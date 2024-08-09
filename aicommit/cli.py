@@ -271,7 +271,7 @@ def generate_commit(ctx, debug, local, rich=False, **kwargs):
         elif char == "y":
             retry = False
 
-    message_generator.repo.git.commit("-m", commit_msg)
+    message_generator.repo.index.commit(commit_msg)
     click.echo(click.style("Commit message saved.", fg="green"))
 
 
