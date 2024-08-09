@@ -1,0 +1,54 @@
+site_name: aicommit
+repo_url: https://github.com/belingud/aicommit
+site_url: https://belingud.github.io/aicommit
+site_description: 'AI Powered Git Commit Message Generator'
+site_author: belingud
+edit_uri: edit/main/docs/
+repo_name: belingud/aicommit
+copyright: Maintained by belingud
+
+nav:
+  - Home: index.md
+  - Modules: modules.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+            setup_commands:
+                - import sys
+                - sys.path.append('../')
+theme:
+  name: material
+  feature:
+    tabs: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/belingud/aicommit
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/aicommit
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true

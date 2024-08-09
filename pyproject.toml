@@ -1,0 +1,126 @@
+[project]
+name = "aicommit"
+version = "0.0.1"
+description = "aicommit: A tool that leverages AI to automatically generate Git commit messages."
+authors = [
+    { name = "belingud", email = "im.victor@qq.com" },
+]
+readme = "README.md"
+packages = [
+    { include = "aicommit" }
+]
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "gitpython>=3.1.43",
+    "click>=8.1.7",
+    "litellm>=1.43.0",
+    "tomlkit>=0.13.0",
+    "tenacity>=9.0.0",
+    "orjson>=3.10.6",
+]
+license = { text = "MIT license" }
+keywords = ['python']
+
+[project.urls]
+Homepage = "https://belingud.github.io/aicommit/"
+Repository = "https://github.com/belingud/aicommit"
+Documentation = "https://belingud.github.io/aicommit/"
+
+[project.scripts]
+aicommit = "aicommit.cli:cli"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+fix = true
+
+[tool.ruff.lint]
+select = [
+    # flake8-2020
+    "YTT",
+    # flake8-bandit
+    "S",
+    # flake8-bugbear
+    "B",
+    # flake8-builtins
+    "A",
+    # flake8-comprehensions
+    "C4",
+    # flake8-debugger
+    "T10",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # mccabe
+    "C90",
+    # pycodestyle
+    "E", "W",
+    # pyflakes
+    "F",
+    # pygrep-hooks
+    "PGH",
+    # pyupgrade
+    "UP",
+    # ruff
+    "RUF",
+    # tryceratops
+    "TRY",
+]
+ignore = [
+    # LineTooLong
+    "E501",
+    # DoNotAssignLambda
+    "E731",
+]
+
+[tool.coverage.report]
+skip_empty = true
+
+[tool.coverage.run]
+branch = true
+source = ["aicommit"]
+
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+bump = "bump2version {args}"
+gen_keys = "python scripts/gen_support_keys.py"
+
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=7.2.0",
+    "pytest-cov>=4.0.0"
+]
+dev = [
+    "deptry>=0.6.4",
+    "mypy>=0.981",
+    "pre-commit>=2.20.0",
+    "tox>=3.25.1",
+    "ruff>=0.5.6",
+    "bump2version>=1.0.1",
+]
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=8.5.10",
+    "mkdocstrings[python]>=0.19.0",
+]
+
+[tool.pdm.build]
+excludes = ["./**/.git"]
+package-dir = "."
+includes = ["aicommit"]
+
