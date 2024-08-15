@@ -1,5 +1,5 @@
 [project]
-name = "aicommit"
+name = "aicommits"
 version = "0.0.1"
 description = "aicommit: A tool that leverages AI to automatically generate Git commit messages."
 authors = [
