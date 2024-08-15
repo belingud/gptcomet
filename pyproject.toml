@@ -27,7 +27,7 @@ Repository = "https://github.com/belingud/aicommit"
 Documentation = "https://belingud.github.io/aicommit/"
 
 [project.scripts]
-aicommit = "aicommit.cli:cli"
+gptcommit = "aicommit.cli:cli"
 
 [build-system]
 requires = ["pdm-backend"]
