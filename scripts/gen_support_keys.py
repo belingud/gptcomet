@@ -4,7 +4,7 @@ from pathlib import Path
 import tomlkit as toml
 from tomlkit.items import Comment, SingleKey, Table, Whitespace
 
-config_file = Path(__file__).resolve().parent.parent / "aicommit" / "aicommit.toml"
+config_file = Path(__file__).resolve().parent.parent / "gptcomet" / "gptcomet.toml"
 
 print(f"Reading default config file: {config_file}")
 config = toml.load(config_file.open())
@@ -57,7 +57,7 @@ for line in lines:
 
 code += '"""'
 
-support_keys_file = Path(__file__).resolve().parent.parent / "aicommit" / "support_keys.py"
+support_keys_file = Path(__file__).resolve().parent.parent / "gptcomet" / "support_keys.py"
 with open(support_keys_file, "w") as f:
     f.write(code)
     f.write("\n")

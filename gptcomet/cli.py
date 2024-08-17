@@ -5,12 +5,12 @@ import click
 from click import Context
 from git import InvalidGitRepositoryError, NoSuchPathError
 
-import aicommit
-from aicommit.config_manager import ConfigManager
-from aicommit.exceptions import ConfigKeyError, GitNoStagedChanges, KeyNotFound
-from aicommit.hook import AICommitHook
-from aicommit.message_generator import MessageGenerator
-from aicommit.utils import common_options
+import gptcomet
+from gptcomet.config_manager import ConfigManager
+from gptcomet.exceptions import ConfigKeyError, GitNoStagedChanges, KeyNotFound
+from gptcomet.hook import AICommitHook
+from gptcomet.message_generator import MessageGenerator
+from gptcomet.utils import common_options
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -21,21 +21,21 @@ logging.basicConfig(
 
 
 @click.group(
-    name="aicommit",
+    name="gptcomet",
     help="AI-Powered Git Commit Message Generator",
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 @click.pass_context
 @common_options
 @click.version_option(
-    aicommit.__version__,
+    gptcomet.__version__,
     "--version",
     "-v",
-    prog_name="aicommit",
+    prog_name="gptcomet",
     message="%(prog)s: %(version)s",
 )
 def cli(ctx: Context, debug, local):
-    """AICommit CLI"""
+    """GPTComet CLI"""
     if debug:
         logger.setLevel(logging.DEBUG)
     else:
@@ -44,20 +44,19 @@ def cli(ctx: Context, debug, local):
 
     ctx.obj["debug"] = debug
     ctx.obj["local"] = local
-    ctx.obj["config_manager"]: ConfigManager = None
+    ctx.obj["config_manager"] = None
 
+
+config: click.Group  # type hints for IDE
 
 @cli.group(name="config")
 @click.pass_context
 @common_options
 def config(ctx, debug, local):
-    """Manage aicommit configuration."""
+    """Manage gptcomet configuration."""
     logger.debug(f"Config manage, local={local}")
     if not ctx.obj["config_manager"]:
         ctx.obj["config_manager"] = ConfigManager(ctx.obj["local"])
-
-
-config: click.Group  # type hints for IDE
 
 
 @config.command("set", help="Set a configuration value.")
@@ -70,10 +69,10 @@ def config_set(ctx: Context, key, value, debug, local):
     try:
         ctx.obj["config_manager"].set(key, value)
         click.echo(
-            f"[AICommit] Set {click.style(key, fg='green')} to {click.style(value, fg='green')}."
+            f"[GPTComet] Set {click.style(key, fg='green')} to {click.style(value, fg='green')}."
         )
     except ConfigKeyError as e:
-        click.echo(f"[AICommit] Error: {e!s}")
+        click.echo(f"[GPTComet] Error: {e!s}")
 
 
 @config.command("get")
@@ -130,17 +129,17 @@ def config_path(ctx: Context, debug, local):
     )
 
 
-@cli.group("hook", help="Manage AICommit prepare-commit-msg hook.")
-@common_options
-@click.pass_context
-def hook(ctx, debug, local):
-    pass
-
-
 hook: click.Group  # type hints for IDE
 
 
-@hook.command("install", help="Install AICommit prepare-commit-msg hook to current repository.")
+@cli.group("hook", help="Manage GPTComet prepare-commit-msg hook.")
+@common_options
+@click.pass_context
+def hook(ctx: click.Context, debug, local):
+    pass
+
+
+@hook.command("install", help="Install GPTComet prepare-commit-msg hook to current repository.")
 @click.option(
     "--force/--no-force",
     "-f/-nf",
@@ -151,27 +150,27 @@ hook: click.Group  # type hints for IDE
 @common_options
 @click.pass_context
 def install_hook(ctx, debug, local, force=False):
-    """Install AICommit prepare-commit-msg hook."""
+    """Install GPTComet prepare-commit-msg hook."""
     try:
         comet_hook = AICommitHook()
         if comet_hook.is_hook_installed() and not force:
             click.echo(
-                "AICommit prepare-commit-msg hook is already installed, use --force to force installation."
+                "GPTComet prepare-commit-msg hook is already installed, use --force to force installation."
             )
             return
         comet_hook.install_hook()
-        click.echo("AICommit prepare-commit-msg hook has been installed successfully.")
+        click.echo("GPTComet prepare-commit-msg hook has been installed successfully.")
     except InvalidGitRepositoryError as e:
         click.echo(f"Error: {e!s}")
     except Exception as e:
         click.echo(f"An error occurred while installing the hook: {e!s}")
 
 
-@hook.command("uninstall", help="Uninstall AICommit prepare-commit-msg hook from current repository.")
+@hook.command("uninstall", help="Uninstall GPTComet prepare-commit-msg hook from current repository.")
 @common_options
 @click.pass_context
-def uninstall_hook(ctx, debug, local, **kwargs):
-    """Uninstall AICommit prepare-commit-msg hook."""
+def uninstall_hook(ctx: click.Context, debug, local, **kwargs):
+    """Uninstall GPTComet prepare-commit-msg hook."""
     try:
         comet_hook = AICommitHook()
         comet_hook.uninstall_hook()
@@ -183,14 +182,14 @@ def uninstall_hook(ctx, debug, local, **kwargs):
 
 @hook.command("status")
 def hook_status():
-    """Check if AICommit prepare-commit-msg hook is installed."""
+    """Check if GPTComet prepare-commit-msg hook is installed."""
     try:
         comet_hook = AICommitHook()
         if comet_hook.is_hook_installed():
-            click.echo("AICommit prepare-commit-msg hook is installed.")
+            click.echo("GPTComet prepare-commit-msg hook is installed.")
         else:
             click.echo(
-                f"AICommit prepare-commit-msg hook is {click.style('not', fg='yellow')} installed."
+                f"GPTComet prepare-commit-msg hook is {click.style('not', fg='yellow')} installed."
             )
     except InvalidGitRepositoryError as e:
         click.echo(f"Error: {e!s}")
@@ -198,21 +197,21 @@ def hook_status():
         click.echo(f"An error occurred while checking the hook status: {e!s}")
 
 
+generate: click.Group  # type hints for IDE
+
+
 @cli.group("generate", help="Generate a commit message based on `git diff --staged`.")
 @click.pass_context
 @common_options
-def generate(ctx, debug, local):
+def generate(ctx: click.Context, debug, local):
     ctx.obj["config_manager"] = ConfigManager(ctx.obj["local"])
-
-
-generate: click.Group  # type hints for IDE
 
 
 @generate.command("commit")
 # @click.option("--rich", is_flag=True, default=False, help="Generate rich commit message")
 @common_options
 @click.pass_context
-def generate_commit(ctx, debug, local, rich=False, **kwargs):
+def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
     """Generate a commit message based on git diff"""
     click.echo(
         click.style(
@@ -277,7 +276,7 @@ def generate_commit(ctx, debug, local, rich=False, **kwargs):
 
 @click.command()
 @click.pass_context
-def generate_prmsg(ctx, debug, local):
+def generate_prmsg(ctx: click.Context, debug, local):
     """Generate a pull request message based on changes compared to master"""
     config_manager = ctx.obj["config_manager"]
     message_generator = MessageGenerator(config_manager)

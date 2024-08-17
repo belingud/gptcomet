@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 from git import Repo
 
-from aicommit.const import RICH_PREPARE_COMMIT_MSG, SHORT_PREPARE_COMMIT_MSG
+from gptcomet.const import RICH_PREPARE_COMMIT_MSG, SHORT_PREPARE_COMMIT_MSG
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class AICommitHook:
 
     def install_hook(self, use_rich: bool = False):
         """
-        Install the AICommit prepare-commit-msg hook.
+        Install the GPTComet prepare-commit-msg hook.
 
         Args:
             use_rich (bool): Whether to use the rich commit message template. Defaults to False.
@@ -38,22 +38,22 @@ class AICommitHook:
 
     def is_hook_installed(self):
         """
-        Check if the AICommit hook is installed.
-        Returns True if the hook path exists and 'aicommit' is in the hook path content, False otherwise.
+        Check if the GPTComet hook is installed.
+        Returns True if the hook path exists and 'gptcomet' is in the hook path content, False otherwise.
         """
-        return self.hook_path.exists() and "aicommit" in self.hook_path.open().read()
+        return self.hook_path.exists() and "gptcomet" in self.hook_path.open().read()
 
     def uninstall_hook(self):
         """
-        Uninstalls the AICommit prepare-commit-msg hook if it is installed.
+        Uninstalls the GPTComet prepare-commit-msg hook if it is installed.
         """
         if self.is_hook_installed():
             logger.debug("Uninstalling prepare-commit-msg hook...")
             self.hook_path.unlink()
             click.echo(
-                f"[{click.style('AICommit', fg='green')}] prepare-commit-msg hook has been uninstalled successfully."
+                f"[{click.style('GPTComet', fg='green')}] prepare-commit-msg hook has been uninstalled successfully."
             )
         else:
             click.echo(
-                f"[{click.style('AICommit', fg='green')}] prepare-commit-msg hook is not installed."
+                f"[{click.style('GPTComet', fg='green')}] prepare-commit-msg hook is not installed."
             )

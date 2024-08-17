@@ -49,7 +49,7 @@ class ConfigKeyError(AICommitError):
     def __str__(self):
         return (
             f"Key '{self.key}' is not allowed. "
-            f"Only specified keys can be set, use 'aicommit config keys' to see the allowed keys."
+            f"Only specified keys can be set, use 'gptcomet config keys' to see the allowed keys."
         )
 
 

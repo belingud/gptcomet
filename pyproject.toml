@@ -1,13 +1,13 @@
 [project]
-name = "gptcommits"
+name = "gptcomet"
 version = "0.0.1"
-description = "aicommit: A tool that leverages AI to automatically generate Git commit messages."
+description = "gptcomet: A tool that leverages AI to automatically generate Git commit messages."
 authors = [
     { name = "belingud", email = "im.victor@qq.com" },
 ]
 readme = "README.md"
 packages = [
-    { include = "aicommit" }
+    { include = "gptcomet" }
 ]
 requires-python = ">=3.9,<4.0"
 dependencies = [
@@ -22,12 +22,12 @@ license = { text = "MIT license" }
 keywords = ['python']
 
 [project.urls]
-Homepage = "https://belingud.github.io/aicommit/"
-Repository = "https://github.com/belingud/aicommit"
-Documentation = "https://belingud.github.io/aicommit/"
+Homepage = "https://belingud.github.io/gptcomet/"
+Repository = "https://github.com/belingud/gptcomet"
+Documentation = "https://belingud.github.io/gptcomet/"
 
 [project.scripts]
-gptcommit = "aicommit.cli:cli"
+gptcomet = "gptcomet.cli:cli"
 
 [build-system]
 requires = ["pdm-backend"]
@@ -86,7 +86,7 @@ skip_empty = true
 
 [tool.coverage.run]
 branch = true
-source = ["aicommit"]
+source = ["gptcomet"]
 
 
 [tool.ruff.lint.per-file-ignores]
@@ -108,7 +108,7 @@ test = [
 dev = [
     "deptry>=0.6.4",
     "mypy>=0.981",
-    "pre-commit>=2.20.0",
+    "pre-commit>=3.8.0",
     "tox>=3.25.1",
     "ruff>=0.5.6",
     "bump2version>=1.0.1",
@@ -122,5 +122,4 @@ docs = [
 [tool.pdm.build]
 excludes = ["./**/.git"]
 package-dir = "."
-includes = ["aicommit"]
-
+includes = ["gptcomet"]

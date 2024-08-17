@@ -47,7 +47,7 @@ def save_common_options(ctx: click.Context):
     ctx.obj["debug"] = ctx.params["debug"] or ctx.params["debug"]
     ctx.obj["local"] = ctx.params["local"] or ctx.params["local"]
     if ctx.obj["debug"] is True:
-        logging.getLogger("aicommit").setLevel(logging.DEBUG)
+        logging.getLogger("gptcomet").setLevel(logging.DEBUG)
 
 
 def is_float(s):

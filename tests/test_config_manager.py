@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from tomlkit import TOMLDocument, document, key
 
-from aicommit.config_manager import ConfigManager
+from gptcomet.config_manager import ConfigManager
 
 
 class MockConfigManager(MagicMock, ConfigManager):

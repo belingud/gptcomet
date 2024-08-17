@@ -6,12 +6,12 @@ import orjson as json
 from litellm import completion_with_retries
 from litellm.types.utils import ModelResponse
 
-from aicommit._types import CompleteParams
-from aicommit.const import DEFAULT_API_BASE, DEFAULT_MODEL, DEFAULT_RETRIES
-from aicommit.exceptions import ConfigError, ConfigErrorEnum
+from gptcomet._types import CompleteParams
+from gptcomet.const import DEFAULT_API_BASE, DEFAULT_MODEL, DEFAULT_RETRIES
+from gptcomet.exceptions import ConfigError, ConfigErrorEnum
 
 if t.TYPE_CHECKING:
-    from aicommit.config_manager import ConfigManager
+    from gptcomet.config_manager import ConfigManager
 
 
 logger = logging.getLogger(__name__)

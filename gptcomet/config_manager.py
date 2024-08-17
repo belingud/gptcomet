@@ -7,10 +7,10 @@ import tomlkit as toml
 from tomlkit import TOMLDocument, boolean, float_, integer, string
 from tomlkit.items import Item
 
-from aicommit._types import CacheType
-from aicommit.exceptions import KeyNotFound
-from aicommit.support_keys import SUPPORT_KEYS
-from aicommit.utils import is_float
+from gptcomet._types import CacheType
+from gptcomet.exceptions import KeyNotFound
+from gptcomet.support_keys import SUPPORT_KEYS
+from gptcomet.utils import is_float
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,8 @@ class ConfigManager:
 
     def __init__(self, local: bool = False):
         self.local: bool = local
-        self.global_config_file: Path = Path.home() / ".local" / "aicommit" / "aicommit.toml"
-        self.default_config_file: Path = Path(__file__).parent / "aicommit.toml"
+        self.global_config_file: Path = Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
+        self.default_config_file: Path = Path(__file__).parent / "gptcomet.toml"
         # runtime config file
         self.current_config_path = self.get_config_file()
 
@@ -77,7 +77,7 @@ class ConfigManager:
         Retrieves the path to the configuration file.
 
         If local is True, checks if the current directory is a git repository
-        and returns the path to .git/aicommit.toml if it is, otherwise returns
+        and returns the path to .git/gptcomet.toml if it is, otherwise returns
         the global configuration file path.
 
         Returns:
@@ -87,10 +87,10 @@ class ConfigManager:
         if self.local:
             cwd = Path.cwd()
             if not (cwd / ".git").exists():
-                click.echo(f"[{click.style('AICommit', fg='green')}] Not a git repository. Using global config.")
+                click.echo(f"[{click.style('GPTComet', fg='green')}] Not a git repository. Using global config.")
             else:
-                config_path = cwd / ".git" / "aicommit.toml"
-        # click.echo(f"[AICommit] Using config file: {config_path}")
+                config_path = cwd / ".git" / "gptcomet.toml"
+        # click.echo(f"[GPTComet] Using config file: {config_path}")
         return config_path
 
     def ensure_config_file(self):
@@ -102,7 +102,7 @@ class ConfigManager:
             config_file.parent.mkdir(parents=True, exist_ok=True)
             with open(self.default_config_file) as default, open(config_file, "w") as target:
                 target.write(default.read())
-            click.echo(f"[{click.style('AICommit', fg='green')}] Created default config file at {config_file}")
+            click.echo(f"[{click.style('GPTComet', fg='green')}] Created default config file at {config_file}")
 
     def load_config(self) -> toml.TOMLDocument:
         """
@@ -213,8 +213,8 @@ class ConfigManager:
         Note:
             This method modifies the toml `config` attribute in-place.
         """
-        value = self.convert2toml_value(value)
-        self.set_nested_value(self.config, key, value)
+        toml_value: Item = self.convert2toml_value(value)
+        self.set_nested_value(self.config, key, toml_value)
         self.save_config()
 
     def get(self, key: str, default: Optional[Any] = None) -> Any:
@@ -274,7 +274,7 @@ class ConfigManager:
         """
         return SUPPORT_KEYS
 
-    def convert2toml_value(self, value: str) -> Union[Item, str]:
+    def convert2toml_value(self, value: str) -> Item:
         """
         Converts a string value to a TOML-compatible value.
 
@@ -282,7 +282,7 @@ class ConfigManager:
             value (str): The string value to be converted.
 
         Returns:
-            Union[Item, str]: The converted TOML value or the original string value.
+            Item: The converted TOML value or the original string value.
         """
         if value.lower() in ("true", "false"):
             return boolean(value.lower())
@@ -293,4 +293,4 @@ class ConfigManager:
         elif is_float(value):
             return float_(value)
         else:
-            return value
+            return string(value)

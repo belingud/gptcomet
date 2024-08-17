@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
 
+import tenacity  # noqa: F401
 from git import Repo
 
-from aicommit.config_manager import ConfigManager
-from aicommit.exceptions import GitNoStagedChanges
-from aicommit.llm_client import LLMClient
+from gptcomet.config_manager import ConfigManager
+from gptcomet.exceptions import GitNoStagedChanges
+from gptcomet.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class MessageGenerator:
         Raises:
             GitNoStagedChanges: If there are no staged changes.
         """
-        logger.debug(f"[AICommit] Generating commit message, rich: {rich}")
+        logger.debug(f"[GPTComet] Generating commit message, rich: {rich}")
         self.llm_client.clear_history()
         diff = self.repo.git.diff("--cached")
         if not diff:
@@ -56,7 +57,7 @@ class MessageGenerator:
             msg = self._generate_rich_commit_message(diff)
         lang = self.config_manager.get("output.lang")
         if lang != "en":
-            logger.debug(f"[AICommit] Translating commit message to {lang}")
+            logger.debug(f"[GPTComet] Translating commit message to {lang}")
             translation = self.config_manager.get("prompt.translation")
             translation = translation.replace("{{ placeholder }}", msg)
             msg = self.llm_client.generate(translation)

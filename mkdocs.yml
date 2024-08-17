@@ -1,10 +1,10 @@
-site_name: aicommit
-repo_url: https://github.com/belingud/aicommit
-site_url: https://belingud.github.io/aicommit
+site_name: gptcomet
+repo_url: https://github.com/belingud/gptcomet
+site_url: https://belingud.github.io/gptcomet
 site_description: 'AI Powered Git Commit Message Generator'
 site_author: belingud
 edit_uri: edit/main/docs/
-repo_name: belingud/aicommit
+repo_name: belingud/gptcomet
 copyright: Maintained by belingud
 
 nav:
@@ -43,9 +43,9 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/belingud/aicommit
+      link: https://github.com/belingud/gptcomet
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/aicommit
+      link: https://pypi.org/project/gptcomet
 
 markdown_extensions:
   - toc:
