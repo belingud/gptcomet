@@ -12,12 +12,37 @@ logger = logging.getLogger(__name__)
 
 
 class MessageGenerator:
+    """
+    A class that generates concise git messages based on the staged changes.
+
+    Args:
+        config_manager (ConfigManager): The gptcomet ConfigManager instance.
+
+    Attributes:
+        config_manager (ConfigManager): The ConfigManager instance to use.
+        llm_client (LLMClient): The LLMClient instance to use.
+        repo (Repo): The Repo instance to use.
+
+    Methods:
+        generate_commit_message(rich: bool = True): Generate a commit message from the staged changes.
+        make_ignored_options(ignored_files: list[str]): Make a list of ignored files.
+
+    Raises:
+        GitNoStagedChanges: If there are no staged changes.
+        InvalidGitRepositoryError: If the current directory is not a Git repository.
+
+    Examples:
+        >>> from gptcomet.config_manager import ConfigManager
+        >>> from gptcomet.message_generator import MessageGenerator
+        >>> config_manager = ConfigManager()
+        >>> message_generator = MessageGenerator(config_manager)
+        >>> message_generator.generate_commit_message()
+    """
     __slots__ = ("config_manager", "llm_client", "repo")
 
     def __init__(self, config_manager: ConfigManager):
         self.config_manager = config_manager
         self.llm_client = LLMClient(config_manager)
-        logger.debug(type(self.llm_client.retries))
         self.repo = Repo(Path.cwd())
 
     @classmethod
@@ -34,7 +59,17 @@ class MessageGenerator:
         return cls(config_manager)
 
     def make_ignored_options(self, ignored_files: list[str]) -> list[str]:
-        return [f":!{file}" for file in ignored_files]
+        """
+        Make a list of ignored files.
+
+        Args:
+            ignored_files (list[str]): The list of ignored files.
+
+        Returns:
+            list[str]: The list of ignored files.
+        """
+        working_dir = Path(self.repo.working_dir)
+        return [f":!{file}" for file in ignored_files if (working_dir / file).exists()]
 
     def generate_commit_message(self, rich: bool = True) -> str:
         """
@@ -52,7 +87,7 @@ class MessageGenerator:
         logger.debug(f"[GPTComet] Generating commit message, rich: {rich}")
         self.llm_client.clear_history()
         ignored_files: list = self.config_manager.get("file_ignore")
-        diff = self.repo.git.diff(["--staged"] + [f":!{file}" for file in ignored_files])
+        diff = self.repo.git.diff(["--staged", *self.make_ignored_options(ignored_files)])
         if not diff:
             raise GitNoStagedChanges()
         if not rich:

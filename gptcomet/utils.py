@@ -44,8 +44,10 @@ def common_options(func):
 
 def save_common_options(ctx: click.Context):
     """Accept --debug and --local options in any command."""
-    ctx.obj["debug"] = ctx.params["debug"] or ctx.params["debug"]
-    ctx.obj["local"] = ctx.params["local"] or ctx.params["local"]
+    if ctx.obj.get("debug") is None or ctx.params["debug"] is True:
+        ctx.obj["debug"] = ctx.params["debug"]
+    if ctx.obj.get("local") is None or ctx.params["local"] is True:
+        ctx.obj["local"] = ctx.params["local"]
     if ctx.obj["debug"] is True:
         logging.getLogger("gptcomet").setLevel(logging.DEBUG)
 

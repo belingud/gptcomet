@@ -3,21 +3,23 @@ import sys
 from pathlib import Path
 
 import pyinstrument
+from click.testing import CliRunner
 
 from gptcomet.cli import cli
 
 os.chdir(Path(__file__).resolve().parent.parent.parent)
 profiler = pyinstrument.Profiler()
-sys.argv = ["gptcomet", "generate", "commit"]
+runner = CliRunner()
+sys.argv = ["gptcomet", "config", "set", "openai.retries", "n"]
 profiler.start()
 # ===========================
 # entry point of the program
 # ===========================
-
-cli()
+# cmd = ["config", "get", "openai.retries"]
+# runner.invoke(cli, cmd, input="n")
 
 # ===========================
 # exit program
 # ===========================
 session = profiler.stop()
-profiler.write_html("pyinstrument.html", timeline=True)
+# profiler.write_html(Path(__file__).parent / f"pyinstrument_{'-'.join(cmd)}.html", timeline=True)

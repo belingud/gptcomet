@@ -9,19 +9,19 @@
 ## Table of content
 
 <!-- TOC -->
-- [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-  - [Table of content](#table-of-content)
-  - [Overview](#overview)
-  - [Features](#features)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Commands](#commands)
-  - [Configuration](#configuration)
-  - [Supported Keys](#supported-keys)
-  - [Example](#example)
-  - [Development](#development)
-  - [License](#license)
-  - [Contact](#contact)
+* [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
+  * [Table of content](#table-of-content)
+  * [Overview](#overview)
+  * [Features](#features)
+  * [Installation](#installation)
+  * [Usage](#usage)
+  * [Commands](#commands)
+  * [Configuration](#configuration)
+  * [Supported Keys](#supported-keys)
+  * [Example](#example)
+  * [Development](#development)
+  * [License](#license)
+  * [Contact](#contact)
 <!-- TOC -->
 
 ## Overview

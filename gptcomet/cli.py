@@ -6,6 +6,7 @@ from click import Context
 from git import InvalidGitRepositoryError, NoSuchPathError
 
 import gptcomet
+from gptcomet._validator import KEYS_VALIDATOR
 from gptcomet.config_manager import ConfigManager
 from gptcomet.exceptions import ConfigKeyError, GitNoStagedChanges, KeyNotFound
 from gptcomet.hook import AICommitHook
@@ -18,6 +19,8 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.WARNING,
 )
+
+cli: click.Group
 
 
 @click.group(
@@ -42,12 +45,7 @@ def cli(ctx: Context, debug, local):
         logger.setLevel(logging.INFO)
     logger.debug(f"Running with debug={debug}, local={local}")
 
-    ctx.obj["debug"] = debug
-    ctx.obj["local"] = local
     ctx.obj["config_manager"] = None
-
-
-config: click.Group  # type hints for IDE
 
 
 @cli.group(name="config")
@@ -55,16 +53,39 @@ config: click.Group  # type hints for IDE
 @common_options
 def config(ctx, debug, local):
     """Manage gptcomet configuration."""
-    logger.debug(f"Config manage, local={local}")
+    logger.debug(f"Config manage, local={ctx.obj['local']}")
     if not ctx.obj["config_manager"]:
         ctx.obj["config_manager"] = ConfigManager(
             config_path=ConfigManager.get_config_path(ctx.obj["local"])
         )
 
 
+def _config_value_validate_callback(ctx, param, value):
+    """
+    Validate the value of the set command.
+
+    Args:
+        ctx (click.Context): The click context object.
+        param (click.Parameter): The click parameter object.
+        value (str): The value to be validated.
+
+    Returns:
+        str: The validated value.
+
+    Raises:
+        click.BadParameter: If the value is invalid.
+    """
+    key = ctx.params.get("key")
+    msg = "Invalid value for key: "
+    for k, v in KEYS_VALIDATOR.items():
+        if k in key and not v["validator"](value):
+            raise click.BadParameter(msg + "{}: {}".format(k, v["msg"]), ctx=ctx, param=param)
+    return value
+
+
 @config.command("set", help="Set a configuration value.")
 @click.argument("key")
-@click.argument("value")
+@click.argument("value", callback=_config_value_validate_callback)
 @click.pass_context
 @common_options
 def config_set(ctx: Context, key, value, debug, local):
@@ -130,9 +151,6 @@ def config_path(ctx: Context, debug, local):
         click.style("Current configuration path:\n", fg="green")
         + ctx.obj["config_manager"].current_config_path.as_posix()
     )
-
-
-hook: click.Group  # type hints for IDE
 
 
 @cli.group("hook", help="Manage GPTComet prepare-commit-msg hook.")
@@ -202,9 +220,6 @@ def hook_status():
         click.echo(f"An error occurred while checking the hook status: {e!s}")
 
 
-generate: click.Group  # type hints for IDE
-
-
 @cli.group("generate", help="Generate a commit message based on `git diff --staged`.")
 @click.pass_context
 @common_options
@@ -250,9 +265,7 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
         if sys.stdin.isatty():
             # Interactive mode will ask for confirmation
             char = click.prompt(
-                click.style(
-                    "Do you want to use this commit message? y: yes, n: no, r: retry.", fg="green"
-                ),
+                "Do you want to use this commit message? y: yes, n: no, r: retry.",
                 default="y",
                 type=click.Choice(["y", "n", "r"]),
             )
