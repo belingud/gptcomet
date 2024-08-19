@@ -27,17 +27,16 @@ class ConfigManager:
     local: bool
     global_config_file: Path
     default_config_file: Path
-    config: TOMLDocument
     current_config_path: Path
     _cache: CacheType
     _valid_keys: set[str]
 
-    def __init__(self, local: bool = False):
+    def __init__(self, config_path: Path, local: bool = False):
         self.local: bool = local
         self.global_config_file: Path = Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
         self.default_config_file: Path = Path(__file__).parent / "gptcomet.toml"
         # runtime config file
-        self.current_config_path = self.get_config_file()
+        self.current_config_path = config_path
 
         self._cache: CacheType = {"config": None, "default_config": None}
         self._valid_keys: set[str] = set(SUPPORT_KEYS.splitlines())
@@ -72,7 +71,14 @@ class ConfigManager:
             self._cache["default_config"] = self.load_default_config()
         return self._cache["default_config"]
 
-    def get_config_file(self) -> Path:
+    @classmethod
+    def get_config_path(cls, local: bool = False) -> Path:
+        if local:
+            return Path.cwd() / ".git" / "gptcomet.toml"
+        else:
+            return Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
+
+    def get_config_file(self, local: bool = False) -> Path:
         """
         Retrieves the path to the configuration file.
 
@@ -84,10 +90,10 @@ class ConfigManager:
             Path: The path to the configuration file.
         """
         config_path = self.global_config_file
-        if self.local:
+        if local:
             cwd = Path.cwd()
             if not (cwd / ".git").exists():
-                click.echo(f"[{click.style('GPTComet', fg='green')}] Not a git repository. Using global config.")
+                click.echo(f"[{click.style('GPTComet', fg='yellow')}] Not a git repository. Using global config.")
             else:
                 config_path = cwd / ".git" / "gptcomet.toml"
         # click.echo(f"[GPTComet] Using config file: {config_path}")

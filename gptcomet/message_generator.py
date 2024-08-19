@@ -33,6 +33,9 @@ class MessageGenerator:
         """
         return cls(config_manager)
 
+    def make_ignored_options(self, ignored_files: list[str]) -> list[str]:
+        return [f":!{file}" for file in ignored_files]
+
     def generate_commit_message(self, rich: bool = True) -> str:
         """
         Generate a commit message from the staged changes.
@@ -48,7 +51,8 @@ class MessageGenerator:
         """
         logger.debug(f"[GPTComet] Generating commit message, rich: {rich}")
         self.llm_client.clear_history()
-        diff = self.repo.git.diff("--cached")
+        ignored_files: list = self.config_manager.get("file_ignore")
+        diff = self.repo.git.diff(["--staged"] + [f":!{file}" for file in ignored_files])
         if not diff:
             raise GitNoStagedChanges()
         if not rich:
@@ -57,6 +61,7 @@ class MessageGenerator:
             msg = self._generate_rich_commit_message(diff)
         lang = self.config_manager.get("output.lang")
         if lang != "en":
+            # Default is English, but can be changed by the user
             logger.debug(f"[GPTComet] Translating commit message to {lang}")
             translation = self.config_manager.get("prompt.translation")
             translation = translation.replace("{{ placeholder }}", msg)

@@ -49,6 +49,7 @@ def cli(ctx: Context, debug, local):
 
 config: click.Group  # type hints for IDE
 
+
 @cli.group(name="config")
 @click.pass_context
 @common_options
@@ -56,7 +57,9 @@ def config(ctx, debug, local):
     """Manage gptcomet configuration."""
     logger.debug(f"Config manage, local={local}")
     if not ctx.obj["config_manager"]:
-        ctx.obj["config_manager"] = ConfigManager(ctx.obj["local"])
+        ctx.obj["config_manager"] = ConfigManager(
+            config_path=ConfigManager.get_config_path(ctx.obj["local"])
+        )
 
 
 @config.command("set", help="Set a configuration value.")
@@ -166,7 +169,9 @@ def install_hook(ctx, debug, local, force=False):
         click.echo(f"An error occurred while installing the hook: {e!s}")
 
 
-@hook.command("uninstall", help="Uninstall GPTComet prepare-commit-msg hook from current repository.")
+@hook.command(
+    "uninstall", help="Uninstall GPTComet prepare-commit-msg hook from current repository."
+)
 @common_options
 @click.pass_context
 def uninstall_hook(ctx: click.Context, debug, local, **kwargs):
@@ -204,7 +209,9 @@ generate: click.Group  # type hints for IDE
 @click.pass_context
 @common_options
 def generate(ctx: click.Context, debug, local):
-    ctx.obj["config_manager"] = ConfigManager(ctx.obj["local"])
+    ctx.obj["config_manager"] = ConfigManager(
+        config_path=ConfigManager.get_config_path(ctx.obj["local"])
+    )
 
 
 @generate.command("commit")
