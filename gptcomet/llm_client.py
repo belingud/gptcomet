@@ -3,7 +3,15 @@ import typing as t
 
 import click
 import orjson as json
-from litellm import completion_with_retries
+
+try:
+    from litellm import completion_with_retries
+except ImportError as e:
+    msg = e.msg
+    if "socksio" in msg:
+        msg = ("Using SOCKS proxy, but the 'socksio' package is not installed. "
+               "Make sure to install gptcomet using `pip install gptcomet[socks]` or `pip install socksio`.")
+    raise ImportError(msg) from None
 from litellm.types.utils import ModelResponse
 
 from gptcomet._types import CompleteParams
