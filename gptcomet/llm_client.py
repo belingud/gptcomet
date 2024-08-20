@@ -5,7 +5,7 @@ import click
 import orjson as json
 
 try:
-    from litellm import completion_with_retries
+    from litellm import BadRequestError, completion_with_retries
 except ImportError as e:
     msg = e.msg
     if "socksio" in msg:
@@ -73,12 +73,19 @@ class LLMClient:
 
         Returns:
             str: The generated response.
+
+        Raises:
+            ConfigError: If the API key is not set in the config.
+            BadRequestError: If the completion API returns an error.
         """
         if use_history:
             messages = [*self.conversation_history, {"role": "user", "content": prompt}]
         else:
             messages = [{"role": "user", "content": prompt}]
         params = self.gen_chat_params(messages)
+
+        # Completion_with_retries returns a dictionary with the response and metadata
+        # Could raise BadRequestError error
         response: ModelResponse = completion_with_retries(**params)
 
         assistant_message: str = response["choices"][0]["message"]["content"].strip()
@@ -103,6 +110,8 @@ class LLMClient:
             "retries": self.retries,
             "messages": messages or [],
         }
+
+        # set optional params
         max_tokens = int(self.config_manager.get(f"{self.provider}.max_tokens"))
         if max_tokens:
             params["max_tokens"] = max_tokens

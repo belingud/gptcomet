@@ -4,7 +4,8 @@ import sys
 
 import click
 from click import Context
-from git import InvalidGitRepositoryError, NoSuchPathError
+from git import HookExecutionError, InvalidGitRepositoryError, NoSuchPathError
+from litellm import BadRequestError
 
 import gptcomet
 from gptcomet._validator import KEYS_VALIDATOR
@@ -264,7 +265,7 @@ def hook_status():
         click.echo(f"An error occurred while checking the hook status: {e!s}")
 
 
-@cli.group("generate", help="Generate a commit message based on `git diff --staged`.")
+@cli.group("gen", help="Generate a commit message based on `git diff --staged`.")
 @click.pass_context
 @common_options
 def generate(ctx: click.Context, debug, local):
@@ -295,7 +296,7 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
         except KeyNotFound as e:
             click.echo(f"Error: {e!s}, please check your configuration.")
             raise click.Abort() from None
-        except GitNoStagedChanges as e:
+        except (GitNoStagedChanges, BadRequestError) as e:
             click.echo(str(e))
             raise click.Abort() from None
 
@@ -328,13 +329,11 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
         elif char == "y":
             retry = False
         logger.debug(f"Input: {char}")
-        if char == "n":
-            click.echo(click.style("Commit message discarded.", fg="yellow"))
-            return
-        elif char == "y":
-            retry = False
-
-    message_generator.repo.index.commit(commit_msg)
+    try:
+        message_generator.repo.index.commit(commit_msg)
+    except (HookExecutionError, ValueError) as e:
+        click.echo(f"Commit Error: {e!s}")
+        raise click.Abort() from None
     click.echo(click.style("Commit message saved.", fg="green"))
 
 

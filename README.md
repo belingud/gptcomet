@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT) 
 ![Static Badge](https://img.shields.io/badge/language-Python-%233572A5?style=for-the-badge) 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
-![Pepy Total Downlods](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
+![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 
 ## Table of content
 
@@ -62,23 +62,23 @@ To use gptcomet, follow these steps:
     *   `api_key`: The API key for the provider.
     *   `model`: The model used for generating commit messages (e.g., `gpt-3.5-turbo`).
     *   `retries`: The number of retries for the API request (e.g., `2`).
-3.  **Run GPTComet**: Run GPTComet using the following command: `gptcomet generate commit`.
+3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg generate commit`.
 
 ## Commands
 
 The following are the available commands for GPTComet:
 
-* `gptcomet config`: Config manage commands group.
+* `gmsg config`: Config manage commands group.
   * `set`: Set a configuration value.
   * `get`: Get a configuration value.
   * `list`: List all configuration values.
   * `reset`: Reset the configuration to its default values.
   * `keys`: List all supported keys.
-* `gptcomet hook`: Hook manage commands group(Prototype phase.).
+* `gmsg hook`: Hook manage commands group(Prototype phase.).
   * `install`: Install the GPTComet hook.
   * `uninstall`: Uninstall the GPTComet hook.
   * `status`: Check the status of the GPTComet hook.
-* `gptcomet generate`: Generate messages by changes/diff.
+* `gmsg generate`: Generate messages by changes/diff.
   * `commit`: Generate a commit message based on the changes made in the code.
   * `pr`: Generate a pull request message based on the changes made in the code.
 
@@ -99,13 +99,13 @@ The configuration file for GPTComet is `gptcomet.toml`. The file should contain 
 
 ## Supported Keys
 
-You can use `gptcomet config keys` to check supported keys.
+You can use `gmsg config keys` to check supported keys.
 
 ## Example
 
 Here is an example of how to use GPTComet:
 
-1.  When you first set your OpenAI KEY by `gptcomet config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.toml`, includes:
+1.  When you first set your OpenAI KEY by `gmsg config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.toml`, includes:
     ```
     provider = "openai"
     api_base = "https://api.openai.com/v1"
@@ -114,7 +114,7 @@ Here is an example of how to use GPTComet:
     retries = 2
     output.lang = "en"
     ```
-2.  Run the following command to generate a commit message: `GPTComet generate commit`
+2.  Run the following command to generate a commit message: `gmsg generate commit`
 3.  GPTComet will generate a commit message based on the changes made in the code and display it in the console.
 
 Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
