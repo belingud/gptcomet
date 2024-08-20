@@ -1,11 +1,16 @@
 import enum
 
 
-class AICommitError(Exception):
+class GPTCometError(Exception):
     pass
 
 
-class KeyNotFound(AICommitError):
+class NotModified(GPTCometError):
+    REASON_EXISTS = "Config value already exists and not modified"
+    REASON_EMPTY = "Config value is empty"
+
+
+class KeyNotFound(GPTCometError):
     def __init__(self, key: str):
         self.key = key
 
@@ -13,7 +18,7 @@ class KeyNotFound(AICommitError):
         return f"Key '{self.key}' not found in the configuration."
 
 
-class GitNoStagedChanges(AICommitError):
+class GitNoStagedChanges(GPTCometError):
 
     def __str__(self):
         return "No staged changes to commit"
@@ -31,7 +36,7 @@ class ConfigErrorEnum(enum.IntEnum):
     API_KEY_MISSING = 0, "Missing {provider}.api_key in config file"
 
 
-class ConfigError(AICommitError):
+class ConfigError(GPTCometError):
 
     def __init__(self, error: ConfigErrorEnum = ConfigErrorEnum.API_KEY_MISSING):
         if not isinstance(error, ConfigErrorEnum):
@@ -42,7 +47,7 @@ class ConfigError(AICommitError):
         return f"Config error: {self.error.description}"
 
 
-class ConfigKeyError(AICommitError):
+class ConfigKeyError(GPTCometError):
     def __init__(self, key: str):
         self.key = key
 
@@ -53,7 +58,16 @@ class ConfigKeyError(AICommitError):
         )
 
 
-class KeyNotSupportError(AICommitError):
+class ConfigKeyTypeError(GPTCometError):
+    def __init__(self, key: str, need_type: str = "list"):
+        self.key = key
+        self.need_type = need_type
+
+    def __str__(self):
+        return f"Key '{self.key}' is not a {self.need_type} type."
+
+
+class KeyNotSupportError(GPTCometError):
     def __init__(self, key: str):
         self.key = key
 

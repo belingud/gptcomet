@@ -37,6 +37,7 @@ Based on the git diff content, generate a commit message that:
 - Follows with a high-level summary in bullet points, using the imperative tense.
 - Focuses on the most significant changes.
 
+Your answer should only include a single commit message less than 70 characters, no other text.
 Examples:
 
 Git Diff:
@@ -56,7 +57,7 @@ Git Diff:
 +     return csvData.toString();
 + }
 
-Commit Message: feat: Add CSV export functionality
+Output: feat: Add CSV export functionality
 
 Git Diff:
 - public void processTransaction() {
@@ -67,7 +68,7 @@ Git Diff:
 +     processNewTransaction();
 + }
 
-Commit Message: refactor: Refactor transaction processing method
+Output: refactor: Refactor transaction processing method
 
 Git Diff:
 - for (int i = 0; i < list.size(); i++) {
@@ -76,7 +77,7 @@ Git Diff:
 +     processItem(item);
 }
 
-Commit Message: perf: Improve performance of item processing loop
+Output: perf: Improve performance of item processing loop
 
 Git Diff:
 - String passwordHash = hashPassword(user.getPassword());
@@ -84,13 +85,11 @@ Git Diff:
 
 Commit Message: fix: Fix password hashing vulnerability
 
-Your answer should only include the commit message less than 70 characters, no other text.
-Now, generate a commit message based on the following git diff:
+Git Diff:
 {{ placeholder }}
 
-Commit Message:
+Output:
 """
-
 # prompt for translation commit message to target language
 translation = """
 You are a professional polyglot programmer and translator. You are translating a git commit message.

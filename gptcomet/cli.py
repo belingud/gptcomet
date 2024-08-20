@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 import click
@@ -8,17 +9,26 @@ from git import InvalidGitRepositoryError, NoSuchPathError
 import gptcomet
 from gptcomet._validator import KEYS_VALIDATOR
 from gptcomet.config_manager import ConfigManager
-from gptcomet.exceptions import ConfigKeyError, GitNoStagedChanges, KeyNotFound
+from gptcomet.exceptions import (
+    ConfigKeyError,
+    ConfigKeyTypeError,
+    GitNoStagedChanges,
+    KeyNotFound,
+    NotModified,
+)
 from gptcomet.hook import AICommitHook
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.utils import common_options
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(filename)s::%(funcName)s: %(message)s",
+logger = logging.getLogger(f"gptcomet.{__name__}")
+logger.setLevel(os.getenv("GPTCOMET_LOG_LEVEL", logging.WARNING))
+handler = logging.StreamHandler(stream=sys.stdout)
+handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(filename)s::%(funcName)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.WARNING,
-)
+))
+logger.addHandler(handler)
+
 
 cli: click.Group
 
@@ -60,7 +70,7 @@ def config(ctx, debug, local):
         )
 
 
-def _config_value_validate_callback(ctx, param, value):
+def _config_value_set_validate_callback(ctx, param, value):
     """
     Validate the value of the set command.
 
@@ -85,7 +95,7 @@ def _config_value_validate_callback(ctx, param, value):
 
 @config.command("set", help="Set a configuration value.")
 @click.argument("key")
-@click.argument("value", callback=_config_value_validate_callback)
+@click.argument("value", callback=_config_value_set_validate_callback)
 @click.pass_context
 @common_options
 def config_set(ctx: Context, key, value, debug, local):
@@ -96,6 +106,40 @@ def config_set(ctx: Context, key, value, debug, local):
             f"[GPTComet] Set {click.style(key, fg='green')} to {click.style(value, fg='green')}."
         )
     except ConfigKeyError as e:
+        click.echo(f"[GPTComet] Error: {e!s}")
+
+
+@config.command("append", help="Append a configuration value.")
+@click.argument("key")
+@click.argument("value")
+@click.pass_context
+@common_options
+def config_append(ctx: Context, key, value, debug, local):
+    """Append a configuration value."""
+    try:
+        ctx.obj["config_manager"].append(key, value)
+        click.echo(
+            f"[GPTComet] Appended {click.style(value, fg='green')} to {click.style(key, fg='green')}."
+        )
+    except NotModified:
+        click.echo(f"[GPTComet] Config value already exists and not modified: {key!s}")
+    except ConfigKeyTypeError as e:
+        click.echo(f"[GPTComet] Error: {e!s}")
+
+
+@config.command("remove", help="Remove a specific value from the list set by the corresponding key.")
+@click.argument("key")
+@click.argument("value")
+@click.pass_context
+@common_options
+def config_remove(ctx: Context, key, value, debug, local):
+    """Remove a configuration value."""
+    try:
+        ctx.obj["config_manager"].remove(key, value)
+        click.echo(
+            f"[GPTComet] Removed {click.style(value, fg='green')} from {click.style(key, fg='green')}."
+        )
+    except ConfigKeyTypeError as e:
         click.echo(f"[GPTComet] Error: {e!s}")
 
 
@@ -238,7 +282,7 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
     click.echo(
         click.style(
             "🤖 Hang tight! I'm having a chat with the AI to craft your commit message...",
-            fg="green",
+            fg="cyan",
         )
     )
     config_manager = ctx.obj["config_manager"]
@@ -259,8 +303,8 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
             click.echo(click.style("No commit message generated.", fg="magenta"))
             return
 
-        click.echo(click.style("Generated commit message:", fg="green"))
-        click.echo(commit_msg)
+        click.echo("Generated commit message:")
+        click.echo(click.style(commit_msg, fg="green"))
 
         if sys.stdin.isatty():
             # Interactive mode will ask for confirmation

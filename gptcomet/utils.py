@@ -6,6 +6,11 @@ import click
 logger = logging.getLogger(__name__)
 
 
+LIST_VALUES = (
+    "file_ignore",
+)
+
+
 def common_options(func):
     """
     Decorator function that wraps another function with common options and saves them in the context object.

@@ -8,9 +8,9 @@ from tomlkit import TOMLDocument, boolean, float_, integer, string
 from tomlkit.items import Item
 
 from gptcomet._types import CacheType
-from gptcomet.exceptions import KeyNotFound
+from gptcomet.exceptions import ConfigKeyError, ConfigKeyTypeError, KeyNotFound, NotModified
 from gptcomet.support_keys import SUPPORT_KEYS
-from gptcomet.utils import is_float
+from gptcomet.utils import is_float, LIST_VALUES
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +279,62 @@ class ConfigManager:
             str: A list of supported keys.
         """
         return SUPPORT_KEYS
+
+    def append(self, key: str, value: str):
+        """
+        Append a value to a configuration key.
+
+        Args:
+            key (str): The key to append the value to.
+            value (str): The value to append.
+
+        Raises:
+            ConfigKeyError: If the key is not supported.
+
+        This method appends a value to a configuration key in the `config` attribute of the `ConfigManager` object.
+        It first checks if the key is valid using the `is_valid_key` method. If the key is not valid, it raises a
+        `ConfigKeyError` with the invalid key.
+
+        Note:
+            This method modifies the toml `config` attribute in-place.
+        """
+        current_value = self.get(key)
+        if not isinstance(current_value, list):
+            raise ConfigKeyTypeError(key, "list")
+        if value in current_value:
+            raise NotModified(NotModified.REASON_EXISTS)
+        current_value.append(value)
+        self.save_config()
+
+    def remove(self, key: str, value: str):
+        """
+        Remove a configuration key.
+
+        Args:
+            key (str): The key containing the value to remove.
+            value (str): The value to remove.
+
+        Raises:
+            ConfigKeyError: If the key is not supported.
+
+        This method removes a configuration key in the `config` attribute of the `ConfigManager` object.
+        It first checks if the key is valid. If the key is not valid, it raises a
+        `ConfigKeyTypeError` with the invalid key.
+
+        Raises:
+            NotModified: If the value is not found in the list.
+            ConfigKeyTypeError: If the value is not a list.
+
+        Note:
+            This method modifies the toml `config` attribute in-place.
+        """
+        current_value = self.get(key)
+        if isinstance(current_value, list):
+            raise ConfigKeyTypeError(key)
+        if not current_value:
+            raise NotModified(NotModified.REASON_EMPTY)
+        current_value.remove(value)
+        self.save_config()
 
     def convert2toml_value(self, value: str) -> Item:
         """
