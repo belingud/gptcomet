@@ -49,7 +49,7 @@ Recommend install use `pipx` on Mac or Linux.
 ```shell
 pipx install gptcomet
 ```
-
+After installing GPTComet, you will have two commands: `gptcomet` and `gmsg`.
 
 ## Usage
 
@@ -74,11 +74,13 @@ The following are the available commands for GPTComet:
   * `list`: List all configuration values.
   * `reset`: Reset the configuration to its default values.
   * `keys`: List all supported keys.
+  * `append`: Append a value to a configuration key. (List value only, like `fileignore`)
+  * `remove`: Remove a value from a configuration key. (List value only, like `fileignore`)
 * `gmsg hook`: Hook manage commands group(Prototype phase.).
   * `install`: Install the GPTComet hook.
   * `uninstall`: Uninstall the GPTComet hook.
   * `status`: Check the status of the GPTComet hook.
-* `gmsg generate`: Generate messages by changes/diff.
+* `gmsg gen`: Generate messages by changes/diff.
   * `commit`: Generate a commit message based on the changes made in the code.
   * `pr`: Generate a pull request message based on the changes made in the code.
 
@@ -95,6 +97,10 @@ The configuration file for GPTComet is `gptcomet.toml`. The file should contain 
 *   `prompt.brief_commit_message`: The prompt for generating brief commit messages.
 *   `prompt.translation`: The prompt for translating commit messages to a target language.
 *   `output.lang`: The language of the commit message (e.g., `en`).
+
+This project using `litellm` as the bridge to LLM providers, so plenty providers are supported.
+
+
 
 
 ## Supported Keys
@@ -123,6 +129,24 @@ Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
 ## Development
 
 If you'd like to contribute to GPTComet, feel free to fork this project and submit a pull request.
+
+First, fork the project and clone your repo.
+
+```shell
+git clone https://github.com/<yourname>/gptcomet
+```
+
+Second, make sure you have `pdm`, you can install by `pip`, `brew` or other way in their [installation](https://github.com/pdm-project/pdm?tab=readme-ov-file#installation) docs
+
+Use `just` command install dependence, `just` is a handy way to save and run project-specific commands, `just` docs [https://github.com/casey/just](https://github.com/casey/just)
+
+```shell
+just install
+```
+
+Or use `pdm` directly `pdm install`.
+
+Then, you can submit a pull request.
 
 ## License
 
