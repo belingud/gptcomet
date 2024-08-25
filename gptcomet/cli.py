@@ -10,6 +10,7 @@ from litellm import BadRequestError
 import gptcomet
 from gptcomet._validator import KEYS_VALIDATOR
 from gptcomet.config_manager import ConfigManager
+from gptcomet.const import GPTCOMET_PRE
 from gptcomet.exceptions import (
     ConfigKeyError,
     ConfigKeyTypeError,
@@ -17,7 +18,7 @@ from gptcomet.exceptions import (
     KeyNotFound,
     NotModified,
 )
-from gptcomet.hook import AICommitHook
+from gptcomet.hook import GPTCometHook
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.utils import common_options
 
@@ -101,13 +102,14 @@ def _config_value_set_validate_callback(ctx, param, value):
 @common_options
 def config_set(ctx: Context, key, value, debug, local):
     """Set a configuration value."""
+    config_manager: ConfigManager = ctx.obj["config_manager"]
     try:
-        ctx.obj["config_manager"].set(key, value)
+        config_manager.set(key, value)
         click.echo(
-            f"[GPTComet] Set {click.style(key, fg='green')} to {click.style(value, fg='green')}."
+            f"{GPTCOMET_PRE} Set {click.style(key, fg='green')} to {click.style(value, fg='green')}."
         )
     except ConfigKeyError as e:
-        click.echo(f"[GPTComet] Error: {e!s}")
+        click.echo(f"{GPTCOMET_PRE} Error: {e!s}")
 
 
 @config.command("append", help="Append a configuration value.")
@@ -120,12 +122,12 @@ def config_append(ctx: Context, key, value, debug, local):
     try:
         ctx.obj["config_manager"].append(key, value)
         click.echo(
-            f"[GPTComet] Appended {click.style(value, fg='green')} to {click.style(key, fg='green')}."
+            f"{GPTCOMET_PRE} Appended {click.style(value, fg='green')} to {click.style(key, fg='green')}."
         )
     except NotModified:
-        click.echo(f"[GPTComet] Config value already exists and not modified: {key!s}")
+        click.echo(f"{GPTCOMET_PRE} Config value already exists and not modified: {key!s}")
     except ConfigKeyTypeError as e:
-        click.echo(f"[GPTComet] Error: {e!s}")
+        click.echo(f"{GPTCOMET_PRE} Error: {e!s}")
 
 
 @config.command("remove", help="Remove a specific value from the list set by the corresponding key.")
@@ -135,13 +137,16 @@ def config_append(ctx: Context, key, value, debug, local):
 @common_options
 def config_remove(ctx: Context, key, value, debug, local):
     """Remove a configuration value."""
+    config_manager: ConfigManager = ctx.obj["config_manager"]
     try:
-        ctx.obj["config_manager"].remove(key, value)
+        config_manager.remove(key, value)
         click.echo(
-            f"[GPTComet] Removed {click.style(value, fg='green')} from {click.style(key, fg='green')}."
+            f"{GPTCOMET_PRE} Removed {click.style(value, fg='green')} from {click.style(key, fg='green')}."
         )
     except ConfigKeyTypeError as e:
-        click.echo(f"[GPTComet] Error: {e!s}")
+        click.echo(f"{GPTCOMET_PRE} Error: {e!s}")
+    except ValueError:
+        click.echo(f"{GPTCOMET_PRE} value not found: {value!s}")
 
 
 @config.command("get")
@@ -150,8 +155,9 @@ def config_remove(ctx: Context, key, value, debug, local):
 @common_options
 def config_get(ctx, key, debug, local):
     """Get a configuration value."""
+    config_manager: ConfigManager = ctx.obj["config_manager"]
     try:
-        value = ctx.obj["config_manager"].get(key)
+        value = config_manager.get(key)
         click.echo(f"{key}: {value}")
     except ValueError as e:
         click.echo(f"Error: {e!s}")
@@ -174,7 +180,8 @@ def config_list(ctx: Context, debug, local):
 @common_options
 def reset(ctx: Context, debug, local):
     """Reset configuration to default values."""
-    ctx.obj["config_manager"].reset()
+    config_manager: ConfigManager = ctx.obj["config_manager"]
+    config_manager.reset()
     click.echo("Configuration reset to default values")
 
 
@@ -192,9 +199,10 @@ def config_keys(ctx, debug, local):
 @common_options
 def config_path(ctx: Context, debug, local):
     """Get the path to the configuration file."""
+    config_manager: ConfigManager = ctx.obj["config_manager"]
     click.echo(
         click.style("Current configuration path:\n", fg="green")
-        + ctx.obj["config_manager"].current_config_path.as_posix()
+        + config_manager.current_config_path.as_posix()
     )
 
 
@@ -218,7 +226,7 @@ def hook(ctx: click.Context, debug, local):
 def install_hook(ctx, debug, local, force=False):
     """Install GPTComet prepare-commit-msg hook."""
     try:
-        comet_hook = AICommitHook()
+        comet_hook = GPTCometHook()
         if comet_hook.is_hook_installed() and not force:
             click.echo(
                 "GPTComet prepare-commit-msg hook is already installed, use --force to force installation."
@@ -240,7 +248,7 @@ def install_hook(ctx, debug, local, force=False):
 def uninstall_hook(ctx: click.Context, debug, local, **kwargs):
     """Uninstall GPTComet prepare-commit-msg hook."""
     try:
-        comet_hook = AICommitHook()
+        comet_hook = GPTCometHook()
         comet_hook.uninstall_hook()
     except (InvalidGitRepositoryError, NoSuchPathError) as e:
         click.echo(f"Error: {e!s}")
@@ -252,7 +260,7 @@ def uninstall_hook(ctx: click.Context, debug, local, **kwargs):
 def hook_status():
     """Check if GPTComet prepare-commit-msg hook is installed."""
     try:
-        comet_hook = AICommitHook()
+        comet_hook = GPTCometHook()
         if comet_hook.is_hook_installed():
             click.echo("GPTComet prepare-commit-msg hook is installed.")
         else:
@@ -269,9 +277,10 @@ def hook_status():
 @click.pass_context
 @common_options
 def generate(ctx: click.Context, debug, local):
-    ctx.obj["config_manager"] = ConfigManager(
-        config_path=ConfigManager.get_config_path(ctx.obj["local"])
-    )
+    if ctx.obj.get("config_manager") is None:
+        ctx.obj["config_manager"] = ConfigManager(
+            config_path=ConfigManager.get_config_path(ctx.obj["local"])
+        )
 
 
 @generate.command("commit")
@@ -280,16 +289,16 @@ def generate(ctx: click.Context, debug, local):
 @click.pass_context
 def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
     """Generate a commit message based on git diff"""
+    config_manager: ConfigManager = ctx.obj["config_manager"]
+    message_generator = MessageGenerator(config_manager)
+    retry = True
+    commit_msg = None
     click.echo(
         click.style(
             "🤖 Hang tight! I'm having a chat with the AI to craft your commit message...",
             fg="cyan",
         )
     )
-    config_manager = ctx.obj["config_manager"]
-    message_generator = MessageGenerator(config_manager)
-    retry = True
-    commit_msg = None
     while retry:
         try:
             commit_msg = message_generator.generate_commit_message(rich)
@@ -341,7 +350,7 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
 @click.pass_context
 def generate_prmsg(ctx: click.Context, debug, local):
     """Generate a pull request message based on changes compared to master"""
-    config_manager = ctx.obj["config_manager"]
+    config_manager: ConfigManager = ctx.obj["config_manager"]
     message_generator = MessageGenerator(config_manager)
 
     pr_msg = message_generator.generate_pr_message()

@@ -1,45 +1,51 @@
+import ast
 import logging
 from pathlib import Path
 from typing import Any, Optional, Union
 
 import click
-import tomlkit as toml
-from tomlkit import TOMLDocument, boolean, float_, integer, string
-from tomlkit.items import Item
+from glom import assign, glom
+from ruamel.yaml import YAML, CommentedMap
 
 from gptcomet._types import CacheType
-from gptcomet.exceptions import ConfigKeyError, ConfigKeyTypeError, KeyNotFound, NotModified
+from gptcomet.const import LANGUAGE_KEY
+from gptcomet.exceptions import (
+    ConfigKeyTypeError,
+    LanguageNotSupportError,
+    NotModified,
+)
 from gptcomet.support_keys import SUPPORT_KEYS
-from gptcomet.utils import is_float, LIST_VALUES
+from gptcomet.utils import output_language_map, strtobool
 
 logger = logging.getLogger(__name__)
+
+yaml = YAML(typ="rt", pure=True)
 
 
 class ConfigManager:
     __slots__ = (
         "local",
-        "global_config_file",
-        "default_config_file",
+        # "global_config_file",
+        # "default_config_file",
         "current_config_path",
         "_cache",
-        "_valid_keys"
+        "_valid_keys",
     )
     local: bool
-    global_config_file: Path
-    default_config_file: Path
+    # global_config_file: Path
+    # default_config_file: Path
     current_config_path: Path
     _cache: CacheType
-    _valid_keys: set[str]
+
+    global_config_file: Path = Path.home() / ".config" / "gptcomet" / "gptcomet.yaml"
+    default_config_file: Path = Path(__file__).parent / "gptcomet.yaml"
 
     def __init__(self, config_path: Path, local: bool = False):
         self.local: bool = local
-        self.global_config_file: Path = Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
-        self.default_config_file: Path = Path(__file__).parent / "gptcomet.toml"
         # runtime config file
         self.current_config_path = config_path
 
         self._cache: CacheType = {"config": None, "default_config": None}
-        self._valid_keys: set[str] = set(SUPPORT_KEYS.splitlines())
 
     @property
     def config(self):
@@ -57,7 +63,7 @@ class ConfigManager:
         return self._cache["config"]
 
     @property
-    def default_config(self) -> toml.TOMLDocument:
+    def default_config(self) -> CommentedMap:
         """
         Returns the default configuration stored in the cache.
 
@@ -73,17 +79,27 @@ class ConfigManager:
 
     @classmethod
     def get_config_path(cls, local: bool = False) -> Path:
-        if local:
-            return Path.cwd() / ".git" / "gptcomet.toml"
-        else:
-            return Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
+        return Path.cwd() / ".git" / "gptcomet.yaml" if local else cls.global_config_file
+
+    def is_api_key_set(self) -> bool:
+        """
+        Checks if the API key is set in the config file.
+
+        Returns:
+            bool: True if the API key is set, False if is empty or default.
+        """
+        if not self.current_config_path.exists():
+            return False
+        provider = self.get("provider")
+        api_key = self.get(f"{provider}.api_key")
+        return api_key.strip("x") != "sk-"
 
     def get_config_file(self, local: bool = False) -> Path:
         """
         Retrieves the path to the configuration file.
 
         If local is True, checks if the current directory is a git repository
-        and returns the path to .git/gptcomet.toml if it is, otherwise returns
+        and returns the path to .git/gptcomet.yaml if it is, otherwise returns
         the global configuration file path.
 
         Returns:
@@ -93,10 +109,12 @@ class ConfigManager:
         if local:
             cwd = Path.cwd()
             if not (cwd / ".git").exists():
-                click.echo(f"[{click.style('GPTComet', fg='yellow')}] Not a git repository. Using global config.")
+                click.echo(
+                    f"[{click.style('GPTComet', fg='yellow')}] Not a git repository. Using global config."
+                )
             else:
-                config_path = cwd / ".git" / "gptcomet.toml"
-        # click.echo(f"[GPTComet] Using config file: {config_path}")
+                config_path = cwd / ".git" / "gptcomet.yaml"
+        # click.echo(f"{GPTCOMET_PRE} Using config file: {config_path}")
         return config_path
 
     def ensure_config_file(self):
@@ -108,72 +126,58 @@ class ConfigManager:
             config_file.parent.mkdir(parents=True, exist_ok=True)
             with open(self.default_config_file) as default, open(config_file, "w") as target:
                 target.write(default.read())
-            click.echo(f"[{click.style('GPTComet', fg='green')}] Created default config file at {config_file}")
+            click.echo(
+                f"[{click.style('GPTComet', fg='green')}] Created default config file at {config_file}"
+            )
 
-    def load_config(self) -> toml.TOMLDocument:
+    def load_config(self) -> CommentedMap:
         """
         Load the configuration from the current configuration file.
 
         Returns:
-            toml.TOMLDocument: The configuration loaded from the current configuration file.
+            CommentedMap: The configuration loaded from the current configuration file.
 
         """
         self.ensure_config_file()
-        with open(self.current_config_path) as f:
-            return toml.load(f)
+        with self.current_config_path.open() as f:
+            return yaml.load(f)
 
-    def load_default_config(self) -> toml.TOMLDocument:
+    def load_default_config(self) -> CommentedMap:
         """
         Load the default configuration from the default configuration file.
 
         Returns:
-            toml.TOMLDocument: The default configuration loaded from the file.
+            CommentedMap: The default configuration loaded from the file.
         """
-        with open(self.default_config_file) as f:
-            return toml.load(f)
+        with self.default_config_file.open() as f:
+            return yaml.load(f)
 
     def save_config(self):
         """
         Saves the current configuration to a file.
-        Returns:
-            None
         """
         with self.current_config_path.open("w") as f:
-            f.write(self.config.as_string())
+            yaml.dump(self.config, f)
 
-    def is_valid_key(self, key: str) -> bool:
-        """
-        Check if the given key is a valid key in the current configuration.
-
-        Args:
-            key (str): The key to be checked.
-
-        Returns:
-            bool: True if the key is valid, False otherwise.
-        """
-        return key in self._valid_keys
-
-    def get_nested_value(self, doc: Union[dict, toml.TOMLDocument], keys: Union[str, list[str]]) -> Any:
+    def get_nested_value(
+        self, doc: Union[dict, CommentedMap], keys: Union[str, list[str]], default: Any = None
+    ) -> Any:
         """
         Get the nested value from a dictionary or TOML document using a list of keys.
 
         Args:
-            doc (Union[dict, toml.TOMLDocument]): The dictionary or TOML document to retrieve the nested value from.
+            doc (Union[dict, CommentedMap]): The dictionary or TOML document to retrieve the nested value from.
             keys (Union[str, List[str]]): The list of keys to navigate through the document.
+            default (Any, optional): The default value to return if the nested value is not found. Defaults to None.
 
         Returns:
             Any: The nested value if found, None otherwise.
         """
-        if isinstance(keys, str):
-            keys = keys.split(".")
-        for key in keys:
-            if isinstance(doc, dict):
-                doc = doc.get(key)
-            else:
-                raise KeyNotFound(key)
-        return doc
+        if isinstance(keys, list):
+            keys = ".".join(keys)
+        return glom(doc, keys, default=default)
 
-    def set_nested_value(self, doc: TOMLDocument, keys: Union[str, list[str]], value: Any):
+    def set_nested_value(self, doc: CommentedMap, keys: Union[str, list[str]], value: Any):
         """
         Set a nested value in a dictionary using a list of keys.
 
@@ -189,17 +193,15 @@ class ConfigManager:
             >>> config = ConfigManager()
             >>> d = {'a': {'b': {'c': 1}}}
             >>> config.set_nested_value(doc, ['a', 'b', 'c'], 2)
-            >>> doc
+            >>> d
             {'a': {'b': {'c': 2}}}
 
         Note:
             This function modifies the input dictionary `d` in-place.
         """
-        if isinstance(keys, str):
-            keys = keys.split(".")
-        for key in keys[:-1]:
-            doc = doc.setdefault(key, {})
-        doc[keys[-1]] = value
+        if isinstance(keys, (list, tuple, set)):
+            keys = ".".join(keys)
+        assign(doc, keys, value)
 
     def set(self, key: str, value: str):
         """
@@ -219,7 +221,9 @@ class ConfigManager:
         Note:
             This method modifies the toml `config` attribute in-place.
         """
-        toml_value: Item = self.convert2toml_value(value)
+        if key == LANGUAGE_KEY and output_language_map.get(value) is None:
+            raise LanguageNotSupportError(key)
+        toml_value = self.convert2yaml_value(value)
         self.set_nested_value(self.config, key, toml_value)
         self.save_config()
 
@@ -242,10 +246,7 @@ class ConfigManager:
             This method assumes that the `config` attribute of the `ConfigManager` object is a nested dictionary
             structure with keys separated by dots.
         """
-        try:
-            return self.get_nested_value(self.config, key)
-        except KeyNotFound:
-            return default
+        return self.get_nested_value(self.config, key, default=default)
 
     def list(self) -> str:
         """
@@ -267,10 +268,13 @@ class ConfigManager:
         """
         Resets the current configuration to its default state.
         """
-        with open(self.default_config_file) as default, open(self.current_config_path, "w") as target:
+        with (
+            self.default_config_file.open() as default,
+            self.current_config_path.open("w") as target,
+        ):
             content = default.read()
             target.write(content)
-        self._cache["config"] = toml.loads(content)
+            self._cache["config"] = yaml.load(default)
 
     def list_keys(self) -> str:
         """
@@ -324,35 +328,43 @@ class ConfigManager:
         Raises:
             NotModified: If the value is not found in the list.
             ConfigKeyTypeError: If the value is not a list.
+            ValueError: If the value not found.
 
         Note:
             This method modifies the toml `config` attribute in-place.
         """
         current_value = self.get(key)
-        if isinstance(current_value, list):
+        if not isinstance(current_value, list):
             raise ConfigKeyTypeError(key)
         if not current_value:
             raise NotModified(NotModified.REASON_EMPTY)
         current_value.remove(value)
         self.save_config()
 
-    def convert2toml_value(self, value: str) -> Item:
+    def convert2yaml_value(self, value: str) -> Any:
         """
-        Converts a string value to a TOML-compatible value.
+        Converts a string value to a YAML-compatible value.
 
         Args:
             value (str): The string value to be converted.
 
         Returns:
-            Item: The converted TOML value or the original string value.
+            Any: The converted YAML value or the original string value.
         """
-        if value.lower() in ("true", "false"):
-            return boolean(value.lower())
-        elif value.isnumeric():
-            return integer(value)
-        elif value.lower() in ("none", "null"):
-            return string(value, literal=True)
-        elif is_float(value):
-            return float_(value)
-        else:
-            return string(value)
+        try:
+            return strtobool(value)
+        except ValueError:
+            pass
+        if value.lower() in ("none", "null"):
+            return None
+        if value.isnumeric():
+            return int(value)
+        try:
+            return float(value)
+        except ValueError:
+            pass
+        try:
+            return ast.literal_eval(value)
+        except ValueError:
+            pass
+        return value

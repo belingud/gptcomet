@@ -1,0 +1,108 @@
+provider: "openai"  # LLM provider
+file_ignore:  # File to ignore when generating a commit
+  - "bun.lockb"
+  - "Cargo.lock"
+  - "composer.lock"
+  - "Gemfile.lock"
+  - "package-lock.json"
+  - "pnpm-lock.yaml"
+  - "poetry.lock"
+  - "yarn.lock"
+  - "pdm.lock"
+  - "Pipfile.lock"
+  - "*.py[cod]"
+
+openai:
+  api_base: "https://api.openai.com/v1"  # GPT base URL, default openai api
+  api_key: "sk-xxxxxx"
+  model: "text-davinci-003"
+  retries: 2
+  proxy: ""
+  max_tokens: 4096
+  top_p: 0.7
+  temperature: 0.7
+  frequency_penalty: 0
+  extra_headers: "{}"  # JSON string
+
+prompt:
+  brief_commit_message: |
+    You are an expert software engineer responsible for writing a clear and concise commit message.
+    You have reviewed the following changes captured in the git diff output.
+
+    Based on the git diff content, generate a commit message that:
+    - Starts with a concise and informative title.
+    - Follows with a high-level summary in bullet points, using the imperative tense.
+    - Focuses on the most significant changes.
+
+    Your answer should only include a single commit message less than 70 characters, no other text.
+    Examples:
+
+    Git Diff:
+    - if (user == null) {
+    + if (user.isEmpty()) {
+        throw new AuthenticationException("User not found");
+    }
+
+    Commit Message: fix: Fix user null check in authentication
+
+    Git Diff:
+    + public String exportToCSV(List<Data> dataList) {
+    +     StringBuilder csvData = new StringBuilder();
+    +     for (Data data : dataList) {
+    +         csvData.append(data.toCSVRow());
+    +     }
+    +     return csvData.toString();
+    + }
+
+    Output: feat: Add CSV export functionality
+
+    Git Diff:
+    - public void processTransaction() {
+    -     // Deprecated method
+    -     processOldTransaction();
+    - }
+    + public void processTransaction() {
+    +     processNewTransaction();
+    + }
+
+    Output: refactor: Refactor transaction processing method
+
+    Git Diff:
+    - for (int i = 0; i < list.size(); i++) {
+    -     processItem(list.get(i));
+    + for (Item item : list) {
+    +     processItem(item);
+    }
+
+    Output: perf: Improve performance of item processing loop
+
+    Git Diff:
+    - String passwordHash = hashPassword(user.getPassword());
+    + String passwordHash = hashPassword(user.getPassword(), SALT);
+
+    Commit Message: fix: Fix password hashing vulnerability
+
+    Git Diff:
+    {{ placeholder }}
+
+    Output:
+  # Prompt for brief commit message
+
+  translation: |
+    You are a professional polyglot programmer and translator. You are translating a git commit message.
+    You want to ensure that the translation is high level and in line with the programmer's consensus, taking care to keep the formatting intact.
+
+    Translate the following message into {{ output_language }}.
+
+    GIT COMMIT MESSAGE:
+
+    ###
+    {{ placeholder }}
+    ###
+
+    Remember translate all given git commit message and give me only the translation.
+    THE TRANSLATION:
+  # Prompt for translation commit message to target language
+
+output:
+  lang: "en"  # Commit message language
