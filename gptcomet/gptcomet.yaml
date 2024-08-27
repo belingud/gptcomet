@@ -12,6 +12,12 @@ file_ignore:  # File to ignore when generating a commit
   - "Pipfile.lock"
   - "*.py[cod]"
 
+output:
+  lang: "en"  # Commit message language
+
+console:
+  verbose: True
+
 openai:
   api_base: "https://api.openai.com/v1"  # GPT base URL, default openai api
   api_key: "sk-xxxxxx"
@@ -26,18 +32,33 @@ openai:
 
 prompt:
   brief_commit_message: |
-    You are an expert software engineer responsible for writing a clear and concise commit message.
-    You have reviewed the following changes captured in the git diff output.
+    you are an expert software engineer responsible for writing a clear and concise commit message.
+    Task: Write a concise commit message based on the provided git diff content.
 
-    Based on the git diff content, generate a commit message that:
-    - Starts with a concise and informative title.
-    - Follows with a high-level summary in bullet points, using the imperative tense.
-    - Focuses on the most significant changes.
+    Guidelines:
+    - start with a concise, informative title.
+    - follow with a high-level summary in bullet points (imperative tense).
+    - focus on the most significant changes.
+    
+    use one of the following labels for the title:
 
-    Your answer should only include a single commit message less than 70 characters, no other text.
+    - build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+    - chore: Updating libraries, copyrights or other repo setting, includes updating dependencies.
+    - ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, gitHub Actions)
+    - docs: Non-code changes, such as fixing typos or adding new documentation
+    - feat: a commit of the type feat introduces a new feature to the codebase
+    - fix: A commit of the type fix patches a bug in your codebase
+    - perf: A code change that improves performance
+    - refactor: A code change that neither fixes a bug nor adds a feature
+    - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+    - test: Adding missing tests or correcting existing tests
+
+    the commit message templete is <title>: <summary>
+
+    your answer should only include a single commit message less than 70 characters, no other text.
     Examples:
 
-    Git Diff:
+    git diff:
     - if (user == null) {
     + if (user.isEmpty()) {
         throw new AuthenticationException("User not found");
@@ -45,7 +66,7 @@ prompt:
 
     Commit Message: fix: Fix user null check in authentication
 
-    Git Diff:
+    git diff:
     + public String exportToCSV(List<Data> dataList) {
     +     StringBuilder csvData = new StringBuilder();
     +     for (Data data : dataList) {
@@ -56,7 +77,7 @@ prompt:
 
     Output: feat: Add CSV export functionality
 
-    Git Diff:
+    git diff:
     - public void processTransaction() {
     -     // Deprecated method
     -     processOldTransaction();
@@ -67,7 +88,7 @@ prompt:
 
     Output: refactor: Refactor transaction processing method
 
-    Git Diff:
+    git diff:
     - for (int i = 0; i < list.size(); i++) {
     -     processItem(list.get(i));
     + for (Item item : list) {
@@ -76,16 +97,16 @@ prompt:
 
     Output: perf: Improve performance of item processing loop
 
-    Git Diff:
+    git diff:
     - String passwordHash = hashPassword(user.getPassword());
     + String passwordHash = hashPassword(user.getPassword(), SALT);
 
     Commit Message: fix: Fix password hashing vulnerability
 
-    Git Diff:
+    git diff:
     {{ placeholder }}
 
-    Output:
+    Commit Message:
   # Prompt for brief commit message
 
   translation: |
@@ -103,6 +124,3 @@ prompt:
     Remember translate all given git commit message and give me only the translation.
     THE TRANSLATION:
   # Prompt for translation commit message to target language
-
-output:
-  lang: "en"  # Commit message language
