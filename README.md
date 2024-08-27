@@ -1,8 +1,8 @@
 # GPTComet: AI-Powered Git Commit Message Generator
 
-[![PyPI version](https://img.shields.io/pypi/v/gptcomet?style=for-the-badge)](https://pypi.org/project/gptcomet/) 
-[![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT) 
-![Static Badge](https://img.shields.io/badge/language-Python-%233572A5?style=for-the-badge) 
+[![PyPI version](https://img.shields.io/pypi/v/gptcomet?style=for-the-badge)](https://pypi.org/project/gptcomet/)
+[![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+![Static Badge](https://img.shields.io/badge/language-Python-%233572A5?style=for-the-badge)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 
@@ -51,18 +51,27 @@ pipx install gptcomet
 ```
 After installing GPTComet, you will have two commands: `gptcomet` and `gmsg`.
 
+```shell
+$ pipx install gptcomet
+  installed package gptcomet 0.0.3, installed using Python 3.12.3
+  These apps are now globally available
+    - gmsg
+    - gptcomet
+done! ✨ 🌟 ✨
+```
+
 ## Usage
 
 To use gptcomet, follow these steps:
 
 1.  **Install GPTComet**: Install GPTComet through pypi.
 2.  **Configure GPTComet**: Configure GPTComet with your api_key The configuration file should contain the following keys:
-    *   `provider`: The provider of the language model (e.g., `openai`).
-    *   `api_base`: The base URL of the API (e.g., `https://api.openai.com/v1`).
+    *   `provider`: The provider of the language model (default `openai`).
+    *   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
     *   `api_key`: The API key for the provider.
-    *   `model`: The model used for generating commit messages (e.g., `gpt-3.5-turbo`).
-    *   `retries`: The number of retries for the API request (e.g., `2`).
-3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg generate commit`.
+    *   `model`: The model used for generating commit messages (default `text-davinci-003`).
+    *   `retries`: The number of retries for the API request (default `2`).
+3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg gen commit`.
 
 ## Commands
 
@@ -89,19 +98,67 @@ The following are the available commands for GPTComet:
 
 The configuration file for GPTComet is `gptcomet.toml`. The file should contain the following keys:
 
-*   `provider`: The provider of the language model (e.g., `openai`).
-*   `api_base`: The base URL of the API (e.g., `https://api.openai.com/v1`).
+*   `provider`: The provider of the language model (default `openai`).
+*   `file_ignore`: The file to ignore when generating a commit.
+*   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
 *   `api_key`: The API key for the provider.
-*   `model`: The model used for generating commit messages (e.g., `gpt-3.5-turbo`).
-*   `retries`: The number of retries for the API request (e.g., `2`).
+*   `model`: The model used for generating commit messages (default `text-davinci-003`).
+*   `retries`: The number of retries for the API request (default `2`).
+*   `proxy`: The proxy URL for the provider.
+*   `max_tokens`: The maximum number of tokens for the provider.
+*   `top_p`: The top_p parameter for the provider (default `0.7`).
+*   `temperature`: The temperature parameter for the provider (default `0.7`).
+*   `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
+*   `extra_headers`: The extra headers for the provider, json string.
 *   `prompt.brief_commit_message`: The prompt for generating brief commit messages.
 *   `prompt.translation`: The prompt for translating commit messages to a target language.
-*   `output.lang`: The language of the commit message (e.g., `en`).
+*   `output.lang`: The language of the commit message (default `en`).
+
+### file_ignore
+
+The file to ignore when generating a commit. The default value is
+```yaml
+  - "bun.lockb"
+  - "Cargo.lock"
+  - "composer.lock"
+  - "Gemfile.lock"
+  - "package-lock.json"
+  - "pnpm-lock.yaml"
+  - "poetry.lock"
+  - "yarn.lock"
+  - "pdm.lock"
+  - "Pipfile.lock"
+  - "*.py[cod]"
+```
+
+You can add more file_ignore by using the `gmsg config append file_ignore <xxx>` command.
+`<xxx>` is same syntax as `gitignore`, like `*.so` to ignore all `.so` suffix files.
 
 This project using `litellm` as the bridge to LLM providers, so plenty providers are supported.
 
+If you are using `openai`, just leave the `api_base` as default. Set your `api_key` in the `config` section.
 
+If you are using an `openai` class provider, or a provider compatible with the `openai` interface, you can set the provider to `openai`.
+And set your custom `api_base`, `api_key` and `model`.
 
+For example:
+
+`Openrouter` providers api interface compatible with openai,
+you can set provider to `openai` and set `api_base` to `https://openrouter.ai/api/v1`,
+`api_key` to your api key from [keys page](https://openrouter.ai/settings/keys)
+and `model` to `meta-llama/llama-3.1-8b-instruct:free` or some other you prefer.
+
+```shell
+gmsg config set openai.api_base https://openrouter.ai/api/v1
+gmsg config set openai.api_key YOUR_API_KEY
+gmsg config set openai.model meta-llama/llama-3.1-8b-instruct:free
+gmsg config set openai.max_tokens 13000
+```
+
+Silicon providers the similar interface with openrouter, so you can set provider to `openai`
+and set `api_base` to `https://api.siliconflow.cn/v1`.
+
+**Note that max tokens may vary, and will return an error if it is too large.**
 
 ## Supported Keys
 
