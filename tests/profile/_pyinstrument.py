@@ -5,8 +5,6 @@ from pathlib import Path
 import pyinstrument
 from click.testing import CliRunner
 
-from gptcomet.cli import cli
-
 os.chdir(Path(__file__).resolve().parent.parent.parent)
 profiler = pyinstrument.Profiler()
 runner = CliRunner()

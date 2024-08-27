@@ -1,4 +1,3 @@
-import click
 from click.testing import CliRunner
 from line_profiler import LineProfiler
 
@@ -15,7 +14,7 @@ def run_profiling():
     profiler.enable_by_count()
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["config", "set", "openai.retries", "3"])
+    runner.invoke(cli, ["config", "set", "openai.retries", "3"])
 
     profiler.disable_by_count()
 
