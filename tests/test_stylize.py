@@ -1,7 +1,7 @@
 from rich.panel import Panel
 from rich.text import Text
 
-from gptcomet.utils import stylize
+from gptcomet.styles import stylize
 
 
 def test_stylize_text():
