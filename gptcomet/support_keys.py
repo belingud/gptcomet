@@ -1,7 +1,7 @@
 SUPPORT_KEYS: str = """\
-provider                     # llm provider
-file_ignore                  # file to ignore when generating a commit
-{provider}.api_base          # openai base url
+provider                      # LLM provider
+file_ignore                   # File to ignore when generating a commit
+{provider}.api_base           # GPT base URL, default openai api
 {provider}.api_key
 {provider}.model
 {provider}.retries
@@ -10,8 +10,8 @@ file_ignore                  # file to ignore when generating a commit
 {provider}.top_p
 {provider}.temperature
 {provider}.frequency_penalty
-{provider}.extra_headers     # json string
-prompt.brief_commit_message  # prmpt for brief commit msg
-prompt.translation           # prompt for translation commit message to target language
-output.lang                  # commit message language
+{provider}.extra_headers      # JSON string
+prompt.brief_commit_message   # Prompt for brief commit message
+prompt.translation            # Prompt for translation commit message to target language
+output.lang                   # Commit message language
 """

@@ -1,54 +1,49 @@
-import ast
-import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Type, Union
 
 import click
+import orjson as json
 from glom import assign, glom
-from ruamel.yaml import YAML, CommentedMap
+from ruamel.yaml import YAML, CommentedMap, CommentedSeq
 
 from gptcomet._types import CacheType
 from gptcomet.const import LANGUAGE_KEY
 from gptcomet.exceptions import (
+    ConfigKeyError,
     ConfigKeyTypeError,
     LanguageNotSupportError,
     NotModified,
 )
 from gptcomet.support_keys import SUPPORT_KEYS
-from gptcomet.utils import output_language_map, strtobool
-
-logger = logging.getLogger(__name__)
+from gptcomet.utils import convert2type, output_language_map, strtobool
 
 yaml = YAML(typ="rt", pure=True)
 
 
 class ConfigManager:
     __slots__ = (
-        "local",
-        # "global_config_file",
-        # "default_config_file",
         "current_config_path",
         "_cache",
         "_valid_keys",
     )
-    local: bool
-    # global_config_file: Path
-    # default_config_file: Path
     current_config_path: Path
     _cache: CacheType
 
     global_config_file: Path = Path.home() / ".config" / "gptcomet" / "gptcomet.yaml"
     default_config_file: Path = Path(__file__).parent / "gptcomet.yaml"
 
-    def __init__(self, config_path: Path, local: bool = False):
-        self.local: bool = local
+    def __init__(self, config_path: Path):
         # runtime config file
         self.current_config_path = config_path
 
         self._cache: CacheType = {"config": None, "default_config": None}
 
+    @classmethod
+    def from_config_path(cls, config_path: Path) -> "ConfigManager":
+        return cls(config_path)
+
     @property
-    def config(self):
+    def config(self) -> CommentedMap:
         """
         Returns the configuration stored in the cache.
 
@@ -91,8 +86,8 @@ class ConfigManager:
         if not self.current_config_path.exists():
             return False
         provider = self.get("provider")
-        api_key = self.get(f"{provider}.api_key")
-        return api_key.strip("x") != "sk-"
+        api_key: str = self.get(f"{provider}.api_key")
+        return str(api_key).strip("x") != "sk-"
 
     def get_config_file(self, local: bool = False) -> Path:
         """
@@ -223,17 +218,20 @@ class ConfigManager:
         """
         if key == LANGUAGE_KEY and output_language_map.get(value) is None:
             raise LanguageNotSupportError(key)
+        if key.split(".")[-1] not in SUPPORT_KEYS:
+            raise ConfigKeyError(key)
         toml_value = self.convert2yaml_value(value)
         self.set_nested_value(self.config, key, toml_value)
         self.save_config()
 
-    def get(self, key: str, default: Optional[Any] = None) -> Any:
+    def get(self, key: str, default: Optional[Any] = None, _type: Optional[type] = None) -> Any:
         """
         Retrieves the value associated with the given key from the configuration.
 
         Args:
             key (str): The key to retrieve the value for.
             default (Optional[str]): The default value to return if the key is not found.
+            _type (Optional[Type]): The type to convert the retrieved value to.
 
         Returns:
             Any: The value associated with the given key.
@@ -246,7 +244,8 @@ class ConfigManager:
             This method assumes that the `config` attribute of the `ConfigManager` object is a nested dictionary
             structure with keys separated by dots.
         """
-        return self.get_nested_value(self.config, key, default=default)
+        v = self.get_nested_value(self.config, key, default=default)
+        return convert2type(v=v, _type=_type)
 
     def list(self) -> str:
         """
@@ -364,7 +363,22 @@ class ConfigManager:
         except ValueError:
             pass
         try:
-            return ast.literal_eval(value)
-        except ValueError:
+            # try to parse the value as a literal expression
+            return json.loads(value)
+        except json.JSONDecodeError:
             pass
         return value
+
+
+def get_config_manager(local: bool) -> ConfigManager:
+    """
+    Load the configuration from the current configuration file.
+
+    Args:
+        local (bool): Whether to use the local configuration file.
+
+    Returns:
+        ConfigManager: The configuration manager with the configuration loaded from the current configuration file.
+    """
+    return ConfigManager.from_config_path(ConfigManager.get_config_path(local=local))
+

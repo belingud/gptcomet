@@ -1,15 +1,13 @@
-import logging
 from pathlib import Path
 
 import click
 from git import Repo
 
 from gptcomet.const import RICH_PREPARE_COMMIT_MSG, SHORT_PREPARE_COMMIT_MSG
+from gptcomet.log import logger
 
-logger = logging.getLogger(__name__)
 
-
-class AICommitHook:
+class GPTCometHook:
     __slots__ = ("repo", "hook_path")
 
     def __init__(self):

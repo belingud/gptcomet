@@ -1,28 +1,31 @@
-import logging
 import typing as t
 
 import click
 import orjson as json
 
 try:
-    from litellm import BadRequestError, completion_with_retries
+    import socksio  # noqa: F401
 except ImportError as e:
     msg = e.msg
     if "socksio" in msg:
         msg = ("Using SOCKS proxy, but the 'socksio' package is not installed. "
                "Make sure to install gptcomet using `pip install gptcomet[socks]` or `pip install socksio`.")
     raise ImportError(msg) from None
+from litellm import completion_with_retries
 from litellm.types.utils import ModelResponse
 
 from gptcomet._types import CompleteParams
-from gptcomet.const import DEFAULT_API_BASE, DEFAULT_MODEL, DEFAULT_RETRIES
+from gptcomet.const import (
+    DEFAULT_API_BASE,
+    DEFAULT_MODEL,
+    DEFAULT_RETRIES,
+    PROVIDER_KEY,
+)
 from gptcomet.exceptions import ConfigError, ConfigErrorEnum
+from gptcomet.log import logger
 
 if t.TYPE_CHECKING:
     from gptcomet.config_manager import ConfigManager
-
-
-logger = logging.getLogger(__name__)
 
 
 class LLMClient:
@@ -52,9 +55,9 @@ class LLMClient:
     def __init__(self, config_manager: "ConfigManager"):
         self.config_manager = config_manager
         self.conversation_history: list[dict[str, str]] = []
-        self.provider: str = self.config_manager.get("provider")
+        self.provider: str = self.config_manager.get(PROVIDER_KEY)
         self.api_key: str = self.config_manager.get(f"{self.provider}.api_key")
-        if not self.api_key:
+        if not self.config_manager.is_api_key_set:
             raise ConfigError(ConfigErrorEnum.API_KEY_MISSING)
         self.model: str = self.config_manager.get(f"{self.provider}.model", DEFAULT_MODEL)
         self.api_base: str = self.config_manager.get(f"{self.provider}.api_base", DEFAULT_API_BASE)

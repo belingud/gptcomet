@@ -1,8 +1,15 @@
+GPTCOMET_PRE = "[GPTComet]"
+
 DEFAULT_API_BASE = "https://api.openai.com/v1"
-DEFAULT_MODEL = "gpt-3.5-turbo"
+DEFAULT_MODEL = "text-davinci-003"
 DEFAULT_RETRIES = 2
 
-SUPPORTED_LANG = ["en", "zh"]
+# GPTComet config keys
+LANGUAGE_KEY = "output.lang"
+PROVIDER_KEY = "provider"
+FILE_IGNORE_KEY = "file_ignore"
+CONSOLE_VERBOSE_KEY = "console.verbose"
+
 
 SHORT_PREPARE_COMMIT_MSG = """\
 #!/bin/sh

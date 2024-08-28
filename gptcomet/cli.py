@@ -5,7 +5,7 @@ import sys
 import click
 from click import Context
 from git import HookExecutionError, InvalidGitRepositoryError, NoSuchPathError
-from litellm import BadRequestError
+from litellm.exceptions import BadRequestError
 
 import gptcomet
 from gptcomet._validator import KEYS_VALIDATOR
@@ -22,7 +22,7 @@ from gptcomet.hook import GPTCometHook
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.utils import common_options
 
-logger = logging.getLogger(f"gptcomet.{__name__}")
+logger = logging.getLogger("gptcomet")
 logger.setLevel(os.getenv("GPTCOMET_LOG_LEVEL", logging.WARNING))
 handler = logging.StreamHandler(stream=sys.stdout)
 handler.setFormatter(logging.Formatter(
@@ -339,7 +339,8 @@ def generate_commit(ctx: click.Context, debug, local, rich=False, **kwargs):
             retry = False
         logger.debug(f"Input: {char}")
     try:
-        message_generator.repo.index.commit(commit_msg)
+        # message_generator.repo.index.commit(commit_msg)
+        pass
     except (HookExecutionError, ValueError) as e:
         click.echo(f"Commit Error: {e!s}")
         raise click.Abort() from None

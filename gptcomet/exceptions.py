@@ -1,5 +1,7 @@
 import enum
 
+from gptcomet.utils import output_language_map
+
 
 class GPTCometError(Exception):
     pass
@@ -65,6 +67,15 @@ class ConfigKeyTypeError(GPTCometError):
 
     def __str__(self):
         return f"Key '{self.key}' is not a {self.need_type} type."
+
+
+class LanguageNotSupportError(GPTCometError):
+    def __init__(self, lang: str):
+        self.lang = lang
+        self.supported = list(output_language_map.keys())
+
+    def __str__(self):
+        return f"Language '{self.lang}' not support. Choose from {self.supported}"
 
 
 class KeyNotSupportError(GPTCometError):

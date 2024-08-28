@@ -1,14 +1,14 @@
 import typing as t
 
-import tomlkit
+from ruamel.yaml import CommentedMap
 
 # Config class types
 CacheKeys = t.Literal["default_config", "config"]
 
 
 class CacheType(t.TypedDict):
-    default_config: t.Optional[tomlkit.TOMLDocument]
-    config: t.Optional[tomlkit.TOMLDocument]
+    default_config: t.Optional[CommentedMap]
+    config: t.Optional[CommentedMap]
 
 
 class CompleteParams(t.TypedDict):

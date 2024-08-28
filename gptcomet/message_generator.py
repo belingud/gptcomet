@@ -1,14 +1,14 @@
-import logging
 from pathlib import Path
 
 import tenacity  # noqa: F401
 from git import Repo
 
 from gptcomet.config_manager import ConfigManager
+from gptcomet.const import FILE_IGNORE_KEY, GPTCOMET_PRE, LANGUAGE_KEY
 from gptcomet.exceptions import GitNoStagedChanges
 from gptcomet.llm_client import LLMClient
-
-logger = logging.getLogger(__name__)
+from gptcomet.log import logger
+from gptcomet.utils import output_language_map, should_ignore
 
 
 class MessageGenerator:
@@ -38,12 +38,14 @@ class MessageGenerator:
         >>> message_generator = MessageGenerator(config_manager)
         >>> message_generator.generate_commit_message()
     """
-    __slots__ = ("config_manager", "llm_client", "repo")
+
+    __slots__ = ("config_manager", "llm_client", "repo", "diff")
 
     def __init__(self, config_manager: ConfigManager):
         self.config_manager = config_manager
         self.llm_client = LLMClient(config_manager)
         self.repo = Repo(Path.cwd())
+        self.diff = None
 
     @classmethod
     def from_config_manager(cls, config_manager: ConfigManager):
@@ -68,38 +70,50 @@ class MessageGenerator:
         Returns:
             list[str]: The list of ignored files.
         """
-        working_dir = Path(self.repo.working_dir)
-        return [f":!{file}" for file in ignored_files if (working_dir / file).exists()]
+        staged_files = self.repo.git.diff(["--staged", "--name-only"]).splitlines()
+        return [
+            f":!{file}"
+            for file in staged_files
+            if should_ignore(file, ignored_files) and Path(file).exists()
+        ]
 
-    def generate_commit_message(self, rich: bool = True) -> str:
+    def generate_commit_message(self, rich: bool = False) -> str:
         """
         Generate a commit message from the staged changes.
 
         Args:
-            rich (bool): Whether to use the rich commit message template. Defaults to True.
+            rich (bool): Whether to use the rich commit message template. Defaults to False.
 
         Returns:
             str: The generated commit message.
 
         Raises:
             GitNoStagedChanges: If there are no staged changes.
+            BadRequestError: If the completion API returns an error.
         """
-        logger.debug(f"[GPTComet] Generating commit message, rich: {rich}")
+        logger.debug(f"{GPTCOMET_PRE} Generating commit message, rich: {rich}")
         self.llm_client.clear_history()
-        ignored_files: list = self.config_manager.get("file_ignore")
-        diff = self.repo.git.diff(["--staged", *self.make_ignored_options(ignored_files)])
+        ignored_files: list = self.config_manager.get(FILE_IGNORE_KEY)
+        diff_options = ["--staged", *self.make_ignored_options(ignored_files)]
+        logger.debug(f"{GPTCOMET_PRE} Diff options: {diff_options}")
+        diff = self.repo.git.diff(diff_options)
+        print(diff)
+        logger.debug(f"{GPTCOMET_PRE} Diff length: {len(diff)}")
         if not diff:
             raise GitNoStagedChanges()
         if not rich:
             msg = self._generate_brief_commit_message(diff)
         else:
             msg = self._generate_rich_commit_message(diff)
-        lang = self.config_manager.get("output.lang")
-        if lang != "en":
+        lang = str(self.config_manager.get(LANGUAGE_KEY))
+        if str(lang).lower() != "en":
             # Default is English, but can be changed by the user
-            logger.debug(f"[GPTComet] Translating commit message to {lang}")
-            translation = self.config_manager.get("prompt.translation")
-            translation = translation.replace("{{ placeholder }}", msg)
+            logger.debug(f"{GPTCOMET_PRE} Translating commit message to {lang}")
+            translation = str(self.config_manager.get("prompt.translation"))
+            full_language = output_language_map.get(lang.lower(), "English")
+            translation = translation.replace("{{ placeholder }}", msg).replace(
+                "{{ output_language }}", full_language
+            )
             msg = self.llm_client.generate(translation)
         return msg
 
@@ -134,7 +148,7 @@ class MessageGenerator:
             >>> print(commit_message)
             Added new feature
         """
-        prompt = self.config_manager.get("prompt.brief_commit_message")
+        prompt = str(self.config_manager.get("prompt.brief_commit_message"))
         prompt = prompt.replace("{{ placeholder }}", diff)
         return self.llm_client.generate(prompt)
 
@@ -162,7 +176,7 @@ class MessageGenerator:
         return f"Title: {title}\n\nDescription:\n{description}\n\nChanges:\n{changes}\n\nTesting:\n{testing}"
 
     def generate(self, prompt_key: str, content: str) -> str:
-        prompt = self.config_manager.get(prompt_key)
+        prompt = str(self.config_manager.get(prompt_key))
         prompt.replace("{{ placeholder }}", content)
         return self.llm_client.generate(prompt)
 
