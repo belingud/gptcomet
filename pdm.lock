@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "profile", "socks", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:def406ac9c324c455bc227f5c6b68fa605ca811e6f43d476f6486165df835763"
+content_hash = "sha256:6cfc2ab7e7ca6d8fd955ba8cd46414e9ca3677864539de42628a656055ede531"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
