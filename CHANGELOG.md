@@ -42,5 +42,3 @@ All notable changes to this project will be documented in this file. See [conven
 ### Update
 
 - Rename `aicommit` to `gptcomet` and update related files - ([62a8f78](https://github.com/belingud/gptcomet/commit/62a8f78b456c125b239aa1d7ec0ebed054669410)) - belingud
-
-
