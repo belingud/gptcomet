@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Any, Optional, Type, Union
+from typing import Any, Optional, Union
 
 import click
 import orjson as json
 from glom import assign, glom
-from ruamel.yaml import YAML, CommentedMap, CommentedSeq
+from ruamel.yaml import YAML, CommentedMap
 
 from gptcomet._types import CacheType
 from gptcomet.const import LANGUAGE_KEY
@@ -381,4 +381,3 @@ def get_config_manager(local: bool) -> ConfigManager:
         ConfigManager: The configuration manager with the configuration loaded from the current configuration file.
     """
     return ConfigManager.from_config_path(ConfigManager.get_config_path(local=local))
-

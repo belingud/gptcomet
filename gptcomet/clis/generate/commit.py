@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Literal, Optional, cast
 
 import typer
 from git import Commit, DiffIndex, HookExecutionError, Repo, safe_decode
@@ -8,43 +8,40 @@ from litellm.exceptions import BadRequestError
 from rich.prompt import Prompt
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
-from gptcomet.const import CONSOLE_VERBOSE_KEY, GPTCOMET_PRE
 from gptcomet.exceptions import GitNoStagedChanges, KeyNotFound
-from gptcomet.log import logger, set_debug
+from gptcomet.log import set_debug
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.styles import Colors, stylize
-from gptcomet.utils import console, strtobool
+from gptcomet.utils import console
 
 
-def ask_for_retry() -> bool:
+def ask_for_retry() -> Literal["y", "n", "r"]:
     """
     Ask the user whether to retry generating a commit message.
 
     This function is only used in interactive mode.
     Returns:
-        bool: True if the user chooses to retry generating the commit message, False otherwise.
+        Literal["y", "n", "r"]: The user's choice.
     """
-    retry = True
+    char: Literal["y", "n", "r"] = "y"
     if sys.stdin.isatty():
         # Interactive mode will ask for confirmation
-        char = Prompt.ask(
-            "Do you want to use this commit message? y: yes, n: no, r: retry.",
-            default="y",
-            choices=["y", "n", "r"],
-            case_sensitive=False,
+        char = cast(
+            Literal["y", "n", "r"],
+            Prompt.ask(
+                "Do you want to use this commit message? y: yes, n: no, r: retry.",
+                default="y",
+                choices=["y", "n", "r"],
+                case_sensitive=False,
+            ),
         )
     else:
         console.print(
             "[yellow]Non-interactive mode detected, using the generated commit message directly.[/yellow]",
         )
-        return False
+        char = "y"
 
-    if char == "n":
-        console.print("[yellow]Commit message discarded.[/yellow]")
-        return False
-    elif char == "y":
-        return False
-    return retry
+    return char
 
 
 def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
@@ -123,53 +120,41 @@ def entry(
         ),
     ] = None,
 ):
-    """
-    Generates a commit message based on the staged changes. Will ignore files in `file_ignore`.
-    """
-    rich = False
-    if config_path:
-        cfg: ConfigManager = ConfigManager(config_path=config_path)
-    else:
-        cfg: ConfigManager = get_config_manager(local=local)
+    """Generates a commit message based on the staged changes. Will ignore files in `file_ignore`."""
+    config_manager = (
+        ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
+    )
     if debug:
         set_debug()
-        logger.debug(f"Using Config path: {cfg.current_config_path}")
-    message_generator = MessageGenerator(cfg)
-    retry = True
-    commit_msg = ""
-    console.print(
-        stylize(
-            "🤖 Hang tight! I'm having a chat with the AI to craft your commit message...",
-            Colors.CYAN,
-        ),
-    )
-    while retry:
+
+    message_generator = MessageGenerator(config_manager)
+    while True:
         try:
-            commit_msg = message_generator.generate_commit_message(rich)
-        except KeyNotFound as e:
-            console.print(f"Error: {e!s}, please check your configuration.")
-            raise typer.Abort() from None
-        except (GitNoStagedChanges, BadRequestError) as e:
-            console.print(str(e))
+            commit_message = message_generator.generate_commit_message()
+        except (KeyNotFound, GitNoStagedChanges, BadRequestError) as error:
+            console.print(str(error))
             raise typer.Abort() from None
 
-        if not commit_msg:
+        if not commit_message:
             console.print(stylize("No commit message generated.", Colors.MAGENTA))
             return
 
         console.print("Generated commit message:")
-        console.print(stylize(commit_msg, Colors.GREEN))
+        console.print(stylize(commit_message, Colors.GREEN, panel=True))
 
-        retry = ask_for_retry()
-    if not commit_msg:
-        console.print(stylize("No commit message generated.", Colors.MAGENTA))
-        raise typer.Abort()
+        user_input = ask_for_retry()
+        if user_input == "y":
+            break
+        elif user_input == "n":
+            console.print(stylize("Commit message discarded.", Colors.YELLOW))
+            return
+
     try:
-        commit: Commit = message_generator.repo.index.commit(message=commit_msg)
-        if strtobool(cfg.get(CONSOLE_VERBOSE_KEY, True)):
-            output: str = gen_output(message_generator.repo, commit)
-            console.print(output)
-    except (HookExecutionError, ValueError) as e:
-        console.print(f"Commit Error: {e!s}")
+        commit = message_generator.repo.index.commit(message=commit_message)
+        output = gen_output(message_generator.repo, commit)
+        console.print(output)
+    except (HookExecutionError, ValueError) as error:
+        console.print(f"Commit Error: {error!s}")
         raise typer.Abort() from None
+
     console.print(stylize("Commit message saved.", Colors.CYAN))

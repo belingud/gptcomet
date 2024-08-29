@@ -1,3 +1,4 @@
+import typing as t
 from pathlib import Path
 
 import tenacity  # noqa: F401
@@ -8,7 +9,7 @@ from gptcomet.const import FILE_IGNORE_KEY, GPTCOMET_PRE, LANGUAGE_KEY
 from gptcomet.exceptions import GitNoStagedChanges
 from gptcomet.llm_client import LLMClient
 from gptcomet.log import logger
-from gptcomet.utils import output_language_map, should_ignore
+from gptcomet.utils import should_ignore
 
 
 class MessageGenerator:
@@ -60,6 +61,13 @@ class MessageGenerator:
         """
         return cls(config_manager)
 
+    def get_staged_diff(self, repo: t.Optional[Repo] = None) -> str:
+        ignored_files: list = self.config_manager.get(FILE_IGNORE_KEY)
+        diff_options = ["--staged", *self.make_ignored_options(ignored_files)]
+        logger.debug(f"{GPTCOMET_PRE} Diff options: {diff_options}")
+        repo = repo or self.repo
+        return repo.git.diff(diff_options)
+
     def make_ignored_options(self, ignored_files: list[str]) -> list[str]:
         """
         Make a list of ignored files.
@@ -92,30 +100,33 @@ class MessageGenerator:
             BadRequestError: If the completion API returns an error.
         """
         logger.debug(f"{GPTCOMET_PRE} Generating commit message, rich: {rich}")
-        self.llm_client.clear_history()
-        ignored_files: list = self.config_manager.get(FILE_IGNORE_KEY)
-        diff_options = ["--staged", *self.make_ignored_options(ignored_files)]
-        logger.debug(f"{GPTCOMET_PRE} Diff options: {diff_options}")
-        diff = self.repo.git.diff(diff_options)
-        print(diff)
+        diff = self.get_staged_diff()
         logger.debug(f"{GPTCOMET_PRE} Diff length: {len(diff)}")
+        self.llm_client.clear_history()
         if not diff:
             raise GitNoStagedChanges()
+        return self._translate_msg(self._gen_msg_from_diff(diff, rich=rich))
+
+    def _gen_msg_from_diff(self, diff: str, rich: bool = False) -> str:
         if not rich:
-            msg = self._generate_brief_commit_message(diff)
+            return self._generate_brief_commit_message(diff)
         else:
-            msg = self._generate_rich_commit_message(diff)
-        lang = str(self.config_manager.get(LANGUAGE_KEY))
+            return self._generate_rich_commit_message(diff)
+
+    def _translate_msg(self, msg: str) -> str:
+        lang = self.config_manager.get(LANGUAGE_KEY, _type=str)
+        title = ""
         if str(lang).lower() != "en":
+            if ":" in msg:
+                title, msg = msg.split(":")
             # Default is English, but can be changed by the user
             logger.debug(f"{GPTCOMET_PRE} Translating commit message to {lang}")
             translation = str(self.config_manager.get("prompt.translation"))
-            full_language = output_language_map.get(lang.lower(), "English")
             translation = translation.replace("{{ placeholder }}", msg).replace(
-                "{{ output_language }}", full_language
+                "{{ output_language }}", lang
             )
             msg = self.llm_client.generate(translation)
-        return msg
+        return f"{title}: {msg}" if title else msg
 
         # summary = self._generate_summary(diff)
         # prefix = self._generate_prefix(summary)
