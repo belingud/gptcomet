@@ -1,6 +1,6 @@
 [project]
 name = "gptcomet"
-version = "0.0.5"
+version = "0.0.6"
 description = "gptcomet: A tool that leverages AI to automatically generate Git commit messages."
 authors = [
     { name = "belingud", email = "im.victor@qq.com" },
@@ -19,6 +19,7 @@ dependencies = [
     "ruamel-yaml>=0.18.6",
     "glom>=23.5.0",
     "typer>=0.12.5",
+    "rich>=13.8.0",
 ]
 license = { text = "MIT license" }
 keywords = ['python']

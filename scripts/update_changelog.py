@@ -13,17 +13,17 @@ from pathlib import Path
 
 root_dir = Path(__file__).parent.parent
 latest_tag = (
-    subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]).decode("utf-8").strip()
+    subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"]).decode("utf-8").strip()  # noqa: S607, S603
 )
 if not latest_tag:
-    raise ValueError("latest tag not found")
+    raise ValueError("latest tag not found")  # noqa: TRY003
 
 print(f"Latest tag: {latest_tag}")
 
 
 def get_changelog_content() -> str:
     os.chdir(root_dir)
-    p = subprocess.run(["git", "cliff", "--tag", latest_tag], stdout=subprocess.PIPE)
+    p = subprocess.run(["git", "cliff", "--tag", latest_tag], stdout=subprocess.PIPE)  # noqa: S607, S603
     return p.stdout.decode("utf-8")
 
 
@@ -64,7 +64,7 @@ def write_changelog(changelog_content: str) -> None:
                 break
             if latest_version_num in origin_content:
                 # truncate all changes
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f"Latest tag {latest_tag} already exists in CHANGELOG.md, aborting."
                 )
             tmp_f.write(origin_content)

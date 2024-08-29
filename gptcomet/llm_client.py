@@ -90,6 +90,7 @@ class LLMClient:
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
         response: ModelResponse = completion_with_retries(**params)
+        logger.debug(f"Response: {response}")
 
         assistant_message: str = response["choices"][0]["message"]["content"].strip()
 

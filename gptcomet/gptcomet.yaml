@@ -39,56 +39,90 @@ prompt:
     - start with a concise, informative title.
     - follow with a high-level summary in bullet points (imperative tense).
     - focus on the most significant changes.
-    
+
     use one of the following labels for the title:
 
-    - build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
-    - chore: Updating libraries, copyrights or other repo setting, includes updating dependencies.
-    - ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, gitHub Actions)
-    - docs: Non-code changes, such as fixing typos or adding new documentation
+    - build: changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+    - chore: updating libraries, copyrights or other repo setting, includes updating dependencies.
+    - ci: changes to our CI configuration files and scripts (example scopes: Travis, Circle, gitHub Actions)
+    - docs: non-code changes, such as fixing typos or adding new documentation
     - feat: a commit of the type feat introduces a new feature to the codebase
-    - fix: A commit of the type fix patches a bug in your codebase
-    - perf: A code change that improves performance
-    - refactor: A code change that neither fixes a bug nor adds a feature
-    - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-    - test: Adding missing tests or correcting existing tests
+    - fix: a commit of the type fix patches a bug in your codebase
+    - perf: a code change that improves performance
+    - refactor: a code change that neither fixes a bug nor adds a feature
+    - style: changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+    - test: adding missing tests or correcting existing tests
 
     the commit message templete is <title>: <summary>
 
     your answer should only include a single commit message less than 70 characters, no other text.
     Examples:
 
-    git diff:
-    - if (user == null) {
-    + if (user.isEmpty()) {
-        throw new AuthenticationException("User not found");
-    }
+    Git diff:
+    diff --git a/tests/test_stylize.py b/tests/test_stylize.py
+    index 519b928..0b4584f 100644
+    --- a/tests/test_stylize.py
+    +++ b/tests/test_stylize.py
+    @@ -1,7 +1,7 @@
+    from rich.panel import Panel
+    from rich.text import Text
 
-    Commit Message: fix: Fix user null check in authentication
+    -from gptcomet.utils import stylize
+    +from gptcomet.styles import stylize
 
-    git diff:
-    + public String exportToCSV(List<Data> dataList) {
-    +     StringBuilder csvData = new StringBuilder();
-    +     for (Data data : dataList) {
-    +         csvData.append(data.toCSVRow());
-    +     }
-    +     return csvData.toString();
-    + }
 
-    Output: feat: Add CSV export functionality
+    def test_stylize_text():
 
-    git diff:
-    - public void processTransaction() {
-    -     // Deprecated method
-    -     processOldTransaction();
-    - }
-    + public void processTransaction() {
-    +     processNewTransaction();
-    + }
+    Commit Message: test: update import of stylize test
 
-    Output: refactor: Refactor transaction processing method
+    Git diff:
+    diff --git a/gptcomet/clis/config/__init__.py b/gptcomet/clis/config/__init__.py
+    index 094713d..7b4ad45 100644
+    --- a/gptcomet/clis/config/__init__.py
+    +++ b/gptcomet/clis/config/__init__.py
+    @@ -1,6 +1,6 @@
+    import typer
 
-    git diff:
+    -from gptcomet.clis.config import get, reset, set
+    +from gptcomet.clis.config import get, path, reset, set
+    from gptcomet.clis.config import list as _list
+    from gptcomet.utils import CONTEXT_SETTINGS
+
+    @@ -12,3 +12,4 @@ app.command(name="get")(get.entry)
+    app.command(name="list")(_list.entry)
+    app.command(name="reset")(reset.entry)
+    app.command(name="set")(set.entry)
+    +app.command(name="path")(path.entry)
+
+    Output: feat: Add path command to config management
+
+    Git diff:
+    diff --git a/gptcomet/config_manager.py b/gptcomet/config_manager.py
+    index 8bdca4b..bb98c1c 100644
+    --- a/gptcomet/config_manager.py
+    +++ b/gptcomet/config_manager.py
+    @@ -27,17 +27,16 @@ class ConfigManager:
+    -    def __init__(self, local: bool = False):
+    +    def __init__(self, config_path: Path, local: bool = False):
+    -        self.current_config_path = self.get_config_file()
+    +        self.current_config_path = config_path
+
+    @@ -72,7 +71,14 @@ class ConfigManager:
+    -    def get_config_file(self) -> Path:
+    +    @classmethod
+    +    def get_config_path(cls, local: bool = False) -> Path:
+    +        if local:
+    +            return Path.cwd() / ".git" / "gptcomet.toml"
+    +        else:
+    +            return Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
+
+    Output: refactor: Refactor configmanger init with config_path and get_config_path classmethod
+
+    Git diff:
+    diff --git a/src/utils.java b/src/utils.java
+    index 8bdca4b..bb98c1c 100644
+    --- a/src/utils.java
+    +++ b/src/utils.java
     - for (int i = 0; i < list.size(); i++) {
     -     processItem(list.get(i));
     + for (Item item : list) {
@@ -97,13 +131,17 @@ prompt:
 
     Output: perf: Improve performance of item processing loop
 
-    git diff:
+    Git diff:
+    diff --git a/src/utils.java b/src/utils.java
+    index 8bdca4b..bb98c1c 100644
+    --- a/src/utils.java
+    +++ b/src/utils.java
     - String passwordHash = hashPassword(user.getPassword());
     + String passwordHash = hashPassword(user.getPassword(), SALT);
 
     Commit Message: fix: Fix password hashing vulnerability
 
-    git diff:
+    Git diff:
     {{ placeholder }}
 
     Commit Message:
@@ -117,9 +155,7 @@ prompt:
 
     GIT COMMIT MESSAGE:
 
-    ###
     {{ placeholder }}
-    ###
 
     Remember translate all given git commit message and give me only the translation.
     THE TRANSLATION:

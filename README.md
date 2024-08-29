@@ -9,20 +9,21 @@
 ## Table of content
 
 <!-- TOC -->
-* [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-  * [Table of content](#table-of-content)
-  * [Overview](#overview)
-  * [Features](#features)
-  * [Installation](#installation)
-  * [Usage](#usage)
-  * [Commands](#commands)
-  * [Configuration](#configuration)
-  * [Supported Keys](#supported-keys)
-  * [Example](#example)
-  * [Development](#development)
-  * [License](#license)
-  * [Contact](#contact)
-<!-- TOC -->
+- [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
+  - [Table of content](#table-of-content)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
+    - [file\_ignore](#file_ignore)
+  - [Supported Keys](#supported-keys)
+  - [Example](#example)
+  - [Development](#development)
+  - [License](#license)
+  - [Contact](#contact)
+<!-- /TOC -->
 
 ## Overview
 
@@ -96,7 +97,7 @@ The following are the available commands for GPTComet:
 
 ## Configuration
 
-The configuration file for GPTComet is `gptcomet.toml`. The file should contain the following keys:
+The configuration file for GPTComet is `gptcomet.yaml`. The file should contain the following keys:
 
 *   `provider`: The provider of the language model (default `openai`).
 *   `file_ignore`: The file to ignore when generating a commit.
@@ -168,7 +169,7 @@ You can use `gmsg config keys` to check supported keys.
 
 Here is an example of how to use GPTComet:
 
-1.  When you first set your OpenAI KEY by `gmsg config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.toml`, includes:
+1.  When you first set your OpenAI KEY by `gmsg config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.yaml`, includes:
     ```
     provider = "openai"
     api_base = "https://api.openai.com/v1"
