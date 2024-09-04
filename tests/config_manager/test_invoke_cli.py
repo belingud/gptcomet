@@ -1,6 +1,6 @@
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
-from gptcomet.cli import cli
+from gptcomet import app as cli
 from gptcomet.const import GPTCOMET_PRE
 
 

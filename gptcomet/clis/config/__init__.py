@@ -1,16 +1,14 @@
 import typer
 
-from gptcomet.clis.config import get
+from gptcomet.clis.config import get, keys, path, reset, set
 from gptcomet.clis.config import list as _list
-from gptcomet.clis.config import path, reset, set
 from gptcomet.utils import CONTEXT_SETTINGS
 
-app = typer.Typer(
-    name="config", no_args_is_help=True, context_settings=CONTEXT_SETTINGS
-)
+app = typer.Typer(name="config", no_args_is_help=True, context_settings=CONTEXT_SETTINGS)
 
 app.command(name="get")(get.entry)
 app.command(name="list")(_list.entry)
 app.command(name="reset")(reset.entry)
 app.command(name="set")(set.entry)
 app.command(name="path")(path.entry)
+app.command(name="keys")(keys.entry)

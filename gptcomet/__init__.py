@@ -1,6 +1,6 @@
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 
-from gptcomet.cli import cli
+from gptcomet.clis import app
 
 if __name__ == "__main__":
-    cli()
+    app()
