@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import typer
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
@@ -5,10 +7,11 @@ from gptcomet.log import logger, set_debug
 
 
 def entry(
-    debug: bool = typer.Option("--debug", "-d", help="Print debug information."),
-    local: bool = typer.Option(
-        "--local", help="Use local configuration file.", rich_help_panel="Options"
-    ),
+    debug: Annotated[bool, typer.Option("--debug", "-d", help="Print debug information.")] = False,
+    local: Annotated[
+        bool,
+        typer.Option("--local", help="Use local configuration file.", rich_help_panel="Options"),
+    ] = False,
 ):
     cfg: ConfigManager = get_config_manager(local=local)
     if debug:

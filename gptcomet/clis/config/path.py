@@ -7,9 +7,10 @@ from gptcomet.utils import console
 
 
 def entry(
-    local: Annotated[bool, typer.Option(
-        "--local", help="Use local configuration file.", rich_help_panel="Options"
-    )] = False,
+    local: Annotated[
+        bool,
+        typer.Option("--local", help="Use local configuration file.", rich_help_panel="Options"),
+    ] = False,
 ):
     cfg: ConfigManager = get_config_manager(local=local)
     console.print(cfg.current_config_path)

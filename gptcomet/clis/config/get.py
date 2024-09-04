@@ -10,12 +10,8 @@ from gptcomet.log import logger, set_debug
 
 def entry(
     key: Annotated[str, typer.Argument(..., help="The configuration key to get the value for.")],
-    debug: Annotated[
-        bool, typer.Option("--debug", "-d", help="Print debug information.")
-    ] = False,
-    local: Annotated[
-        bool, typer.Option("--local", help="Use local configuration file.")
-    ] = False,
+    debug: Annotated[bool, typer.Option("--debug", "-d", help="Print debug information.")] = False,
+    local: Annotated[bool, typer.Option("--local", help="Use local configuration file.")] = False,
 ):
     cfg: ConfigManager = get_config_manager(local=local)
     if debug:
