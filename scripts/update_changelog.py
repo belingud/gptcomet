@@ -23,7 +23,7 @@ print(f"Latest tag: {latest_tag}")
 
 def get_changelog_content() -> str:
     os.chdir(root_dir)
-    p = subprocess.run(["git", "cliff", "--tag", latest_tag], stdout=subprocess.PIPE)  # noqa: S607, S603
+    p = subprocess.run(["git", "cliff", "--latest"], stdout=subprocess.PIPE)  # noqa: S607, S603
     return p.stdout.decode("utf-8")
 
 
