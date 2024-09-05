@@ -1,6 +1,20 @@
 # Changelog
 
 
+---
+## [0.0.7](https://github.com/belingud/gptcomet/compare/v0.0.6..v0.0.7) - 2024-09-05
+
+### 🚜 Refactor
+
+- Refactor config management CLI commands - ([e2261f9](https://github.com/belingud/gptcomet/commit/e2261f961555d6e0b204291ca59671a94f08c1fe)) - belingud
+
+### 📚 Documentation
+
+- Update Changelog for v0.0.6 release - ([f1b7578](https://github.com/belingud/gptcomet/commit/f1b75789e84d5553a5947a216874c4ccb3b8fe4a)) - belingud
+
+### 🧪 Testing
+
+- Add smoke test for gmsg commands - ([523fe75](https://github.com/belingud/gptcomet/commit/523fe75e2157f04bc2b32d2edaf443cfcb3c6ba8)) - belingud
 
 ---
 ## [0.0.6](https://github.com/belingud/gptcomet/compare/v0.0.5..v0.0.6) - 2024-08-29
