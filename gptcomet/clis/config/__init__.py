@@ -1,8 +1,9 @@
 import typer
 
 from gptcomet.clis.config import get, keys, path, reset, set
-from gptcomet.clis.config import list as _list
 from gptcomet.utils import CONTEXT_SETTINGS
+
+from gptcomet.clis.config import list as _list  # isort:skip
 
 app = typer.Typer(name="config", no_args_is_help=True, context_settings=CONTEXT_SETTINGS)
 
