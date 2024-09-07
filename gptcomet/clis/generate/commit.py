@@ -5,6 +5,8 @@ from typing import Annotated, Literal, Optional, cast
 import typer
 from git import Commit, DiffIndex, HookExecutionError, Repo, safe_decode
 from litellm.exceptions import BadRequestError
+from prompt_toolkit import prompt
+from rich.panel import Panel
 from rich.prompt import Prompt
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
@@ -15,7 +17,7 @@ from gptcomet.styles import Colors, stylize
 from gptcomet.utils import console
 
 
-def ask_for_retry() -> Literal["y", "n", "r"]:
+def ask_for_retry() -> Literal["y", "n", "r", "e"]:
     """
     Ask the user whether to retry generating a commit message.
 
@@ -23,15 +25,15 @@ def ask_for_retry() -> Literal["y", "n", "r"]:
     Returns:
         Literal["y", "n", "r"]: The user's choice.
     """
-    char: Literal["y", "n", "r"] = "y"
+    char: Literal["y", "n", "r", "e"] = "y"
     if sys.stdin.isatty():
         # Interactive mode will ask for confirmation
         char = cast(
-            Literal["y", "n", "r"],
+            Literal["y", "n", "r", "e"],
             Prompt.ask(
-                "Do you want to use this commit message? y: yes, n: no, r: retry.",
+                "Do you want to use this commit message? y: yes, n: no, r: retry, e: edit.",
                 default="y",
-                choices=["y", "n", "r"],
+                choices=["y", "n", "r", "e"],
                 case_sensitive=False,
             ),
         )
@@ -42,6 +44,12 @@ def ask_for_retry() -> Literal["y", "n", "r"]:
         char = "y"
 
     return char
+
+
+def edit_text_in_place(initial_message: str) -> str:
+    edited_message = prompt("Edit the msg: ", default=initial_message)
+    console.print(Panel(stylize(edited_message, Colors.GREEN), title="Updated Msg"))
+    return edited_message
 
 
 def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
@@ -148,6 +156,9 @@ def entry(
         elif user_input == "n":
             console.print(stylize("Commit message discarded.", Colors.YELLOW))
             return
+        elif user_input == "e":
+            commit_message = edit_text_in_place(commit_message)
+            break
 
     try:
         commit = message_generator.repo.index.commit(message=commit_message)
