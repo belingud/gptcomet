@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "profile", "socks", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6cfc2ab7e7ca6d8fd955ba8cd46414e9ca3677864539de42628a656055ede531"
+content_hash = "sha256:8363b5c5bfb33d03de6ffb776b7572c67c910dcd59e83748d33fae9deeb809c2"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -1565,6 +1565,20 @@ files = [
 ]
 
 [[package]]
+name = "prompt-toolkit"
+version = "3.0.47"
+requires_python = ">=3.7.0"
+summary = "Library for building powerful interactive command lines in Python"
+groups = ["default"]
+dependencies = [
+    "wcwidth",
+]
+files = [
+    {file = "prompt_toolkit-3.0.47-py3-none-any.whl", hash = "sha256:0d7bfa67001d5e39d02c224b663abc33687405033a8c422d0d675a5a13361d10"},
+    {file = "prompt_toolkit-3.0.47.tar.gz", hash = "sha256:1e1b29cb58080b1e69f207c893a1a7bf16d127a5c30c9d17a25a5d77792e5360"},
+]
+
+[[package]]
 name = "pydantic"
 version = "2.8.2"
 requires_python = ">=3.8"
@@ -2527,6 +2541,19 @@ files = [
     {file = "watchdog-4.0.2-py3-none-win_amd64.whl", hash = "sha256:c344453ef3bf875a535b0488e3ad28e341adbd5a9ffb0f7d62cefacc8824ef2b"},
     {file = "watchdog-4.0.2-py3-none-win_ia64.whl", hash = "sha256:baececaa8edff42cd16558a639a9b0ddf425f93d892e8392a56bf904f5eff22c"},
     {file = "watchdog-4.0.2.tar.gz", hash = "sha256:b4dfbb6c49221be4535623ea4474a4d6ee0a9cef4a80b20c28db4d858b64e270"},
+]
+
+[[package]]
+name = "wcwidth"
+version = "0.2.13"
+summary = "Measures the displayed width of unicode strings in a terminal"
+groups = ["default"]
+dependencies = [
+    "backports-functools-lru-cache>=1.2.1; python_version < \"3.2\"",
+]
+files = [
+    {file = "wcwidth-0.2.13-py2.py3-none-any.whl", hash = "sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859"},
+    {file = "wcwidth-0.2.13.tar.gz", hash = "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"},
 ]
 
 [[package]]

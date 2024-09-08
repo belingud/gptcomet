@@ -3,7 +3,7 @@ from typing import Any, Optional, Union
 
 import click
 import orjson as json
-from glom import assign, glom
+from glom import glom
 from ruamel.yaml import YAML, CommentedMap
 
 from gptcomet._types import CacheType
@@ -194,9 +194,28 @@ class ConfigManager:
         Note:
             This function modifies the input dictionary `d` in-place.
         """
-        if isinstance(keys, (list, tuple, set)):
-            keys = ".".join(keys)
-        assign(doc, keys, value)
+        if isinstance(keys, str):
+            keys = keys.split(".")
+        for key in keys[:-1]:
+            doc = doc.setdefault(key, {})
+        doc[keys[-1]] = value
+
+    def add_provider(self, provider: str):
+        if provider in self.config:
+            raise ValueError(f"Provider {provider} already exists in config.")  # noqa: TRY003
+        info = {
+            provider: {
+                "model": "xxx",
+                "api_key": "xxx",
+                "proxy": "",
+                "max_tokens": 4096,
+                "temperature": 0.7,
+                "top_p": 1,
+                "frequency_penalty": 0,
+                "presence_penalty": 0,
+            }
+        }
+        self.config.update(info)
 
     def set(self, key: str, value: str):
         """
@@ -273,7 +292,7 @@ class ConfigManager:
         ):
             content = default.read()
             target.write(content)
-            self._cache["config"] = yaml.load(default)
+            self._cache["config"] = None
 
     def list_keys(self) -> str:
         """

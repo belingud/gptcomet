@@ -21,5 +21,7 @@ def set_level(level):
     logger.setLevel(level)
 
 
-def set_debug():
+def set_debug(debug=True):
+    if not debug:
+        return
     set_level("DEBUG")
