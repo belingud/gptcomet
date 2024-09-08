@@ -1,5 +1,31 @@
 # Changelog
 
+---
+## [0.0.9](https://github.com/belingud/gptcomet/compare/v0.0.8..v0.0.9) - 2024-09-08
+
+### 🚜 Refactor
+
+- Simplify config manager and log module - ([cf15285](https://github.com/belingud/gptcomet/commit/cf15285038f3524ab57fbb4f1449fcb360eec30c)) - belingud
+
+
+---
+## [0.0.8](https://github.com/belingud/gptcomet/compare/v0.0.7..v0.0.8) - 2024-09-08
+
+### ⛰️  Features
+
+- Add "edit" option to commit message generation - ([5636646](https://github.com/belingud/gptcomet/commit/56366467c6e2f02e1978ed51e4648831ea7f6e41)) - belingud
+
+### 🚜 Refactor
+
+- Simplify commit output and use template - ([9c2663c](https://github.com/belingud/gptcomet/commit/9c2663cb520db6ffc5405b82f1e3f7695e85e010)) - belingud
+- Correct import and skip isort directive - ([cbbef2d](https://github.com/belingud/gptcomet/commit/cbbef2d53f401cb23479208e733f16ad20803221)) - belingud
+
+### 📚 Documentation
+
+- Update CLI command descriptions and add 'keys' command - ([8bfff4f](https://github.com/belingud/gptcomet/commit/8bfff4f2f3db7e405bbdc73b3e8ce2304336ed3c)) - belingud
+- Update Changelog for v0.0.7 release - ([55bf557](https://github.com/belingud/gptcomet/commit/55bf557eaed82e2985797f9445a70d200e7ce005)) - belingud
+
+
 
 ---
 ## [0.0.7](https://github.com/belingud/gptcomet/compare/v0.0.6..v0.0.7) - 2024-09-05
