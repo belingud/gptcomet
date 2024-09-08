@@ -111,7 +111,6 @@ class LLMClient:
             "model": f"{self.provider}/{self.model}",
             "api_key": self.api_key,
             "api_base": self.api_base,
-            "retries": self.retries,
             "messages": messages or [],
         }
 

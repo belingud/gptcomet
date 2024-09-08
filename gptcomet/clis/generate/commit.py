@@ -3,13 +3,14 @@ from pathlib import Path
 from typing import Annotated, Literal, Optional, cast
 
 import typer
-from git import Commit, DiffIndex, HookExecutionError, Repo, safe_decode
+from git import Commit, HookExecutionError, Repo, safe_decode
 from litellm.exceptions import BadRequestError
 from prompt_toolkit import prompt
 from rich.panel import Panel
 from rich.prompt import Prompt
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
+from gptcomet.const import COMMIT_OUTPUT_TEMPLATE
 from gptcomet.exceptions import GitNoStagedChanges, KeyNotFound
 from gptcomet.log import set_debug
 from gptcomet.message_generator import MessageGenerator
@@ -65,48 +66,29 @@ def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
     Returns:
         str: A formatted output string containing information about the commit.
     """
-    commit_hash: str = commit.hexsha[:7]
+    commit_hash: str = commit.hexsha
     branch: str = repo.active_branch.name
-    commit_msg: str = safe_decode(commit.message)
+    commit_msg: str = safe_decode(commit.message).strip()
     author: Optional[str] = safe_decode(getattr(commit.author, commit.author.conf_name, None))
     email: Optional[str] = safe_decode(getattr(commit.author, commit.author.conf_email, None))
 
-    # Get the diff details from the previous commit
-    diffs: DiffIndex = commit.diff(commit.parents[0] if commit.parents else None)
-    file_count: int = 0
-    insertions: int = 0
-    deletions: int = 0
-    file_changes: list[str] = []
-
-    for change in diffs:
-        file_count += 1
-        insertions += change.diff.count("\n+")  # Count added lines
-        deletions += change.diff.count("\n-")  # Count deleted lines
-        # Track file mode changes (e.g., new files)
-        if change.new_file:
-            file_changes.append(f" create mode {change.b_mode} {change.b_path}")
-        elif change.deleted_file:
-            file_changes.append(f" delete mode {change.b_mode} {change.b_path}")
-        elif change.renamed_file:
-            file_changes.append(f" rename {change.a_path} {change.b_path}")
-        else:
-            file_changes.append(f" modify {change.a_path}")
+    git_show_stat: str = repo.git.show("--pretty=format:%b", "--stat", commit_hash)
+    git_show_stat = (
+        git_show_stat.strip().replace("+", "[green]+[/green]").replace("-", "[red]-[/red]")
+    )
 
     # Prepare the output format
     if rich is True:
-        author_info = (
-            f":construction_worker: [green]{author}[/green]  :email: [blue]{email}[/blue]\n"
-        )
-    else:
-        author_info = f"{author}  {email}\n"
-    output = author_info + f"[{branch} {commit_hash}] {commit_msg}\n"
-
-    output += f" {file_count} files changed, {insertions} insertions(+), {deletions} deletions(-)\n"
-
-    # Append file mode changes if any
-    if file_changes:
-        output += "\n".join(file_changes) + "\n"
-    return output
+        author = f":construction_worker: [green]{author}[/]"
+        email = f"[blue]{email}[/blue]"
+    return COMMIT_OUTPUT_TEMPLATE.format(
+        author=author,
+        email=email,
+        branch=branch,
+        commit_hash=commit_hash,
+        commit_msg=commit_msg,
+        git_show_stat=git_show_stat,
+    )
 
 
 def entry(
