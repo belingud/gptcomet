@@ -1,16 +1,31 @@
 # GPTComet: AI-Powered Git Commit Message Generator
 
+> [!IMPORTANT]
+> 
+> This repo has been public archieved. Recommand to use [CodeGPT](https://github.com/appleboy/CodeGPT) instead, using similar configuration, generate commit messages with `codegpt commit`.
+> CodeGPT is more efficient, since it's written in Go.
+> 
+> The only thing is that these is no default `exclude_list` value. You can use the default value from this project and add the files you want to ignore.
+> Use `codegpt config set git.exclude_list "bun.lockb,Cargo.lock,composer.lock,Gemfile.lock,package-lock.json,pnpm-lock.yaml,poetry.lock,yarn.lock,pdm.lock,Pipfile.lock,*.py[cod],go.mod,go.sum"` to set it. Or edit config file manually with `file_ignore` value.
+> ```yaml
+>   - "bun.lockb"
+>   - "Cargo.lock"
+>   - "composer.lock"
+>   - "Gemfile.lock"
+>   - "package-lock.json"
+>   - "pnpm-lock.yaml"
+>   - "poetry.lock"
+>   - "yarn.lock"
+>   - "pdm.lock"
+>   - "Pipfile.lock"
+>   - "*.py[cod]"
+> ```
+
 [![PyPI version](https://img.shields.io/pypi/v/gptcomet?style=for-the-badge)](https://pypi.org/project/gptcomet/)
 [![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-![Static Badge](https://img.shields.io/badge/language-Python-%233572A5?style=for-the-badge)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
-![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
-
-## Table of content
-
 <!-- TOC -->
+
 - [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-  - [Table of content](#table-of-content)
   - [Overview](#overview)
   - [Features](#features)
   - [Installation](#installation)
@@ -23,6 +38,12 @@
   - [Development](#development)
   - [License](#license)
   - [Contact](#contact)
+
+<!-- /TOC -->
+<!-- /TOC -->
+
+<!-- /TOC -->
+<!-- /TOC -->
 <!-- /TOC -->
 
 ## Overview
