@@ -1,5 +1,32 @@
 # Changelog
 
+
+---
+## [0.0.10](https://github.com/belingud/gptcomet/compare/v0.0.9..v0.0.10) - 2024-09-14
+
+### ⛰️  Features
+
+- refine LLMClient config and enhance API handling - ([b8baf21](https://github.com/belingud/gptcomet/commit/b8baf211f8bfbce0da082d25e926be8047cfae56)) - belingud
+- Add append and remove commands to config CLI - ([ea4431d](https://github.com/belingud/gptcomet/commit/ea4431dfeebf85aac0bfe8354c825a503721369f)) - belingud
+- Rename gen to commit and refactor commit CLI - ([ccd059a](https://github.com/belingud/gptcomet/commit/ccd059aa6b363ff124189b2aa4aacc0a94bb7ebe)) - belingud
+
+### 📚 Documentation
+
+- Update README with static badges and TOC - ([1be3d34](https://github.com/belingud/gptcomet/commit/1be3d341b9757586abf229f807a250ba6f63fce9)) - belingud
+- refactor README for CodeGPT Documentation and Enhancements - ([2f46e18](https://github.com/belingud/gptcomet/commit/2f46e18c535c454db452b5c8a30a306f1e63fbe4)) - belingud
+- archive project and point to CodeGPT alternative - ([60b77e2](https://github.com/belingud/gptcomet/commit/60b77e24a6bb84d34ae358fd19801157d21feab5)) - belingud
+- Update changelog - ([21bb74c](https://github.com/belingud/gptcomet/commit/21bb74cd27a1038b8e4d52fc267d6ef996aae361)) - belingud
+
+### 🧪 Testing
+
+- enhance and Refactor Test Suite - ([0b9e1ae](https://github.com/belingud/gptcomet/commit/0b9e1aee3529b2827c74230d6a7382b878040395)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- enhance project configuration and dependencies management - ([9c95295](https://github.com/belingud/gptcomet/commit/9c9529518a8040fb02b307ad97a3161bcf7f9527)) - belingud
+- Update dependencies and remove litellm - ([78e090d](https://github.com/belingud/gptcomet/commit/78e090daf7f9ec3fe833e71800dd0ed03c497364)) - belingud
+
+
 ---
 ## [0.0.9](https://github.com/belingud/gptcomet/compare/v0.0.8..v0.0.9) - 2024-09-08
 

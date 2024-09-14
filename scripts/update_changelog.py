@@ -50,7 +50,6 @@ def write_changelog(changelog_content: str) -> None:
         # note -> All notable changes to this project will xxx
         tmp_f.write(f.readline())
         tmp_f.write(f.readline())
-        tmp_f.write("\n")
 
         while True:
             cc_content = cc_container.read(1024 * 1024)
