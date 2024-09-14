@@ -1,1 +1,1 @@
-from gptcomet.clis.main import app  # noqa: F401
+from gptcomet.clis.__main__ import app  # noqa: F401

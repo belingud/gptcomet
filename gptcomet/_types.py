@@ -15,7 +15,6 @@ class CompleteParams(t.TypedDict):
     api_base: str
     api_key: str
     model: str
-    retries: int
     messages: t.Union[list[dict], None, list]
     max_tokens: t.Optional[int]
     temperature: t.Optional[float]

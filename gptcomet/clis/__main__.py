@@ -1,6 +1,6 @@
 import typer
 
-from gptcomet.clis import config, generate
+from gptcomet.clis import commit, config
 from gptcomet.utils import CONTEXT_SETTINGS
 
 app = typer.Typer(
@@ -12,7 +12,7 @@ app = typer.Typer(
 )
 
 app.add_typer(config.app, name="config")
-app.add_typer(generate.app, name="gen")
+app.command("commit")(commit.entry)
 
 if __name__ == "__main__":
     app()

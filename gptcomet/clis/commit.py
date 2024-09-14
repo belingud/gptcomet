@@ -4,7 +4,7 @@ from typing import Annotated, Literal, Optional, cast
 
 import typer
 from git import Commit, HookExecutionError, Repo, safe_decode
-from litellm.exceptions import BadRequestError
+from httpx import HTTPStatusError
 from prompt_toolkit import prompt
 from rich.panel import Panel
 from rich.prompt import Prompt
@@ -68,17 +68,25 @@ def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
     """
     commit_hash: str = commit.hexsha
     branch: str = repo.active_branch.name
-    commit_msg: str = safe_decode(commit.message).strip()
-    author: Optional[str] = safe_decode(getattr(commit.author, commit.author.conf_name, None))
-    email: Optional[str] = safe_decode(getattr(commit.author, commit.author.conf_email, None))
+    commit_msg: Optional[str] = safe_decode(commit.message)
+    if commit_msg is not None:
+        commit_msg = commit_msg.strip()
+    no_author = "No Author"
+    no_email = "No Email"
+    author: Optional[str] = (
+        safe_decode(getattr(commit.author, commit.author.conf_name, no_author)) or no_author
+    )
+    email: Optional[str] = (
+        safe_decode(getattr(commit.author, commit.author.conf_email, no_email)) or no_email
+    )
 
     git_show_stat: str = repo.git.show("--pretty=format:%b", "--stat", commit_hash)
-    git_show_stat = (
-        git_show_stat.strip().replace("+", "[green]+[/green]").replace("-", "[red]-[/red]")
-    )
 
     # Prepare the output format
     if rich is True:
+        git_show_stat = (
+            git_show_stat.strip().replace("+", "[green]+[/green]").replace("-", "[red]-[/red]")
+        )
         author = f":construction_worker: [green]{author}[/]"
         email = f"[blue]{email}[/blue]"
     return COMMIT_OUTPUT_TEMPLATE.format(
@@ -121,16 +129,16 @@ def entry(
     while True:
         try:
             commit_message = message_generator.generate_commit_message()
-        except (KeyNotFound, GitNoStagedChanges, BadRequestError) as error:
-            console.print(str(error))
-            raise typer.Abort() from None
+        except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
+            console.print(stylize(str(error), Colors.YELLOW))
+            raise typer.Exit(0) from None
 
         if not commit_message:
             console.print(stylize("No commit message generated.", Colors.MAGENTA))
             return
 
         console.print("Generated commit message:")
-        console.print(stylize(commit_message, Colors.GREEN, panel=True))
+        console.print(Panel(stylize(commit_message, Colors.GREEN)))
 
         user_input = ask_for_retry()
         if user_input == "y":
@@ -150,4 +158,4 @@ def entry(
         console.print(f"Commit Error: {error!s}")
         raise typer.Abort() from None
 
-    console.print(stylize("Commit message saved.", Colors.CYAN))
+    console.print(stylize("Commit message saved!", Colors.GREEN))
