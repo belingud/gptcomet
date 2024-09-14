@@ -1,10 +1,7 @@
-import typing as t
 from decimal import Decimal
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from git import safe_decode
-from rich.color import Color
-from rich.panel import Panel
 from rich.text import Text
 
 from gptcomet.utils import defenc

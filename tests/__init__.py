@@ -1,7 +1,6 @@
-from typing import Any
-from dataclasses import dataclass
 import os
-from unittest.mock import MagicMock
+from dataclasses import dataclass
+from typing import Any
 
 # Change working dir to tests dir
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

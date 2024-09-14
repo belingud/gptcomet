@@ -1,12 +1,12 @@
 import typing as t
 
 import click
-from glom import glom
 import httpx
 import orjson as json
+from glom import glom
 from rich.text import Text
 
-from gptcomet.styles import Colors, stylize
+from gptcomet.styles import Colors
 from gptcomet.utils import console
 
 try:

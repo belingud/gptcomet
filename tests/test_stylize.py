@@ -1,4 +1,3 @@
-from rich.panel import Panel
 from rich.text import Text
 
 from gptcomet.styles import stylize

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from tests import MockRepo, MockGit, ActiveBranch, Author
+from tests import ActiveBranch, Author, MockGit, MockRepo
 
 
 @pytest.fixture
