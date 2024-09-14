@@ -1,8 +1,9 @@
 import typing as t
 from decimal import Decimal
-from enum import StrEnum
+from enum import Enum, StrEnum
 
 from git import safe_decode
+from rich.color import Color
 from rich.panel import Panel
 from rich.text import Text
 
@@ -32,39 +33,26 @@ class Colors(StrEnum):
     WHITE = "white"
     BLACK = "black"
 
-    LIGHT_RED = "light_red"
-    LIGHT_GREEN = "light_green"
-    LIGHT_YELLOW = "light_yellow"
-    LIGHT_BLUE = "light_blue"
-    LIGHT_MAGENTA = "light_magenta"
-    LIGHT_CYAN = "light_cyan"
-    LIGHT_WHITE = "light_white"
+    LIGHT_RED = "rgb(255,100,0)"
+    LIGHT_GREEN = "rgb(173,255,47)"
+    LIGHT_YELLOW = "rgb(255,255,224)"
+    LIGHT_BLUE = "rgb(135,206,235)"
+    LIGHT_MAGENTA = "rgb(255,105,180)"
+    LIGHT_CYAN = "rgb(224,255,255)"
+    LIGHT_WHITE = "rgb(245,245,245)"
 
     BRIGHT = "bright"
 
     DEFAULT = "default"
 
 
-@t.overload
-def stylize(text: str, *styles: str, panel: t.Literal[False] = ...) -> Text: ...
-
-
-@t.overload
-def stylize(text: str, *styles: str, panel: t.Literal[True] = ...) -> Panel: ...
-
-
-@t.overload
-def stylize(text: str, *styles: str) -> Text: ...
-
-
-def stylize(text: str, *styles: str, panel: bool = False) -> t.Union[Text, Panel]:
+def stylize(text: str, *styles: str) -> Text:
     """
-    Format the text with specified styles. If panel is True, the text will be formatted as a panel.
+    Format the text with specified styles.
 
     Args:
         text (str): The text to format.
         *styles (str): The styles to apply to the text.
-        panel (bool, optional): If True, the text will be formatted as a panel. Defaults to False.
 
     Returns:
         str: The formatted text.
@@ -74,8 +62,4 @@ def stylize(text: str, *styles: str, panel: bool = False) -> t.Union[Text, Panel
         text = str(text)
     elif isinstance(text, bytes):
         text = text.decode(defenc)
-    t = Text(text, style=" ".join(styles))
-    if panel is False:
-        return t
-    else:
-        return Panel(t)
+    return Text(text, style=" ".join(styles))

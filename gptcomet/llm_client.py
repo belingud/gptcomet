@@ -1,18 +1,24 @@
 import typing as t
 
 import click
+from glom import glom
+import httpx
 import orjson as json
+from rich.text import Text
+
+from gptcomet.styles import Colors, stylize
+from gptcomet.utils import console
 
 try:
     import socksio  # noqa: F401
 except ImportError as e:
     msg = e.msg
     if "socksio" in msg:
-        msg = ("Using SOCKS proxy, but the 'socksio' package is not installed. "
-               "Make sure to install gptcomet using `pip install gptcomet[socks]` or `pip install socksio`.")
+        msg = (
+            "Using SOCKS proxy, but the 'socksio' package is not installed. "
+            "Make sure to install gptcomet using `pip install gptcomet[socks]` or `pip install socksio`."
+        )
     raise ImportError(msg) from None
-from litellm import completion_with_retries
-from litellm.types.utils import ModelResponse
 
 from gptcomet._types import CompleteParams
 from gptcomet.const import (
@@ -37,6 +43,9 @@ class LLMClient:
         "model",
         "api_base",
         "retries",
+        "completion_path",
+        "proxy",
+        "content_path",
     )
 
     @classmethod
@@ -64,6 +73,13 @@ class LLMClient:
         self.retries: int = int(
             self.config_manager.get(f"{self.provider}.retries", DEFAULT_RETRIES)
         )
+        self.completion_path = self.config_manager.get(
+            f"{self.provider}.completion_path", "/chat/completions"
+        )
+        self.content_path = self.config_manager.get(
+            f"{self.provider}.answer_path", "choices.0.message.content"
+        )
+        self.proxy = self.config_manager.get(f"{self.provider}.proxy", "")
         logger.debug(f"Provider: {self.provider}, Model: {self.model}, retries: {self.retries}")
 
     def generate(self, prompt: str, use_history: bool = False) -> str:
@@ -85,18 +101,29 @@ class LLMClient:
             messages = [*self.conversation_history, {"role": "user", "content": prompt}]
         else:
             messages = [{"role": "user", "content": prompt}]
-        params = self.gen_chat_params(messages)
+        params: CompleteParams = self.gen_chat_params(messages)
 
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
-        response: ModelResponse = completion_with_retries(**params)
+        response = self.completion_with_retries(**params)
         logger.debug(f"Response: {response}")
+        usage = response.get("usage", {})
 
-        assistant_message: str = response["choices"][0]["message"]["content"].strip()
+        assistant_message: str = glom(response, self.content_path, default="").strip()
 
         if use_history:
             self.conversation_history.append({"role": "user", "content": prompt})
             self.conversation_history.append({"role": "assistant", "content": assistant_message})
+        if not usage:
+            console.print("No usage response found.")
+        else:
+            text = Text("Token usage> prompt tokens: ")
+            text.append(f"{usage.get('prompt_tokens')}", Colors.LIGHT_GREEN)
+            text.append(", completion tokens: ")
+            text.append(f"{usage.get('completion_tokens')}", Colors.LIGHT_GREEN)
+            text.append(" total tokens: ")
+            text.append(f"{usage.get('total_tokens')}", Colors.LIGHT_GREEN)
+            console.print(text)
 
         return assistant_message
 
@@ -108,7 +135,7 @@ class LLMClient:
             CompleteParams: The parameters for the chat completion API.
         """
         params: CompleteParams = {
-            "model": f"{self.provider}/{self.model}",
+            "model": self.model,
             "api_key": self.api_key,
             "api_base": self.api_base,
             "messages": messages or [],
@@ -148,3 +175,71 @@ class LLMClient:
         Clears the conversation history.
         """
         self.conversation_history = []
+
+    def completion_with_retries(
+        self,
+        api_base,
+        api_key,
+        model,
+        messages,
+        max_tokens,
+        temperature=None,
+        top_p=None,
+        frequency_penalty=None,
+        extra_headers=None,
+    ):
+        """
+        Wrapper around the completion API that retries on failure.
+
+        Args:
+            api_base (str): The base URL for the API.
+            api_key (str): The API key to use for authentication.
+            model (str): The model to use for completion.
+            messages (list[dict]): The messages to send to the API.
+            max_tokens (int, optional): The maximum number of tokens to generate. Defaults to None.
+            temperature (float, optional): The temperature to use for completion. Defaults to None.
+            top_p (float, optional): The top_p to use for completion. Defaults to None.
+            frequency_penalty (float, optional): The frequency_penalty to use for completion. Defaults to None.
+            extra_headers (dict, optional): Additional headers to send with the request. Defaults to None.
+
+        Returns:
+            dict: The response from the API.
+
+        Raises:
+            ConfigError: If the API key is not set in the config.
+            BadRequestError: If the completion API returns an error.
+        """
+        transport = httpx.HTTPTransport(retries=self.retries)
+        client_params = {"transport": transport}
+        if self.proxy:
+            client_params["proxies"] = self.proxy
+        client = httpx.Client(**client_params)
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+
+        payload = {
+            "api_base": api_base,
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+        }
+        if temperature:
+            payload["temperature"] = temperature
+        if top_p:
+            payload["top_p"] = top_p
+        if frequency_penalty:
+            payload["frequency_penalty"] = frequency_penalty
+        if extra_headers:
+            headers.update(extra_headers)
+        if api_base.endswith("/"):
+            api_base = api_base[:-1]
+        if not self.completion_path.startswith("/"):
+            self.completion_path = "/" + self.completion_path
+        url = f"{api_base}{self.completion_path}"
+
+        response = client.post(
+            url,
+            json=payload,
+            headers=headers,
+        )
+        response.raise_for_status()
+        return response.json()
