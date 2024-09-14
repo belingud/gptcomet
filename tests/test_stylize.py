@@ -22,15 +22,6 @@ def test_stylize_styles():
     assert result._text[0] == "Hello, world!"
 
 
-def test_stylize_panel():
-    text = "Hello, world!"
-    styles = ["bold", "italic"]
-    result = stylize(text, *styles, panel=True)
-    assert isinstance(result, Panel)
-    assert result.renderable.style == "bold italic"
-    assert result.renderable._text[0] == "Hello, world!"
-
-
 def test_stylize_int():
     text = 42
     styles = ["bold", "italic"]

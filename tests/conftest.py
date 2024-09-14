@@ -2,6 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests import MockRepo, MockGit, ActiveBranch, Author
+
 
 @pytest.fixture
 def config_manager(tmp_path):
@@ -17,3 +19,20 @@ def config_manager(tmp_path):
         f2.write(f1.read())
 
     yield config_manager
+
+
+@pytest.fixture
+def repo():
+    return MockRepo(
+        active_branch=ActiveBranch(name="master"),
+        git=MockGit(name="master", show=MagicMock(return_value="git show")),
+    )
+
+
+@pytest.fixture
+def commit():
+    return MagicMock(
+        hexsha="123456",
+        message="test commit message",
+        author=Author(name="John Doe", email="john@example.com"),
+    )
