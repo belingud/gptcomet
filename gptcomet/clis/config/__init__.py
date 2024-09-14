@@ -1,6 +1,6 @@
 import typer
 
-from gptcomet.clis.config import get, keys, path, reset, set
+from gptcomet.clis.config import append, get, keys, path, remove, reset, set
 from gptcomet.utils import CONTEXT_SETTINGS
 
 from gptcomet.clis.config import list as _list  # isort:skip
@@ -13,3 +13,13 @@ app.command(name="reset", help="Reset config to default")(reset.entry)
 app.command(name="set", help="Set config value")(set.entry)
 app.command(name="path", help="Get runtime config path")(path.entry)
 app.command(name="keys", help="List supported config keys")(keys.entry)
+app.command(
+    name="append",
+    help="Append a config value to sequence value, not modify if not exists",
+    short_help="Append a config value",
+)(append.entry)
+app.command(
+    name="remove",
+    help="Remove a config value from sequence value, not modify if not exists",
+    short_help="Remove a config value",
+)(remove.entry)
