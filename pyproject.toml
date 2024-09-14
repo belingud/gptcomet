@@ -2,13 +2,9 @@
 name = "gptcomet"
 version = "0.0.9"
 description = "gptcomet: A tool that leverages AI to automatically generate Git commit messages."
-authors = [
-    { name = "belingud", email = "im.victor@qq.com" },
-]
+authors = [{ name = "belingud", email = "im.victor@qq.com" }]
 readme = "README.md"
-packages = [
-    { include = "gptcomet" }
-]
+packages = [{ include = "gptcomet" }]
 requires-python = ">=3.9,<4.0"
 dependencies = [
     "gitpython>=3.1.43",
@@ -31,13 +27,11 @@ Repository = "https://github.com/belingud/gptcomet"
 Documentation = "https://belingud.github.io/gptcomet/"
 
 [project.scripts]
-gptcomet = "gptcomet.clis.main:app"
-gmsg = "gptcomet.clis.main:app"
+gptcomet = "gptcomet.clis.__main__:app"
+gmsg = "gptcomet.clis.__main__:app"
 
 [project.optional-dependencies]
-socks = [
-    "socksio>=1.0.0",
-]
+socks = ["socksio>=1.0.0"]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -71,7 +65,8 @@ select = [
     # mccabe
     "C90",
     # pycodestyle
-    "E", "W",
+    "E",
+    "W",
     # pyflakes
     "F",
     # pygrep-hooks
@@ -110,7 +105,7 @@ bump = "bump2version {args}"
 gen_keys = "python scripts/gen_support_keys.py"
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -l --tb=short --strict"
+addopts = "-rsxX -s -l --tb=short --strict"
 testpaths = ["tests/"]
 python_files = ["test*.py"]
 markers = ["skipif: conditionally skip tests"]
@@ -118,10 +113,7 @@ markers = ["skipif: conditionally skip tests"]
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.pdm.dev-dependencies]
-test = [
-    "pytest>=7.2.0",
-    "pytest-cov>=4.0.0"
-]
+test = ["pytest>=7.2.0", "pytest-cov>=4.0.0"]
 dev = [
     "deptry>=0.6.4",
     "mypy>=0.981",
@@ -135,10 +127,7 @@ docs = [
     "mkdocs-material>=8.5.10",
     "mkdocstrings[python]>=0.19.0",
 ]
-profile = [
-    "pyinstrument>=4.7.2",
-    "line-profiler>=4.1.3",
-]
+profile = ["pyinstrument>=4.7.2", "line-profiler>=4.1.3"]
 
 [tool.pdm.build]
 excludes = ["./**/.git"]
