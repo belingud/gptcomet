@@ -1,6 +1,15 @@
 import logging
 
+from rich.logging import RichHandler
+
 logger = logging.getLogger("gptcomet")
+
+formatter = logging.Formatter(
+    "%(message)s: "
+)
+handler = RichHandler(level=logging.NOTSET, show_path=False)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 LOG_LEVELS = (
     "CRITICAL",

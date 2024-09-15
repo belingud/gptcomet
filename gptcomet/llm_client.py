@@ -213,11 +213,11 @@ class LLMClient:
         client_params = {"transport": transport}
         if self.proxy:
             client_params["proxies"] = self.proxy
+            logger.debug(f"Using proxy: {self.proxy}")
         client = httpx.Client(**client_params)
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
         payload = {
-            "api_base": api_base,
             "model": model,
             "messages": messages,
             "max_tokens": max_tokens,
@@ -241,5 +241,6 @@ class LLMClient:
             json=payload,
             headers=headers,
         )
+        logger.debug(f"completion response: {response.text}")
         response.raise_for_status()
         return response.json()
