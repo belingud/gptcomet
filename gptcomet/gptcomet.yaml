@@ -11,6 +11,8 @@ file_ignore:  # File to ignore when generating a commit
   - "pdm.lock"
   - "Pipfile.lock"
   - "*.py[cod]"
+  - "go.mod"
+  - "go.sum"
 
 output:
   lang: "en"  # Commit message language
@@ -24,7 +26,7 @@ openai:
   model: "text-davinci-003"
   retries: 2
   proxy: ""
-  max_tokens: 4096
+  max_tokens: 2048
   top_p: 0.7
   temperature: 0.7
   frequency_penalty: 0
@@ -39,11 +41,12 @@ prompt:
     - start with a concise, informative title.
     - follow with a high-level summary in bullet points (imperative tense).
     - focus on the most significant changes.
+    - sometimes you need to judge the effect based on the type of files that have been modified.
 
     use one of the following labels for the title:
 
     - build: changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
-    - chore: updating libraries, copyrights or other repo setting, includes updating dependencies.
+    - chore: updating libraries, copyrights or other setting, includes updating dependencies.
     - ci: changes to our CI configuration files and scripts (example scopes: Travis, Circle, gitHub Actions)
     - docs: non-code changes, such as fixing typos or adding new documentation
     - feat: a commit of the type feat introduces a new feature to the codebase
@@ -56,92 +59,30 @@ prompt:
     the commit message templete is <title>: <summary>
 
     your answer should only include a single commit message less than 70 characters, no other text.
-    Examples:
-
-    Git diff:
+    
+    Git diff like below example:
+    ```
     diff --git a/tests/test_stylize.py b/tests/test_stylize.py
     index 519b928..0b4584f 100644
     --- a/tests/test_stylize.py
     +++ b/tests/test_stylize.py
-    @@ -1,7 +1,7 @@
-    from rich.panel import Panel
-    from rich.text import Text
+    ```
+    this example means `test_stylize.py` is modified in this commit.
+    Then there is a specifier of the lines that were modified.
+    A line starting with `+` means it was added.
+    A line that starting with `-` means that line was deleted.
+    No space before + and -.
+    A line that starts with neither `+` nor `-` is code given for context and better understanding.
+    If there are some spaces before `+`, `-` or `diff`, it could be context.
+    It is not part of the diff.
+    After the git diff of the first file, there will be an empty line, and then the git diff of the next file.
 
-    -from gptcomet.utils import stylize
-    +from gptcomet.styles import stylize
+    
+    Examples:
+    test: update import of stylize test
+    fix: Fix password hashing vulnerability
 
-
-    def test_stylize_text():
-
-    Commit Message: test: update import of stylize test
-
-    Git diff:
-    diff --git a/gptcomet/clis/config/__init__.py b/gptcomet/clis/config/__init__.py
-    index 094713d..7b4ad45 100644
-    --- a/gptcomet/clis/config/__init__.py
-    +++ b/gptcomet/clis/config/__init__.py
-    @@ -1,6 +1,6 @@
-    import typer
-
-    -from gptcomet.clis.config import get, reset, set
-    +from gptcomet.clis.config import get, path, reset, set
-    from gptcomet.clis.config import list as _list
-    from gptcomet.utils import CONTEXT_SETTINGS
-
-    @@ -12,3 +12,4 @@ app.command(name="get")(get.entry)
-    app.command(name="list")(_list.entry)
-    app.command(name="reset")(reset.entry)
-    app.command(name="set")(set.entry)
-    +app.command(name="path")(path.entry)
-
-    Output: feat: Add path command to config management
-
-    Git diff:
-    diff --git a/gptcomet/config_manager.py b/gptcomet/config_manager.py
-    index 8bdca4b..bb98c1c 100644
-    --- a/gptcomet/config_manager.py
-    +++ b/gptcomet/config_manager.py
-    @@ -27,17 +27,16 @@ class ConfigManager:
-    -    def __init__(self, local: bool = False):
-    +    def __init__(self, config_path: Path, local: bool = False):
-    -        self.current_config_path = self.get_config_file()
-    +        self.current_config_path = config_path
-
-    @@ -72,7 +71,14 @@ class ConfigManager:
-    -    def get_config_file(self) -> Path:
-    +    @classmethod
-    +    def get_config_path(cls, local: bool = False) -> Path:
-    +        if local:
-    +            return Path.cwd() / ".git" / "gptcomet.toml"
-    +        else:
-    +            return Path.home() / ".local" / "gptcomet" / "gptcomet.toml"
-
-    Output: refactor: Refactor configmanger init with config_path and get_config_path classmethod
-
-    Git diff:
-    diff --git a/src/utils.java b/src/utils.java
-    index 8bdca4b..bb98c1c 100644
-    --- a/src/utils.java
-    +++ b/src/utils.java
-    - for (int i = 0; i < list.size(); i++) {
-    -     processItem(list.get(i));
-    + for (Item item : list) {
-    +     processItem(item);
-    }
-
-    Output: perf: Improve performance of item processing loop
-
-    Git diff:
-    diff --git a/src/utils.java b/src/utils.java
-    index 8bdca4b..bb98c1c 100644
-    --- a/src/utils.java
-    +++ b/src/utils.java
-    - String passwordHash = hashPassword(user.getPassword());
-    + String passwordHash = hashPassword(user.getPassword(), SALT);
-
-    Commit Message: fix: Fix password hashing vulnerability
-
-    Git diff:
+    Generate commit message by below git diff:
     {{ placeholder }}
 
     Commit Message:
