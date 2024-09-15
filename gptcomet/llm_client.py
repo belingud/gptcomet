@@ -1,3 +1,4 @@
+import logging
 import typing as t
 
 import click
@@ -106,7 +107,6 @@ class LLMClient:
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
         response = self.completion_with_retries(**params)
-        logger.debug(f"Response: {response}")
         usage = response.get("usage", {})
 
         assistant_message: str = glom(response, self.content_path, default="").strip()
@@ -241,6 +241,12 @@ class LLMClient:
             json=payload,
             headers=headers,
         )
-        logger.debug(f"completion response: {response.text}")
+        if logger.level == logging.DEBUG:
+            text = response.text
+            try:
+                j = json.loads(text)
+            except json.JSONDecodeError:
+                j = text
+            logger.debug(f"completion response: {j}")
         response.raise_for_status()
         return response.json()
