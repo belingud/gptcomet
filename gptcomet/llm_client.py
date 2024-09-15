@@ -145,13 +145,13 @@ class LLMClient:
         max_tokens = int(self.config_manager.get(f"{self.provider}.max_tokens"))
         if max_tokens:
             params["max_tokens"] = max_tokens
-        temperature = float(self.config_manager.get(f"{self.provider}.temperature"))
+        temperature = float(self.config_manager.get(f"{self.provider}.temperature", 0.7))
         if temperature:
             params["temperature"] = temperature
         top_p = float(self.config_manager.get(f"{self.provider}.top_p"))
         if top_p:
             params["top_p"] = top_p
-        frequency_penalty = float(self.config_manager.get(f"{self.provider}.frequency_penalty"))
+        frequency_penalty = float(self.config_manager.get(f"{self.provider}.frequency_penalty", 0.7))
         if frequency_penalty:
             params["frequency_penalty"] = frequency_penalty
         try:
