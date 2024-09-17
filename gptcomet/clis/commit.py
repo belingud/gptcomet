@@ -6,6 +6,8 @@ import typer
 from git import Commit, HookExecutionError, Repo, safe_decode
 from httpx import HTTPStatusError
 from prompt_toolkit import prompt
+from prompt_toolkit.cursor_shapes import CursorShape
+from prompt_toolkit.styles import Style
 from rich.panel import Panel
 from rich.prompt import Prompt
 
@@ -48,7 +50,35 @@ def ask_for_retry() -> Literal["y", "n", "r", "e"]:
 
 
 def edit_text_in_place(initial_message: str) -> str:
-    edited_message = prompt("Edit the msg: ", default=initial_message)
+    """
+    Edit a given text in place with a prompt.
+
+    Args:
+        initial_message (str): The initial message to be edited.
+
+    Returns:
+        str: The edited message.
+    """
+    bottom_bar = "Support multiple lines. Press `Ctrl+D` to continue."
+
+    def bottom_toolbar():
+        return [('class:bottom-toolbar', f' {bottom_bar} ')]
+
+    style = Style.from_dict({
+        'bottom-toolbar': 'fg:#aaaaaa bg:#FDF5E6',
+    })
+
+    edited_message = prompt(
+        "Edit the message\n",
+        default=initial_message,
+        multiline=True,
+        enable_open_in_editor=True,
+        mouse_support=True,
+        cursor=CursorShape.BEAM,
+        vi_mode=True,
+        bottom_toolbar=bottom_toolbar,
+        style=style
+    )
     console.print(Panel(stylize(edited_message, Colors.GREEN), title="Updated Msg"))
     return edited_message
 

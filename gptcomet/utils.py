@@ -1,3 +1,4 @@
+import asyncio
 import fnmatch
 import logging
 import sys
@@ -5,6 +6,9 @@ import typing as t
 from functools import wraps
 
 import click
+from prompt_toolkit.input import Input, create_input
+from prompt_toolkit.key_binding.key_processor import KeyPress
+from prompt_toolkit.keys import Keys
 from rich import get_console
 
 defenc = sys.getdefaultencoding()
@@ -152,3 +156,65 @@ def should_ignore(filepath: str, ignore_patterns: list[str]) -> bool:
         bool: True if the filepath should be ignored, False otherwise.
     """
     return any(fnmatch.fnmatch(filepath, pattern) for pattern in ignore_patterns)
+
+
+async def async_raw_input(_stdout=sys.stdout, mask: bool = False, multiline: bool = False) -> str:
+    """
+    Reads input from the user, with optional character masking.
+
+    Args:
+        _stdout (TextIO, optional): The file to write the input to. Defaults to sys.stdout.
+        mask (bool, optional): Whether to mask the input characters. Defaults to False.
+        multiline (bool, optional): Whether to allow multiline input. Defaults to False.
+
+    Returns:
+        str: The input read from the user.
+    """
+    _stdout = sys.stdout
+    done = asyncio.Event()
+    _input: Input = create_input()
+    keys = []
+
+    def keys_ready():
+        key_press: KeyPress
+        for key_press in _input.read_keys():
+            raw_char = key_press.data.replace("\r", "\n")
+            char = "*" if mask else raw_char
+            if not multiline and raw_char == "\n":
+                done.set()
+                return
+            keys.append(raw_char)
+            _stdout.write(f"{char}")
+            _stdout.flush()
+            if key_press.key == Keys.ControlD:
+                done.set()
+                return
+            if key_press.key == Keys.ControlC:
+                done.set()
+                raise KeyboardInterrupt
+
+    with _input.raw_mode(), _input.attach(keys_ready):
+        await done.wait()
+    _stdout.write("\n")
+    _stdout.flush()
+    _input.close()
+    return ''.join(keys)
+
+
+def raw_input(_stdout=sys.stdout, mask: bool = False, multiline: bool = False) -> str:
+    """
+    Reads input from the user, with optional character masking, synchronously.
+
+    This is a blocking version of `read_input`. It will block until the user presses
+    Control-C.
+
+    Args:
+        _stdout (TextIO, optional): The file to write the input to. Defaults to sys.stdout.
+        mask (bool, optional): Whether to mask the input characters. Defaults to False.
+        multiline (bool, optional): Whether to allow multiline input. Defaults to False.
+
+    Returns:
+        str: The input read from the user.
+    """
+    loop = asyncio.new_event_loop()
+    return loop.run_until_complete(async_raw_input(_stdout=_stdout, mask=mask, multiline=multiline))
