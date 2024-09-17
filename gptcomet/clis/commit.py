@@ -17,7 +17,7 @@ from gptcomet.exceptions import GitNoStagedChanges, KeyNotFound
 from gptcomet.log import set_debug
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.styles import Colors, stylize
-from gptcomet.utils import console
+from gptcomet.utils import console, raw_input
 
 
 def ask_for_retry() -> Literal["y", "n", "r", "e"]:
@@ -59,7 +59,7 @@ def edit_text_in_place(initial_message: str) -> str:
     Returns:
         str: The edited message.
     """
-    bottom_bar = "Support multiple lines. Press `Ctrl+D` to continue."
+    bottom_bar = "Support multiple lines. Type `ESC` and then `Enter` to continue."
 
     def bottom_toolbar():
         return [('class:bottom-toolbar', f' {bottom_bar} ')]

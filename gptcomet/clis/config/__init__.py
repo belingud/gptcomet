@@ -5,7 +5,15 @@ from gptcomet.utils import CONTEXT_SETTINGS
 
 from gptcomet.clis.config import list as _list  # isort:skip
 
-app = typer.Typer(name="config", no_args_is_help=True, context_settings=CONTEXT_SETTINGS)
+app = typer.Typer(
+    name="config",
+    no_args_is_help=True,
+    context_settings=CONTEXT_SETTINGS,
+    short_help="Manage config.",
+    help=(
+        "Manage gptcomet configuration, default config path is `~/.config/gptcomet/gptcomet.toml`."
+    ),
+)
 
 app.command(name="get", help="Get config value")(get.entry)
 app.command(name="list", help="List config content")(_list.entry)

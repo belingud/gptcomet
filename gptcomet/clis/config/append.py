@@ -29,8 +29,8 @@ def entry(
         console.print(
             stylize(
                 f"{GPTCOMET_PRE} Config value already exists and not modified: {key!s}",
-                Colors.LIGHT_BLUE,
+                Colors.LIGHT_BLUE_RGB,
             )
         )
     except ConfigKeyTypeError as e:
-        console.print(stylize(f"{GPTCOMET_PRE} Error: {e!s}", Colors.LIGHT_RED))
+        console.print(stylize(f"{GPTCOMET_PRE} Error: {e!s}", Colors.LIGHT_RED_RGB))
