@@ -14,7 +14,7 @@ def config_manager(tmp_path):
     config_manager = ConfigManager(config_path=runtime_config_file)
 
     # Mock runtime config file path for CliRunner
-    ConfigManager.get_config_path = MagicMock(return_value=config_manager.current_config_path)
+    ConfigManager.make_config_path = MagicMock(return_value=config_manager.current_config_path)
     with config_manager.default_config_file.open() as f1, runtime_config_file.open("w") as f2:
         f2.write(f1.read())
 

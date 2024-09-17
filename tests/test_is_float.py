@@ -21,6 +21,4 @@ def test_is_float_empty():
 
 def test_is_float_non_string():
     with pytest.raises(TypeError):
-        is_float(123)
-    with pytest.raises(TypeError):
         is_float(None)

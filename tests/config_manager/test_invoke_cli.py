@@ -37,4 +37,4 @@ def test_config_remove(config_manager):
     runner = CliRunner()
     result = runner.invoke(cli, ["config", "remove", "file_ignore", "yarn.lock"])
     assert result.exit_code == 0
-    assert result.output.strip() == f"{GPTCOMET_PRE} Removed yarn.lock from file_ignore."
+    assert result.output.strip() == "\x1b[1m[\x1b[0mGPTComet\x1b[1m]\x1b[0m Removed yarn.lock from file_ignore."
