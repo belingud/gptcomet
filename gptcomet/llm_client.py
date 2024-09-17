@@ -74,13 +74,13 @@ class LLMClient:
         self.retries: int = int(
             self.config_manager.get(f"{self.provider}.retries", DEFAULT_RETRIES)
         )
-        self.completion_path = self.config_manager.get(
+        self.completion_path: str = self.config_manager.get(
             f"{self.provider}.completion_path", "/chat/completions"
         )
-        self.content_path = self.config_manager.get(
+        self.content_path: str = self.config_manager.get(
             f"{self.provider}.answer_path", "choices.0.message.content"
         )
-        self.proxy = self.config_manager.get(f"{self.provider}.proxy", "")
+        self.proxy: str = self.config_manager.get(f"{self.provider}.proxy", "")
         logger.debug(f"Provider: {self.provider}, Model: {self.model}, retries: {self.retries}")
 
     def generate(self, prompt: str, use_history: bool = False) -> str:
@@ -106,8 +106,8 @@ class LLMClient:
 
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
-        response = self.completion_with_retries(**params)
-        usage = response.get("usage", {})
+        response: dict = self.completion_with_retries(**params)
+        usage: dict = response.get("usage", {})
 
         assistant_message: str = glom(response, self.content_path, default="").strip()
 
@@ -118,11 +118,11 @@ class LLMClient:
             console.print("No usage response found.")
         else:
             text = Text("Token usage> prompt tokens: ")
-            text.append(f"{usage.get('prompt_tokens')}", Colors.LIGHT_GREEN)
+            text.append(f"{usage.get('prompt_tokens')}", Colors.LIGHT_GREEN_RGB)
             text.append(", completion tokens: ")
-            text.append(f"{usage.get('completion_tokens')}", Colors.LIGHT_GREEN)
+            text.append(f"{usage.get('completion_tokens')}", Colors.LIGHT_GREEN_RGB)
             text.append(" total tokens: ")
-            text.append(f"{usage.get('total_tokens')}", Colors.LIGHT_GREEN)
+            text.append(f"{usage.get('total_tokens')}", Colors.LIGHT_GREEN_RGB)
             console.print(text)
 
         return assistant_message
@@ -142,16 +142,16 @@ class LLMClient:
         }
 
         # set optional params
-        max_tokens = int(self.config_manager.get(f"{self.provider}.max_tokens"))
+        max_tokens = int(self.config_manager.get(f"{self.provider}.max_tokens", 0))
         if max_tokens:
             params["max_tokens"] = max_tokens
-        temperature = float(self.config_manager.get(f"{self.provider}.temperature", 0.7))
+        temperature = float(self.config_manager.get(f"{self.provider}.temperature", 0))
         if temperature:
             params["temperature"] = temperature
-        top_p = float(self.config_manager.get(f"{self.provider}.top_p"))
+        top_p = float(self.config_manager.get(f"{self.provider}.top_p", 0.0))
         if top_p:
             params["top_p"] = top_p
-        frequency_penalty = float(self.config_manager.get(f"{self.provider}.frequency_penalty", 0.7))
+        frequency_penalty = float(self.config_manager.get(f"{self.provider}.frequency_penalty", 0))
         if frequency_penalty:
             params["frequency_penalty"] = frequency_penalty
         try:
@@ -170,7 +170,7 @@ class LLMClient:
             params["extra_headers"] = extra_headers
         return params
 
-    def clear_history(self):
+    def clear_history(self) -> None:
         """
         Clears the conversation history.
         """
@@ -187,7 +187,7 @@ class LLMClient:
         top_p=None,
         frequency_penalty=None,
         extra_headers=None,
-    ):
+    ) -> dict:
         """
         Wrapper around the completion API that retries on failure.
 
@@ -209,12 +209,12 @@ class LLMClient:
             ConfigError: If the API key is not set in the config.
             BadRequestError: If the completion API returns an error.
         """
-        transport = httpx.HTTPTransport(retries=self.retries)
-        client_params = {"transport": transport}
+        transport: httpx.HTTPTransport = httpx.HTTPTransport(retries=self.retries)
+        client_params: dict = {"transport": transport}
         if self.proxy:
             client_params["proxies"] = self.proxy
             logger.debug(f"Using proxy: {self.proxy}")
-        client = httpx.Client(**client_params)
+        client: httpx.Client = httpx.Client(**client_params)
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
         payload = {
@@ -236,17 +236,12 @@ class LLMClient:
             self.completion_path = "/" + self.completion_path
         url = f"{api_base}{self.completion_path}"
 
-        response = client.post(
+        response: httpx.Response = client.post(
             url,
             json=payload,
             headers=headers,
         )
         if logger.level == logging.DEBUG:
-            text = response.text
-            try:
-                j = json.loads(text)
-            except json.JSONDecodeError:
-                j = text
-            logger.debug(f"completion response: {j}")
+            logger.debug(f"completion response: {response.text}")
         response.raise_for_status()
         return response.json()

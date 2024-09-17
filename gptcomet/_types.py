@@ -11,7 +11,7 @@ class CacheType(t.TypedDict):
     config: t.Optional[CommentedMap]
 
 
-class CompleteParams(t.TypedDict):
+class CompleteParams(t.TypedDict, total=False):
     """complete required params"""
     api_base: str
     api_key: str
