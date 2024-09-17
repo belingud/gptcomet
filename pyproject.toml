@@ -9,7 +9,6 @@ requires-python = ">=3.9,<4.0"
 dependencies = [
     "gitpython>=3.1.43",
     "click>=8.1.7",
-    "tenacity>=9.0.0",
     "orjson>=3.10.6",
     "ruamel-yaml>=0.18.6",
     "glom>=23.5.0",
@@ -17,6 +16,7 @@ dependencies = [
     "rich>=13.8.0",
     "prompt-toolkit>=3.0.47",
     "httpx>=0.27.2",
+    "socksio>=1.0.0",
 ]
 license = { text = "MIT license" }
 keywords = ['python']
@@ -30,8 +30,6 @@ Documentation = "https://belingud.github.io/gptcomet/"
 gptcomet = "gptcomet.clis.__main__:app"
 gmsg = "gptcomet.clis.__main__:app"
 
-[project.optional-dependencies]
-socks = ["socksio>=1.0.0"]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
