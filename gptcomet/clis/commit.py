@@ -17,10 +17,12 @@ from gptcomet.exceptions import GitNoStagedChanges, KeyNotFound
 from gptcomet.log import set_debug
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.styles import Colors, stylize
-from gptcomet.utils import console, raw_input
+from gptcomet.utils import console
+
+RETRY_INPUT = Literal["y", "n", "r", "e"]
 
 
-def ask_for_retry() -> Literal["y", "n", "r", "e"]:
+def ask_for_retry() -> RETRY_INPUT:
     """
     Ask the user whether to retry generating a commit message.
 
@@ -28,7 +30,7 @@ def ask_for_retry() -> Literal["y", "n", "r", "e"]:
     Returns:
         Literal["y", "n", "r"]: The user's choice.
     """
-    char: Literal["y", "n", "r", "e"] = "y"
+    char: RETRY_INPUT
     if sys.stdin.isatty():
         # Interactive mode will ask for confirmation
         char = cast(
