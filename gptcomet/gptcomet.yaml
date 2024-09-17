@@ -59,7 +59,7 @@ prompt:
     the commit message templete is <title>: <summary>
 
     your answer should only include a single commit message less than 70 characters, no other text.
-    
+
     Git diff like below example:
     ```
     diff --git a/tests/test_stylize.py b/tests/test_stylize.py
@@ -77,7 +77,7 @@ prompt:
     It is not part of the diff.
     After the git diff of the first file, there will be an empty line, and then the git diff of the next file.
 
-    
+
     Examples:
     test: update import of stylize test
     fix: Fix password hashing vulnerability
