@@ -12,6 +12,7 @@ class CacheType(t.TypedDict):
 
 
 class CompleteParams(t.TypedDict):
+    """complete required params"""
     api_base: str
     api_key: str
     model: str
@@ -21,3 +22,18 @@ class CompleteParams(t.TypedDict):
     top_p: t.Optional[float]
     frequency_penalty: t.Optional[float]
     extra_headers: t.Optional[dict]
+
+
+class Provider(t.TypedDict, total=False):
+    """provider setting dict"""
+    api_base: str
+    api_key: str
+    model: str
+    max_tokens: int
+    temperature: t.Optional[float]
+    top_p: t.Optional[float]
+    frequency_penalty: t.Optional[float]
+    presence_penalty: t.Optional[float]
+    extra_headers: t.Optional[str]
+    proxy: t.Optional[str]
+    retries: t.Optional[int]
