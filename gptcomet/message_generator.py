@@ -1,7 +1,6 @@
 import typing as t
 from pathlib import Path
 
-import tenacity  # noqa: F401
 from git import Repo
 
 from gptcomet.config_manager import ConfigManager

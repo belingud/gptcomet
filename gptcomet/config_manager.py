@@ -6,7 +6,7 @@ import orjson as json
 from glom import glom
 from ruamel.yaml import YAML, CommentedMap
 
-from gptcomet._types import CacheType
+from gptcomet._types import CacheType, Provider
 from gptcomet.const import LANGUAGE_KEY
 from gptcomet.exceptions import (
     ConfigKeyError,
@@ -73,7 +73,7 @@ class ConfigManager:
         return self._cache["default_config"]
 
     @classmethod
-    def get_config_path(cls, local: bool = False) -> Path:
+    def make_config_path(cls, local: bool = False) -> Path:
         return Path.cwd() / ".git" / "gptcomet.yaml" if local else cls.global_config_file
 
     def is_api_key_set(self) -> bool:
@@ -216,6 +216,10 @@ class ConfigManager:
             }
         }
         self.config.update(info)
+
+    def set_new_provider(self, provider: str, provider_info: Provider):
+        self.config[provider] = provider_info
+        self.save_config()
 
     def set(self, key: str, value: str):
         """
@@ -399,4 +403,4 @@ def get_config_manager(local: bool) -> ConfigManager:
     Returns:
         ConfigManager: The configuration manager with the configuration loaded from the current configuration file.
     """
-    return ConfigManager.from_config_path(ConfigManager.get_config_path(local=local))
+    return ConfigManager.from_config_path(ConfigManager.make_config_path(local=local))
