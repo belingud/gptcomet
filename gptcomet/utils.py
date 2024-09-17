@@ -160,7 +160,8 @@ def should_ignore(filepath: str, ignore_patterns: list[str]) -> bool:
 
 async def async_raw_input(_stdout=sys.stdout, mask: bool = False, multiline: bool = False) -> str:
     """
-    Reads input from the user, with optional character masking.
+    Reads input from the user, with optional character masking, support multiline.
+    Support press Esc and then Enter to exit, also support Ctrl+D to exit
 
     Args:
         _stdout (TextIO, optional): The file to write the input to. Defaults to sys.stdout.
@@ -177,7 +178,15 @@ async def async_raw_input(_stdout=sys.stdout, mask: bool = False, multiline: boo
 
     def keys_ready():
         key_press: KeyPress
+        pre_key: t.Optional[Keys] = None
         for key_press in _input.read_keys():
+            if key_press.key == Keys.Escape:
+                pre_key = key_press.key
+                continue
+            if pre_key == Keys.Escape and key_press.key in (Keys.Enter, Keys.ControlM):
+                # press Esc and then Enter to exit
+                done.set()
+                return
             raw_char = key_press.data.replace("\r", "\n")
             char = "*" if mask else raw_char
             if not multiline and raw_char == "\n":
@@ -187,6 +196,7 @@ async def async_raw_input(_stdout=sys.stdout, mask: bool = False, multiline: boo
             _stdout.write(f"{char}")
             _stdout.flush()
             if key_press.key == Keys.ControlD:
+                # also support press Ctrl+D to exit
                 done.set()
                 return
             if key_press.key == Keys.ControlC:
