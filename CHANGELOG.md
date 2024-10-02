@@ -1,3 +1,35 @@
+
+---
+## [0.0.12](https://github.com/belingud/gptcomet/compare/v0.0.11..v0.0.12) - 2024-10-02
+
+### ⛰️  Features
+
+- Enhance command-line application interface and provider management - ([09b1e90](https://github.com/belingud/gptcomet/commit/09b1e90535ac2de90184d8a947dc871b65485049)) - belingud
+- enhance text editing and input handling capabilities - ([2517224](https://github.com/belingud/gptcomet/commit/25172240d5af1d9fae4c226e2708209fae4c7b87)) - belingud
+- add Provider type and new color variants - ([b45eb7b](https://github.com/belingud/gptcomet/commit/b45eb7bab09c241356441d1ece891e1f4825567d)) - belingud
+
+### 🚜 Refactor
+
+- exclude prompt config in config list command - ([3396533](https://github.com/belingud/gptcomet/commit/33965334155944b564250756659408328e182adf)) - belingud
+- improve ask_for_retry function in commit.py - ([9fc7d04](https://github.com/belingud/gptcomet/commit/9fc7d044f93938886181d2b48bd2efe4c73565d7)) - belingud
+- Enhance configuration management and provider handling - ([2f12cd8](https://github.com/belingud/gptcomet/commit/2f12cd832e4a5b31ef9e7b2fbc2ebd5168d8b3eb)) - belingud
+- Refactor CLI application and enhance user interface - ([6533e3b](https://github.com/belingud/gptcomet/commit/6533e3ba3b78d8dee0a6b27eea2e016b36dc85ed)) - belingud
+- Enhance LLMClient functionality and parameter handling - ([879c410](https://github.com/belingud/gptcomet/commit/879c410c2508e057714f5ce7dad1e14989f5562a)) - belingud
+- Standardize default parameters for completions API - ([cab02d5](https://github.com/belingud/gptcomet/commit/cab02d5b475635b50fe8a60f063f55dd3c3fe29f)) - belingud
+
+### 📚 Documentation
+
+- update commit message guidelines in gptcomet.yaml - ([7367204](https://github.com/belingud/gptcomet/commit/73672047c83c5bcc59511528a41eff7620a77e5a)) - belingud
+
+### 🧪 Testing
+
+- Improve GPTComet branding and configuration management - ([b623690](https://github.com/belingud/gptcomet/commit/b6236905fa8d97c601ddf622c303a17ab821a2ce)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update dependencies in pyproject.toml - ([d6b2b87](https://github.com/belingud/gptcomet/commit/d6b2b872774162ebdb65a1598dc2b6906a80ad84)) - belingud
+- Update gptcomet configuration and commit guidelines - ([b0f128a](https://github.com/belingud/gptcomet/commit/b0f128afe8cfec92cb9b23a51d293d7af50aef39)) - belingud
+
 # Changelog
 
 
