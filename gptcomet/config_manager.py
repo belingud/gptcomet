@@ -1,3 +1,4 @@
+from io import StringIO
 from pathlib import Path
 from typing import Any, Optional, Union
 
@@ -283,8 +284,11 @@ class ConfigManager:
             This method assumes that `self.current_config_path` is a valid file path.
 
         """
-        with self.current_config_path.open() as f:
-            return f.read()
+        _c = self.config.copy()
+        _c.pop("prompt", None)
+        t = StringIO()
+        yaml.dump(_c, t)
+        return t.getvalue()
 
     def reset(self):
         """
