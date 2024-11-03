@@ -1,5 +1,17 @@
 
 ---
+## [0.0.14](https://github.com/belingud/gptcomet/compare/v0.0.13..v0.0.14) - 2024-11-03
+
+### ⛰️  Features
+
+- Add version command to CLI - ([3a10f73](https://github.com/belingud/gptcomet/commit/3a10f737e50dd4d7ddac8414d7ee6853161ad2b1)) - belingud
+
+### 📚 Documentation
+
+- Update CHANGELOG.md for version 0.0.13 - ([ee9f82a](https://github.com/belingud/gptcomet/commit/ee9f82a4bf13c752466491c9d64b2393d106177b)) - belingud
+
+
+---
 ## [0.0.13](https://github.com/belingud/gptcomet/compare/v0.0.12..v0.0.13) - 2024-11-03
 
 ### 🐛 Bug Fixes
