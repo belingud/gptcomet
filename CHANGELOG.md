@@ -1,5 +1,59 @@
 
 ---
+## [0.0.16](https://github.com/belingud/gptcomet/compare/v0.0.14..v0.0.16) - 2024-11-03
+
+### 🐛 Bug Fixes
+
+- Handle KeyboardInterrupt in commit CLI - ([12062f2](https://github.com/belingud/gptcomet/commit/12062f2a3ff6fa5efb021c5c019f98546fd44a9c)) - belingud
+- Strip quotes from API key in config_manager - ([4664823](https://github.com/belingud/gptcomet/commit/4664823899247a9ca833ce906672a9807622ad64)) - belingud
+
+### 🚜 Refactor
+
+- Improve staged diff handling - ([5d556dc](https://github.com/belingud/gptcomet/commit/5d556dc3839edb0859e6d9aba2be784eafcce99f)) - belingud
+- Simplify CLI version flag and remove unused signal handler - ([28f16b7](https://github.com/belingud/gptcomet/commit/28f16b74c5c9f52d816b0954eb8eadd3a8293da0)) - belingud
+
+### 📚 Documentation
+
+- Clarify git diff explanation in gptcomet.yaml - ([48466a2](https://github.com/belingud/gptcomet/commit/48466a2198dd5c6c709d678d8e077161b75a626a)) - belingud
+- Clarify context in git diff example - ([2e24d83](https://github.com/belingud/gptcomet/commit/2e24d832b1351f31c73086a3b10bdc19947d174b)) - belingud
+- Update CHANGELOG.md for version 0.0.14 - ([48e67d2](https://github.com/belingud/gptcomet/commit/48e67d28f0ea564fa39fa1509906dad8f6c67115)) - belingud
+
+### ⚡ Performance
+
+- Add diff option for better performance - ([93bb8db](https://github.com/belingud/gptcomet/commit/93bb8dbdfd650688ed8acf809584e2377d1a2839)) - belingud
+
+
+---
+## [0.0.14](https://github.com/belingud/gptcomet/compare/v0.0.13..v0.0.14) - 2024-11-03
+
+### ⛰️  Features
+
+- Add version command to CLI - ([3a10f73](https://github.com/belingud/gptcomet/commit/3a10f737e50dd4d7ddac8414d7ee6853161ad2b1)) - belingud
+
+### 📚 Documentation
+
+- Update CHANGELOG.md for version 0.0.13 - ([ee9f82a](https://github.com/belingud/gptcomet/commit/ee9f82a4bf13c752466491c9d64b2393d106177b)) - belingud
+
+
+---
+## [0.0.13](https://github.com/belingud/gptcomet/compare/v0.0.12..v0.0.13) - 2024-11-03
+
+### 🐛 Bug Fixes
+
+- Fix console output formatting in remove.py - ([efae39b](https://github.com/belingud/gptcomet/commit/efae39b485122de797043e8c32ffe0d582d12429)) - belingud
+- Filter out index and metadata lines in diff output - ([7222b2b](https://github.com/belingud/gptcomet/commit/7222b2b357bd0d7879486c3d83e8d6eb267026cc)) - belingud
+- Mask API keys in config dump - ([ba8e6fe](https://github.com/belingud/gptcomet/commit/ba8e6fe5f05efe177bf2629c47f50341d0ca7e94)) - belingud
+
+### 📚 Documentation
+
+- update CHANGELOG.md for version 0.0.12 - ([276dde0](https://github.com/belingud/gptcomet/commit/276dde0d61c25be5c85a929f4c50d468656f7fa0)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- Update Justfile default goal and help command - ([91fbd75](https://github.com/belingud/gptcomet/commit/91fbd75638c722a8912b254b4cc46b27560e1408)) - belingud
+
+
+---
 ## [0.0.12](https://github.com/belingud/gptcomet/compare/v0.0.11..v0.0.12) - 2024-10-02
 
 ### ⛰️  Features

@@ -23,9 +23,7 @@ def entry(
         logger.debug(f"Using Config path: {cfg.current_config_path}")
     try:
         cfg.remove(key, value)
-        console.print(
-            f"{GPTCOMET_PRE} Removed {stylize(value, Colors.GREEN)} from {stylize(key, Colors.GREEN)}."
-        )
+        console.print(stylize(f"{GPTCOMET_PRE} Removed {value} from {key}", Colors.GREEN))
 
     except NotModified:
         console.print(f"{GPTCOMET_PRE} Config value not exists and not modified: {key!s}")
