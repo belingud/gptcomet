@@ -291,7 +291,7 @@ class ConfigManager:
         lines = text.splitlines()
         for i, line in enumerate(lines):
             if "api_key:" in line:
-                key = line.split(":")[1].strip()
+                key = line.split(":")[1].strip(" \"'")
                 show_idx = 3
                 if key.startswith("sk-or-v1-"):
                     show_idx += 9
