@@ -62,7 +62,7 @@ class MessageGenerator:
 
     def get_staged_diff(self, repo: t.Optional[Repo] = None) -> str:
         ignored_files: list = self.config_manager.get(FILE_IGNORE_KEY)
-        diff_options = ["--staged", "-U1", *self.make_ignored_options(ignored_files)]
+        diff_options = ["--staged", "-U2", *self.make_ignored_options(ignored_files)]
         logger.debug(f"{GPTCOMET_PRE} Diff options: {diff_options}")
         repo = repo or self.repo
         diff = repo.git.diff(diff_options)
