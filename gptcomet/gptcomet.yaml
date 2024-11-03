@@ -63,9 +63,6 @@ prompt:
     Git diff like below example:
     ```
     diff --git a/tests/test_stylize.py b/tests/test_stylize.py
-    index 519b928..0b4584f 100644
-    --- a/tests/test_stylize.py
-    +++ b/tests/test_stylize.py
     ```
     this example means `test_stylize.py` is modified in this commit.
     Then there is a specifier of the lines that were modified.
@@ -73,7 +70,7 @@ prompt:
     A line that starting with `-` means that line was deleted.
     No space before + and -.
     A line that starts with neither `+` nor `-` is code given for context and better understanding.
-    If there are some spaces before `+`, `-` or `diff`, it could be context.
+    If there are some spaces before `+`, `-` or `diff` in a line, it could be context.
     It is not part of the diff.
     After the git diff of the first file, there will be an empty line, and then the git diff of the next file.
 
