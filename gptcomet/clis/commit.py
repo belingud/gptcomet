@@ -160,6 +160,7 @@ def entry(
     message_generator = MessageGenerator(config_manager)
     while True:
         try:
+            # generate commit message by staged changes
             commit_message = message_generator.generate_commit_message()
         except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
             console.print(stylize(str(error), Colors.YELLOW))
@@ -171,8 +172,12 @@ def entry(
 
         console.print("Generated commit message:")
         console.print(Panel(stylize(commit_message, Colors.GREEN)))
-
-        user_input = ask_for_retry()
+        try:
+            # use generated commit message, retry, edit or discard
+            user_input = ask_for_retry()
+        except KeyboardInterrupt:
+            # catch input interrupt
+            return
         if user_input == "y":
             break
         elif user_input == "n":
