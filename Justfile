@@ -1,3 +1,7 @@
+# Default goal: help
+help:
+    @just --list
+
 # Install the environment
 install:
     @echo "🚀 Creating virtual environment using pyenv and PDM"
@@ -56,7 +60,3 @@ docs-test:
 docs:
     pdm run mkdocs serve
 
-# Default goal: help
-help:
-    @echo "Available commands:"
-    @just --list
