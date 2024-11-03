@@ -1,5 +1,23 @@
 
 ---
+## [0.0.13](https://github.com/belingud/gptcomet/compare/v0.0.12..v0.0.13) - 2024-11-03
+
+### 🐛 Bug Fixes
+
+- Fix console output formatting in remove.py - ([efae39b](https://github.com/belingud/gptcomet/commit/efae39b485122de797043e8c32ffe0d582d12429)) - belingud
+- Filter out index and metadata lines in diff output - ([7222b2b](https://github.com/belingud/gptcomet/commit/7222b2b357bd0d7879486c3d83e8d6eb267026cc)) - belingud
+- Mask API keys in config dump - ([ba8e6fe](https://github.com/belingud/gptcomet/commit/ba8e6fe5f05efe177bf2629c47f50341d0ca7e94)) - belingud
+
+### 📚 Documentation
+
+- update CHANGELOG.md for version 0.0.12 - ([276dde0](https://github.com/belingud/gptcomet/commit/276dde0d61c25be5c85a929f4c50d468656f7fa0)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- Update Justfile default goal and help command - ([91fbd75](https://github.com/belingud/gptcomet/commit/91fbd75638c722a8912b254b4cc46b27560e1408)) - belingud
+
+
+---
 ## [0.0.12](https://github.com/belingud/gptcomet/compare/v0.0.11..v0.0.12) - 2024-10-02
 
 ### ⛰️  Features
