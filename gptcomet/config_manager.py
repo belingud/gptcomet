@@ -284,11 +284,23 @@ class ConfigManager:
             This method assumes that `self.current_config_path` is a valid file path.
 
         """
-        _c = self.config.copy()
-        _c.pop("prompt", None)
+        self.config.pop("prompt", None)
         t = StringIO()
-        yaml.dump(_c, t)
-        return t.getvalue()
+        yaml.dump(self.config, t)
+        text = t.getvalue()
+        lines = text.splitlines()
+        for i, line in enumerate(lines):
+            if "api_key:" in line:
+                key = line.split(":")[1].strip()
+                show_idx = 3
+                if key.startswith("sk-or-v1-"):
+                    show_idx += 9
+                elif key.startswith("sk-"):
+                    show_idx += 3
+                elif key.startswith("gsk_"):
+                    show_idx += 4
+                lines[i] = line.replace(key, key[:show_idx] + (len(key) - show_idx) * "*")
+        return "\n".join(lines)
 
     def reset(self):
         """
