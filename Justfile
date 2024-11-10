@@ -60,3 +60,5 @@ docs-test:
 docs:
     pdm run mkdocs serve
 
+changelog:
+    git cliff -l --prepend CHANGELOG.md
