@@ -240,6 +240,7 @@ class LLMClient:
             url,
             json=payload,
             headers=headers,
+            timeout=8,
         )
         if logger.level == logging.DEBUG:
             logger.debug(f"completion response: {response.text}")
