@@ -15,7 +15,7 @@ COMMIT_OUTPUT_TEMPLATE = """
 Auther: {author} <{email}>
 {branch}({commit_hash})
 
-    {commit_msg}
+{commit_msg}
 
 {git_show_stat}
 """

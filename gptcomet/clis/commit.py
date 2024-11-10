@@ -112,7 +112,7 @@ def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
         safe_decode(getattr(commit.author, commit.author.conf_email, no_email)) or no_email
     )
 
-    git_show_stat: str = repo.git.show("--pretty=format:%b", "--stat", commit_hash)
+    git_show_stat: str = repo.git.show("--pretty=format:", "--stat", commit_hash)
 
     # Prepare the output format
     if rich is True:
