@@ -1,5 +1,22 @@
 
 ---
+## [0.0.17](https://github.com/belingud/gptcomet/compare/v0.0.16..v0.0.17) - 2024-11-10
+
+### ⛰️  Features
+
+- support generating rich commit messages - ([22ca79e](https://github.com/belingud/gptcomet/commit/22ca79e8c7fcf454dc3a1215abc9b07217d4736a)) - belingud
+- support generating rich commit messages - ([8172c0e](https://github.com/belingud/gptcomet/commit/8172c0ef4ad43020a087c0f459b8a00fc89faf53)) - belingud
+
+### 🐛 Bug Fixes
+
+- update git show format in commit gen - ([bd22e2a](https://github.com/belingud/gptcomet/commit/bd22e2a03232cfd2c0b32a21477983719aa32fde)) - belingud
+
+### 📚 Documentation
+
+- Update CHANGELOG.md with version 0.0.16 details - ([cab0e59](https://github.com/belingud/gptcomet/commit/cab0e59b35d62d6194799e3e721d0109c9d9548c)) - belingud
+
+
+---
 ## [0.0.16](https://github.com/belingud/gptcomet/compare/v0.0.14..v0.0.16) - 2024-11-03
 
 ### 🐛 Bug Fixes

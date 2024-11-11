@@ -112,7 +112,7 @@ def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
         safe_decode(getattr(commit.author, commit.author.conf_email, no_email)) or no_email
     )
 
-    git_show_stat: str = repo.git.show("--pretty=format:%b", "--stat", commit_hash)
+    git_show_stat: str = repo.git.show("--pretty=format:", "--stat", commit_hash)
 
     # Prepare the output format
     if rich is True:
@@ -132,7 +132,7 @@ def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
 
 
 def entry(
-    # rich: Annotated[bool, typer.Option(False, "--rich", "-r", help="Use rich output.")] = False,
+    rich: Annotated[bool, typer.Option("--rich", "-r", help="Generate rich commit message.")] = False,
     debug: Annotated[bool, typer.Option("--debug", "-d", help="Print debug information.")] = False,
     local: Annotated[bool, typer.Option("--local", help="Use local configuration file.")] = False,
     config_path: Annotated[
@@ -161,7 +161,7 @@ def entry(
     while True:
         try:
             # generate commit message by staged changes
-            commit_message = message_generator.generate_commit_message()
+            commit_message = message_generator.generate_commit_message(rich=rich)
         except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
             console.print(stylize(str(error), Colors.YELLOW))
             raise typer.Exit(0) from None

@@ -137,13 +137,6 @@ class MessageGenerator:
             msg = self.llm_client.generate(translation)
         return f"{title}: {msg}" if title else msg
 
-        # summary = self._generate_summary(diff)
-        # prefix = self._generate_prefix(summary)
-        # title = self._generate_title(summary)
-        #
-        # message = self._generate_detailed_message(summary)
-        # return f"{prefix}: {title}\n\n{message}"
-
     def _generate_brief_commit_message(self, diff: str) -> str:
         """
         Generates a brief commit message based on the given diff.
@@ -174,68 +167,33 @@ class MessageGenerator:
 
     def _generate_rich_commit_message(self, diff: str) -> str:
         """
-        TODO: Support rich commit message
-        1. Generate summary from diff
-        2. Generate prefix from summary
-        3. Generate title from summary
-        4. Generate detailed message from summary
+        Generates a rich commit message based on the given diff.
+
+        Args:
+            diff (str): The diff string representing the changes made.
+
+        Returns:
+            str: The generated rich commit message.
+
+        Raises:
+            None
+
+        Description:
+            This function uses the "prompt.rich_commit_message" and "output.rich_template" from the config manager
+            to generate a prompt. The placeholders "{{ rich_template }}" and "{{ placeholder }}" in the prompt
+            are replaced with the provided diff and the rich template, respectively.
+
+        Example:
+            >>> diff = "Add new feature"
+            >>> generator = MessageGenerator(ConfigManager())
+            >>> commit_message = generator._generate_rich_commit_message(diff)
+            >>> print(commit_message)
+            feat: Add new feature
+
+            - Added new feature
         """
-        return self._generate_brief_commit_message(diff)
-
-    def generate_pr_message(self) -> str:
-        diff = self.repo.git.diff("origin/master...HEAD")
-        if not diff:
-            return "No changes to create a pull request."
-
-        summary = self._generate_summary(diff)
-        title = self._generate_pr_title(summary)
-        description = self._generate_pr_description(summary)
-        changes = self._generate_pr_changes(summary)
-        testing = self._generate_pr_testing(summary)
-
-        return f"Title: {title}\n\nDescription:\n{description}\n\nChanges:\n{changes}\n\nTesting:\n{testing}"
-
-    def generate(self, prompt_key: str, content: str) -> str:
-        prompt = str(self.config_manager.get(prompt_key))
-        prompt.replace("{{ placeholder }}", content)
-        return self.llm_client.generate(prompt)
-
-    def _generate_summary(self, diff: str) -> str:
-        prompt = self.config_manager.get("prompt.commit_summary")
-        prompt = prompt.replace("{{ placeholder }}", diff)
-        return self.llm_client.generate(prompt)
-
-    def _generate_prefix(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.conventional_commit_prefix")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
-
-    def _generate_title(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.commit_title")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
-
-    def _generate_detailed_message(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.commit_message")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
-
-    def _generate_pr_title(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.pr_title")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
-
-    def _generate_pr_description(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.pr_description")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
-
-    def _generate_pr_changes(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.pr_changes")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
-
-    def _generate_pr_testing(self, summary: str) -> str:
-        prompt = self.config_manager.get("prompt.pr_testing")
-        prompt = prompt.replace("{{ placeholder }}", summary)
-        return self.llm_client.generate(prompt)
+        rich_prompt = str(self.config_manager.get("prompt.rich_commit_message"))
+        rich_template = str(self.config_manager.get("output.rich_template"))
+        rich_prompt = rich_prompt.replace("{{ rich_template }}", rich_template)
+        rich_prompt = rich_prompt.replace("{{ placeholder }}", diff)
+        return self.llm_client.generate(rich_prompt)
