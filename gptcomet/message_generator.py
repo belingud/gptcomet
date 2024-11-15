@@ -41,24 +41,24 @@ class MessageGenerator:
 
     __slots__ = ("config_manager", "llm_client", "repo", "diff")
 
-    def __init__(self, config_manager: ConfigManager):
+    def __init__(self, config_manager: ConfigManager, repo_path: t.Optional[str] = None):
         self.config_manager = config_manager
         self.llm_client = LLMClient(config_manager)
-        self.repo = Repo(Path.cwd())
+        self.repo = Repo(repo_path or Path.cwd())
         self.diff = None
 
     @classmethod
-    def from_config_manager(cls, config_manager: ConfigManager):
+    def from_config_manager(cls, config_manager: ConfigManager, repo_path: t.Optional[str] = None):
         """
         Creates an instance of the class from a ConfigManager.
 
         Args:
             config_manager (ConfigManager): The ConfigManager instance to create the class instance from.
-
+            repo_path (Optional[str]): The path to the repository to use.
         Returns:
             An instance of the class.
         """
-        return cls(config_manager)
+        return cls(config_manager, repo_path)
 
     def get_staged_diff(self, repo: t.Optional[Repo] = None) -> str:
         ignored_files: list = self.config_manager.get(FILE_IGNORE_KEY)
