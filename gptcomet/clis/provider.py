@@ -2,13 +2,15 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
+from prompt_toolkit import prompt
 
 from gptcomet._types import Provider
+from gptcomet._validator import RequiredValidator
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.const import GPTCOMET_PRE
 from gptcomet.log import logger, set_debug
 from gptcomet.styles import Colors, stylize
-from gptcomet.utils import console, raw_input
+from gptcomet.utils import console
 
 
 def entry(
@@ -37,12 +39,13 @@ def entry(
         set_debug()
         logger.debug(f"Using config file: {cfg.current_config_path}")
     provider: str = typer.prompt("Enter provider(lowercase)", default="openai", type=str).lower()
-    api_base: str = typer.prompt("Enter API Base", default="https://api.openai.com/v1/")
-    model: str = typer.prompt("Enter model", default="text-davinci-003", type=str)
-
-    console.print("Enter API key: ", end="")
-    api_key: str = raw_input("Enter API key", mask=True)
-
+    api_base: str = typer.prompt(
+        "Enter API Base", default="https://api.openai.com/v1/", show_default=False
+    )
+    model: str = prompt("Enter model:")
+    api_key: str = prompt(
+        "Enter API key:", is_password=True, validator=RequiredValidator("API key")
+    )
     max_tokens: int = typer.prompt("Max tokens", default=1024, type=int)
     provider_cfg: Provider = {
         "api_base": api_base,

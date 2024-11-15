@@ -64,11 +64,13 @@ def edit_text_in_place(initial_message: str) -> str:
     bottom_bar = "Support multiple lines. Type `ESC` and then `Enter` to continue."
 
     def bottom_toolbar():
-        return [('class:bottom-toolbar', f' {bottom_bar} ')]
+        return [("class:bottom-toolbar", f" {bottom_bar} ")]
 
-    style = Style.from_dict({
-        'bottom-toolbar': 'fg:#aaaaaa bg:#FDF5E6',
-    })
+    style = Style.from_dict(
+        {
+            "bottom-toolbar": "fg:#aaaaaa bg:#FDF5E6",
+        }
+    )
 
     edited_message = prompt(
         "Edit the message\n",
@@ -79,7 +81,7 @@ def edit_text_in_place(initial_message: str) -> str:
         cursor=CursorShape.BEAM,
         vi_mode=True,
         bottom_toolbar=bottom_toolbar,
-        style=style
+        style=style,
     )
     console.print(Panel(stylize(edited_message, Colors.GREEN), title="Updated Msg"))
     return edited_message
@@ -132,7 +134,9 @@ def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
 
 
 def entry(
-    rich: Annotated[bool, typer.Option("--rich", "-r", help="Generate rich commit message.")] = False,
+    rich: Annotated[
+        bool, typer.Option("--rich", "-r", help="Generate rich commit message.")
+    ] = False,
     debug: Annotated[bool, typer.Option("--debug", "-d", help="Print debug information.")] = False,
     local: Annotated[bool, typer.Option("--local", help="Use local configuration file.")] = False,
     config_path: Annotated[
