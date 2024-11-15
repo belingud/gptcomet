@@ -21,7 +21,6 @@ class KeyNotFound(GPTCometError):
 
 
 class GitNoStagedChanges(GPTCometError):
-
     def __str__(self):
         return "No staged changes to commit"
 
@@ -39,7 +38,6 @@ class ConfigErrorEnum(enum.IntEnum):
 
 
 class ConfigError(GPTCometError):
-
     def __init__(self, error: ConfigErrorEnum = ConfigErrorEnum.API_KEY_MISSING):
         if not isinstance(error, ConfigErrorEnum):
             raise TypeError
