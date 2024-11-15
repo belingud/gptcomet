@@ -11,7 +11,7 @@ app = typer.Typer(
     context_settings=CONTEXT_SETTINGS,
     short_help="Manage config.",
     help=(
-        "Manage gptcomet configuration, default config path is `~/.config/gptcomet/gptcomet.toml`."
+        "Manage gptcomet configuration, default config path is `~/.config/gptcomet/gptcomet.yaml`."
     ),
 )
 
