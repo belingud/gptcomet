@@ -302,17 +302,20 @@ class ConfigManager:
                 lines[i] = line.replace(key, key[:show_idx] + (len(key) - show_idx) * "*")
         return "\n".join(lines)
 
-    def reset(self):
+    def reset(self, prompt: bool = False):
         """
         Resets the current configuration to its default state.
+
+        Args:
+            prompt: If True, only reset prompt configuration
         """
-        with (
-            self.default_config_file.open() as default,
-            self.current_config_path.open("w") as target,
-        ):
-            content = default.read()
-            target.write(content)
-            self._cache["config"] = None
+        default_config = self.load_default_config()
+        if prompt:
+            self.set("prompt", default_config.get("prompt"))
+            return
+        self._cache["config"] = default_config
+        self.save_config()
+        self._cache["config"] = None
 
     def list_keys(self) -> str:
         """
@@ -389,9 +392,11 @@ class ConfigManager:
         Returns:
             Any: The converted YAML value or the original string value.
         """
+        if not isinstance(value, str):
+            return value
         try:
             return strtobool(value)
-        except ValueError:
+        except (ValueError, TypeError):
             pass
         if value.lower() in ("none", "null"):
             return None

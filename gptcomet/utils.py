@@ -54,12 +54,15 @@ def strtobool(value: t.Union[str, bool, int]) -> bool:
     Raises:
         ValueError: If the string cannot be converted to a boolean value.
     """
+    true_values = {"ok", "true", "yes", "1", "y", "on"}
+    false_values = {"false", "no", "0", "n", "off"}
+    if not isinstance(value, (str, bool, int)):
+        msg = f"{value} is not a valid boolean value, use {true_values | false_values}."
+        raise TypeError(msg)
     if isinstance(value, bool):
         return value
     elif isinstance(value, int):
         return bool(value)
-    true_values = {"ok", "true", "yes", "1", "y", "on"}
-    false_values = {"false", "no", "0", "n", "off"}
 
     value = value.lower()
     if value in true_values:
