@@ -143,8 +143,7 @@ class LLMClient:
 
         # set optional params
         max_tokens = int(self.config_manager.get(f"{self.provider}.max_tokens", 0))
-        if max_tokens:
-            params["max_tokens"] = max_tokens
+        params["max_tokens"] = max_tokens or 100
         temperature = float(self.config_manager.get(f"{self.provider}.temperature", 0))
         if temperature:
             params["temperature"] = temperature
