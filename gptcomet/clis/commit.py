@@ -20,35 +20,35 @@ from gptcomet.styles import Colors, stylize
 from gptcomet.utils import console
 
 RETRY_INPUT = Literal["y", "n", "r", "e"]
+RETRY_CHOICES = {"y": "yes", "n": "no", "r": "retry", "e": "edit"}
 
 
 def ask_for_retry() -> RETRY_INPUT:
     """
     Ask the user whether to retry generating a commit message.
 
-    This function is only used in interactive mode.
     Returns:
-        Literal["y", "n", "r"]: The user's choice.
+        RETRY_INPUT: The user's choice (y/n/r/e).
     """
-    char: RETRY_INPUT
-    if sys.stdin.isatty():
-        # Interactive mode will ask for confirmation
-        char = cast(
-            Literal["y", "n", "r", "e"],
-            Prompt.ask(
-                "Do you want to use this commit message? y: yes, n: no, r: retry, e: edit.",
-                default="y",
-                choices=["y", "n", "r", "e"],
-                case_sensitive=False,
-            ),
-        )
-    else:
+    if not sys.stdin.isatty():
         console.print(
             "[yellow]Non-interactive mode detected, using the generated commit message directly.[/yellow]",
         )
-        char = "y"
+        return "y"
 
-    return char
+    prompt_text = "Do you want to use this commit message?\n" + ", ".join(
+        [f"{k}: {v}" for k, v in RETRY_CHOICES.items()]
+    )
+
+    return cast(
+        RETRY_INPUT,
+        Prompt.ask(
+            prompt_text,
+            default="y",
+            choices=list(RETRY_CHOICES.keys()),
+            case_sensitive=False,
+        ).lower(),
+    )
 
 
 def edit_text_in_place(initial_message: str) -> str:
@@ -61,7 +61,7 @@ def edit_text_in_place(initial_message: str) -> str:
     Returns:
         str: The edited message.
     """
-    bottom_bar = "Support multiple lines. Type `ESC` and then `Enter` to continue."
+    bottom_bar = "Support multiple lines. Press ESC then Enter to save, Ctrl+C to cancel."
 
     def bottom_toolbar():
         return [("class:bottom-toolbar", f" {bottom_bar} ")]
@@ -69,60 +69,64 @@ def edit_text_in_place(initial_message: str) -> str:
     style = Style.from_dict(
         {
             "bottom-toolbar": "fg:#aaaaaa bg:#FDF5E6",
+            "prompt": "bold",
         }
     )
 
-    edited_message = prompt(
-        "Edit the message\n",
-        default=initial_message,
-        multiline=True,
-        enable_open_in_editor=True,
-        mouse_support=True,
-        cursor=CursorShape.BEAM,
-        vi_mode=True,
-        bottom_toolbar=bottom_toolbar,
-        style=style,
-    )
-    console.print(Panel(stylize(edited_message, Colors.GREEN), title="Updated Msg"))
-    return edited_message
+    try:
+        edited_message = prompt(
+            "Edit the message:\n",
+            default=initial_message,
+            multiline=True,
+            enable_open_in_editor=True,
+            mouse_support=True,
+            cursor=CursorShape.BEAM,
+            vi_mode=True,
+            bottom_toolbar=bottom_toolbar,
+            style=style,
+        ).strip()
+
+        if edited_message:
+            console.print(Panel(stylize(edited_message, Colors.GREEN), title="Updated Message"))
+            return edited_message
+        else:
+            return initial_message
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Edit cancelled, keeping original message.[/yellow]")
+        return initial_message
 
 
-def gen_output(repo: Repo, commit: Commit, rich=True) -> str:
+def gen_output(repo: Repo, commit: Commit, rich: bool = True) -> str:
     """
     Generate a formatted output string for a commit message.
 
     Args:
         repo (Repo): The git repository object.
         commit (Commit): The git commit object.
-        rich (bool, optional): If True, the output will be formatted with rich text markup.
-            Defaults to True.
+        rich (bool): If True, the output will be formatted with rich text markup.
 
     Returns:
         str: A formatted output string containing information about the commit.
     """
+    NO_AUTHOR = "No Author"
+    NO_EMAIL = "No Email"
+
     commit_hash: str = commit.hexsha
     branch: str = repo.active_branch.name
-    commit_msg: Optional[str] = safe_decode(commit.message)
-    if commit_msg is not None:
-        commit_msg = commit_msg.strip()
-    no_author = "No Author"
-    no_email = "No Email"
-    author: Optional[str] = (
-        safe_decode(getattr(commit.author, commit.author.conf_name, no_author)) or no_author
-    )
-    email: Optional[str] = (
-        safe_decode(getattr(commit.author, commit.author.conf_email, no_email)) or no_email
-    )
+    commit_msg: str = safe_decode(commit.message).strip() if commit.message else ""
 
-    git_show_stat: str = repo.git.show("--pretty=format:", "--stat", commit_hash)
+    author: str = (
+        safe_decode(getattr(commit.author, commit.author.conf_name, NO_AUTHOR)) or NO_AUTHOR
+    )
+    email: str = safe_decode(getattr(commit.author, commit.author.conf_email, NO_EMAIL)) or NO_EMAIL
 
-    # Prepare the output format
-    if rich is True:
-        git_show_stat = (
-            git_show_stat.strip().replace("+", "[green]+[/green]").replace("-", "[red]-[/red]")
-        )
+    git_show_stat: str = repo.git.show("--pretty=format:", "--stat", commit_hash).strip()
+
+    if rich:
+        git_show_stat = git_show_stat.replace("+", "[green]+[/green]").replace("-", "[red]-[/red]")
         author = f":construction_worker: [green]{author}[/]"
         email = f"[blue]{email}[/blue]"
+
     return COMMIT_OUTPUT_TEMPLATE.format(
         author=author,
         email=email,
@@ -153,50 +157,53 @@ def entry(
             resolve_path=True,
         ),
     ] = None,
-):
-    """Generates a commit message based on the staged changes. Will ignore files in `file_ignore`."""
-    config_manager = (
-        ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
-    )
+) -> None:
+    """
+    Generate and commit a message based on staged changes.
+
+    The commit message will be generated automatically based on the staged changes,
+    ignoring files specified in `file_ignore`.
+    """
     if debug:
         set_debug()
 
+    config_manager = (
+        ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
+    )
     message_generator = MessageGenerator(config_manager)
+
     while True:
         try:
-            # generate commit message by staged changes
             commit_message = message_generator.generate_commit_message(rich=rich)
+            if not commit_message:
+                console.print(stylize("No commit message generated.", Colors.MAGENTA))
+                raise typer.Exit(0) from None
+
+            console.print("\nGenerated commit message:")
+            console.print(Panel(stylize(commit_message, Colors.GREEN)))
+
+            user_input = ask_for_retry()
+            if user_input == "y":
+                break
+            elif user_input == "n":
+                console.print(stylize("Commit message discarded.", Colors.YELLOW))
+                return
+            elif user_input == "e":
+                commit_message = edit_text_in_place(commit_message)
+                break
+
         except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
             console.print(stylize(str(error), Colors.YELLOW))
-            raise typer.Exit(0) from None
-
-        if not commit_message:
-            console.print(stylize("No commit message generated.", Colors.MAGENTA))
-            return
-
-        console.print("Generated commit message:")
-        console.print(Panel(stylize(commit_message, Colors.GREEN)))
-        try:
-            # use generated commit message, retry, edit or discard
-            user_input = ask_for_retry()
+            raise typer.Exit(1) from None
         except KeyboardInterrupt:
-            # catch input interrupt
+            console.print("\n[yellow]Operation cancelled by user.[/yellow]")
             return
-        if user_input == "y":
-            break
-        elif user_input == "n":
-            console.print(stylize("Commit message discarded.", Colors.YELLOW))
-            return
-        elif user_input == "e":
-            commit_message = edit_text_in_place(commit_message)
-            break
 
     try:
         commit = message_generator.repo.index.commit(message=commit_message)
-        output = gen_output(message_generator.repo, commit)
+        output = gen_output(message_generator.repo, commit, rich)
         console.print(output)
+        console.print(stylize("Commit message saved successfully!", Colors.GREEN))
     except (HookExecutionError, ValueError) as error:
-        console.print(f"Commit Error: {error!s}")
-        raise typer.Abort() from None
-
-    console.print(stylize("Commit message saved!", Colors.GREEN))
+        console.print(f"[red]Commit Error: {error}[/red]")
+        raise typer.Exit(1) from None
