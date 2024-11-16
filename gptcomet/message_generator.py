@@ -125,7 +125,7 @@ class MessageGenerator:
     def _translate_msg(self, msg: str) -> str:
         lang = self.config_manager.get(LANGUAGE_KEY, _type=str)
         title = ""
-        if str(lang).lower() != "en":
+        if str(lang).lower() != "en" and lang is not None:
             if ":" in msg:
                 title, msg = msg.split(":")
             # Default is English, but can be changed by the user
