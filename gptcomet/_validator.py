@@ -34,3 +34,16 @@ class RequiredValidator(Validator):
     def validate(self, document):
         if not document.text:
             raise ValidationError(message=f"{self.field_name} is required")
+
+
+class URLValidator(Validator):
+    """Validator for URL format."""
+
+    def validate(self, document) -> None:
+        text = document.text.strip()
+        if not text:
+            raise ValidationError(message="URL cannot be empty")
+        if not text.startswith(("http://", "https://")):
+            raise ValidationError(message="URL must start with http:// or https://")
+        if not text.endswith("/"):
+            raise ValidationError(message="URL must end with /")
