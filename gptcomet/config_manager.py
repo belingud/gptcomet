@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -19,6 +20,28 @@ from gptcomet.support_keys import SUPPORT_KEYS
 from gptcomet.utils import convert2type, output_language_map, strtobool
 
 yaml = YAML(typ="rt", pure=True)
+
+
+@dataclass
+class ProviderConfig:
+    """Provider configuration data class."""
+
+    provider: str = field(default="openai")
+    api_base: str = field(default="https://api.openai.com/v1/")
+    model: str = field(default="")
+    api_key: str = field(default="")
+    max_tokens: int = field(default=1024)
+    retries: int = field(default=2)
+
+    def to_dict(self) -> Provider:
+        """Convert to provider dictionary."""
+        return {
+            "api_base": self.api_base,
+            "api_key": self.api_key,
+            "model": self.model,
+            "max_tokens": self.max_tokens,
+            "retries": self.retries,
+        }
 
 
 class ConfigManager:

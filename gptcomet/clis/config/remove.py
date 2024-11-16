@@ -25,6 +25,9 @@ def entry(
         cfg.remove(key, value)
         console.print(stylize(f"{GPTCOMET_PRE} Removed {value} from {key}", Colors.GREEN))
 
+    except ValueError as e:
+        print("???????????????????" + f"{GPTCOMET_PRE} value not found: {value}")
+        console.print(f"{GPTCOMET_PRE} value not found: {value}")
     except NotModified:
         console.print(f"{GPTCOMET_PRE} Config value not exists and not modified: {key!s}")
     except ConfigKeyTypeError as e:
