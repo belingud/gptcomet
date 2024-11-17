@@ -38,11 +38,13 @@ def mock_repo():
 @pytest.fixture
 def message_generator(mock_config_manager, mock_repo):
     """创建MessageGenerator实例"""
-    with patch("git.Repo") as mock_repo_class:
-        # 确保Repo()调用返回正确工作目录的repo
-        mock_repo_class.return_value = mock_repo
-        # 显式传入项目根目录
-        return MessageGenerator(mock_config_manager, repo_path=PROJECT_ROOT)
+    mock_repo_class = patch("git.Repo")
+    # 确保Repo()调用返回正确工作目录的repo
+    mock_repo_class.return_value = mock_repo
+    # 显式传入项目根目录
+    msg_generator = MessageGenerator(mock_config_manager, repo_path=PROJECT_ROOT)
+    msg_generator.repo = mock_repo
+    return msg_generator
 
 
 class TestMessageGenerator:
