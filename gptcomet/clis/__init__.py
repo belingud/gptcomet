@@ -6,6 +6,7 @@ from gptcomet.utils import CONTEXT_SETTINGS
 
 app = typer.Typer(
     name="gmsg",
+    help="AI powered git commit message generator",
     no_args_is_help=True,
     rich_markup_mode="rich",
     context_settings=CONTEXT_SETTINGS,
