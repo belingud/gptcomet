@@ -306,17 +306,18 @@ class ConfigManager:
         Note:
             This method assumes that `self.current_config_path` is a valid file path.
         """
+
         def api_key_mask(api_key: str, show_first: int = 3) -> str:
             if not isinstance(api_key, str):
                 return api_key
-            
+
             # check api_key prefix
             prefixes = ("sk-or-v1-", "sk-", "gsk_", "xai-")
             for prefix in prefixes:
                 if api_key.startswith(prefix):
-                    visible_part = api_key[:(len(prefix) + show_first)]
+                    visible_part = api_key[: (len(prefix) + show_first)]
                     return visible_part + "*" * (len(api_key) - len(visible_part))
-            
+
             # no prefix found, return the first few characters
             return api_key[:show_first] + "*" * (len(api_key) - show_first)
 
@@ -324,23 +325,20 @@ class ConfigManager:
             """
             Mask API keys in a dictionary or list.
             """
-            if isinstance(data, dict):
-                for key, value in data.items():
-                    if key == "api_key":
-                        data[key] = api_key_mask(value)
-                    elif isinstance(value, (dict, list)):
-                        mask_api_keys(value)
-            elif isinstance(data, list):
-                for item in data:
-                    if isinstance(item, (dict, list)):
-                        mask_api_keys(item)
+            if not isinstance(data, (dict, list)):
+                return
+            for key, value in data.items():
+                if key == "api_key":
+                    data[key] = api_key_mask(value)
+                elif isinstance(value, (dict, list)):
+                    mask_api_keys(value)
 
         config_data = self.config.copy()
         config_data.pop("prompt", None)
-        
+
         # recursively mask api keys
         mask_api_keys(config_data)
-        
+
         # convert to YAML string
         output = StringIO()
         yaml.dump(config_data, output)

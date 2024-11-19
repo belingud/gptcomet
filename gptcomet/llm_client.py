@@ -106,7 +106,7 @@ class LLMClient:
 
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
-        console.print(f"🤖 Hang tight, I'm cooking up something good!")
+        console.print("🤖 Hang tight, I'm cooking up something good!")
         response: dict = self.completion_with_retries(**params)
         usage: dict = response.get("usage", {})
 

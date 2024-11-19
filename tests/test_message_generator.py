@@ -103,23 +103,27 @@ index 1234567..89abcdef 100644
 class TestGenerateCommitMessage:
     def test_generate_commit_message_no_changes(self, message_generator):
         """测试没有暂存更改时生成提交信息"""
-        with pytest.raises(GitNoStagedChanges):
-            with patch("gptcomet.message_generator.MessageGenerator.get_staged_diff") as mock_get_staged_diff:
-                mock_get_staged_diff.return_value = ""
-                message_generator.generate_commit_message()
+        with (
+            pytest.raises(GitNoStagedChanges),
+            patch(
+                "gptcomet.message_generator.MessageGenerator.get_staged_diff"
+            ) as mock_get_staged_diff,
+        ):
+            mock_get_staged_diff.return_value = ""
+            message_generator.generate_commit_message()
 
     def test_generate_brief_commit_message(self, message_generator, mock_repo):
         """测试生成简短提交信息"""
         mock_repo.git.diff.return_value = "test diff content"
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
+
             def get_side_effect(key, _type=None):
-                if key == "output.lang":
-                    return "en"
-                elif key == "prompt.translation":
-                    return "Translate: {{ placeholder }} to {{ output_language }}"
-                elif key == "file_ignore":
-                    return ["*.log", "*.tmp"]
-                return None
+                return {
+                    "output.lang": "zh-cn",
+                    "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
+                    "file_ignore": ["*.log", "*.tmp"],
+                }.get(key)
+
             message_generator.config_manager.get.side_effect = get_side_effect
             mock_generate.return_value = "Add new feature"
             msg = message_generator.generate_commit_message(rich=False)
@@ -129,14 +133,14 @@ class TestGenerateCommitMessage:
         """测试生成富文本提交信息"""
         mock_repo.git.diff.return_value = "test diff content"
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
+
             def get_side_effect(key, _type=None):
-                if key == "output.lang":
-                    return "zh-cn"
-                elif key == "prompt.translation":
-                    return "Translate: {{ placeholder }} to {{ output_language }}"
-                elif key == "file_ignore":
-                    return ["*.log", "*.tmp"]
-                return None
+                return {
+                    "output.lang": "zh-cn",
+                    "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
+                    "file_ignore": ["*.log", "*.tmp"],
+                }.get(key)
+
             message_generator.config_manager.get.side_effect = get_side_effect
             mock_generate.side_effect = ["Add new feature", "添加新功能"]
 
@@ -144,14 +148,14 @@ class TestGenerateCommitMessage:
         """测试提交信息翻译"""
         mock_repo.git.diff.return_value = "test diff content"
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
+
             def get_side_effect(key, _type=None):
-                if key == "output.lang":
-                    return "zh-cn"
-                elif key == "prompt.translation":
-                    return "Translate: {{ placeholder }} to {{ output_language }}"
-                elif key == "file_ignore":
-                    return ["*.log", "*.tmp"]
-                return None
+                return {
+                    "output.lang": "zh-cn",
+                    "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
+                    "file_ignore": ["*.log", "*.tmp"],
+                }.get(key)
+
             mock_generate.side_effect = ["Add new feature", "添加新功能"]
             message_generator.config_manager.get.side_effect = get_side_effect
 
