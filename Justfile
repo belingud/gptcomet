@@ -21,7 +21,7 @@ check:
 # Format code with ruff and isort
 format:
     @echo "🚀 Formatting code: Running ruff"
-    pdm run ruff check --fix . --config pyproject.toml
+    pdm run ruff format . --config pyproject.toml
     @echo "🚀 Formatting code: Running isort"
     pdm run isort . --settings-path pyproject.toml
 

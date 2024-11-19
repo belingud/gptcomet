@@ -7,16 +7,18 @@ from gptcomet.log import logger, set_debug
 
 
 def entry(
-    debug: Annotated[
-        bool, typer.Option("--debug", "-d", help="Print debug information.")
+    prompt: Annotated[
+        bool,
+        typer.Option(
+            "--prompt", help="Reset prompt to default of current version.", rich_help_panel="Prompt"
+        ),
     ] = False,
-    local: Annotated[
-        bool, typer.Option("--local", help="Use local configuration file.")
-    ] = False,
+    debug: Annotated[bool, typer.Option("--debug", "-d", help="Print debug information.")] = False,
+    local: Annotated[bool, typer.Option("--local", help="Use local configuration file.")] = False,
 ):
     cfg: ConfigManager = get_config_manager(local=local)
     if debug:
         set_debug()
         logger.debug(f"Using Config path: {cfg.current_config_path}")
-    cfg.reset()
+    cfg.reset(prompt=prompt)
     typer.echo(f"Configuration `{cfg.current_config_path}` reset to default values")

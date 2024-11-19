@@ -11,4 +11,5 @@ def timeit_decorator(func):
         end_time = time.perf_counter()
         logger.debug(f"{func.__name__} executed in {end_time - start_time:.4f} seconds")
         return result
+
     return wrapper

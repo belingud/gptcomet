@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -19,6 +20,28 @@ from gptcomet.support_keys import SUPPORT_KEYS
 from gptcomet.utils import convert2type, output_language_map, strtobool
 
 yaml = YAML(typ="rt", pure=True)
+
+
+@dataclass
+class ProviderConfig:
+    """Provider configuration data class."""
+
+    provider: str = field(default="openai")
+    api_base: str = field(default="https://api.openai.com/v1/")
+    model: str = field(default="")
+    api_key: str = field(default="")
+    max_tokens: int = field(default=1024)
+    retries: int = field(default=2)
+
+    def to_dict(self) -> Provider:
+        """Convert to provider dictionary."""
+        return {
+            "api_base": self.api_base,
+            "api_key": self.api_key,
+            "model": self.model,
+            "max_tokens": self.max_tokens,
+            "retries": self.retries,
+        }
 
 
 class ConfigManager:
@@ -282,37 +305,59 @@ class ConfigManager:
             FileNotFoundError: If the current configuration file does not exist.
         Note:
             This method assumes that `self.current_config_path` is a valid file path.
-
         """
-        self.config.pop("prompt", None)
-        t = StringIO()
-        yaml.dump(self.config, t)
-        text = t.getvalue()
-        lines = text.splitlines()
-        for i, line in enumerate(lines):
-            if "api_key:" in line:
-                key = line.split(":")[1].strip(" \"'")
-                show_idx = 3
-                if key.startswith("sk-or-v1-"):
-                    show_idx += 9
-                elif key.startswith("sk-"):
-                    show_idx += 3
-                elif key.startswith("gsk_"):
-                    show_idx += 4
-                lines[i] = line.replace(key, key[:show_idx] + (len(key) - show_idx) * "*")
-        return "\n".join(lines)
 
-    def reset(self):
+        def api_key_mask(api_key: str, show_first: int = 3) -> str:
+            if not isinstance(api_key, str):
+                return api_key
+
+            # check api_key prefix
+            prefixes = ("sk-or-v1-", "sk-", "gsk_", "xai-")
+            for prefix in prefixes:
+                if api_key.startswith(prefix):
+                    visible_part = api_key[: (len(prefix) + show_first)]
+                    return visible_part + "*" * (len(api_key) - len(visible_part))
+
+            # no prefix found, return the first few characters
+            return api_key[:show_first] + "*" * (len(api_key) - show_first)
+
+        def mask_api_keys(data):
+            """
+            Mask API keys in a dictionary or list.
+            """
+            if not isinstance(data, (dict, list)):
+                return
+            for key, value in data.items():
+                if key == "api_key":
+                    data[key] = api_key_mask(value)
+                elif isinstance(value, (dict, list)):
+                    mask_api_keys(value)
+
+        config_data = self.config.copy()
+        config_data.pop("prompt", None)
+
+        # recursively mask api keys
+        mask_api_keys(config_data)
+
+        # convert to YAML string
+        output = StringIO()
+        yaml.dump(config_data, output)
+        return output.getvalue()
+
+    def reset(self, prompt: bool = False):
         """
         Resets the current configuration to its default state.
+
+        Args:
+            prompt: If True, only reset prompt configuration
         """
-        with (
-            self.default_config_file.open() as default,
-            self.current_config_path.open("w") as target,
-        ):
-            content = default.read()
-            target.write(content)
-            self._cache["config"] = None
+        default_config = self.load_default_config()
+        if prompt:
+            self.set("prompt", default_config.get("prompt"))
+            return
+        self._cache["config"] = default_config
+        self.save_config()
+        self._cache["config"] = None
 
     def list_keys(self) -> str:
         """
@@ -389,9 +434,11 @@ class ConfigManager:
         Returns:
             Any: The converted YAML value or the original string value.
         """
+        if not isinstance(value, str):
+            return value
         try:
             return strtobool(value)
-        except ValueError:
+        except (ValueError, TypeError):
             pass
         if value.lower() in ("none", "null"):
             return None

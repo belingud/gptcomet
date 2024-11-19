@@ -11,13 +11,15 @@ app = typer.Typer(
     context_settings=CONTEXT_SETTINGS,
     short_help="Manage config.",
     help=(
-        "Manage gptcomet configuration, default config path is `~/.config/gptcomet/gptcomet.toml`."
+        "Manage gptcomet configuration, default config path is `~/.config/gptcomet/gptcomet.yaml`."
     ),
 )
 
 app.command(name="get", help="Get config value")(get.entry)
 app.command(name="list", help="List config content")(_list.entry)
-app.command(name="reset", help="Reset config to default")(reset.entry)
+app.command(name="reset", help="Reset config to default, only reset prompt if --prompt is set")(
+    reset.entry
+)
 app.command(name="set", help="Set config value")(set.entry)
 app.command(name="path", help="Get runtime config path")(path.entry)
 app.command(name="keys", help="List supported config keys")(keys.entry)

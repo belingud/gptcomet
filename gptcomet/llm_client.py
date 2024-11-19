@@ -106,6 +106,7 @@ class LLMClient:
 
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
+        console.print("🤖 Hang tight, I'm cooking up something good!")
         response: dict = self.completion_with_retries(**params)
         usage: dict = response.get("usage", {})
 
@@ -143,8 +144,7 @@ class LLMClient:
 
         # set optional params
         max_tokens = int(self.config_manager.get(f"{self.provider}.max_tokens", 0))
-        if max_tokens:
-            params["max_tokens"] = max_tokens
+        params["max_tokens"] = max_tokens or 100
         temperature = float(self.config_manager.get(f"{self.provider}.temperature", 0))
         if temperature:
             params["temperature"] = temperature

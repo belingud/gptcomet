@@ -1,5 +1,51 @@
 
 ---
+## [0.0.18](https://github.com/belingud/gptcomet/compare/v0.0.17..v0.0.18) - 2024-11-19
+
+### ⛰️  Features
+
+- add loading message in LLMClient - ([d7bf851](https://github.com/belingud/gptcomet/commit/d7bf851d0e3fb92d94bce8fe33941ff4c03ab9a8)) - belingud
+- add retry choices and improve commit message generation - ([89876cf](https://github.com/belingud/gptcomet/commit/89876cff7fd1a1c6578582736982debed967b7ba)) - belingud
+- add ProviderConfig data class and value error handling - ([47665d6](https://github.com/belingud/gptcomet/commit/47665d61d406139f1a8f1cd758e85d0af5b17e30)) - belingud
+- add URL validation for required fields - ([fdc9789](https://github.com/belingud/gptcomet/commit/fdc97898dab28c3d2cf4f12df3a7f6c804f0935a)) - belingud
+- add rich commit message template and prompt - ([e277bd2](https://github.com/belingud/gptcomet/commit/e277bd2589b7d866a07190e952868495d1461dda)) - belingud
+- add RequiredValidator and update logging formatter - ([756a468](https://github.com/belingud/gptcomet/commit/756a468cd60fb8c676b3e3cabb1d7f491cf2038a)) - belingud
+
+### 🐛 Bug Fixes
+
+- ensure lang is checked for None before using - ([7f91dd3](https://github.com/belingud/gptcomet/commit/7f91dd311e37087ef4ba35c9d7ac173a39bdd067)) - belingud
+- simplify max_tokens parameter setting - ([40ec6f1](https://github.com/belingud/gptcomet/commit/40ec6f17ff7ded27cdd856ab6c036a83b940f3b4)) - belingud
+- change default config path to yaml - ([59c1df4](https://github.com/belingud/gptcomet/commit/59c1df427bfba83b97686ba42c1ac62ceed961da)) - belingud
+
+### 🚜 Refactor
+
+- add xai api key masking support - ([3abc9d0](https://github.com/belingud/gptcomet/commit/3abc9d06ab960dabb6f7685f7280ec07e33bafd3)) - belingud
+- update reset command to conditionally reset prompt - ([b2c7732](https://github.com/belingud/gptcomet/commit/b2c7732b6eb5cfe156087dea891b3ad646acb1dc)) - belingud
+- update config_manager and utils for better reset functionality and type safety - ([cf4553d](https://github.com/belingud/gptcomet/commit/cf4553d99ac0af845289a72e5cac7b3dd857495a)) - belingud
+- add repo_path parameter to MessageGenerator - ([061071b](https://github.com/belingud/gptcomet/commit/061071b54eddd9688521e63fb0f0cbafc129c041)) - belingud
+- remove unused imports and simplify utils - ([a32155c](https://github.com/belingud/gptcomet/commit/a32155c7a24a678f3d40598646b821a51ea126f5)) - belingud
+- update formatting and add validators in provider.py - ([f23c2e1](https://github.com/belingud/gptcomet/commit/f23c2e1e4c4ce8734a320cf32bfa073ab32178e6)) - belingud
+- update code formatting commands - ([c387360](https://github.com/belingud/gptcomet/commit/c387360234f4fc2e6260e997e9b0758decaec67f)) - belingud
+
+### 📚 Documentation
+
+- add help text for cli app - ([5213e30](https://github.com/belingud/gptcomet/commit/5213e30dac48826fdaea81f128fdd3400a0bf9d6)) - belingud
+- update command documentation and configuration options - ([4a0e902](https://github.com/belingud/gptcomet/commit/4a0e9023d141681cde9c3846923120397e76e3de)) - belingud
+- Update CHANGELOG.md with version 0.0.17 details - ([c1a51e2](https://github.com/belingud/gptcomet/commit/c1a51e22f9788db8aa46e5ea090cfe5c07f3b5cf)) - belingud
+
+### 🧪 Testing
+
+- update message generator test implementation - ([8833c51](https://github.com/belingud/gptcomet/commit/8833c51a5eddf83f47a174118616f2c18d241799)) - belingud
+- update commit message style in tests - ([264f231](https://github.com/belingud/gptcomet/commit/264f231db9167f6ccd01953b4c2fd080a058dc2c)) - belingud
+- add test cases and new message generator module - ([c659eb5](https://github.com/belingud/gptcomet/commit/c659eb58d95a692d4f3c0c364729fbea49497273)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update Justfile changelog generation command - ([83f411e](https://github.com/belingud/gptcomet/commit/83f411e0aa5b0339d2a3091d5889ea62628c4ed9)) - belingud
+- update changelog generation script - ([2964477](https://github.com/belingud/gptcomet/commit/2964477b11d6da597894a725339812c418b2b64d)) - belingud
+
+
+---
 ## [0.0.17](https://github.com/belingud/gptcomet/compare/v0.0.16..v0.0.17) - 2024-11-10
 
 ### ⛰️  Features

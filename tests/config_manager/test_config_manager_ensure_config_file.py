@@ -1,5 +1,3 @@
-
-
 def test_ensure_configfile_not_exist(config_manager, tmp_path):
     config_manager.current_config_path = tmp_path / "not_exist" / "gptcomet.yaml"
     assert not config_manager.current_config_path.exists()

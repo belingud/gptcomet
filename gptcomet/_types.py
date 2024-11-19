@@ -13,6 +13,7 @@ class CacheType(t.TypedDict):
 
 class CompleteParams(t.TypedDict, total=False):
     """complete required params"""
+
     api_base: str
     api_key: str
     model: str
@@ -26,6 +27,7 @@ class CompleteParams(t.TypedDict, total=False):
 
 class Provider(t.TypedDict, total=False):
     """provider setting dict"""
+
     api_base: str
     api_key: str
     model: str

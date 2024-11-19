@@ -71,7 +71,7 @@ To use gptcomet, follow these steps:
     *   `api_key`: The API key for the provider.
     *   `model`: The model used for generating commit messages (default `text-davinci-003`).
     *   `retries`: The number of retries for the API request (default `2`).
-3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg gen commit`.
+3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg commit`.
 
 ## Commands
 
@@ -85,13 +85,8 @@ The following are the available commands for GPTComet:
   * `keys`: List all supported keys.
   * `append`: Append a value to a configuration key. (List value only, like `fileignore`)
   * `remove`: Remove a value from a configuration key. (List value only, like `fileignore`)
-* `gmsg hook`: Hook manage commands group(Prototype phase.).
-  * `install`: Install the GPTComet hook.
-  * `uninstall`: Uninstall the GPTComet hook.
-  * `status`: Check the status of the GPTComet hook.
-* `gmsg gen`: Generate messages by changes/diff.
-  * `commit`: Generate a commit message based on the changes made in the code.
-  * `pr`: Generate a pull request message based on the changes made in the code.
+* `gmsg commit`: Generate commit message by changes/diff.
+* `gmsg newprovider`: Add a new provider.
 
 
 ## Configuration
@@ -111,24 +106,28 @@ The configuration file for GPTComet is `gptcomet.yaml`. The file should contain 
 *   `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
 *   `extra_headers`: The extra headers for the provider, json string.
 *   `prompt.brief_commit_message`: The prompt for generating brief commit messages.
+*   `prompt.rich_commit_message`: The prompt for generating rich commit messages.
 *   `prompt.translation`: The prompt for translating commit messages to a target language.
 *   `output.lang`: The language of the commit message (default `en`).
+*   `output.rich_template`: The template for generating rich commit messages.
 
 ### file_ignore
 
 The file to ignore when generating a commit. The default value is
 ```yaml
-  - "bun.lockb"
-  - "Cargo.lock"
-  - "composer.lock"
-  - "Gemfile.lock"
-  - "package-lock.json"
-  - "pnpm-lock.yaml"
-  - "poetry.lock"
-  - "yarn.lock"
-  - "pdm.lock"
-  - "Pipfile.lock"
-  - "*.py[cod]"
+- bun.lockb
+- Cargo.lock
+- composer.lock
+- Gemfile.lock
+- package-lock.json
+- pnpm-lock.yaml
+- poetry.lock
+- yarn.lock
+- pdm.lock
+- Pipfile.lock
+- '*.py[cod]'
+- go.mod
+- go.sum
 ```
 
 You can add more file_ignore by using the `gmsg config append file_ignore <xxx>` command.
@@ -152,7 +151,7 @@ and `model` to `meta-llama/llama-3.1-8b-instruct:free` or some other you prefer.
 gmsg config set openai.api_base https://openrouter.ai/api/v1
 gmsg config set openai.api_key YOUR_API_KEY
 gmsg config set openai.model meta-llama/llama-3.1-8b-instruct:free
-gmsg config set openai.max_tokens 13000
+gmsg config set openai.max_tokens 1300
 ```
 
 Silicon providers the similar interface with openrouter, so you can set provider to `openai`
@@ -177,7 +176,7 @@ Here is an example of how to use GPTComet:
     retries = 2
     output.lang = "en"
     ```
-2.  Run the following command to generate a commit message: `gmsg generate commit`
+2.  Run the following command to generate a commit message: `gmsg commit`
 3.  GPTComet will generate a commit message based on the changes made in the code and display it in the console.
 
 Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
