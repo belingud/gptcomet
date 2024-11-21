@@ -98,6 +98,7 @@ class LLMClient:
             ConfigError: If the API key is not set in the config.
             BadRequestError: If the completion API returns an error.
         """
+        console.print(f"Discovered model `{self.model}` with provider `{self.provider}`.")
         if use_history:
             messages = [*self.conversation_history, {"role": "user", "content": prompt}]
         else:
@@ -119,11 +120,11 @@ class LLMClient:
             console.print("No usage response found.")
         else:
             text = Text("Token usage> prompt tokens: ")
-            text.append(f"{usage.get('prompt_tokens')}", Colors.LIGHT_GREEN_RGB)
+            text.append(f"{usage.get('prompt_tokens')}", Colors.LIGHT_MAGENTA_RGB)
             text.append(", completion tokens: ")
-            text.append(f"{usage.get('completion_tokens')}", Colors.LIGHT_GREEN_RGB)
+            text.append(f"{usage.get('completion_tokens')}", Colors.LIGHT_MAGENTA_RGB)
             text.append(" total tokens: ")
-            text.append(f"{usage.get('total_tokens')}", Colors.LIGHT_GREEN_RGB)
+            text.append(f"{usage.get('total_tokens')}", Colors.LIGHT_MAGENTA_RGB)
             console.print(text)
 
         return assistant_message
