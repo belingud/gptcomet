@@ -1,5 +1,30 @@
 
 ---
+## [0.0.19](https://github.com/belingud/gptcomet/compare/v0.0.18..v0.0.19) - 2024-11-21
+
+### ⛰️  Features
+
+- add model and provider print, change token color - ([f0f7127](https://github.com/belingud/gptcomet/commit/f0f712703159647637bce888db7b60e2fcf64caf)) - belingud
+
+### 🚜 Refactor
+
+- improve code readability and error handling - ([d0cf65d](https://github.com/belingud/gptcomet/commit/d0cf65d212faee6287bc4d7243c66077419933bf)) - belingud
+
+### 📚 Documentation
+
+- update changelog for version 0.0.18 - ([b1a5510](https://github.com/belingud/gptcomet/commit/b1a551070348ddf9307552eadcb024c624c7a7e4)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- disable auto commit in bumpversion config - ([6e352eb](https://github.com/belingud/gptcomet/commit/6e352ebdb7b643dda90aab814f6e04997edd4054)) - belingud
+- update pdm lock - ([9dc802f](https://github.com/belingud/gptcomet/commit/9dc802f5ac4c84a176dddfd22de59691453f02a2)) - belingud
+
+### Build
+
+- update and restructure dev dependencies - ([49f541d](https://github.com/belingud/gptcomet/commit/49f541d4cb6150918b0945c6a535675644812979)) - belingud
+
+
+---
 ## [0.0.18](https://github.com/belingud/gptcomet/compare/v0.0.17..v0.0.18) - 2024-11-19
 
 ### ⛰️  Features
