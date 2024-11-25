@@ -14,7 +14,7 @@ check:
     @echo "🚀 Linting code: Running pre-commit"
     pdm run pre-commit run -a
     @echo "🚀 Linting with ruff"
-    pdm run ruff check tests . --config pyproject.toml
+    pdm run ruff check . --config pyproject.toml
     @echo "🚀 Checking for obsolete dependencies: Running deptry"
     pdm run deptry .
 

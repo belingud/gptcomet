@@ -30,6 +30,7 @@ class MessageGenerator:
     Raises:
         GitNoStagedChanges: If there are no staged changes.
         InvalidGitRepositoryError: If the current directory is not a Git repository.
+        ConfigError: If the configuration is invalid.
 
     Examples:
         >>> from gptcomet.config_manager import ConfigManager
@@ -39,9 +40,20 @@ class MessageGenerator:
         >>> message_generator.generate_commit_message()
     """
 
-    __slots__ = ("config_manager", "llm_client", "repo", "diff")
+    __slots__ = ("config_manager", "diff", "llm_client", "repo")
 
     def __init__(self, config_manager: ConfigManager, repo_path: t.Optional[str] = None):
+        """
+        Initialize MessageGenerator instance.
+
+        Args:
+            config_manager (ConfigManager): The ConfigManager instance to use.
+            repo_path (str, optional): The path to the Git repository. Defaults to None.
+
+        Raises:
+            InvalidGitRepositoryError: If the path is not a Git repository.
+            ConfigError: If the configuration is invalid.
+        """
         self.config_manager = config_manager
         self.llm_client = LLMClient(config_manager)
         self.repo = Repo(repo_path or Path.cwd())

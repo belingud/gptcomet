@@ -3,7 +3,14 @@ from pathlib import Path
 from typing import Annotated, Literal, Optional, cast
 
 import typer
-from git import Commit, HookExecutionError, Repo, safe_decode
+from git import (
+    Commit,
+    HookExecutionError,
+    InvalidGitRepositoryError,
+    NoSuchPathError,
+    Repo,
+    safe_decode,
+)
 from httpx import HTTPStatusError
 from prompt_toolkit import prompt
 from prompt_toolkit.cursor_shapes import CursorShape
@@ -13,7 +20,7 @@ from rich.prompt import Prompt
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.const import COMMIT_OUTPUT_TEMPLATE
-from gptcomet.exceptions import GitNoStagedChanges, KeyNotFound
+from gptcomet.exceptions import ConfigError, GitNoStagedChanges, KeyNotFound
 from gptcomet.log import set_debug
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.styles import Colors, stylize
@@ -137,6 +144,25 @@ def gen_output(repo: Repo, commit: Commit, rich: bool = True) -> str:
     )
 
 
+def commit(message_generator: MessageGenerator, commit_message: str, rich: bool = True) -> None:
+    """
+    Commit the generated commit message.
+
+    Args:
+        message_generator (MessageGenerator): The message generator object.
+        commit_message (str): The commit message to be committed.
+        rich (bool): If True, the commit message will be formatted with rich text markup.
+    """
+    try:
+        commit = message_generator.repo.index.commit(message=commit_message)
+        output = gen_output(message_generator.repo, commit, rich)
+        console.print(output)
+        console.print(stylize("Commit message saved successfully!", Colors.GREEN))
+    except (HookExecutionError, ValueError) as error:
+        console.print(f"[red]Commit Error: {error}[/red]")
+        raise typer.Exit(1) from None
+
+
 def entry(
     rich: Annotated[
         bool, typer.Option("--rich", "-r", help="Generate rich commit message.")
@@ -170,7 +196,11 @@ def entry(
     config_manager = (
         ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
     )
-    message_generator = MessageGenerator(config_manager)
+    try:
+        message_generator = MessageGenerator(config_manager)
+    except (ConfigError, InvalidGitRepositoryError, NoSuchPathError) as error:
+        console.print(stylize(str(error), Colors.YELLOW))
+        raise typer.Exit(1) from None
 
     while True:
         try:
@@ -199,11 +229,5 @@ def entry(
             console.print("\n[yellow]Operation cancelled by user.[/yellow]")
             return
 
-    try:
-        commit = message_generator.repo.index.commit(message=commit_message)
-        output = gen_output(message_generator.repo, commit, rich)
-        console.print(output)
-        console.print(stylize("Commit message saved successfully!", Colors.GREEN))
-    except (HookExecutionError, ValueError) as error:
-        console.print(f"[red]Commit Error: {error}[/red]")
-        raise typer.Exit(1) from None
+    # Commit and show the output
+    commit(message_generator, commit_message, rich)
