@@ -19,12 +19,37 @@ dependencies = [
     "socksio>=1.0.0",
 ]
 license = { text = "MIT license" }
-keywords = ['python']
+keywords = [
+    "ai",
+    "git",
+    "commit",
+    "message",
+    "ai-powered",
+    "commit-message",
+    "gptcomet",
+    "chatgpt",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [project.urls]
-Homepage = "https://belingud.github.io/gptcomet/"
+Homepage = "https://github.com/belingud/gptcomet"
 Repository = "https://github.com/belingud/gptcomet"
-Documentation = "https://belingud.github.io/gptcomet/"
+Documentation = "https://github.com/belingud/gptcomet"
 
 [project.scripts]
 gptcomet = "gptcomet.clis.__main__:app"
