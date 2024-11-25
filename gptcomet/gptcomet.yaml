@@ -13,6 +13,7 @@ file_ignore:  # File to ignore when generating a commit
   - "*.py[cod]"
   - "go.mod"
   - "go.sum"
+  - "uv.lock"
 
 output:
   lang: "en"  # Commit message language
