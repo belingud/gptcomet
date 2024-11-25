@@ -1,7 +1,6 @@
 import logging
 import typing as t
 
-import click
 import httpx
 import orjson as json
 from glom import glom
@@ -63,13 +62,30 @@ class LLMClient:
         return cls(config_manager)
 
     def __init__(self, config_manager: "ConfigManager"):
+        """
+        Initializes the LLMClient instance from a ConfigManager.
+
+        Args:
+            config_manager (ConfigManager): The ConfigManager instance to create the class instance from.
+
+        Raises:
+            ConfigError: If the provider is not specified or if the API key is not set.
+        """
         self.config_manager = config_manager
         self.conversation_history: list[dict[str, str]] = []
         self.provider: str = self.config_manager.get(PROVIDER_KEY)
+        if not self.provider:
+            raise ConfigError(ConfigErrorEnum.PROVIDER_KEY_MISSING)
+
+        if not self.config_manager.get(self.provider):
+            raise ConfigError(ConfigErrorEnum.PROVIDER_CONFIG_MISSING, self.provider)
+
         self.api_key: str = self.config_manager.get(f"{self.provider}.api_key")
         if not self.config_manager.is_api_key_set:
-            raise ConfigError(ConfigErrorEnum.API_KEY_MISSING)
+            raise ConfigError(ConfigErrorEnum.API_KEY_MISSING, self.provider)
+
         self.model: str = self.config_manager.get(f"{self.provider}.model", DEFAULT_MODEL)
+
         self.api_base: str = self.config_manager.get(f"{self.provider}.api_base", DEFAULT_API_BASE)
         self.retries: int = int(
             self.config_manager.get(f"{self.provider}.retries", DEFAULT_RETRIES)
@@ -160,11 +176,9 @@ class LLMClient:
                 str(self.config_manager.get(f"{self.provider}.extra_headers", "{}"))
             )
         except json.JSONDecodeError:
-            click.echo(
-                click.style(
-                    f"{self.provider}.extra_headers is not a valid JSON string, ignored.",
-                    fg="yellow",
-                )
+            console.print(
+                f"{self.provider}.extra_headers is not a valid JSON string, ignored.",
+                style="yellow",
             )
             extra_headers = None
         if extra_headers:

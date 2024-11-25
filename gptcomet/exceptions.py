@@ -1,4 +1,5 @@
 import enum
+import typing as t
 
 from gptcomet.utils import output_language_map
 
@@ -34,17 +35,24 @@ class ConfigErrorEnum(enum.IntEnum):
         obj.description = description
         return obj
 
-    API_KEY_MISSING = 0, "Missing {provider}.api_key in config file"
+    API_KEY_MISSING = 0, "Missing API key in config file for provider '{provider}'"
+    PROVIDER_KEY_MISSING = 1, "No LLM provider specified in config file"
+    PROVIDER_CONFIG_MISSING = 2, "Configuration for provider '{provider}' not found"
 
 
 class ConfigError(GPTCometError):
-    def __init__(self, error: ConfigErrorEnum = ConfigErrorEnum.API_KEY_MISSING):
+    def __init__(
+        self,
+        error: ConfigErrorEnum = ConfigErrorEnum.API_KEY_MISSING,
+        provider: t.Optional[str] = None,
+    ):
         if not isinstance(error, ConfigErrorEnum):
             raise TypeError
         self.error = error
+        self.provider = provider or "unknown"
 
     def __str__(self):
-        return f"Config error: {self.error.description}"
+        return self.error.description.format(provider=self.provider)
 
 
 class ConfigKeyError(GPTCometError):
