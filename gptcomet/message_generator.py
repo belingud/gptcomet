@@ -40,7 +40,7 @@ class MessageGenerator:
         >>> message_generator.generate_commit_message()
     """
 
-    __slots__ = ("config_manager", "llm_client", "repo", "diff")
+    __slots__ = ("config_manager", "diff", "llm_client", "repo")
 
     def __init__(self, config_manager: ConfigManager, repo_path: t.Optional[str] = None):
         """

@@ -46,9 +46,9 @@ class ProviderConfig:
 
 class ConfigManager:
     __slots__ = (
-        "current_config_path",
         "_cache",
         "_valid_keys",
+        "current_config_path",
     )
     current_config_path: Path
     _cache: CacheType

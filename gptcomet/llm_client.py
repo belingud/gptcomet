@@ -36,16 +36,16 @@ if t.TYPE_CHECKING:
 
 class LLMClient:
     __slots__ = (
-        "config_manager",
-        "conversation_history",
-        "provider",
-        "api_key",
-        "model",
         "api_base",
-        "retries",
+        "api_key",
         "completion_path",
-        "proxy",
+        "config_manager",
         "content_path",
+        "conversation_history",
+        "model",
+        "provider",
+        "proxy",
+        "retries",
     )
 
     @classmethod
