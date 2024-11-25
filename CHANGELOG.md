@@ -1,5 +1,29 @@
 
 ---
+## [0.0.20](https://github.com/belingud/gptcomet/compare/v0.0.19..v0.0.20) - 2024-11-25
+
+### 🚜 Refactor
+
+- optimize imports and internal structures - ([0615d8d](https://github.com/belingud/gptcomet/commit/0615d8d6de3a3062147e107d183ee1570e249bc0)) - belingud
+- reorganize test dependencies in pyproject.toml - ([8b80013](https://github.com/belingud/gptcomet/commit/8b8001390f4d1b1acf9636791f3a254561b6f5b5)) - belingud
+- improve error handling in commit process - ([bed8f5d](https://github.com/belingud/gptcomet/commit/bed8f5dfb30baf91bdc6e752c3884211d6b82606)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- remove GPTComet hook and prepare-commit-msg script - ([1bf52f9](https://github.com/belingud/gptcomet/commit/1bf52f9484cd5ba64a927de34cb7d2c4cc5cc6a5)) - belingud
+- update project metadata and linting scope - ([7238915](https://github.com/belingud/gptcomet/commit/7238915c299d0f7920bdcd08d4b7c04d566968dc)) - belingud
+- remove update_changelog script - ([fcc9884](https://github.com/belingud/gptcomet/commit/fcc9884cb4eb903d0ab58107f944360423dd8336)) - belingud
+
+### Build
+
+- update tox environments and tools - ([7c4006b](https://github.com/belingud/gptcomet/commit/7c4006b2faff47459678b157b2b192a16d545425)) - belingud
+
+### Version
+
+- update version to 0.0.19 - ([01a305a](https://github.com/belingud/gptcomet/commit/01a305ac64e29ecc68fa07163e022bad319999f8)) - belingud
+
+
+---
 ## [0.0.19](https://github.com/belingud/gptcomet/compare/v0.0.18..v0.0.19) - 2024-11-21
 
 ### ⛰️  Features
