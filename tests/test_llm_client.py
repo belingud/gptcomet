@@ -1,8 +1,8 @@
 from unittest.mock import Mock, patch
 
+import glom
 import httpx
 import pytest
-import glom
 
 from gptcomet.exceptions import ConfigError, ConfigErrorEnum
 from gptcomet.llm_client import LLMClient
@@ -12,27 +12,31 @@ from gptcomet.llm_client import LLMClient
 def mock_config_manager():
     """基础配置管理器mock"""
     config = Mock()
-    config.get.side_effect = lambda key, default=None: glom.glom({
-        "provider": "openai",
-        "openai": {
-            "api_key": "test-key",
-            "model": "gpt-3.5-turbo",
-            "api_base": "https://api.openai.com/v1",
-            "retries": "3",
-            "completion_path": "/chat/completions",
-            "answer_path": "choices.0.message.content",
-            "proxy": "",
-            "max_tokens": "100",
-            "temperature": "0.7",
-            "top_p": "1",
-            "frequency_penalty": "0",
-            "presence_penalty": "0",
+    config.get.side_effect = lambda key, default=None: glom.glom(
+        {
+            "provider": "openai",
+            "openai": {
+                "api_key": "test-key",
+                "model": "gpt-3.5-turbo",
+                "api_base": "https://api.openai.com/v1",
+                "retries": "3",
+                "completion_path": "/chat/completions",
+                "answer_path": "choices.0.message.content",
+                "proxy": "",
+                "max_tokens": "100",
+                "temperature": "0.7",
+                "top_p": "1",
+                "frequency_penalty": "0",
+                "presence_penalty": "0",
+            },
+            "prompt": {
+                "system": "You are a helpful assistant.",
+                "user": "Hello!",
+            },
         },
-        "prompt": {
-            "system": "You are a helpful assistant.",
-            "user": "Hello!",
-        },
-    }, key, default=default)
+        key,
+        default=default,
+    )
     config.is_api_key_set = True
     return config
 
@@ -69,9 +73,13 @@ class TestLLMClientInitialization:
 
     def test_provider_config_missing(self, mock_config_manager):
         """测试 provider 配置缺失的情况"""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom({
-            "provider": "openai",
-        }, key, default=default)
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {
+                "provider": "openai",
+            },
+            key,
+            default=default,
+        )
 
         with pytest.raises(ConfigError) as exc_info:
             LLMClient(mock_config_manager)
@@ -192,20 +200,24 @@ class TestLLMClientCompletionWithRetries:
 
     def test_completion_with_retries_url_handling(self, mock_config_manager):
         """测试 URL 路径处理"""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom({
-            "provider": "openai",
-            "openai": {
-                "api_key": "test-key",
-                "model": "gpt-3.5-turbo",
-                "api_base": "https://api.openai.com/",  # 带斜杠
-                "completion_path": "chat/completions",  # 不带斜杠
-                "max_tokens": "100",
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {
+                "provider": "openai",
+                "openai": {
+                    "api_key": "test-key",
+                    "model": "gpt-3.5-turbo",
+                    "api_base": "https://api.openai.com/",  # 带斜杠
+                    "completion_path": "chat/completions",  # 不带斜杠
+                    "max_tokens": "100",
+                },
+                "prompt": {
+                    "system": "You are a helpful assistant.",
+                    "user": "Hello!",
+                },
             },
-            "prompt": {
-                "system": "You are a helpful assistant.",
-                "user": "Hello!",
-            },
-        }, key, default=default)
+            key,
+            default=default,
+        )
 
         client = LLMClient(mock_config_manager)
         with patch("httpx.Client.post") as mock_post:
@@ -214,7 +226,7 @@ class TestLLMClientCompletionWithRetries:
             }
             mock_post.return_value.status_code = 200
 
-            response = client.completion_with_retries(
+            client.completion_with_retries(
                 api_base="https://api.openai.com/",
                 api_key="test-key",
                 model="gpt-3.5-turbo",
@@ -239,23 +251,27 @@ class TestLLMClientGenChatParams:
 
     def test_gen_chat_params_with_optional(self, mock_config_manager):
         """测试包含可选参数的chat参数生成"""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom({
-            "provider": "openai",
-            "openai": {
-                "api_key": "test-key",
-                "model": "gpt-3.5-turbo",
-                "api_base": "https://api.openai.com/v1",
-                "max_tokens": "100",
-                "temperature": "0.7",
-                "top_p": "0.9",
-                "frequency_penalty": "0.5",
-                "extra_headers": '{"X-Custom": "value"}',
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {
+                "provider": "openai",
+                "openai": {
+                    "api_key": "test-key",
+                    "model": "gpt-3.5-turbo",
+                    "api_base": "https://api.openai.com/v1",
+                    "max_tokens": "100",
+                    "temperature": "0.7",
+                    "top_p": "0.9",
+                    "frequency_penalty": "0.5",
+                    "extra_headers": '{"X-Custom": "value"}',
+                },
+                "prompt": {
+                    "system": "You are a helpful assistant.",
+                    "user": "Hello!",
+                },
             },
-            "prompt": {
-                "system": "You are a helpful assistant.",
-                "user": "Hello!",
-            },
-        }, key, default=default)
+            key,
+            default=default,
+        )
 
         client = LLMClient(mock_config_manager)
         params = client.gen_chat_params([])
@@ -268,23 +284,27 @@ class TestLLMClientGenChatParams:
 
     def test_gen_chat_params_with_invalid_extra_headers(self, mock_config_manager):
         """测试无效的 extra_headers 参数"""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom({
-            "provider": "openai",
-            "openai": {
-                "api_key": "test-key",
-                "model": "gpt-3.5-turbo",
-                "api_base": "https://api.openai.com/v1",
-                "max_tokens": "100",
-                "temperature": "0.7",
-                "top_p": "0.9",
-                "frequency_penalty": "0.5",
-                "extra_headers": "{invalid json}",
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {
+                "provider": "openai",
+                "openai": {
+                    "api_key": "test-key",
+                    "model": "gpt-3.5-turbo",
+                    "api_base": "https://api.openai.com/v1",
+                    "max_tokens": "100",
+                    "temperature": "0.7",
+                    "top_p": "0.9",
+                    "frequency_penalty": "0.5",
+                    "extra_headers": "{invalid json}",
+                },
+                "prompt": {
+                    "system": "You are a helpful assistant.",
+                    "user": "Hello!",
+                },
             },
-            "prompt": {
-                "system": "You are a helpful assistant.",
-                "user": "Hello!",
-            },
-        }, key, default=default)
+            key,
+            default=default,
+        )
 
         client = LLMClient(mock_config_manager)
         params = client.gen_chat_params([])
@@ -293,62 +313,70 @@ class TestLLMClientGenChatParams:
 
     def test_gen_chat_params_with_all_optional_params(self, mock_config_manager):
         """Test gen_chat_params with all optional parameters set."""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom({
-            "provider": "openai",
-            "openai": {
-                "api_key": "test-key",
-                "model": "gpt-3.5-turbo",
-                "temperature": "0.7",
-                "top_p": "0.9",
-                "frequency_penalty": "0.5"
-            }
-        }, key, default=default)
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {
+                "provider": "openai",
+                "openai": {
+                    "api_key": "test-key",
+                    "model": "gpt-3.5-turbo",
+                    "temperature": "0.7",
+                    "top_p": "0.9",
+                    "frequency_penalty": "0.5",
+                },
+            },
+            key,
+            default=default,
+        )
         mock_config_manager.is_api_key_set = True
-        
+
         client = LLMClient(mock_config_manager)
         params = client.gen_chat_params([{"role": "user", "content": "test"}])
-        
+
         assert params["temperature"] == 0.7
         assert params["top_p"] == 0.9
         assert params["frequency_penalty"] == 0.5
 
     def test_completion_with_retries_with_all_optional_params(self, mock_config_manager):
         """Test completion_with_retries with all optional parameters."""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom({
-            "provider": "openai",
-            "openai": {
-                "api_key": "test-key",
-                "model": "gpt-3.5-turbo"
-            }
-        }, key, default=default)
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {"provider": "openai", "openai": {"api_key": "test-key", "model": "gpt-3.5-turbo"}},
+            key,
+            default=default,
+        )
         mock_config_manager.is_api_key_set = True
-        
+
         client = LLMClient(mock_config_manager)
-        
+
         # Mock httpx.Client
         class MockResponse:
             def __init__(self):
                 self.status_code = 200
                 self.text = '{"choices": [{"message": {"content": "test response"}}]}'
+
             def raise_for_status(self):
                 pass
+
             def json(self):
                 return {"choices": [{"message": {"content": "test response"}}]}
-        
+
         class MockClient:
             def __init__(self, *args, **kwargs):
                 pass
+
             def post(self, *args, **kwargs):
                 return MockResponse()
+
             def __enter__(self):
                 return self
+
             def __exit__(self, *args):
                 pass
-        
+
         import httpx
+
         original_client = httpx.Client
         httpx.Client = MockClient
-        
+
         try:
             response = client.completion_with_retries(
                 api_base="https://api.openai.com/v1",
@@ -360,7 +388,7 @@ class TestLLMClientGenChatParams:
                 top_p=0.9,
                 frequency_penalty=0.5,
             )
-            
+
             assert response == {"choices": [{"message": {"content": "test response"}}]}
         finally:
             httpx.Client = original_client
