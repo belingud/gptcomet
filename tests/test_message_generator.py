@@ -15,6 +15,21 @@ def mock_config_manager():
     """创建模拟的配置管理器"""
     config = Mock()
     config.get.side_effect = lambda key, default=None: {
+        "provider": "openai",
+        "openai": {
+            "api_key": "test-key",
+            "model": "gpt-3.5-turbo",
+            "api_base": "https://api.openai.com/v1",
+            "retries": "3",
+            "completion_path": "/chat/completions",
+            "answer_path": "choices.0.message.content",
+            "proxy": "",
+            "max_tokens": "100",
+            "temperature": "0.7",
+            "top_p": "1",
+            "frequency_penalty": "0",
+            "presence_penalty": "0",
+        },
         "file_ignore": ["*.log", "*.tmp"],
         "language": "en",
         "prompt.brief_commit_message": "Generate commit message for: {{ placeholder }}",
@@ -22,6 +37,7 @@ def mock_config_manager():
         "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
         "output.rich_template": "type: message\n\n- details",
     }.get(key, default)
+    config.is_api_key_set = True
     return config
 
 
