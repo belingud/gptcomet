@@ -325,12 +325,12 @@ class ConfigManager:
             """
             Mask API keys in a dictionary or list.
             """
-            if not isinstance(data, (dict, list)):
+            if not isinstance(data, dict):
                 return
             for key, value in data.items():
                 if key == "api_key":
                     data[key] = api_key_mask(value)
-                elif isinstance(value, (dict, list)):
+                elif isinstance(value, dict):
                     mask_api_keys(value)
 
         config_data = self.config.copy()
