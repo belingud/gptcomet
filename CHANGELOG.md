@@ -1,5 +1,25 @@
 
 ---
+## [0.0.21](https://github.com/belingud/gptcomet/compare/v0.0.20..v0.0.21) - 2024-11-26
+
+### 🐛 Bug Fixes
+
+- improve error messaging in config removal - ([fec93b7](https://github.com/belingud/gptcomet/commit/fec93b79906c42095885da9d0c81d51f29929edc)) - belingud
+
+### 🚜 Refactor
+
+- remove unused commit hooks - ([477e2b1](https://github.com/belingud/gptcomet/commit/477e2b1233ed62e6415d139be2a90c1de6633f46)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- add uv.lock to default ignored files - ([b0a7c27](https://github.com/belingud/gptcomet/commit/b0a7c27a73162a7e808150197116c574667ed521)) - belingud
+
+### Build
+
+- update version to 0.0.20 - ([4924647](https://github.com/belingud/gptcomet/commit/49246478125094956576fcdf6442e8dc89ed3fea)) - belingud
+
+
+---
 ## [0.0.20](https://github.com/belingud/gptcomet/compare/v0.0.19..v0.0.20) - 2024-11-25
 
 ### 🚜 Refactor
