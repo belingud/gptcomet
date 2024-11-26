@@ -1,5 +1,25 @@
 
 ---
+## [0.0.22](https://github.com/belingud/gptcomet/compare/v0.0.21..v0.0.22) - 2024-11-26
+
+### 🐛 Bug Fixes
+
+- simplify api key masking in config manager - ([e872e1c](https://github.com/belingud/gptcomet/commit/e872e1c7a39edb49faf4d0b181bd60341ed16a0d)) - belingud
+
+### 📚 Documentation
+
+- update CHANGELOG for v0.0.21 - ([2ffd432](https://github.com/belingud/gptcomet/commit/2ffd4326ffc6e6ba180490d8a1c29f1acaa9d47d)) - belingud
+
+### 🧪 Testing
+
+- enhance mock config for LLM tests - ([93ee469](https://github.com/belingud/gptcomet/commit/93ee46999f2e32df0a0a969e836ccf00a3d4b500)) - belingud
+
+### Build
+
+- bump version to 0.0.21 - ([f97d183](https://github.com/belingud/gptcomet/commit/f97d183c82c00414f8907c1c790503ae2b067ddd)) - belingud
+
+
+---
 ## [0.0.21](https://github.com/belingud/gptcomet/compare/v0.0.20..v0.0.21) - 2024-11-26
 
 ### 🐛 Bug Fixes
