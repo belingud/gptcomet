@@ -51,34 +51,34 @@ def test_keys_validator_frequency_penalty():
 
 def test_required_validator():
     validator = RequiredValidator("test_field")
-    
+
     # Test empty input
     with pytest.raises(ValidationError) as exc:
         validator.validate(Document(""))
     assert "test_field is required" in str(exc.value)
-    
+
     # Test valid input
     validator.validate(Document("some value"))  # Should not raise
 
 
 def test_url_validator():
     validator = URLValidator()
-    
+
     # Test empty input
     with pytest.raises(ValidationError) as exc:
         validator.validate(Document(""))
     assert "URL cannot be empty" in str(exc.value)
-    
+
     # Test invalid URL format (no protocol)
     with pytest.raises(ValidationError) as exc:
         validator.validate(Document("example.com/"))
     assert "URL must start with http:// or https://" in str(exc.value)
-    
+
     # Test invalid URL format (no trailing slash)
     with pytest.raises(ValidationError) as exc:
         validator.validate(Document("http://example.com"))
     assert "URL must end with /" in str(exc.value)
-    
+
     # Test valid URLs
     validator.validate(Document("http://example.com/"))
     validator.validate(Document("https://example.com/"))

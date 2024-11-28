@@ -10,7 +10,7 @@ from gptcomet.llm_client import LLMClient
 
 @pytest.fixture
 def mock_config_manager():
-    """基础配置管理器mock"""
+    """Basic config manager mock"""
     config = Mock()
     config.get.side_effect = lambda key, default=None: glom.glom(
         {
@@ -43,13 +43,13 @@ def mock_config_manager():
 
 @pytest.fixture
 def llm_client(mock_config_manager):
-    """基础LLMClient实例"""
+    """Basic LLMClient instance"""
     return LLMClient(mock_config_manager)
 
 
 class TestLLMClientInitialization:
     def test_successful_initialization(self, mock_config_manager):
-        """测试成功初始化"""
+        """Test successful initialization"""
         client = LLMClient(mock_config_manager)
         assert client.provider == "openai"
         assert client.api_key == "test-key"
@@ -59,20 +59,20 @@ class TestLLMClientInitialization:
         assert client.conversation_history == []
 
     def test_missing_api_key(self, mock_config_manager):
-        """测试缺少API key的情况"""
+        """Test initialization without API key"""
         mock_config_manager.is_api_key_set = False
         with pytest.raises(ConfigError) as exc_info:
             LLMClient(mock_config_manager)
         assert exc_info.value.error == ConfigErrorEnum.API_KEY_MISSING
 
     def test_from_config_manager(self, mock_config_manager):
-        """测试from_config_manager工厂方法"""
+        """Test from_config_manager factory method"""
         client = LLMClient.from_config_manager(mock_config_manager)
         assert isinstance(client, LLMClient)
         assert client.api_key == "test-key"
 
     def test_provider_config_missing(self, mock_config_manager):
-        """测试 provider 配置缺失的情况"""
+        """Test missing provider configuration"""
         mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
             {
                 "provider": "openai",
@@ -88,7 +88,7 @@ class TestLLMClientInitialization:
 
 class TestLLMClientGenerate:
     def test_generate_without_history(self, llm_client):
-        """测试不使用历史记录的生成"""
+        """Test generation without history"""
         mock_response = {
             "choices": [{"message": {"content": "Test response"}}],
             "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
@@ -103,7 +103,7 @@ class TestLLMClientGenerate:
             mock_completion.assert_called_once()
 
     def test_generate_with_history(self, llm_client):
-        """测试使用历史记录的生成"""
+        """Test generation with history"""
         mock_response = {
             "choices": [{"message": {"content": "Test response"}}],
             "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
@@ -119,7 +119,7 @@ class TestLLMClientGenerate:
             assert llm_client.conversation_history[-1]["role"] == "assistant"
 
     def test_generate_without_usage_info(self, llm_client):
-        """测试响应中没有usage信息的情况"""
+        """Test generation when response has no usage info"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
         with patch("gptcomet.llm_client.LLMClient.completion_with_retries") as mock_completion:
@@ -130,7 +130,7 @@ class TestLLMClientGenerate:
 
 class TestLLMClientHistory:
     def test_clear_history(self, llm_client):
-        """测试清除历史记录"""
+        """Test clearing history"""
         llm_client.conversation_history = [
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi"},
@@ -141,7 +141,7 @@ class TestLLMClientHistory:
 
 class TestLLMClientCompletionWithRetries:
     def test_successful_completion(self, llm_client):
-        """测试成功的completion请求"""
+        """Test successful completion request"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
         with patch("httpx.Client") as mock_client:
@@ -161,7 +161,7 @@ class TestLLMClientCompletionWithRetries:
             assert response == mock_response
 
     def test_completion_with_proxy(self, llm_client):
-        """测试使用代理的completion请求"""
+        """Test completion request with proxy"""
         llm_client.proxy = "http://proxy:8080"
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
@@ -183,7 +183,7 @@ class TestLLMClientCompletionWithRetries:
             assert mock_client.call_args[1]["proxies"] == "http://proxy:8080"
 
     def test_completion_http_error(self, llm_client):
-        """测试HTTP错误处理"""
+        """Test HTTP error handling"""
         with patch("httpx.Client") as mock_client:
             mock_instance = Mock()
             mock_instance.post.side_effect = httpx.HTTPError("API Error")
@@ -199,15 +199,15 @@ class TestLLMClientCompletionWithRetries:
                 )
 
     def test_completion_with_retries_url_handling(self, mock_config_manager):
-        """测试 URL 路径处理"""
+        """Test URL path handling"""
         mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
             {
                 "provider": "openai",
                 "openai": {
                     "api_key": "test-key",
                     "model": "gpt-3.5-turbo",
-                    "api_base": "https://api.openai.com/",  # 带斜杠
-                    "completion_path": "chat/completions",  # 不带斜杠
+                    "api_base": "https://api.openai.com/",  # with trailing slash
+                    "completion_path": "chat/completions",  # without trailing slash
                     "max_tokens": "100",
                 },
                 "prompt": {
@@ -240,7 +240,7 @@ class TestLLMClientCompletionWithRetries:
 
 class TestLLMClientGenChatParams:
     def test_gen_chat_params_basic(self, llm_client):
-        """测试基本的chat参数生成"""
+        """Test basic chat parameter generation"""
         messages = [{"role": "user", "content": "Hello"}]
         params = llm_client.gen_chat_params(messages)
 
@@ -250,7 +250,7 @@ class TestLLMClientGenChatParams:
         assert params["api_key"] == "test-key"
 
     def test_gen_chat_params_with_optional(self, mock_config_manager):
-        """测试包含可选参数的chat参数生成"""
+        """Test chat parameter generation with optional parameters"""
         mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
             {
                 "provider": "openai",
@@ -283,7 +283,7 @@ class TestLLMClientGenChatParams:
         assert params["extra_headers"] == {"X-Custom": "value"}
 
     def test_gen_chat_params_with_invalid_extra_headers(self, mock_config_manager):
-        """测试无效的 extra_headers 参数"""
+        """Test chat parameter generation with invalid extra headers"""
         mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
             {
                 "provider": "openai",
@@ -312,7 +312,7 @@ class TestLLMClientGenChatParams:
         assert "extra_headers" not in params
 
     def test_gen_chat_params_with_all_optional_params(self, mock_config_manager):
-        """Test gen_chat_params with all optional parameters set."""
+        """Test chat parameter generation with all optional parameters"""
         mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
             {
                 "provider": "openai",
@@ -337,7 +337,7 @@ class TestLLMClientGenChatParams:
         assert params["frequency_penalty"] == 0.5
 
     def test_completion_with_retries_with_all_optional_params(self, mock_config_manager):
-        """Test completion_with_retries with all optional parameters."""
+        """Test completion_with_retries with all optional parameters"""
         mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
             {"provider": "openai", "openai": {"api_key": "test-key", "model": "gpt-3.5-turbo"}},
             key,

@@ -12,7 +12,7 @@ PROJECT_ROOT = str(Path(__file__).parent.parent.absolute())
 
 @pytest.fixture
 def mock_config_manager():
-    """创建模拟的配置管理器"""
+    """Create a mock configuration manager"""
     config = Mock()
     config.get.side_effect = lambda key, default=None: {
         "provider": "openai",
@@ -43,29 +43,29 @@ def mock_config_manager():
 
 @pytest.fixture
 def mock_repo():
-    """创建模拟的Git仓库"""
+    """Create a mock Git repository"""
     repo = Mock(spec=Repo)
     repo.git.diff.return_value = ""
-    # 设置工作目录为项目根目录
+    # Set working directory as project root directory
     repo.working_dir = PROJECT_ROOT
     return repo
 
 
 @pytest.fixture
-def message_generator(mock_config_manager, mock_repo):
-    """创建MessageGenerator实例"""
+def create_message_generator(mock_config_manager, mock_repo):
+    """Create MessageGenerator instance"""
     mock_repo_class = patch("git.Repo")
-    # 确保Repo()调用返回正确工作目录的repo
+    # Ensure Repo() call returns repo with correct working directory
     mock_repo_class.return_value = mock_repo
-    # 显式传入项目根目录
+    # Explicitly pass project root directory
     msg_generator = MessageGenerator(mock_config_manager, repo_path=PROJECT_ROOT)
     msg_generator.repo = mock_repo
     return msg_generator
 
 
 class TestMessageGenerator:
-    def test_initialization(self, mock_config_manager):
-        """测试初始化"""
+    def test_init(self, mock_config_manager):
+        """Test initialization"""
         with patch("git.Repo") as mock_repo:
             mock_instance = Mock(spec=Repo)
             mock_instance.working_dir = PROJECT_ROOT
@@ -75,7 +75,7 @@ class TestMessageGenerator:
             assert generator.diff is None
 
     def test_from_config_manager(self, mock_config_manager):
-        """测试from_config_manager工厂方法"""
+        """Test from_config_manager factory method"""
         with patch("git.Repo") as mock_repo:
             mock_instance = Mock(spec=Repo)
             mock_instance.working_dir = PROJECT_ROOT
@@ -88,14 +88,14 @@ class TestMessageGenerator:
 
 
 class TestGetStagedDiff:
-    def test_get_staged_diff_empty(self, message_generator, mock_repo):
-        """测试没有暂存更改时的差异获取"""
+    def test_get_staged_diff_no_changes(self, create_message_generator, mock_repo):
+        """Test getting diff when there are no staged changes"""
         mock_repo.git.diff.return_value = ""
-        diff = message_generator.get_staged_diff(mock_repo)
+        diff = create_message_generator.get_staged_diff(mock_repo)
         assert diff == ""
 
-    def test_get_staged_diff_with_changes(self, message_generator, mock_repo):
-        """测试有暂存更改时的差异获取"""
+    def test_get_staged_diff_with_changes(self, create_message_generator, mock_repo):
+        """Test getting diff when there are staged changes"""
         mock_diff = """
 diff --git a/test.py b/test.py
 index 1234567..89abcdef 100644
@@ -107,9 +107,9 @@ index 1234567..89abcdef 100644
      pass
 """
         mock_repo.git.diff.return_value = mock_diff
-        diff = message_generator.get_staged_diff(mock_repo)
+        diff = create_message_generator.get_staged_diff(mock_repo)
 
-        # 验证过滤掉了不需要的行
+        # Verify that unwanted lines are filtered out
         assert "index 1234567..89abcdef 100644" not in diff
         assert "--- a/test.py" not in diff
         assert "+++ b/test.py" not in diff
@@ -117,8 +117,8 @@ index 1234567..89abcdef 100644
 
 
 class TestGenerateCommitMessage:
-    def test_generate_commit_message_no_changes(self, message_generator):
-        """测试没有暂存更改时生成提交信息"""
+    def test_generate_commit_message_no_changes(self, create_message_generator):
+        """Test generating commit message when there are no staged changes"""
         with (
             pytest.raises(GitNoStagedChanges),
             patch(
@@ -126,27 +126,42 @@ class TestGenerateCommitMessage:
             ) as mock_get_staged_diff,
         ):
             mock_get_staged_diff.return_value = ""
-            message_generator.generate_commit_message()
+            create_message_generator.generate_commit_message()
 
-    def test_generate_brief_commit_message(self, message_generator, mock_repo):
-        """测试生成简短提交信息"""
+    def test_generate_brief_commit_message(self, create_message_generator, mock_repo):
+        """Test generating brief commit message"""
         mock_repo.git.diff.return_value = "test diff content"
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
 
             def get_side_effect(key, _type=None):
                 return {
-                    "output.lang": "zh-cn",
+                    "output.lang": "en",
                     "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
                     "file_ignore": ["*.log", "*.tmp"],
                 }.get(key)
 
-            message_generator.config_manager.get.side_effect = get_side_effect
+            create_message_generator.config_manager.get.side_effect = get_side_effect
             mock_generate.return_value = "Add new feature"
-            msg = message_generator.generate_commit_message(rich=False)
+            msg = create_message_generator.generate_commit_message(rich=False)
             assert msg == "Add new feature"
 
-    def test_generate_rich_commit_message(self, message_generator, mock_repo):
-        """测试生成富文本提交信息"""
+    def test_generate_rich_commit_message(self, create_message_generator, mock_repo):
+        """Test generating rich commit message"""
+        mock_repo.git.diff.return_value = "test diff content"
+        with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
+
+            def get_side_effect(key, _type=None):
+                return {
+                    "output.lang": "en",
+                    "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
+                    "file_ignore": ["*.log", "*.tmp"],
+                }.get(key)
+
+            create_message_generator.config_manager.get.side_effect = get_side_effect
+            mock_generate.side_effect = ["Add new feature", "Add new feature"]
+
+    def test_translate_message(self, create_message_generator, mock_repo):
+        """Test message translation"""
         mock_repo.git.diff.return_value = "test diff content"
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
 
@@ -157,57 +172,42 @@ class TestGenerateCommitMessage:
                     "file_ignore": ["*.log", "*.tmp"],
                 }.get(key)
 
-            message_generator.config_manager.get.side_effect = get_side_effect
-            mock_generate.side_effect = ["Add new feature", "添加新功能"]
+            mock_generate.side_effect = ["Add new feature", "Add new feature"]
+            create_message_generator.config_manager.get.side_effect = get_side_effect
 
-    def test_translate_commit_message(self, message_generator, mock_repo):
-        """测试提交信息翻译"""
-        mock_repo.git.diff.return_value = "test diff content"
-        with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
-
-            def get_side_effect(key, _type=None):
-                return {
-                    "output.lang": "zh-cn",
-                    "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
-                    "file_ignore": ["*.log", "*.tmp"],
-                }.get(key)
-
-            mock_generate.side_effect = ["Add new feature", "添加新功能"]
-            message_generator.config_manager.get.side_effect = get_side_effect
-
-            msg = message_generator.generate_commit_message(rich=False)
-            assert msg == "添加新功能"
+            msg = create_message_generator.generate_commit_message(rich=False)
+            assert msg == "Add new feature"
             assert mock_generate.call_count == 2
 
 
 class TestPrivateMethods:
-    def test_generate_brief_commit_message(self, message_generator):
-        """测试_generate_brief_commit_message方法"""
+    def test__generate_brief_commit_message(self, create_message_generator):
+        """Test _generate_brief_commit_message method"""
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
             mock_generate.return_value = "Add new feature"
-            msg = message_generator._generate_brief_commit_message("test diff")
+            msg = create_message_generator._generate_brief_commit_message("test diff")
             assert msg == "Add new feature"
 
-    def test_generate_rich_commit_message(self, message_generator):
-        """测试_generate_rich_commit_message方法"""
+    def test__generate_rich_commit_message(self, create_message_generator):
+        """Test _generate_rich_commit_message method"""
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
             mock_generate.return_value = "feat: Add new feature"
-            msg = message_generator._generate_rich_commit_message("test diff")
+            msg = create_message_generator._generate_rich_commit_message("test diff")
             assert msg == "feat: Add new feature"
 
-    def test_translate_msg(self, message_generator):
-        """测试_translate_msg方法"""
+    def test__translate_msg(self, create_message_generator):
+        """Test _translate_msg method"""
         with patch("gptcomet.llm_client.LLMClient.generate") as mock_generate:
-            mock_generate.return_value = "添加新功能"
+            mock_generate.return_value = "Add new feature"
 
             def get_side_effect(key, _type=None):
                 if key == "output.lang":
-                    return "zh-cn"
+                    return "en"
                 elif key == "prompt.translation":
                     return "Translate: {{ placeholder }} to {{ output_language }}"
                 return None
 
-            message_generator.config_manager.get.side_effect = get_side_effect
+            create_message_generator.config_manager.get.side_effect = get_side_effect
 
-            msg = message_generator._translate_msg("Add new feature")
-            assert msg == "添加新功能"
+            msg = create_message_generator._translate_msg("Add new feature")
+            assert msg == "Add new feature"

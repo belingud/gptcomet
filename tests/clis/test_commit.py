@@ -1,10 +1,8 @@
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 import typer
 from git import Commit, Repo
-from prompt_toolkit.document import Document
 
 from gptcomet.clis.commit import (
     RETRY_CHOICES,
@@ -14,12 +12,7 @@ from gptcomet.clis.commit import (
     entry,
     gen_output,
 )
-from gptcomet.exceptions import (
-    ConfigError,
-    ConfigErrorEnum,
-    GitNoStagedChanges,
-    KeyNotFound,
-)
+from gptcomet.exceptions import ConfigError, ConfigErrorEnum, GitNoStagedChanges
 from gptcomet.message_generator import MessageGenerator
 from gptcomet.styles import Colors, stylize
 
@@ -102,8 +95,12 @@ def test_ask_for_retry_interactive(mock_prompt, mock_stdin):
     mock_prompt.return_value = "y"
     result = ask_for_retry()
     assert result == "y"
-    prompt_text = "Do you want to use this commit message?\n" + ", ".join([f"{k}: {v}" for k, v in RETRY_CHOICES.items()])
-    mock_prompt.assert_called_with(prompt_text, default="y", choices=list(RETRY_CHOICES.keys()), case_sensitive=False)
+    prompt_text = "Do you want to use this commit message?\n" + ", ".join(
+        [f"{k}: {v}" for k, v in RETRY_CHOICES.items()]
+    )
+    mock_prompt.assert_called_with(
+        prompt_text, default="y", choices=list(RETRY_CHOICES.keys()), case_sensitive=False
+    )
 
 
 @patch("gptcomet.clis.commit.prompt")
@@ -125,8 +122,10 @@ def test_edit_text_in_place_empty(mock_prompt, mock_console):
 def test_edit_text_in_place_keyboard_interrupt(mock_prompt, mock_console):
     mock_prompt.side_effect = KeyboardInterrupt()
     result = edit_text_in_place("initial message")
-    assert result == "initial message"
-    mock_console.print.assert_called_with("\n[yellow]Edit cancelled, keeping original message.[/yellow]")
+    assert result is None
+    mock_console.print.assert_called_with(
+        "\n[yellow]Commit cancelled.[/yellow]"
+    )
 
 
 def test_commit_success(mock_message_generator, mock_console):
@@ -139,7 +138,7 @@ def test_commit_success(mock_message_generator, mock_console):
     commit_obj.author.email = "test@example.com"
     mock_message_generator.repo.index.commit.return_value = commit_obj
     mock_message_generator.repo.git.show.return_value = "1 file changed"
-    
+
     commit(mock_message_generator, "test message")
     mock_message_generator.repo.index.commit.assert_called_with(message="test message")
     assert mock_console.print.call_count >= 2
@@ -178,7 +177,7 @@ def test_entry_user_reject(mock_ask_retry, mock_message_generator_class, mock_co
     mock_generator.generate_commit_message.return_value = "test message"
     mock_message_generator_class.return_value = mock_generator
     mock_ask_retry.return_value = "n"
-    
+
     entry()
     mock_console.print.assert_any_call(stylize("Commit message discarded.", Colors.YELLOW))
 
@@ -198,6 +197,6 @@ def test_entry_keyboard_interrupt(mock_message_generator_class, mock_console):
     mock_generator = Mock()
     mock_generator.generate_commit_message.side_effect = KeyboardInterrupt()
     mock_message_generator_class.return_value = mock_generator
-    
+
     entry()
     mock_console.print.assert_called_with("\n[yellow]Operation cancelled by user.[/yellow]")
