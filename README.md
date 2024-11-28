@@ -15,7 +15,7 @@
   - [Usage](#usage)
   - [Commands](#commands)
   - [Configuration](#configuration)
-    - [file\_ignore](#file_ignore)
+  - [file\_ignore](#file_ignore)
   - [Supported Keys](#supported-keys)
   - [Example](#example)
   - [Development](#development)
@@ -31,10 +31,10 @@ It leverages the power of AI to create meaningful commit messages based on the c
 
 ## Features
 
-*   **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
-*   **Support for Multiple Languages**: GPTComet supports multiple languages, including English and Chinese.
-*   **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs.
-*   **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
+* **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
+* **Support for Multiple Languages**: GPTComet supports multiple languages, including English and Chinese.
+* **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs.
+* **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
 
 ## Installation
 
@@ -55,8 +55,8 @@ After installing GPTComet, you will have two commands: `gptcomet` and `gmsg`.
 $ pipx install gptcomet
   installed package gptcomet 0.0.3, installed using Python 3.12.3
   These apps are now globally available
-    - gmsg
-    - gptcomet
+  - gmsg
+  - gptcomet
 done! ✨ 🌟 ✨
 ```
 
@@ -66,11 +66,11 @@ To use gptcomet, follow these steps:
 
 1.  **Install GPTComet**: Install GPTComet through pypi.
 2.  **Configure GPTComet**: Configure GPTComet with your api_key The configuration file should contain the following keys:
-    *   `provider`: The provider of the language model (default `openai`).
-    *   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
-    *   `api_key`: The API key for the provider.
-    *   `model`: The model used for generating commit messages (default `text-davinci-003`).
-    *   `retries`: The number of retries for the API request (default `2`).
+  * `provider`: The provider of the language model (default `openai`).
+  * `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
+  * `api_key`: The API key for the provider.
+  * `model`: The model used for generating commit messages (default `text-davinci-003`).
+  * `retries`: The number of retries for the API request (default `2`).
 3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg commit`.
 
 ## Commands
@@ -93,23 +93,27 @@ The following are the available commands for GPTComet:
 
 The configuration file for GPTComet is `gptcomet.yaml`. The file should contain the following keys:
 
-*   `provider`: The provider of the language model (default `openai`).
-*   `file_ignore`: The file to ignore when generating a commit.
-*   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
-*   `api_key`: The API key for the provider.
-*   `model`: The model used for generating commit messages (default `text-davinci-003`).
-*   `retries`: The number of retries for the API request (default `2`).
-*   `proxy`: The proxy URL for the provider.
-*   `max_tokens`: The maximum number of tokens for the provider.
-*   `top_p`: The top_p parameter for the provider (default `0.7`).
-*   `temperature`: The temperature parameter for the provider (default `0.7`).
-*   `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
-*   `extra_headers`: The extra headers for the provider, json string.
-*   `prompt.brief_commit_message`: The prompt for generating brief commit messages.
-*   `prompt.rich_commit_message`: The prompt for generating rich commit messages.
-*   `prompt.translation`: The prompt for translating commit messages to a target language.
-*   `output.lang`: The language of the commit message (default `en`).
-*   `output.rich_template`: The template for generating rich commit messages.
+* `file_ignore`: The file to ignore when generating a commit.
+* `provider`: The provider of the language model (default `openai`).
+  * `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
+  * `api_key`: The API key for the provider.
+  * `model`: The model used for generating commit messages (default `text-davinci-003`).
+  * `retries`: The number of retries for the API request (default `2`).
+  * `proxy`: The proxy URL for the provider.
+  * `max_tokens`: The maximum number of tokens for the provider.
+  * `top_p`: The top_p parameter for the provider (default `0.7`).
+  * `temperature`: The temperature parameter for the provider (default `0.7`).
+  * `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
+  * `extra_headers`: The extra headers for the provider, json string.
+  * `answer_path`: The json path for the answer. Default `choices[0].message.content`
+  * `completion_path`: The url path for the completion api. Default `/chat/completions`
+* `prompt`: The prompt for generating commit messages.
+  * `brief_commit_message`: The prompt for generating brief commit messages.
+  * `rich_commit_message`: The prompt for generating rich commit messages.
+  * `translation`: The prompt for translating commit messages to a target language.
+* `output`: The output configuration.
+  * `output.lang`: The language of the commit message (default `en`).
+  * `output.rich_template`: The template for generating rich commit messages.
 
 ### file_ignore
 
@@ -168,14 +172,14 @@ You can use `gmsg config keys` to check supported keys.
 Here is an example of how to use GPTComet:
 
 1.  When you first set your OpenAI KEY by `gmsg config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.yaml`, includes:
-    ```
-    provider = "openai"
-    api_base = "https://api.openai.com/v1"
-    api_key = "YOUR_API_KEY"
-    model = "gpt-3.5-turbo"
-    retries = 2
-    output.lang = "en"
-    ```
+  ```
+  provider = "openai"
+  api_base = "https://api.openai.com/v1"
+  api_key = "YOUR_API_KEY"
+  model = "gpt-3.5-turbo"
+  retries = 2
+  output.lang = "en"
+  ```
 2.  Run the following command to generate a commit message: `gmsg commit`
 3.  GPTComet will generate a commit message based on the changes made in the code and display it in the console.
 
