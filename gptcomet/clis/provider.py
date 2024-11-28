@@ -14,42 +14,36 @@ from gptcomet.utils import console
 
 def create_provider_config() -> ProviderConfig:
     """Create provider config from user input."""
-    try:
-        provider = typer.prompt(
-            "Enter provider name (lowercase)", default="openai", type=str
-        ).lower()
+    provider = typer.prompt("Enter provider name (lowercase)", default="openai", type=str).lower()
 
-        api_base = typer.prompt(
-            "Enter API Base URL: ",
-            default="https://api.openai.com/v1/",
-        )
+    api_base = typer.prompt(
+        "Enter API Base URL: ",
+        default="https://api.openai.com/v1/",
+    )
 
-        model = typer.prompt(
-            "Enter model name: ",
-            default="gpt-3.5-turbo",
-        )
+    model = typer.prompt(
+        "Enter model name: ",
+        default="gpt-3.5-turbo",
+    )
 
-        api_key = prompt(
-            "Enter API key: ",
-            is_password=True,
-        )
+    api_key = prompt(
+        "Enter API key: ",
+        is_password=True,
+    )
 
-        max_tokens = typer.prompt(
-            "Enter max tokens",
-            default=1024,
-            type=int,
-        )
+    max_tokens = typer.prompt(
+        "Enter max tokens",
+        default=1024,
+        type=int,
+    )
 
-        return ProviderConfig(
-            provider=provider,
-            api_base=api_base,
-            model=model,
-            api_key=api_key,
-            max_tokens=max_tokens,
-        )
-    except (typer.Abort, Exception) as e:
-        msg = f"Failed to get provider config: {e!s}"
-        raise ConfigError(msg) from None
+    return ProviderConfig(
+        provider=provider,
+        api_base=api_base,
+        model=model,
+        api_key=api_key,
+        max_tokens=max_tokens,
+    )
 
 
 def entry(

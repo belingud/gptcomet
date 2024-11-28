@@ -13,7 +13,6 @@ from git import (
 )
 from httpx import HTTPStatusError
 from prompt_toolkit import prompt
-from prompt_toolkit.cursor_shapes import CursorShape
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.styles import Style
@@ -70,7 +69,9 @@ def edit_text_in_place(initial_message: str) -> Optional[str]:
     Returns:
         Optional[str]: The edited message or None if cancelled.
     """
-    bottom_bar = "[VIM mode] Support multiple lines. Press ESC then Enter to save, Ctrl+C to cancel."
+    bottom_bar = (
+        "[VIM mode] Support multiple lines. Press ESC then Enter to save, Ctrl+C to cancel."
+    )
 
     def bottom_toolbar():
         return [("class:bottom-toolbar", f" {bottom_bar} ")]
@@ -151,15 +152,19 @@ def gen_output(repo: Repo, commit: Commit, rich: bool = True) -> str:
     )
 
 
-def commit(message_generator: MessageGenerator, commit_message: str, rich: bool = True) -> None:
+def commit(
+    message_generator: MessageGenerator, commit_message: Optional[str] = None, rich: bool = True
+) -> None:
     """
     Commit the generated commit message.
 
     Args:
         message_generator (MessageGenerator): The message generator object.
-        commit_message (str): The commit message to be committed.
+        commit_message (Optional[str]): The commit message to be committed.
         rich (bool): If True, the commit message will be formatted with rich text markup.
     """
+    if not commit_message:
+        return
     try:
         commit = message_generator.repo.index.commit(message=commit_message)
         output = gen_output(message_generator.repo, commit, rich)
@@ -197,8 +202,7 @@ def entry(
     The commit message will be generated automatically based on the staged changes,
     ignoring files specified in `file_ignore`.
     """
-    if debug:
-        set_debug()
+    debug and set_debug()
 
     config_manager = (
         ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
@@ -236,7 +240,5 @@ def entry(
             console.print("\n[yellow]Operation cancelled by user.[/yellow]")
             return
 
-    if commit_message is None:
-        return
     # Commit and show the output
     commit(message_generator, commit_message, rich)
