@@ -14,6 +14,8 @@ from git import (
 from httpx import HTTPStatusError
 from prompt_toolkit import prompt
 from prompt_toolkit.cursor_shapes import CursorShape
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
 from prompt_toolkit.styles import Style
 from rich.panel import Panel
 from rich.prompt import Prompt
@@ -58,7 +60,7 @@ def ask_for_retry() -> RETRY_INPUT:
     )
 
 
-def edit_text_in_place(initial_message: str) -> str:
+def edit_text_in_place(initial_message: str) -> Optional[str]:
     """
     Edit a given text in place with a prompt.
 
@@ -66,9 +68,9 @@ def edit_text_in_place(initial_message: str) -> str:
         initial_message (str): The initial message to be edited.
 
     Returns:
-        str: The edited message.
+        Optional[str]: The edited message or None if cancelled.
     """
-    bottom_bar = "Support multiple lines. Press ESC then Enter to save, Ctrl+C to cancel."
+    bottom_bar = "[VIM mode] Support multiple lines. Press ESC then Enter to save, Ctrl+C to cancel."
 
     def bottom_toolbar():
         return [("class:bottom-toolbar", f" {bottom_bar} ")]
@@ -80,27 +82,32 @@ def edit_text_in_place(initial_message: str) -> str:
         }
     )
 
+    kb = KeyBindings()
+
+    @kb.add(Keys.ControlC)
+    def _(event):
+        event.app.exit(result=None)
+
     try:
         edited_message = prompt(
             "Edit the message:\n",
             default=initial_message,
             multiline=True,
-            enable_open_in_editor=True,
-            mouse_support=True,
-            cursor=CursorShape.BEAM,
-            vi_mode=True,
-            bottom_toolbar=bottom_toolbar,
             style=style,
-        ).strip()
-
+            bottom_toolbar=bottom_toolbar,
+            key_bindings=kb,
+        )
+        if edited_message is None:  # Ctrl+C was pressed
+            console.print("\n[yellow]Commit cancelled.[/yellow]")
+            return None
         if edited_message:
             console.print(Panel(stylize(edited_message, Colors.GREEN), title="Updated Message"))
             return edited_message
         else:
             return initial_message
     except KeyboardInterrupt:
-        console.print("\n[yellow]Edit cancelled, keeping original message.[/yellow]")
-        return initial_message
+        console.print("\n[yellow]Commit cancelled.[/yellow]")
+        return None
 
 
 def gen_output(repo: Repo, commit: Commit, rich: bool = True) -> str:
@@ -229,5 +236,7 @@ def entry(
             console.print("\n[yellow]Operation cancelled by user.[/yellow]")
             return
 
+    if commit_message is None:
+        return
     # Commit and show the output
     commit(message_generator, commit_message, rich)
