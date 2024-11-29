@@ -12,10 +12,11 @@
   - [Overview](#overview)
   - [Features](#features)
   - [Installation](#installation)
+  - [Setup](#setup)
   - [Usage](#usage)
   - [Commands](#commands)
   - [Configuration](#configuration)
-  - [file\_ignore](#file_ignore)
+    - [file_ignore](#file_ignore)
   - [Supported Keys](#supported-keys)
   - [Example](#example)
   - [Development](#development)
@@ -32,8 +33,8 @@ It leverages the power of AI to create meaningful commit messages based on the c
 ## Features
 
 * **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
-* **Support for Multiple Languages**: GPTComet supports multiple languages, including English and Chinese.
-* **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs.
+* **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
+* **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs, such llm model and prompt.
 * **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
 
 ## Installation
@@ -44,7 +45,7 @@ To use GPTComet, you need to have Python installed on your system. You can insta
 pip install gptcomet
 ```
 
-Recommend install use `pipx` on Mac or Linux.
+Install use `pipx` on Mac or Linux.
 
 ```shell
 pipx install gptcomet
@@ -58,6 +59,37 @@ $ pipx install gptcomet
   - gmsg
   - gptcomet
 done! ✨ 🌟 ✨
+```
+
+Install by `uv`
+
+```shell
+uv tool install gptcomet
+```
+
+## Setup
+
+Before using GPTComet, you need to configure it with your OpenAI API key and other settings.
+You can do this by running the following command:
+
+```shell
+gmsg config set openai.api_key YOUR_API_KEY
+gmsg config set openai.model gpt-4o
+```
+
+Replace `YOUR_API_KEY` with your actual API key for the OpenAI provider.
+The configuration file will be created at `~/.config/gptcomet/gptcomet.yaml`
+
+Or you can use `gmsg newprovider` to setup a custom provider.
+
+```shell
+$ gmsg newprovider
+Enter provider name (lowercase) [openai]: 
+Enter API Base URL:  [https://api.openai.com/v1/]: https://api.siliconflow.cn/v1
+Enter model name:  [text-davinci-003]: Qwen/Qwen2.5-7B-Instruct
+Enter API key: ***************************************************
+Enter max tokens [1024]: 
+[GPTComet] Provider silicon configured successfully.
 ```
 
 ## Usage
@@ -132,16 +164,15 @@ The file to ignore when generating a commit. The default value is
 - '*.py[cod]'
 - go.mod
 - go.sum
+- uv.lock
 ```
 
 You can add more file_ignore by using the `gmsg config append file_ignore <xxx>` command.
 `<xxx>` is same syntax as `gitignore`, like `*.so` to ignore all `.so` suffix files.
 
-This project using `litellm` as the bridge to LLM providers, so plenty providers are supported.
-
 If you are using `openai`, just leave the `api_base` as default. Set your `api_key` in the `config` section.
 
-If you are using an `openai` class provider, or a provider compatible with the `openai` interface, you can set the provider to `openai`.
+If you are using an `openai` class provider, or a provider compatible interface, you can set the provider to `openai`.
 And set your custom `api_base`, `api_key` and `model`.
 
 For example:
