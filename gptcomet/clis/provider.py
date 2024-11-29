@@ -14,36 +14,40 @@ from gptcomet.utils import console
 
 def create_provider_config() -> ProviderConfig:
     """Create provider config from user input."""
-    provider = typer.prompt("Enter provider name (lowercase)", default="openai", type=str).lower()
+    try:
+        provider = typer.prompt("Enter provider name (lowercase)", default="openai", type=str).lower()
 
-    api_base = typer.prompt(
-        "Enter API Base URL: ",
-        default="https://api.openai.com/v1/",
-    )
+        api_base = typer.prompt(
+            "Enter API Base URL: ",
+            default="https://api.openai.com/v1/",
+        )
 
-    model = typer.prompt(
-        "Enter model name: ",
-        default="gpt-3.5-turbo",
-    )
+        model = typer.prompt(
+            "Enter model name: ",
+            default="text-davinci-003",
+        )
 
-    api_key = prompt(
-        "Enter API key: ",
-        is_password=True,
-    )
+        api_key = prompt(
+            "Enter API key: ",
+            is_password=True,
+        )
 
-    max_tokens = typer.prompt(
-        "Enter max tokens",
-        default=1024,
-        type=int,
-    )
+        max_tokens = typer.prompt(
+            "Enter max tokens",
+            default=1024,
+            type=int,
+        )
 
-    return ProviderConfig(
-        provider=provider,
-        api_base=api_base,
-        model=model,
-        api_key=api_key,
-        max_tokens=max_tokens,
-    )
+        return ProviderConfig(
+            provider=provider,
+            api_base=api_base,
+            model=model,
+            api_key=api_key,
+            max_tokens=max_tokens,
+        )
+    except KeyboardInterrupt as e:
+        console.print(stylize("Operation cancelled by user.", Colors.MAGENTA))
+        raise typer.Exit(1) from e
 
 
 def entry(
