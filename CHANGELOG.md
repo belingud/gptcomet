@@ -1,5 +1,17 @@
 
 ---
+## [0.0.24](https://github.com/belingud/gptcomet/compare/v0.0.23..v0.0.24) - 2024-11-29
+
+### 🚜 Refactor
+
+- enhance http client configuration and error handling - ([4b17666](https://github.com/belingud/gptcomet/commit/4b176665179b4a096291f3564612e2722ea1151a)) - belingud
+
+### Build
+
+- bump version to 0.0.23 - ([5ef05e7](https://github.com/belingud/gptcomet/commit/5ef05e7ae8e3eb6c8bff678de2d1298637b19c0e)) - belingud
+
+
+---
 ## [0.0.23](https://github.com/belingud/gptcomet/compare/v0.0.22..v0.0.23) - 2024-11-29
 
 ### 🐛 Bug Fixes

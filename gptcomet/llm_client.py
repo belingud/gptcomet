@@ -46,6 +46,8 @@ class LLMClient:
         "provider",
         "proxy",
         "retries",
+        "_http_client",
+        "_request_timeout",
     )
 
     @classmethod
@@ -85,7 +87,6 @@ class LLMClient:
             raise ConfigError(ConfigErrorEnum.API_KEY_MISSING, self.provider)
 
         self.model: str = self.config_manager.get(f"{self.provider}.model", DEFAULT_MODEL)
-
         self.api_base: str = self.config_manager.get(f"{self.provider}.api_base", DEFAULT_API_BASE)
         self.retries: int = int(
             self.config_manager.get(f"{self.provider}.retries", DEFAULT_RETRIES)
@@ -97,7 +98,22 @@ class LLMClient:
             f"{self.provider}.answer_path", "choices.0.message.content"
         )
         self.proxy: str = self.config_manager.get(f"{self.provider}.proxy", "")
-        logger.debug(f"Provider: {self.provider}, Model: {self.model}, retries: {self.retries}")
+        self._request_timeout: int = int(self.config_manager.get(f"{self.provider}.timeout", 30))
+
+        # Initialize HTTP clients with connection pooling
+        limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
+        transport = httpx.HTTPTransport(retries=self.retries, limits=limits)
+        client_params = {"transport": transport, "timeout": self._request_timeout}
+
+        if self.proxy:
+            client_params["proxy"] = self.proxy
+            logger.debug("Using proxy: %s", self.proxy)
+
+        self._http_client = httpx.Client(**client_params)
+
+        logger.debug(
+            "Provider: %s, Model: %s, retries: %d", self.provider, self.model, self.retries
+        )
 
     def generate(self, prompt: str, use_history: bool = False) -> str:
         """
@@ -211,11 +227,11 @@ class LLMClient:
             api_key (str): The API key to use for authentication.
             model (str): The model to use for completion.
             messages (list[dict]): The messages to send to the API.
-            max_tokens (int, optional): The maximum number of tokens to generate. Defaults to None.
-            temperature (float, optional): The temperature to use for completion. Defaults to None.
-            top_p (float, optional): The top_p to use for completion. Defaults to None.
-            frequency_penalty (float, optional): The frequency_penalty to use for completion. Defaults to None.
-            extra_headers (dict, optional): Additional headers to send with the request. Defaults to None.
+            max_tokens (int, optional): The maximum number of tokens to generate.
+            temperature (float, optional): The temperature to use for completion.
+            top_p (float, optional): The top_p to use for completion.
+            frequency_penalty (float, optional): The frequency_penalty to use for completion.
+            extra_headers (dict, optional): Additional headers to send with the request.
 
         Returns:
             dict: The response from the API.
@@ -224,40 +240,47 @@ class LLMClient:
             ConfigError: If the API key is not set in the config.
             BadRequestError: If the completion API returns an error.
         """
-        transport: httpx.HTTPTransport = httpx.HTTPTransport(retries=self.retries)
-        client_params: dict = {"transport": transport}
-        if self.proxy:
-            client_params["proxy"] = self.proxy
-            logger.debug(f"Using proxy: {self.proxy}")
-        client: httpx.Client = httpx.Client(**client_params)
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        if extra_headers:
+            headers.update(extra_headers)
 
         payload = {
             "model": model,
             "messages": messages,
             "max_tokens": max_tokens,
         }
-        if temperature:
+        if temperature is not None:
             payload["temperature"] = temperature
-        if top_p:
+        if top_p is not None:
             payload["top_p"] = top_p
-        if frequency_penalty:
+        if frequency_penalty is not None:
             payload["frequency_penalty"] = frequency_penalty
-        if extra_headers:
-            headers.update(extra_headers)
+
+        url = self._build_url(api_base)
+
+        try:
+            response = self._http_client.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except httpx.TimeoutException as e:
+            logger.error("Request timed out: %s", str(e))
+            raise
+        except httpx.HTTPStatusError as e:
+            logger.error("HTTP error occurred: %s", str(e))
+            raise
+        except Exception as e:
+            logger.error("Unexpected error: %s", str(e))
+            raise
+
+    def _build_url(self, api_base: str) -> str:
+        """Helper method to build the API URL."""
         if api_base.endswith("/"):
             api_base = api_base[:-1]
         if not self.completion_path.startswith("/"):
             self.completion_path = "/" + self.completion_path
-        url = f"{api_base}{self.completion_path}"
+        return f"{api_base}{self.completion_path}"
 
-        response: httpx.Response = client.post(
-            url,
-            json=payload,
-            headers=headers,
-            timeout=8,
-        )
-        if logger.level == logging.DEBUG:
-            logger.debug(f"completion response: {response.text}")
-        response.raise_for_status()
-        return response.json()
+    def __del__(self):
+        """Cleanup method to close HTTP clients."""
+        if hasattr(self, "_http_client"):
+            self._http_client.close()
