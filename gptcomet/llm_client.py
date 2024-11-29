@@ -8,6 +8,7 @@ from rich.text import Text
 
 from gptcomet.styles import Colors
 from gptcomet.utils import console
+from gptcomet._types import Message, ChatResponse, CompleteParams, ChatUsage
 
 try:
     import socksio  # noqa: F401
@@ -20,7 +21,6 @@ except ImportError as e:
         )
     raise ImportError(msg) from None
 
-from gptcomet._types import CompleteParams
 from gptcomet.const import (
     DEFAULT_API_BASE,
     DEFAULT_MODEL,
@@ -51,7 +51,7 @@ class LLMClient:
     )
 
     @classmethod
-    def from_config_manager(cls, config_manager: "ConfigManager"):
+    def from_config_manager(cls, config_manager: "ConfigManager") -> "LLMClient":
         """
         Creates an instance of the class from a ConfigManager.
 
@@ -59,11 +59,11 @@ class LLMClient:
             config_manager (ConfigManager): The ConfigManager instance to create the class instance from.
 
         Returns:
-            An instance of the class.
+            LLMClient: An instance of the class.
         """
         return cls(config_manager)
 
-    def __init__(self, config_manager: "ConfigManager"):
+    def __init__(self, config_manager: "ConfigManager") -> None:
         """
         Initializes the LLMClient instance from a ConfigManager.
 
@@ -74,7 +74,7 @@ class LLMClient:
             ConfigError: If the provider is not specified or if the API key is not set.
         """
         self.config_manager = config_manager
-        self.conversation_history: list[dict[str, str]] = []
+        self.conversation_history: list[Message] = []
         self.provider: str = self.config_manager.get(PROVIDER_KEY)
         if not self.provider:
             raise ConfigError(ConfigErrorEnum.PROVIDER_KEY_MISSING)
@@ -103,7 +103,7 @@ class LLMClient:
         # Initialize HTTP clients with connection pooling
         limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
         transport = httpx.HTTPTransport(retries=self.retries, limits=limits)
-        client_params = {"transport": transport, "timeout": self._request_timeout}
+        client_params: dict[str, t.Any] = {"transport": transport, "timeout": self._request_timeout}
 
         if self.proxy:
             client_params["proxy"] = self.proxy
@@ -132,7 +132,7 @@ class LLMClient:
         """
         console.print(f"Discovered model `{self.model}` with provider `{self.provider}`.")
         if use_history:
-            messages = [*self.conversation_history, {"role": "user", "content": prompt}]
+            messages: list[Message] = [*self.conversation_history, {"role": "user", "content": prompt}]
         else:
             messages = [{"role": "user", "content": prompt}]
         params: CompleteParams = self.gen_chat_params(messages)
@@ -140,8 +140,8 @@ class LLMClient:
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
         console.print("🤖 Hang tight, I'm cooking up something good!")
-        response: dict = self.completion_with_retries(**params)
-        usage: dict = response.get("usage", {})
+        response: ChatResponse = self.completion_with_retries(**params)
+        usage: t.Optional[ChatUsage] = response.get("usage")
 
         assistant_message: str = glom(response, self.content_path, default="").strip()
 
@@ -161,9 +161,12 @@ class LLMClient:
 
         return assistant_message
 
-    def gen_chat_params(self, messages: t.Optional[list[dict]] = None) -> CompleteParams:
+    def gen_chat_params(self, messages: t.Optional[list[Message]] = None) -> CompleteParams:
         """
         Generates the parameters for the chat completion API.
+
+        Args:
+            messages (Optional[list[Message]], optional): List of chat messages. Defaults to None.
 
         Returns:
             CompleteParams: The parameters for the chat completion API.
@@ -188,7 +191,7 @@ class LLMClient:
         if frequency_penalty:
             params["frequency_penalty"] = frequency_penalty
         try:
-            extra_headers = json.loads(
+            extra_headers: t.Optional[dict[str, str]] = json.loads(
                 str(self.config_manager.get(f"{self.provider}.extra_headers", "{}"))
             )
         except json.JSONDecodeError:
@@ -209,16 +212,16 @@ class LLMClient:
 
     def completion_with_retries(
         self,
-        api_base,
-        api_key,
-        model,
-        messages,
-        max_tokens,
-        temperature=None,
-        top_p=None,
-        frequency_penalty=None,
-        extra_headers=None,
-    ) -> dict:
+        api_base: str,
+        api_key: str,
+        model: str,
+        messages: list[Message],
+        max_tokens: int,
+        temperature: t.Optional[float] = None,
+        top_p: t.Optional[float] = None,
+        frequency_penalty: t.Optional[float] = None,
+        extra_headers: t.Optional[dict[str, str]] = None,
+    ) -> ChatResponse:
         """
         Wrapper around the completion API that retries on failure.
 
@@ -226,25 +229,27 @@ class LLMClient:
             api_base (str): The base URL for the API.
             api_key (str): The API key to use for authentication.
             model (str): The model to use for completion.
-            messages (list[dict]): The messages to send to the API.
-            max_tokens (int, optional): The maximum number of tokens to generate.
-            temperature (float, optional): The temperature to use for completion.
-            top_p (float, optional): The top_p to use for completion.
-            frequency_penalty (float, optional): The frequency_penalty to use for completion.
-            extra_headers (dict, optional): Additional headers to send with the request.
+            messages (list[Message]): The messages to send to the API.
+            max_tokens (int): The maximum number of tokens to generate.
+            temperature (Optional[float], optional): The temperature to use for completion. Defaults to None.
+            top_p (Optional[float], optional): The top_p to use for completion. Defaults to None.
+            frequency_penalty (Optional[float], optional): The frequency_penalty to use for completion. Defaults to None.
+            extra_headers (Optional[dict[str, str]], optional): Additional headers to send with the request. Defaults to None.
 
         Returns:
-            dict: The response from the API.
+            ChatResponse: The response from the API.
 
         Raises:
             ConfigError: If the API key is not set in the config.
             BadRequestError: If the completion API returns an error.
+            httpx.TimeoutException: If the request times out.
+            httpx.HTTPError: If an HTTP error occurs.
         """
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        headers: dict[str, str] = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         if extra_headers:
             headers.update(extra_headers)
 
-        payload = {
+        payload: dict[str, t.Any] = {
             "model": model,
             "messages": messages,
             "max_tokens": max_tokens,
@@ -261,11 +266,11 @@ class LLMClient:
         try:
             response = self._http_client.post(url, json=payload, headers=headers)
             response.raise_for_status()
-            return response.json()
+            return t.cast(ChatResponse, response.json())
         except httpx.TimeoutException as e:
             logger.error("Request timed out: %s", str(e))
             raise
-        except httpx.HTTPStatusError as e:
+        except httpx.HTTPError as e:
             logger.error("HTTP error occurred: %s", str(e))
             raise
         except Exception as e:
@@ -280,7 +285,7 @@ class LLMClient:
             self.completion_path = "/" + self.completion_path
         return f"{api_base}{self.completion_path}"
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup method to close HTTP clients."""
         if hasattr(self, "_http_client"):
             self._http_client.close()
