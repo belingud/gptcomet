@@ -1,4 +1,3 @@
-import logging
 import typing as t
 
 import httpx
@@ -6,9 +5,9 @@ import orjson as json
 from glom import glom
 from rich.text import Text
 
+from gptcomet._types import ChatResponse, ChatUsage, CompleteParams, Message
 from gptcomet.styles import Colors
 from gptcomet.utils import console
-from gptcomet._types import Message, ChatResponse, CompleteParams, ChatUsage
 
 try:
     import socksio  # noqa: F401
@@ -36,6 +35,8 @@ if t.TYPE_CHECKING:
 
 class LLMClient:
     __slots__ = (
+        "_http_client",
+        "_request_timeout",
         "api_base",
         "api_key",
         "completion_path",
@@ -46,8 +47,6 @@ class LLMClient:
         "provider",
         "proxy",
         "retries",
-        "_http_client",
-        "_request_timeout",
     )
 
     @classmethod
@@ -132,7 +131,10 @@ class LLMClient:
         """
         console.print(f"Discovered model `{self.model}` with provider `{self.provider}`.")
         if use_history:
-            messages: list[Message] = [*self.conversation_history, {"role": "user", "content": prompt}]
+            messages: list[Message] = [
+                *self.conversation_history,
+                {"role": "user", "content": prompt},
+            ]
         else:
             messages = [{"role": "user", "content": prompt}]
         params: CompleteParams = self.gen_chat_params(messages)
@@ -245,7 +247,10 @@ class LLMClient:
             httpx.TimeoutException: If the request times out.
             httpx.HTTPError: If an HTTP error occurs.
         """
-        headers: dict[str, str] = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        headers: dict[str, str] = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
         if extra_headers:
             headers.update(extra_headers)
 

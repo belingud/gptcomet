@@ -13,12 +13,14 @@ class CacheType(t.TypedDict):
 
 class Message(t.TypedDict):
     """Chat message format"""
+
     role: t.Literal["user", "assistant", "system"]
     content: str
 
 
 class ChatUsage(t.TypedDict):
     """API usage information"""
+
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
@@ -26,12 +28,14 @@ class ChatUsage(t.TypedDict):
 
 class ChatResponse(t.TypedDict):
     """API response format"""
+
     choices: list[dict[str, t.Any]]
     usage: t.Optional[ChatUsage]
 
 
 class CompleteParams(t.TypedDict, total=False):
     """complete required params"""
+
     api_base: str
     api_key: str
     model: str
@@ -45,6 +49,7 @@ class CompleteParams(t.TypedDict, total=False):
 
 class Provider(t.TypedDict, total=False):
     """provider setting dict"""
+
     api_base: str
     api_key: str
     model: str
