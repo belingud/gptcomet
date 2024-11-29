@@ -15,7 +15,9 @@ from gptcomet.utils import console
 def create_provider_config() -> ProviderConfig:
     """Create provider config from user input."""
     try:
-        provider = typer.prompt("Enter provider name (lowercase)", default="openai", type=str).lower()
+        provider = typer.prompt(
+            "Enter provider name (lowercase)", default="openai", type=str
+        ).lower()
 
         api_base = typer.prompt(
             "Enter API Base URL: ",

@@ -84,11 +84,11 @@ Or you can use `gmsg newprovider` to setup a custom provider.
 
 ```shell
 $ gmsg newprovider
-Enter provider name (lowercase) [openai]: 
+Enter provider name (lowercase) [openai]:
 Enter API Base URL:  [https://api.openai.com/v1/]: https://api.siliconflow.cn/v1
 Enter model name:  [text-davinci-003]: Qwen/Qwen2.5-7B-Instruct
 Enter API key: ***************************************************
-Enter max tokens [1024]: 
+Enter max tokens [1024]:
 [GPTComet] Provider silicon configured successfully.
 ```
 

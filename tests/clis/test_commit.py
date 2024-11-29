@@ -123,9 +123,7 @@ def test_edit_text_in_place_keyboard_interrupt(mock_prompt, mock_console):
     mock_prompt.side_effect = KeyboardInterrupt()
     result = edit_text_in_place("initial message")
     assert result is None
-    mock_console.print.assert_called_with(
-        "\n[yellow]Commit cancelled.[/yellow]"
-    )
+    mock_console.print.assert_called_with("\n[yellow]Commit cancelled.[/yellow]")
 
 
 def test_commit_success(mock_message_generator, mock_console):
