@@ -1,5 +1,39 @@
 
 ---
+## [0.0.23](https://github.com/belingud/gptcomet/compare/v0.0.22..v0.0.23) - 2024-11-29
+
+### 🐛 Bug Fixes
+
+- handle user cancellation and update proxy handling in provider config - ([519a505](https://github.com/belingud/gptcomet/commit/519a505d6ec9d2237b5c6a29cba21317c1d385e4)) - belingud
+- enhance commit message editing with multi-line support and VIM mode - ([e3a57ee](https://github.com/belingud/gptcomet/commit/e3a57ee13c6428964bbacbc49c77101f6d1e8fd4)) - belingud
+
+### 🚜 Refactor
+
+- remove unused import and simplify provider config - ([da9b457](https://github.com/belingud/gptcomet/commit/da9b457419cb18bca51cfe4a8ba49440c6969abd)) - belingud
+
+### 📚 Documentation
+
+- update README.md and provider.py for new provider setup - ([46da242](https://github.com/belingud/gptcomet/commit/46da242b3810eb50e947ac3ed3c6a9dcff286540)) - belingud
+- update README.md for setup, usage, and configuration - ([a44a853](https://github.com/belingud/gptcomet/commit/a44a853fa152ed376e414d309658ccb14c4820cf)) - belingud
+- Update README.md for GPTComet configuration and features - ([46138b8](https://github.com/belingud/gptcomet/commit/46138b81976b50645ff4ac1660d0926e1dd979f6)) - belingud
+
+### 🧪 Testing
+
+- correct proxy argument name in test_llm_client.py - ([0031ba9](https://github.com/belingud/gptcomet/commit/0031ba91ff3908b4d99e681bc41bd814390474b3)) - belingud
+- clean up tests and adjust config manager mock - ([397b86c](https://github.com/belingud/gptcomet/commit/397b86c36752176678e20992f3a67f32b9dc1001)) - belingud
+- add unit tests for commit, log, and validator - ([da7934e](https://github.com/belingud/gptcomet/commit/da7934e3ad4fcb7bc1f7ad592d230f9f27af31a7)) - belingud
+- improve readability in test cases - ([a867e63](https://github.com/belingud/gptcomet/commit/a867e6379eaad85f8bc3ff26e6ab33b761beec47)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update pyrightconfig settings - ([3e67d61](https://github.com/belingud/gptcomet/commit/3e67d61f38c543b490a967f7c3dbedee2ae244a0)) - belingud
+
+### Build
+
+- bump version to 0.0.22 - ([749a7e4](https://github.com/belingud/gptcomet/commit/749a7e4ee917e6a447c400cafd2591be3b69abdc)) - belingud
+
+
+---
 ## [0.0.22](https://github.com/belingud/gptcomet/compare/v0.0.21..v0.0.22) - 2024-11-26
 
 ### 🐛 Bug Fixes
