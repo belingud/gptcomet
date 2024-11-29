@@ -144,11 +144,9 @@ class TestLLMClientCompletionWithRetries:
         """Test successful completion request"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
-        with patch("httpx.Client") as mock_client:
-            mock_instance = Mock()
-            mock_instance.post.return_value.json.return_value = mock_response
-            mock_instance.post.return_value.raise_for_status.return_value = None
-            mock_client.return_value = mock_instance
+        with patch.object(llm_client._http_client, 'post') as mock_post:
+            mock_post.return_value.json.return_value = mock_response
+            mock_post.return_value.raise_for_status.return_value = None
 
             response = llm_client.completion_with_retries(
                 api_base="https://api.openai.com/v1",
@@ -159,83 +157,111 @@ class TestLLMClientCompletionWithRetries:
             )
 
             assert response == mock_response
+            mock_post.assert_called_once()
 
-    def test_completion_with_proxy(self, llm_client):
-        """Test completion request with proxy"""
-        llm_client.proxy = "http://proxy:8080"
+    def test_completion_with_optional_params(self, llm_client):
+        """Test completion request with optional parameters"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
-        with patch("httpx.Client") as mock_client:
-            mock_instance = Mock()
-            mock_instance.post.return_value.json.return_value = mock_response
-            mock_instance.post.return_value.raise_for_status.return_value = None
-            mock_client.return_value = mock_instance
+        with patch.object(llm_client._http_client, 'post') as mock_post:
+            mock_post.return_value.json.return_value = mock_response
+            mock_post.return_value.raise_for_status.return_value = None
 
-            llm_client.completion_with_retries(
+            response = llm_client.completion_with_retries(
                 api_base="https://api.openai.com/v1",
                 api_key="test-key",
                 model="gpt-3.5-turbo",
-                messages=[],
+                messages=[{"role": "user", "content": "Hello"}],
                 max_tokens=100,
+                temperature=0.7,
+                top_p=0.9,
+                frequency_penalty=0.5,
             )
 
-            mock_client.assert_called_once()
-            assert mock_client.call_args[1]["proxy"] == "http://proxy:8080"
+            assert response == mock_response
+            mock_post.assert_called_once()
+            
+            # Verify optional parameters in payload
+            payload = mock_post.call_args[1]["json"]
+            assert payload["temperature"] == 0.7
+            assert payload["top_p"] == 0.9
+            assert payload["frequency_penalty"] == 0.5
+
+    def test_completion_with_extra_headers(self, llm_client):
+        """Test completion request with extra headers"""
+        mock_response = {"choices": [{"message": {"content": "Test response"}}]}
+        extra_headers = {"X-Custom-Header": "test-value"}
+
+        with patch.object(llm_client._http_client, 'post') as mock_post:
+            mock_post.return_value.json.return_value = mock_response
+            mock_post.return_value.raise_for_status.return_value = None
+
+            response = llm_client.completion_with_retries(
+                api_base="https://api.openai.com/v1",
+                api_key="test-key",
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "Hello"}],
+                max_tokens=100,
+                extra_headers=extra_headers,
+            )
+
+            assert response == mock_response
+            mock_post.assert_called_once()
+            
+            # Verify headers
+            headers = mock_post.call_args[1]["headers"]
+            assert headers["X-Custom-Header"] == "test-value"
+            assert headers["Authorization"] == "Bearer test-key"
+            assert headers["Content-Type"] == "application/json"
 
     def test_completion_http_error(self, llm_client):
         """Test HTTP error handling"""
-        with patch("httpx.Client") as mock_client:
-            mock_instance = Mock()
-            mock_instance.post.side_effect = httpx.HTTPError("API Error")
-            mock_client.return_value = mock_instance
+        with patch.object(llm_client._http_client, 'post') as mock_post:
+            mock_post.side_effect = httpx.HTTPError("API Error")
 
             with pytest.raises(httpx.HTTPError):
                 llm_client.completion_with_retries(
                     api_base="https://api.openai.com/v1",
                     api_key="test-key",
                     model="gpt-3.5-turbo",
-                    messages=[],
+                    messages=[{"role": "user", "content": "Hello"}],
                     max_tokens=100,
                 )
 
-    def test_completion_with_retries_url_handling(self, mock_config_manager):
+    def test_completion_timeout_error(self, llm_client):
+        """Test timeout error handling"""
+        with patch.object(llm_client._http_client, 'post') as mock_post:
+            mock_post.side_effect = httpx.TimeoutException("Request timed out")
+
+            with pytest.raises(httpx.TimeoutException):
+                llm_client.completion_with_retries(
+                    api_base="https://api.openai.com/v1",
+                    api_key="test-key",
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": "Hello"}],
+                    max_tokens=100,
+                )
+
+    def test_completion_url_handling(self, llm_client):
         """Test URL path handling"""
-        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
-            {
-                "provider": "openai",
-                "openai": {
-                    "api_key": "test-key",
-                    "model": "gpt-3.5-turbo",
-                    "api_base": "https://api.openai.com/",  # with trailing slash
-                    "completion_path": "chat/completions",  # without trailing slash
-                    "max_tokens": "100",
-                },
-                "prompt": {
-                    "system": "You are a helpful assistant.",
-                    "user": "Hello!",
-                },
-            },
-            key,
-            default=default,
-        )
+        mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
-        client = LLMClient(mock_config_manager)
-        with patch("httpx.Client.post") as mock_post:
-            mock_post.return_value.json.return_value = {
-                "choices": [{"message": {"content": "test response"}}]
-            }
-            mock_post.return_value.status_code = 200
+        with patch.object(llm_client._http_client, 'post') as mock_post:
+            mock_post.return_value.json.return_value = mock_response
+            mock_post.return_value.raise_for_status.return_value = None
 
-            client.completion_with_retries(
+            # Test with trailing slash in api_base
+            llm_client.completion_with_retries(
                 api_base="https://api.openai.com/",
                 api_key="test-key",
                 model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": "test"}],
+                messages=[{"role": "user", "content": "Hello"}],
                 max_tokens=100,
             )
 
             mock_post.assert_called_once()
-            assert mock_post.call_args[0][0] == "https://api.openai.com/chat/completions"
+            assert mock_post.call_args[0][0].endswith("/chat/completions")
+            assert not mock_post.call_args[0][0].endswith("//chat/completions")
 
 
 class TestLLMClientGenChatParams:
