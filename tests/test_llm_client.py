@@ -180,7 +180,7 @@ class TestLLMClientCompletionWithRetries:
             )
 
             mock_client.assert_called_once()
-            assert mock_client.call_args[1]["proxies"] == "http://proxy:8080"
+            assert mock_client.call_args[1]["proxy"] == "http://proxy:8080"
 
     def test_completion_http_error(self, llm_client):
         """Test HTTP error handling"""
