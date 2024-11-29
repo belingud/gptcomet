@@ -26,7 +26,7 @@ def create_provider_config() -> ProviderConfig:
 
         model = typer.prompt(
             "Enter model name: ",
-            default="gpt-3.5-turbo",
+            default="text-davinci-003",
         )
 
         api_key = prompt(
@@ -47,9 +47,9 @@ def create_provider_config() -> ProviderConfig:
             api_key=api_key,
             max_tokens=max_tokens,
         )
-    except (typer.Abort, Exception) as e:
-        msg = f"Failed to get provider config: {e!s}"
-        raise ConfigError(msg) from None
+    except KeyboardInterrupt as e:
+        console.print(stylize("Operation cancelled by user.", Colors.MAGENTA))
+        raise typer.Exit(1) from e
 
 
 def entry(

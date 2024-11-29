@@ -227,7 +227,7 @@ class LLMClient:
         transport: httpx.HTTPTransport = httpx.HTTPTransport(retries=self.retries)
         client_params: dict = {"transport": transport}
         if self.proxy:
-            client_params["proxies"] = self.proxy
+            client_params["proxy"] = self.proxy
             logger.debug(f"Using proxy: {self.proxy}")
         client: httpx.Client = httpx.Client(**client_params)
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
