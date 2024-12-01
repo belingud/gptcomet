@@ -40,7 +40,7 @@ class CompleteParams(t.TypedDict, total=False):
     api_key: str
     model: str
     messages: list[Message]
-    max_tokens: t.Optional[int]
+    max_tokens: int
     temperature: t.Optional[float]
     top_p: t.Optional[float]
     frequency_penalty: t.Optional[float]

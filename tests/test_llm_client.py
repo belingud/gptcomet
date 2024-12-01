@@ -144,7 +144,7 @@ class TestLLMClientCompletionWithRetries:
         """Test successful completion request"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
-        with patch.object(llm_client._http_client, 'post') as mock_post:
+        with patch.object(llm_client._http_client, "post") as mock_post:
             mock_post.return_value.json.return_value = mock_response
             mock_post.return_value.raise_for_status.return_value = None
 
@@ -163,7 +163,7 @@ class TestLLMClientCompletionWithRetries:
         """Test completion request with optional parameters"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
-        with patch.object(llm_client._http_client, 'post') as mock_post:
+        with patch.object(llm_client._http_client, "post") as mock_post:
             mock_post.return_value.json.return_value = mock_response
             mock_post.return_value.raise_for_status.return_value = None
 
@@ -180,7 +180,7 @@ class TestLLMClientCompletionWithRetries:
 
             assert response == mock_response
             mock_post.assert_called_once()
-            
+
             # Verify optional parameters in payload
             payload = mock_post.call_args[1]["json"]
             assert payload["temperature"] == 0.7
@@ -192,7 +192,7 @@ class TestLLMClientCompletionWithRetries:
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
         extra_headers = {"X-Custom-Header": "test-value"}
 
-        with patch.object(llm_client._http_client, 'post') as mock_post:
+        with patch.object(llm_client._http_client, "post") as mock_post:
             mock_post.return_value.json.return_value = mock_response
             mock_post.return_value.raise_for_status.return_value = None
 
@@ -207,7 +207,7 @@ class TestLLMClientCompletionWithRetries:
 
             assert response == mock_response
             mock_post.assert_called_once()
-            
+
             # Verify headers
             headers = mock_post.call_args[1]["headers"]
             assert headers["X-Custom-Header"] == "test-value"
@@ -216,7 +216,7 @@ class TestLLMClientCompletionWithRetries:
 
     def test_completion_http_error(self, llm_client):
         """Test HTTP error handling"""
-        with patch.object(llm_client._http_client, 'post') as mock_post:
+        with patch.object(llm_client._http_client, "post") as mock_post:
             mock_post.side_effect = httpx.HTTPError("API Error")
 
             with pytest.raises(httpx.HTTPError):
@@ -230,7 +230,7 @@ class TestLLMClientCompletionWithRetries:
 
     def test_completion_timeout_error(self, llm_client):
         """Test timeout error handling"""
-        with patch.object(llm_client._http_client, 'post') as mock_post:
+        with patch.object(llm_client._http_client, "post") as mock_post:
             mock_post.side_effect = httpx.TimeoutException("Request timed out")
 
             with pytest.raises(httpx.TimeoutException):
@@ -246,7 +246,7 @@ class TestLLMClientCompletionWithRetries:
         """Test URL path handling"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
-        with patch.object(llm_client._http_client, 'post') as mock_post:
+        with patch.object(llm_client._http_client, "post") as mock_post:
             mock_post.return_value.json.return_value = mock_response
             mock_post.return_value.raise_for_status.return_value = None
 
