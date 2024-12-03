@@ -3,11 +3,12 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"gptcomet/internal/config"
 	"os"
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/belingud/gptcomet/internal/config"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/term"

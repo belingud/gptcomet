@@ -12,7 +12,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // Client represents an LLM client
