@@ -6,20 +6,6 @@ from glom import glom
 from rich.text import Text
 
 from gptcomet._types import ChatResponse, ChatUsage, CompleteParams, Message
-from gptcomet.styles import Colors
-from gptcomet.utils import console
-
-try:
-    import socksio  # noqa: F401
-except ImportError as e:
-    msg = e.msg
-    if "socksio" in msg:
-        msg = (
-            "Using SOCKS proxy, but the 'socksio' package is not installed. "
-            "Make sure to install gptcomet using `pip install gptcomet[socks]` or `pip install socksio`."
-        )
-    raise ImportError(msg) from None
-
 from gptcomet.const import (
     DEFAULT_API_BASE,
     DEFAULT_MODEL,
@@ -28,9 +14,13 @@ from gptcomet.const import (
 )
 from gptcomet.exceptions import ConfigError, ConfigErrorEnum
 from gptcomet.log import logger
+from gptcomet.styles import Colors
+from gptcomet.utils import console
 
 if t.TYPE_CHECKING:
     from gptcomet.config_manager import ConfigManager
+
+import socksio  # NOQA: F401
 
 
 class LLMClient:
