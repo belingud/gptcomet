@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gptcomet/cmd"
+	"github.com/belingud/gptcomet/cmd"
 	"os"
 
 	"github.com/spf13/cobra"

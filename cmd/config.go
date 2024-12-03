@@ -3,7 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"gptcomet/internal/config"
+
+	"github.com/belingud/gptcomet/internal/config"
 
 	"github.com/spf13/cobra"
 )

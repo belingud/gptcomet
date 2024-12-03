@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/types"
 
 	"gopkg.in/yaml.v3"
 )
@@ -328,32 +328,32 @@ func defaultConfig() map[string]interface{} {
 			"verbose": true,
 		},
 		"openai": map[string]interface{}{
-			"api_base":        types.DefaultAPIBase,
-			"api_key":         "",
-			"model":           types.DefaultModel,
-			"retries":         2,
-			"proxy":           "",
-			"max_tokens":      2048,
-			"top_p":           0.7,
-			"temperature":     0.7,
+			"api_base":          types.DefaultAPIBase,
+			"api_key":           "",
+			"model":             types.DefaultModel,
+			"retries":           2,
+			"proxy":             "",
+			"max_tokens":        2048,
+			"top_p":             0.7,
+			"temperature":       0.7,
 			"frequency_penalty": 0,
-			"extra_headers":   "{}",
-			"completion_path": "/chat/completions",
-			"answer_path":     "choices.0.message.content",
+			"extra_headers":     "{}",
+			"completion_path":   "/chat/completions",
+			"answer_path":       "choices.0.message.content",
 		},
 		"anthropic": map[string]interface{}{
-			"api_base":        "https://api.anthropic.com",
-			"api_key":         "",
-			"model":           "claude-2",
-			"retries":         2,
-			"proxy":           "",
-			"max_tokens":      2048,
-			"top_p":           0.7,
-			"temperature":     0.7,
+			"api_base":          "https://api.anthropic.com",
+			"api_key":           "",
+			"model":             "claude-2",
+			"retries":           2,
+			"proxy":             "",
+			"max_tokens":        2048,
+			"top_p":             0.7,
+			"temperature":       0.7,
 			"frequency_penalty": 0,
-			"extra_headers":   "{}",
-			"completion_path": "/v1/messages",
-			"answer_path":     "content.0.text",
+			"extra_headers":     "{}",
+			"completion_path":   "/v1/messages",
+			"answer_path":       "content.0.text",
 		},
 		"prompt": map[string]interface{}{
 			"brief_commit_message": `you are an expert software engineer responsible for writing a clear and concise commit message.
