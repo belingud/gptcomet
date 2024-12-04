@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/belingud/gptcomet/internal/config"
+	"github.com/belingud/gptcomet/internal/debug"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -37,6 +38,8 @@ func NewProviderCmd() *cobra.Command {
 		Use:   "newprovider",
 		Short: "Add a new API provider interactively",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			debug.Println("Starting provider configuration")
+
 			// Create a reader for user input
 			reader := bufio.NewReader(os.Stdin)
 
@@ -50,6 +53,7 @@ func NewProviderCmd() *cobra.Command {
 			if provider == "" {
 				provider = defaultProvider
 			}
+			debug.Printf("Provider name: %s", provider)
 
 			// Get API base
 			fmt.Printf("Enter API base URL [%s]: ", defaultAPIBase)
@@ -61,6 +65,7 @@ func NewProviderCmd() *cobra.Command {
 			if apiBase == "" {
 				apiBase = defaultAPIBase
 			}
+			debug.Printf("API base: %s", apiBase)
 
 			// Get API key (with masked input)
 			apiKey, err := readMaskedInput("Enter API key: ")
@@ -70,6 +75,7 @@ func NewProviderCmd() *cobra.Command {
 			if apiKey == "" {
 				return fmt.Errorf("API key cannot be empty")
 			}
+			debug.Println("API key read successfully")
 
 			// Get model
 			fmt.Printf("Enter model name [%s]: ", defaultModel)
@@ -81,6 +87,7 @@ func NewProviderCmd() *cobra.Command {
 			if model == "" {
 				model = defaultModel
 			}
+			debug.Printf("Model name: %s", model)
 
 			// Get model max tokens
 			fmt.Printf("Enter model max tokens [%d]: ", defaultMaxTokens)
@@ -96,12 +103,14 @@ func NewProviderCmd() *cobra.Command {
 					return fmt.Errorf("invalid max tokens value: %w", err)
 				}
 			}
+			debug.Printf("Max tokens: %d", maxTokens)
 
 			// Create config manager
 			cfgManager, err := config.New()
 			if err != nil {
 				return err
 			}
+			debug.Println("Created config manager")
 
 			// Check if provider already exists
 			if _, exists := cfgManager.Get(provider); exists {
@@ -127,6 +136,7 @@ func NewProviderCmd() *cobra.Command {
 			if err := cfgManager.Set(provider, providerConfig); err != nil {
 				return fmt.Errorf("failed to set provider config: %w", err)
 			}
+			debug.Println("Provider configuration saved")
 
 			fmt.Printf("\nProvider configuration saved:\n")
 			fmt.Printf("  Provider: %s\n", provider)

@@ -20,20 +20,18 @@ type Manager struct {
 
 // New creates a new configuration manager
 func New() (*Manager, error) {
-	configDir, err := os.UserHomeDir()
+	configPath, err := getConfigDir()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get home directory: %w", err)
+		return nil, fmt.Errorf("failed to get config directory: %w", err)
 	}
-
-	configPath := filepath.Join(configDir, ".config", "gptcomet", "config.yaml")
+	configPath = configPath + "/gptcomet.yaml"
 	manager := &Manager{
 		config:     make(map[string]interface{}),
 		configPath: configPath,
 	}
 
 	// Create config directory if it doesn't exist
-	configDirPath := filepath.Dir(configPath)
-	if err := os.MkdirAll(configDirPath, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
 		return nil, fmt.Errorf("failed to create config directory: %w", err)
 	}
 
@@ -86,13 +84,43 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		completionPath = path
 	}
 
+	proxy := ""
+	if p, ok := providerConfig["proxy"].(string); ok {
+		proxy = p
+	}
+
+	maxTokens := types.DefaultMaxTokens
+	if m, ok := providerConfig["max_tokens"].(float64); ok {
+		maxTokens = int(m)
+	}
+
+	topP := types.DefaultTopP
+	if m, ok := providerConfig["top_p"].(float64); ok {
+		topP = m
+	}
+
+	temperature := types.DefaultTemperature
+	if m, ok := providerConfig["temperature"].(float64); ok {
+		temperature = m
+	}
+
+	frequencyPenalty := types.DefaultFrequencyPenalty
+	if m, ok := providerConfig["frequency_penalty"].(float64); ok {
+		frequencyPenalty = m
+	}
+
 	return &types.ClientConfig{
-		APIBase:        apiBase,
-		APIKey:         apiKey,
-		Model:          model,
-		Provider:       provider,
-		Retries:        types.DefaultRetries,
-		CompletionPath: completionPath,
+		APIBase:          apiBase,
+		APIKey:           apiKey,
+		Model:            model,
+		Provider:         provider,
+		Retries:          types.DefaultRetries,
+		Proxy:            proxy,
+		MaxTokens:        maxTokens,
+		TopP:             topP,
+		Temperature:      temperature,
+		FrequencyPenalty: frequencyPenalty,
+		CompletionPath:   completionPath,
 	}, nil
 }
 
@@ -122,6 +150,14 @@ func (m *Manager) Get(key string) (interface{}, bool) {
 
 // Set sets a configuration value
 func (m *Manager) Set(key string, value interface{}) error {
+	if key == "output.lang" {
+		if str, ok := value.(string); ok {
+			if !IsValidLanguage(str) {
+				return fmt.Errorf("invalid language code: %s", str)
+			}
+		}
+	}
+
 	keys := strings.Split(key, ".")
 	m.setNestedValue(keys, value)
 	return m.save()
@@ -378,9 +414,8 @@ use one of the following labels for the title:
 - style: changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
 - test: adding missing tests or correcting existing tests
 
-the commit message templete is <title>: <summary>
-
-your answer should only include a single commit message less than 70 characters, no other text.
+The commit message template is <title>: <summary>. Your answer should only include a single commit message less than 70 characters, no other text or ` + "`" + `.
+If your answer includes details about the commit, please list each item on a new line.
 
 Git diff like below example:
 ` + "```" + `
@@ -472,6 +507,29 @@ Remember translate all given git commit message and give me only the translation
 THE TRANSLATION:`,
 		},
 	}
+}
+
+// OutputLanguageMap maps language codes to their names
+var OutputLanguageMap = map[string]string{
+	"en":    "English",
+	"zh-cn": "Simplified Chinese",
+	"zh-tw": "Traditional Chinese",
+	"fr":    "French",
+	"vi":    "Vietnamese",
+	"ja":    "Japanese",
+	"ko":    "Korean",
+	"ru":    "Russian",
+	"tr":    "Turkish",
+	"id":    "Indonesian",
+	"th":    "Thai",
+	"de":    "German",
+	"es":    "Spanish",
+}
+
+// IsValidLanguage checks if a language code is valid
+func IsValidLanguage(lang string) bool {
+	_, ok := OutputLanguageMap[lang]
+	return ok
 }
 
 // GetSupportedKeys returns a list of supported configuration keys

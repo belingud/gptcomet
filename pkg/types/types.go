@@ -1,9 +1,13 @@
 package types
 
 const (
-	DefaultAPIBase = "https://api.openai.com/v1"
-	DefaultModel   = "gpt-4o"
-	DefaultRetries = 3
+	DefaultAPIBase          = "https://api.openai.com/v1"
+	DefaultModel            = "gpt-4o"
+	DefaultRetries          = 3
+	DefaultMaxTokens        = 1024
+	DefaultTemperature      = 0.7
+	DefaultTopP             = 1.0
+	DefaultFrequencyPenalty = 0.0
 )
 
 // Message represents a chat message
@@ -17,9 +21,9 @@ type CompletionRequest struct {
 	Model            string    `json:"model"`
 	Messages         []Message `json:"messages"`
 	MaxTokens        *int      `json:"max_tokens,omitempty"`
-	Temperature      *float32  `json:"temperature,omitempty"`
-	TopP             *float32  `json:"top_p,omitempty"`
-	FrequencyPenalty *float32  `json:"frequency_penalty,omitempty"`
+	Temperature      *float64  `json:"temperature,omitempty"`
+	TopP             *float64  `json:"top_p,omitempty"`
+	FrequencyPenalty *float64  `json:"frequency_penalty,omitempty"`
 }
 
 // CompletionResponse represents a chat completion response
@@ -39,15 +43,19 @@ type Usage struct {
 
 // ClientConfig represents the configuration for an LLM client
 type ClientConfig struct {
-	APIBase        string            `json:"api_base"`
-	APIKey         string            `json:"api_key"`
-	Model          string            `json:"model"`
-	Provider       string            `json:"provider"`
-	Retries        int               `json:"retries"`
-	Timeout        int64             `json:"timeout"`
-	Proxy          string            `json:"proxy,omitempty"`
-	ExtraHeaders   map[string]string `json:"extra_headers,omitempty"`
-	CompletionPath string            `json:"completion_path"`
-	AnswerPath     string            `json:"answer_path"`
-	Debug          bool              `json:"debug,omitempty"`
+	APIBase          string            `json:"api_base"`
+	APIKey           string            `json:"api_key"`
+	Model            string            `json:"model"`
+	Provider         string            `json:"provider"`
+	Retries          int               `json:"retries"`
+	Timeout          int64             `json:"timeout"`
+	Proxy            string            `json:"proxy,omitempty"`
+	ExtraHeaders     map[string]string `json:"extra_headers,omitempty"`
+	CompletionPath   string            `json:"completion_path"`
+	AnswerPath       string            `json:"answer_path"`
+	MaxTokens        int               `json:"max_tokens"`
+	TopP             float64           `json:"top_p"`
+	Temperature      float64           `json:"temperature"`
+	FrequencyPenalty float64           `json:"frequency_penalty"`
+	Debug            bool              `json:"debug,omitempty"`
 }
