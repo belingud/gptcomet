@@ -9,6 +9,7 @@ import (
 
 	"github.com/belingud/gptcomet/internal/client"
 	"github.com/belingud/gptcomet/internal/config"
+	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/internal/git"
 
 	"github.com/charmbracelet/bubbles/textarea"
@@ -106,7 +107,7 @@ func formatCommitMessage(msg string) string {
 }
 
 // NewCommitCmd creates a new commit command
-func NewCommitCmd(debug *bool) *cobra.Command {
+func NewCommitCmd() *cobra.Command {
 	var repoPath string
 	var rich bool
 
@@ -121,6 +122,7 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 					return fmt.Errorf("failed to get current directory: %w", err)
 				}
 			}
+			debug.Printf("Using repository path: %s", repoPath)
 
 			// Check for staged changes
 			hasStagedChanges, err := git.HasStagedChanges(repoPath)
@@ -130,12 +132,14 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 			if !hasStagedChanges {
 				return fmt.Errorf("no staged changes found")
 			}
+			debug.Println("Found staged changes")
 
 			// Get diff
 			diff, err := git.GetDiff(repoPath)
 			if err != nil {
 				return fmt.Errorf("failed to get diff: %w", err)
 			}
+			debug.Printf("Got diff length: %d", len(diff))
 
 			// Create config manager
 			cfgManager, err := config.New()
@@ -149,9 +153,6 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 				return fmt.Errorf("failed to get client config: %w", err)
 			}
 
-			// Set debug mode from global flag
-			clientConfig.Debug = *debug
-
 			// Create client
 			client := client.New(clientConfig)
 
@@ -161,6 +162,7 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 				if commitMsg != "" {
 					fmt.Printf("\nCurrent commit message:\n%s\n", formatCommitMessage(commitMsg))
 				}
+				fmt.Println("🤖 Hang tight, I'm cooking up something good!")
 
 				// Get prompt based on rich flag
 				prompt := cfgManager.GetPrompt(rich)
@@ -172,7 +174,7 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 					if err != nil {
 						return fmt.Errorf("failed to generate commit message: %w", err)
 					}
-					fmt.Printf("\nGenerated commit message:\n%s\n", formatCommitMessage(commitMsg))
+
 				}
 				// If output.lang is not "en", prompt for translation
 				var lang string
@@ -190,8 +192,8 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 					if err != nil {
 						return fmt.Errorf("failed to translate commit message: %w", err)
 					}
-					fmt.Printf("\nTranslated commit message to %s:\n%s\n", lang, formatCommitMessage(commitMsg))
 				}
+				fmt.Printf("\nGenerated commit message:\n%s\n", formatCommitMessage(commitMsg))
 
 				fmt.Print("\nWould you like to create this commit? ([Y]es/[n]o/[r]etry/[e]dit): ")
 				answer, err := reader.ReadString('\n')
@@ -208,7 +210,7 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 				switch answer {
 				case "y", "yes":
 					// Create commit
-					if err := git.Commit(repoPath, commitMsg); err != nil {
+					if err := git.CreateCommit(repoPath, commitMsg); err != nil {
 						return fmt.Errorf("failed to create commit: %w", err)
 					}
 					fmt.Printf("\nSuccessfully created commit with message:\n%s\n", formatCommitMessage(commitMsg))
@@ -235,7 +237,8 @@ func NewCommitCmd(debug *bool) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&repoPath, "path", "p", "", "Repository path")
+	cmd.Flags().StringVarP(&repoPath, "config", "c", "", "Config path")
 	cmd.Flags().BoolVarP(&rich, "rich", "r", false, "Generate rich commit message with details")
+
 	return cmd
 }
