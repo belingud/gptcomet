@@ -21,15 +21,26 @@ import (
 
 // Style definitions
 var (
-	successStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("2"))
+	successStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("2"))  // green
+	errorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))  // red
 	boxStyle     = lipgloss.NewStyle().
 			BorderStyle(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("2")).
 			Padding(0, 1)
+	authorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("2"))  // green
+	emailStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("4"))  // blue
 )
 
 const (
 	LANGUAGE_KEY = "output.lang"
+	commitOutputTemplate = `
+Author: %s <%s>
+%s(%s)
+
+%s
+
+%s
+`
 )
 
 type textEditor struct {
@@ -104,6 +115,29 @@ func editText(initialText string) (string, error) {
 
 func formatCommitMessage(msg string) string {
 	return boxStyle.Render(successStyle.Render(msg))
+}
+
+func formatCommitOutput(repo *git.Repo, commit *git.Commit) string {
+	// Get commit details
+	commitHash := commit.Hash()
+	branch := repo.Branch()
+	commitMsg := commit.Message()
+	author := authorStyle.Render(commit.Author())
+	email := emailStyle.Render(commit.Email())
+
+	// Get git show stat with colored + and -
+	showStat := repo.ShowStat(commitHash)
+	showStat = strings.ReplaceAll(showStat, "+", successStyle.Render("+"))
+	showStat = strings.ReplaceAll(showStat, "-", errorStyle.Render("-"))
+
+	return fmt.Sprintf(commitOutputTemplate,
+		author,
+		email,
+		branch,
+		commitHash,
+		commitMsg,
+		showStat,
+	)
 }
 
 // NewCommitCmd creates a new commit command
@@ -210,10 +244,19 @@ func NewCommitCmd() *cobra.Command {
 				switch answer {
 				case "y", "yes":
 					// Create commit
-					if err := git.CreateCommit(repoPath, commitMsg); err != nil {
+					repo, err := git.NewRepo(repoPath)
+					if err != nil {
+						return fmt.Errorf("failed to create repository: %w", err)
+					}
+					commit, err := repo.Commit(commitMsg)
+					if err != nil {
 						return fmt.Errorf("failed to create commit: %w", err)
 					}
-					// TODO: print commit info
+
+					// Print commit details
+					output := formatCommitOutput(repo, commit)
+					fmt.Println(output)
+					fmt.Println(successStyle.Render("Commit message saved successfully!"))
 
 					return nil
 				case "n", "no":

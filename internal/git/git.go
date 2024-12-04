@@ -7,6 +7,106 @@ import (
 	"strings"
 )
 
+// Repo represents a git repository
+type Repo struct {
+	path string
+}
+
+// Commit represents a git commit
+type Commit struct {
+	hash    string
+	message string
+	author  string
+	email   string
+	repo    *Repo
+}
+
+// NewRepo creates a new Repo instance
+func NewRepo(path string) (*Repo, error) {
+	return &Repo{path: path}, nil
+}
+
+// Branch returns the current branch name
+func (r *Repo) Branch() string {
+	branch, err := GetCurrentBranch(r.path)
+	if err != nil {
+		return "unknown"
+	}
+	return branch
+}
+
+// Commit creates a new commit with the given message
+func (r *Repo) Commit(message string) (*Commit, error) {
+	if err := CreateCommit(r.path, message); err != nil {
+		return nil, err
+	}
+
+	// Get the commit hash
+	cmd := exec.Command("git", "rev-parse", "HEAD")
+	cmd.Dir = r.path
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to get commit hash: %w", err)
+	}
+	hash := strings.TrimSpace(out.String())
+
+	// Get author and email
+	cmd = exec.Command("git", "log", "-1", "--pretty=format:%an|%ae")
+	cmd.Dir = r.path
+	out.Reset()
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to get author info: %w", err)
+	}
+	parts := strings.Split(strings.TrimSpace(out.String()), "|")
+	author := parts[0]
+	email := ""
+	if len(parts) > 1 {
+		email = parts[1]
+	}
+
+	return &Commit{
+		hash:    hash,
+		message: message,
+		author:  author,
+		email:   email,
+		repo:    r,
+	}, nil
+}
+
+// ShowStat returns the git show --stat output for a commit
+func (r *Repo) ShowStat(hash string) string {
+	cmd := exec.Command("git", "show", "--pretty=format:", "--stat", hash)
+	cmd.Dir = r.path
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(out.String())
+}
+
+// Hash returns the commit hash
+func (c *Commit) Hash() string {
+	return c.hash
+}
+
+// Message returns the commit message
+func (c *Commit) Message() string {
+	return c.message
+}
+
+// Author returns the commit author
+func (c *Commit) Author() string {
+	return c.author
+}
+
+// Email returns the author's email
+func (c *Commit) Email() string {
+	return c.email
+}
+
 // GetDiff returns the git diff for staged changes
 func GetDiff(repoPath string) (string, error) {
 	cmd := exec.Command("git", "diff", "--staged")
