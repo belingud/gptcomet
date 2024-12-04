@@ -69,12 +69,46 @@ func (c *Client) Chat(messages []types.Message) (*types.CompletionResponse, erro
 		return nil, err
 	}
 
-	var result types.CompletionResponse
+	var result map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	return &result, nil
+	// Print token usage information if available
+	if usage, ok := result["usage"].(map[string]interface{}); ok {
+		printTokenUsage(usage)
+	}
+
+	return &types.CompletionResponse{Result: result}, nil
+}
+
+func printTokenUsage(usage map[string]interface{}) {
+	type tokenInfo struct {
+		name  string
+		value float64
+		ok    bool
+	}
+
+	getTokenValue := func(key string) tokenInfo {
+		val, ok := usage[key].(float64)
+		return tokenInfo{key, val, ok}
+	}
+
+	tokens := []tokenInfo{
+		getTokenValue("prompt_tokens"),
+		getTokenValue("completion_tokens"),
+		getTokenValue("total_tokens"),
+	}
+
+	// Check if all token values are present
+	for _, token := range tokens {
+		if !token.ok {
+			return
+		}
+	}
+
+	fmt.Printf("Token usage> prompt tokens: %.0f, completion tokens: %.0f, total tokens: %.0f\n",
+		tokens[0].value, tokens[1].value, tokens[2].value)
 }
 
 // sendRawRequest sends a completion request to the LLM provider and returns the raw JSON response

@@ -27,7 +27,9 @@ type CompletionRequest struct {
 }
 
 // CompletionResponse represents a chat completion response
-type CompletionResponse map[string]interface{}
+type CompletionResponse struct {
+	Result map[string]interface{} `json:"result"`
+}
 
 // Choice represents a completion choice
 type Choice struct {

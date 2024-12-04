@@ -213,7 +213,8 @@ func NewCommitCmd() *cobra.Command {
 					if err := git.CreateCommit(repoPath, commitMsg); err != nil {
 						return fmt.Errorf("failed to create commit: %w", err)
 					}
-					fmt.Printf("\nSuccessfully created commit with message:\n%s\n", formatCommitMessage(commitMsg))
+					// TODO: print commit info
+
 					return nil
 				case "n", "no":
 					fmt.Println("Operation cancelled")
