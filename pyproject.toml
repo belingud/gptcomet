@@ -52,7 +52,6 @@ Repository = "https://github.com/belingud/gptcomet"
 Documentation = "https://github.com/belingud/gptcomet"
 
 [project.scripts]
-gptcomet = "gptcomet.clis.__main__:app"
 gmsg = "gptcomet.clis.__main__:app"
 
 [build-system]
