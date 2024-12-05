@@ -200,4 +200,6 @@ jobs:
           PDM_PUBLISH_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           cd py
+          ls -al gptcomet
+          ls -al dist
           pdm publish --no-build ${{ needs.detect-env.outputs.pypi_repo }}
