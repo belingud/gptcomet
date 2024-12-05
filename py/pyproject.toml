@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Code Generators",
 ]
 
@@ -42,6 +43,14 @@ distribution = true
 includes = ["gptcomet"]
 excludes = ["tests"]
 is-purelib = false  # This is important for binary distributions
+# 指定平台标签
+platforms = [
+    "win_amd64",
+    "manylinux_2_17_x86_64",
+    "manylinux_2_17_aarch64",
+    "macosx_10_12_x86_64",
+    "macosx_11_0_arm64"
+]
 
 [project.scripts]
 gmsg = "gptcomet.cli:main"
