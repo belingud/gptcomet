@@ -1,4 +1,4 @@
-name: goreleaser
+name: Release
 
 on:
   push:
@@ -9,7 +9,30 @@ permissions:
   contents: write
 
 jobs:
+  detect-env:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      pypi_repo: ${{ steps.set-env.outputs.pypi_repo }}
+    steps:
+      - name: Set environment based on tag
+        id: set-env
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "Tag: $TAG"
+          
+          if [[ "$TAG" == *"-dev" ]]; then
+            echo "Development version detected"
+            echo "environment=testpypi" >> $GITHUB_OUTPUT
+            echo "pypi_repo=-r testpypi" >> $GITHUB_OUTPUT
+          else
+            echo "Release version detected"
+            echo "environment=pypi" >> $GITHUB_OUTPUT
+            echo "pypi_repo=" >> $GITHUB_OUTPUT
+          fi
+
   goreleaser:
+    needs: detect-env
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,4 +52,78 @@ jobs:
           version: latest
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  python-release:
+    needs: [detect-env, goreleaser]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.detect-env.outputs.environment }}
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Install PDM
+        run: |
+          python -m pip install --upgrade pip
+          pip install pdm
+          
+      - name: Download Go binaries
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}  # Remove 'v' prefix
+          WORK_DIR=$(mktemp -d)
+          mkdir -p py/gptcomet
+          
+          # Function to download and extract binary
+          download_and_extract() {
+            local os=$1
+            local arch=$2
+            local ext=$3
+            echo "Downloading binary for ${os}_${arch}"
+            
+            if [ "$ext" = "zip" ]; then
+              curl -sL "https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_${os}_${arch}.${ext}" -o "${WORK_DIR}/tmp.${ext}"
+              unzip -j "${WORK_DIR}/tmp.${ext}" "gptcomet*" -d "py/gptcomet"
+              if [ "$os" = "windows" ]; then
+                mv py/gptcomet/gptcomet.exe "py/gptcomet/gptcomet_${os}_${arch}.exe"
+              fi
+            else
+              curl -sL "https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_${os}_${arch}.${ext}" | tar xz -C "${WORK_DIR}"
+              mv "${WORK_DIR}/gptcomet" "py/gptcomet/gptcomet_${os}_${arch}"
+            fi
+          }
+          
+          # Download all platform binaries
+          download_and_extract "darwin" "amd64" "tar.gz"
+          download_and_extract "darwin" "arm64" "tar.gz"
+          download_and_extract "linux" "amd64" "tar.gz"
+          download_and_extract "linux" "arm64" "tar.gz"
+          download_and_extract "windows" "amd64" "zip"
+          
+          # Cleanup
+          rm -rf "${WORK_DIR}"
+          
+          # List files for debugging
+          ls -la py/gptcomet/
+      
+      - name: Install dependencies
+        run: cd py && pdm install
+        
+      - name: Build package
+        run: cd py && pdm build
+        
+      - name: Publish to PyPI
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        env:
+          PDM_PUBLISH_USERNAME: __token__
+          PDM_PUBLISH_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: cd py && pdm publish --no-build ${{ needs.detect-env.outputs.pypi_repo }}
