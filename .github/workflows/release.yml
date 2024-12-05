@@ -130,15 +130,19 @@ jobs:
           ls -la py/gptcomet/
       
       - name: Install dependencies
-        run: cd py && pdm install
+        run: |
+          cd py
+          pdm install
         
       - name: Build package
-        run: cd py && pdm build
+        run: |
+          cd py
+          pdm build
         
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheel-${{ matrix.os }}-py${{ matrix.python-version }}
           path: py/dist/*.whl
           if-no-files-found: error
 
@@ -150,11 +154,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Download wheels
+      - name: Download all wheels
         uses: actions/download-artifact@v4
         with:
-          name: wheels
-          path: dist
+          pattern: wheel-*
+          path: py/dist
+          merge-multiple: true
           
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -170,4 +175,6 @@ jobs:
         env:
           PDM_PUBLISH_USERNAME: __token__
           PDM_PUBLISH_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: cd py && pdm publish --no-build ${{ needs.detect-env.outputs.pypi_repo }}
+        run: |
+          cd py
+          pdm publish --no-build ${{ needs.detect-env.outputs.pypi_repo }}
