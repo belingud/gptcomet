@@ -81,8 +81,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pdm
-          
-      - name: Download Go binaries
+
+      - name: Download Go binaries (Unix)
+        if: runner.os != 'Windows'
         run: |
           TAG=${GITHUB_REF#refs/tags/}
           VERSION=${TAG#v}  # Remove 'v' prefix
@@ -114,9 +115,6 @@ jobs:
               download_and_extract "linux" "amd64" "tar.gz"
               download_and_extract "linux" "arm64" "tar.gz"
               ;;
-            "windows-latest")
-              download_and_extract "windows" "amd64" "zip"
-              ;;
             "macos-latest")
               download_and_extract "darwin" "amd64" "tar.gz"
               download_and_extract "darwin" "arm64" "tar.gz"
@@ -128,6 +126,30 @@ jobs:
           
           # List files for debugging
           ls -la py/gptcomet/
+
+      - name: Download Go binaries (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $TAG = $env:GITHUB_REF -replace '^refs/tags/', ''
+          $VERSION = $TAG -replace '^v', ''
+          $WORK_DIR = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
+          New-Item -ItemType Directory -Force -Path $WORK_DIR | Out-Null
+          New-Item -ItemType Directory -Force -Path "py/gptcomet" | Out-Null
+
+          # Download and extract Windows binary
+          $url = "https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_windows_amd64.zip"
+          $zipPath = Join-Path $WORK_DIR "gptcomet.zip"
+          
+          Write-Host "Downloading from: $url"
+          Invoke-WebRequest -Uri $url -OutFile $zipPath
+          
+          Expand-Archive -Path $zipPath -DestinationPath $WORK_DIR
+          Move-Item -Path (Join-Path $WORK_DIR "gptcomet.exe") -Destination "py/gptcomet/gptcomet_windows_amd64.exe"
+          
+          # Cleanup
+          Remove-Item -Recurse -Force $WORK_DIR
+          Get-ChildItem "py/gptcomet"
       
       - name: Install dependencies
         run: |
