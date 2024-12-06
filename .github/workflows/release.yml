@@ -66,15 +66,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13-xl, macos-14]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: ubuntu-latest
             platform: linux
           - os: windows-latest
             platform: windows
+          - os: macos-13
+            platform: darwin-amd64
           - os: macos-latest
-            platform: darwin
+            platform: darwin-arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -125,12 +127,14 @@ jobs:
               download_and_extract "linux" "amd64" "tar.gz"
               download_and_extract "linux" "arm64" "tar.gz"
               ;;
-            "macos-latest")
-              # 确保下载 macOS 的 x86_64 和 arm64 二进制文件
+            "macos-13")
+              # 仅下载 Intel/AMD64 二进制文件
               download_and_extract "darwin" "amd64" "tar.gz"
-              download_and_extract "darwin" "arm64" "tar.gz"
-              # 重命名为更明确的名称
               mv "py/gptcomet/gptcomet_darwin_amd64" "py/gptcomet/gptcomet_macos_x86_64"
+              ;;
+            "macos-latest")
+              # 仅下载 ARM64 二进制文件
+              download_and_extract "darwin" "arm64" "tar.gz"
               mv "py/gptcomet/gptcomet_darwin_arm64" "py/gptcomet/gptcomet_macos_arm64"
               ;;
           esac
