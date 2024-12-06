@@ -15,4 +15,4 @@ Key features:
 For more information, visit: https://github.com/belingud/gptcomet
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"

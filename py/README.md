@@ -10,17 +10,14 @@ pip install gptcomet
 
 ## Usage
 
-After installation, you can use the `gptcomet` command directly from your terminal:
+After installation, you can use the `gmsg` command directly from your terminal:
 
 ```bash
 # Generate a commit message for staged changes
-gptcomet commit
-
-# Translate a commit message
-gptcomet translate "fix: update user interface" --lang zh
+gmsg commit
 
 # Configure GPTComet
-gptcomet config set api_key "your-api-key"
+gmsg config set api_key "your-api-key"
 ```
 
 ## Features
