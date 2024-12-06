@@ -44,6 +44,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '>=1.21'
+
       - name: List files
         run: |
           go version
@@ -97,41 +98,44 @@ jobs:
           WORK_DIR=$(mktemp -d)
           mkdir -p py/gptcomet
           
-          # Function to download and extract binary
           download_and_extract() {
             local os=$1
             local arch=$2
             local ext=$3
             echo "Downloading binary for ${os}_${arch}"
             
+            DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_${os}_${arch}.${ext}"
+            echo "Download URL: $DOWNLOAD_URL"
+            
             if [ "$ext" = "zip" ]; then
-              curl -sL "https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_${os}_${arch}.${ext}" -o "${WORK_DIR}/tmp.${ext}"
+              curl -sL "$DOWNLOAD_URL" -o "${WORK_DIR}/tmp.${ext}"
               unzip -j "${WORK_DIR}/tmp.${ext}" "gptcomet*" -d "py/gptcomet"
               if [ "$os" = "windows" ]; then
                 mv py/gptcomet/gptcomet.exe "py/gptcomet/gptcomet_${os}_${arch}.exe"
               fi
             else
-              curl -sL "https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_${os}_${arch}.${ext}" | tar xz -C "${WORK_DIR}"
+              curl -sL "$DOWNLOAD_URL" -o "${WORK_DIR}/tmp.${ext}"
+              tar xzf "${WORK_DIR}/tmp.${ext}" -C "${WORK_DIR}"
               mv "${WORK_DIR}/gptcomet" "py/gptcomet/gptcomet_${os}_${arch}"
             fi
           }
           
-          # Download platform-specific binary
           case "${{ matrix.os }}" in
             "ubuntu-latest")
               download_and_extract "linux" "amd64" "tar.gz"
               download_and_extract "linux" "arm64" "tar.gz"
               ;;
             "macos-latest")
+              # 确保下载 macOS 的 x86_64 和 arm64 二进制文件
               download_and_extract "darwin" "amd64" "tar.gz"
               download_and_extract "darwin" "arm64" "tar.gz"
+              # 重命名为更明确的名称
+              mv "py/gptcomet/gptcomet_darwin_amd64" "py/gptcomet/gptcomet_macos_x86_64"
+              mv "py/gptcomet/gptcomet_darwin_arm64" "py/gptcomet/gptcomet_macos_arm64"
               ;;
           esac
           
-          # Cleanup
-          rm -rf "${WORK_DIR}"
-          
-          # List files for debugging
+          echo "Contents of py/gptcomet:"
           ls -la py/gptcomet/
 
       - name: Download Go binaries (Windows)
@@ -144,7 +148,6 @@ jobs:
           New-Item -ItemType Directory -Force -Path $WORK_DIR | Out-Null
           New-Item -ItemType Directory -Force -Path "py/gptcomet" | Out-Null
 
-          # Download and extract Windows binary
           $url = "https://github.com/${{ github.repository }}/releases/download/${TAG}/gptcomet_${VERSION}_windows_amd64.zip"
           $zipPath = Join-Path $WORK_DIR "gptcomet.zip"
           
@@ -154,7 +157,6 @@ jobs:
           Expand-Archive -Path $zipPath -DestinationPath $WORK_DIR
           Move-Item -Path (Join-Path $WORK_DIR "gptcomet.exe") -Destination "py/gptcomet/gptcomet_windows_amd64.exe"
           
-          # Cleanup
           Remove-Item -Recurse -Force $WORK_DIR
           Get-ChildItem "py/gptcomet"
       
