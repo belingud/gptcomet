@@ -18,6 +18,14 @@ keywords = [
     "chatgpt",
 ]
 classifiers = [
+    # Development Status options:
+    # 1 - Planning - Initial planning and design phase
+    # 2 - Pre-Alpha - Early development, not feature complete
+    # 3 - Alpha - Feature complete but unstable, testing phase
+    # 4 - Beta - Feature complete and mostly stable, public testing
+    # 5 - Production/Stable - Production ready, stable release
+    # 6 - Mature - Well-established, battle-tested production release
+    # 7 - Inactive - No longer maintained or supported
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",

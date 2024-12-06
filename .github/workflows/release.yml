@@ -30,6 +30,9 @@ jobs:
             echo "environment=pypi" >> $GITHUB_OUTPUT
             echo "pypi_repo=" >> $GITHUB_OUTPUT
           fi
+          ls -la .
+          ls -al py
+          cat py/pyproject.toml
 
   goreleaser:
     needs: detect-env
