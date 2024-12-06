@@ -125,12 +125,12 @@ jobs:
           case "${{ matrix.os }}" in
             "ubuntu-latest")
               download_and_extract "linux" "amd64" "tar.gz"
-              download_and_extract "linux" "arm64" "tar.gz"
+              # download_and_extract "linux" "arm64" "tar.gz"
               ;;
             "macos-13")
               # 仅下载 Intel/AMD64 二进制文件
               download_and_extract "darwin" "amd64" "tar.gz"
-              mv "py/gptcomet/gptcomet_darwin_amd64" "py/gptcomet/gptcomet_macos_x86_64"
+              mv "py/gptcomet/gptcomet_darwin_amd64" "py/gptcomet/gptcomet_macos_amd64"
               ;;
             "macos-latest")
               # 仅下载 ARM64 二进制文件
