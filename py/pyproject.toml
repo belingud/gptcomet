@@ -51,13 +51,16 @@ distribution = true
 includes = ["gptcomet"]
 excludes = ["tests"]
 is-purelib = false  # This is important for binary distributions
-# 指定平台标签
+# 使用更通用的平台标签
 platforms = [
+    # Windows
     "win_amd64",
-    "manylinux_2_17_x86_64",
-    "manylinux_2_17_aarch64",
-    "macosx_10_12_x86_64",
-    "macosx_11_0_arm64"
+    # Linux - 使用更旧的 manylinux 标签以提高兼容性
+    "manylinux1_x86_64",  # 最广泛兼容的 Linux 标签
+    "manylinux1_aarch64",
+    # macOS - 使用更低的最小版本要求
+    "macosx_10_9_x86_64",  # 支持 OS X 10.9 及以上
+    "macosx_10_9_arm64"   # M1/M2 芯片支持
 ]
 
 [project.scripts]
