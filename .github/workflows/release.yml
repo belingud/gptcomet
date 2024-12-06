@@ -59,16 +59,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: ubuntu-latest
             platform: linux
-            python-version: "3.12"
           - os: windows-latest
             platform: windows
-            python-version: "3.12"
           - os: macos-latest
             platform: darwin
-            python-version: "3.12"
 
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +79,7 @@ jobs:
           
       - name: Install PDM
         run: |
+          cd py
           python -m pip install --upgrade pip
           pip install pdm
 
@@ -165,7 +165,7 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-${{ matrix.platform }}
+          name: wheel-${{ matrix.platform }}-py${{ matrix.python-version }}
           path: py/dist/*.whl
           if-no-files-found: error
 
