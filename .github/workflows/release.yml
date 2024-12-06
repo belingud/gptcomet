@@ -30,9 +30,6 @@ jobs:
             echo "environment=pypi" >> $GITHUB_OUTPUT
             echo "pypi_repo=" >> $GITHUB_OUTPUT
           fi
-          ls -la .
-          ls -al py
-          cat py/pyproject.toml
 
   goreleaser:
     needs: detect-env
@@ -47,6 +44,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '>=1.21'
+      - name: List files
+        run: |
+          go version
+          ls -la
+          ls -la py
+          cat py/pyproject.toml
           
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
