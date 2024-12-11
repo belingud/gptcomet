@@ -248,6 +248,28 @@ Supported languages:
 * `th`: Thai
 * `de`: German
 * `es`: Spanish
+* `pt`: Portuguese
+* `it`: Italian
+* `ar`: Arabic
+* `hi`: Hindi
+* `el`: Greek
+* `pl`: Polish
+* `nl`: Dutch
+* `sv`: Swedish
+* `fi`: Finnish
+* `hu`: Hungarian
+* `cs`: Czech
+* `ro`: Romanian
+* `bg`: Bulgarian
+* `uk`: Ukrainian
+* `he`: Hebrew
+* `lt`: Lithuanian
+* `la`: Latin
+* `ca`: Catalan
+* `sr`: Serbian
+* `sl`: Slovenian
+* `mk`: Macedonian
+* `lv`: Latvian
 
 You can set `rich_template` to change the template of the rich commit message.
 
