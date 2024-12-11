@@ -62,3 +62,25 @@ docs:
 
 changelog:
     git cliff -l --prepend CHANGELOG.md
+
+pyinstaller:
+    pdm run pyinstaller gptcomet/clis/__main__.py \
+    --name gptcomet \
+    --onefile \
+    --clean \
+    --noupx \
+    --hidden-import=click \
+    --hidden-import=typer \
+    --hidden-import=rich \
+    --hidden-import=gitpython \
+    --hidden-import=ruamel.yaml \
+    --hidden-import=glom \
+    --hidden-import=prompt_toolkit \
+    --hidden-import=httpx \
+    --hidden-import=socksio \
+    --exclude-module _tkinter \
+    --exclude-module unittest \
+    --exclude-module doctest \
+    --exclude-module pydoc \
+    --exclude-module Tkinter \
+    --exclude-module pyreadline

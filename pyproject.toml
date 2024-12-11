@@ -145,6 +145,7 @@ dev = [
     "tox>=3.25.1",
     "ruff>=0.5.6",
     "bump2version>=1.0.1",
+    "pyinstaller>=6.11.1",
 ]
 test = ["pytest>=7.2.0", "pytest-cov>=4.0.0"]
 profile = ["pyinstrument>=4.7.2", "line-profiler>=4.1.3"]
