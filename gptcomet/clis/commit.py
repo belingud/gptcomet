@@ -217,6 +217,7 @@ def entry(
     while True:
         try:
             if not commit_message:
+                console.print(stylize("🤖 Hang tight, I'm cooking up something good!", Colors.GREEN))
                 commit_message = message_generator.generate_commit_message(rich=rich)
 
             console.print("\nCommit message:")

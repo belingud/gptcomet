@@ -17,12 +17,7 @@ from gptcomet.exceptions import (
     NotModified,
 )
 from gptcomet.support_keys import SUPPORT_KEYS
-from gptcomet.utils import (
-    convert2type,
-    output_language_map,
-    strtobool,
-    mask_api_keys,
-)
+from gptcomet.utils import convert2type, mask_api_keys, output_language_map, strtobool
 
 yaml = YAML(typ="rt", pure=True)
 
