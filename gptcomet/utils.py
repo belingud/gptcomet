@@ -104,3 +104,55 @@ def should_ignore(filepath: str, ignore_patterns: list[str]) -> bool:
         bool: True if the filepath should be ignored, False otherwise.
     """
     return any(fnmatch.fnmatch(filepath, pattern) for pattern in ignore_patterns)
+
+
+def api_key_mask(api_key: str, show_first: int = 3) -> str:
+    """
+    Mask API keys.
+
+    Args:
+        api_key (str): The API key to mask.
+        show_first (int, optional): The number of characters to show before masking. Defaults to 3.
+
+    Returns:
+        str: The masked API key.
+    """
+    if not isinstance(api_key, str):
+        return api_key
+    if show_first < 0:
+        show_first = 0
+
+    # check api_key prefix
+    prefixes = ("sk-or-v1-", "sk-", "gsk_", "xai-")
+    for prefix in prefixes:
+        if api_key.startswith(prefix):
+            visible_part = api_key[: (len(prefix) + show_first)]
+            return visible_part + "*" * (len(api_key) - len(visible_part))
+
+    # no prefix found, return the first few characters
+    return api_key[:show_first] + "*" * (len(api_key) - show_first)
+
+
+def mask_api_keys(data, show_first: int = 3):
+    """
+    Mask API keys in a dictionary or list.
+
+    Args:
+        data (dict or list): The data to mask.
+        show_first (int, optional): The number of characters to show before masking. Defaults to 3.
+
+    Returns:
+        dict or list: The masked data.
+    """
+    if isinstance(data, str):
+        return api_key_mask(data, show_first)
+    if isinstance(data, list):
+        return [mask_api_keys(item, show_first) for item in data]
+    elif not isinstance(data, dict):
+        return data
+    for key, value in data.items():
+        if key == "api_key":
+            data[key] = api_key_mask(value, show_first)
+        elif isinstance(value, dict):
+            mask_api_keys(value, show_first)
+    return data

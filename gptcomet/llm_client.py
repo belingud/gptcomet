@@ -1,4 +1,3 @@
-import logging
 import typing as t
 
 import httpx
@@ -36,6 +35,8 @@ if t.TYPE_CHECKING:
 
 class LLMClient:
     __slots__ = (
+        "_http_client",
+        "_request_timeout",
         "api_base",
         "api_key",
         "completion_path",
@@ -46,8 +47,6 @@ class LLMClient:
         "provider",
         "proxy",
         "retries",
-        "_http_client",
-        "_request_timeout",
     )
 
     @classmethod

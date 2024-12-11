@@ -17,7 +17,12 @@ from gptcomet.exceptions import (
     NotModified,
 )
 from gptcomet.support_keys import SUPPORT_KEYS
-from gptcomet.utils import convert2type, output_language_map, strtobool
+from gptcomet.utils import (
+    convert2type,
+    output_language_map,
+    strtobool,
+    mask_api_keys,
+)
 
 yaml = YAML(typ="rt", pure=True)
 
@@ -201,7 +206,7 @@ class ConfigManager:
         Set a nested value in a dictionary using a list of keys.
 
         Args:
-            doc (TOMLDocument): The dictionary to modify.
+            doc (CommentedMap): The dictionary to modify.
             keys (Union[str, List[str]]): The list of keys to navigate through the dictionary.
             value (Any): The value to set at the end of the nested keys.
 
@@ -307,37 +312,11 @@ class ConfigManager:
             This method assumes that `self.current_config_path` is a valid file path.
         """
 
-        def api_key_mask(api_key: str, show_first: int = 3) -> str:
-            if not isinstance(api_key, str):
-                return api_key
-
-            # check api_key prefix
-            prefixes = ("sk-or-v1-", "sk-", "gsk_", "xai-")
-            for prefix in prefixes:
-                if api_key.startswith(prefix):
-                    visible_part = api_key[: (len(prefix) + show_first)]
-                    return visible_part + "*" * (len(api_key) - len(visible_part))
-
-            # no prefix found, return the first few characters
-            return api_key[:show_first] + "*" * (len(api_key) - show_first)
-
-        def mask_api_keys(data):
-            """
-            Mask API keys in a dictionary or list.
-            """
-            if not isinstance(data, dict):
-                return
-            for key, value in data.items():
-                if key == "api_key":
-                    data[key] = api_key_mask(value)
-                elif isinstance(value, dict):
-                    mask_api_keys(value)
-
         config_data = self.config.copy()
         config_data.pop("prompt", None)
 
         # recursively mask api keys
-        mask_api_keys(config_data)
+        mask_api_keys(config_data, show_first=3)
 
         # convert to YAML string
         output = StringIO()
