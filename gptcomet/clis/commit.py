@@ -213,14 +213,14 @@ def entry(
         console.print(stylize(str(error), Colors.YELLOW))
         raise typer.Exit(1) from None
 
+    commit_message: Optional[str] = None
     while True:
         try:
-            commit_message = message_generator.generate_commit_message(rich=rich)
             if not commit_message:
-                console.print(stylize("No commit message generated.", Colors.MAGENTA))
-                raise typer.Exit(0) from None
+                console.print(stylize("🤖 Hang tight, I'm cooking up something good!", Colors.GREEN))
+                commit_message = message_generator.generate_commit_message(rich=rich)
 
-            console.print("\nGenerated commit message:")
+            console.print("\nCommit message:")
             console.print(Panel(stylize(commit_message, Colors.GREEN)))
 
             user_input = ask_for_retry()
@@ -231,7 +231,8 @@ def entry(
                 return
             elif user_input == "e":
                 commit_message = edit_text_in_place(commit_message)
-                break
+            elif user_input == "r":
+                commit_message = None
 
         except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
             console.print(stylize(str(error), Colors.YELLOW))

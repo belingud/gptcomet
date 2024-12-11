@@ -1,4 +1,3 @@
-import logging
 import typing as t
 
 import httpx
@@ -36,6 +35,8 @@ if t.TYPE_CHECKING:
 
 class LLMClient:
     __slots__ = (
+        "_http_client",
+        "_request_timeout",
         "api_base",
         "api_key",
         "completion_path",
@@ -46,8 +47,6 @@ class LLMClient:
         "provider",
         "proxy",
         "retries",
-        "_http_client",
-        "_request_timeout",
     )
 
     @classmethod
@@ -130,7 +129,8 @@ class LLMClient:
             ConfigError: If the API key is not set in the config.
             BadRequestError: If the completion API returns an error.
         """
-        console.print(f"Discovered model `{self.model}` with provider `{self.provider}`.")
+        if self.config_manager.get("console.verbose"):
+            console.print(f"Discovered model `{self.model}` with provider `{self.provider}`.")
         if use_history:
             messages = [*self.conversation_history, {"role": "user", "content": prompt}]
         else:
@@ -139,7 +139,6 @@ class LLMClient:
 
         # Completion_with_retries returns a dictionary with the response and metadata
         # Could raise BadRequestError error
-        console.print("🤖 Hang tight, I'm cooking up something good!")
         response: dict = self.completion_with_retries(**params)
         usage: dict = response.get("usage", {})
 

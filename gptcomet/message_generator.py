@@ -8,7 +8,8 @@ from gptcomet.const import FILE_IGNORE_KEY, GPTCOMET_PRE, LANGUAGE_KEY
 from gptcomet.exceptions import GitNoStagedChanges
 from gptcomet.llm_client import LLMClient
 from gptcomet.log import logger
-from gptcomet.utils import should_ignore
+from gptcomet.styles import Colors, stylize
+from gptcomet.utils import console, output_language_map, should_ignore
 
 
 class MessageGenerator:
@@ -138,13 +139,24 @@ class MessageGenerator:
         lang = self.config_manager.get(LANGUAGE_KEY, _type=str)
         title = ""
         if str(lang).lower() != "en" and lang is not None:
+            full_lang = output_language_map.get(lang, None)
+            if full_lang is None:
+                console.print(
+                    stylize(
+                        f"{GPTCOMET_PRE} Language {lang} not supported, will use the original value {lang} for the attempt.",
+                        Colors.MAGENTA,
+                    )
+                )
+                full_lang = lang
+            if self.config_manager.get("console.verbose"):
+                console.print(f"{GPTCOMET_PRE} Original commit message: {msg}")
             if ":" in msg:
                 title, msg = msg.split(":")
             # Default is English, but can be changed by the user
-            logger.debug(f"{GPTCOMET_PRE} Translating commit message to {lang}")
+            console.print(f"{GPTCOMET_PRE} Translating commit message to {lang}")
             translation = str(self.config_manager.get("prompt.translation"))
             translation = translation.replace("{{ placeholder }}", msg).replace(
-                "{{ output_language }}", lang
+                "{{ output_language }}", full_lang
             )
             msg = self.llm_client.generate(translation)
         return f"{title}: {msg}" if title else msg
