@@ -13,7 +13,9 @@ console.verbose
 {provider}.top_p
 {provider}.temperature
 {provider}.frequency_penalty
-{provider}.extra_headers      # JSON string
+{provider}.extra_headers      # JSON string, default `{}`
+{provider}.answer_path        # completion response path, default `choices[0].message.content`
+{provider}.completion_path    # completion api path, default `/chat/completions`
 prompt.brief_commit_message   # Prompt for brief commit message
 prompt.rich_commit_message    # Prompt for rich commit message
 prompt.translation            # Prompt for translation commit message to target language

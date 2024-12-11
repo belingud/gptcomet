@@ -32,7 +32,9 @@ openai:
   top_p: 0.7
   temperature: 0.7
   frequency_penalty: 0
-  extra_headers: "{}"  # JSON string
+  extra_headers: "{}"  # JSON string, default `{}`
+  answer_path: "choices.0.message.content"  # completion response path, default `choices[0].message.content`
+  completion_path: "/chat/completions"  # completion api path, default `/chat/completions`
 
 prompt:
   brief_commit_message: |
