@@ -20,8 +20,8 @@ from gptcomet.utils import api_key_mask
         ("sk-abcdefghijklmn", 0, "sk-**************"),  # show_first zero, include prefix
         ("abcdefghijklmn", 0, "**************"),  # show_first zero, no prefix
         ("sk-abcdefghijklmn", -1, "sk-**************"),  # show_first negative, same as zero
-        ("abcdefghijklmn", -1, "**************"), # show_first negative, same as zero
-        (None, 0, None), # Non-string input with show_first zero, expect same as input
+        ("abcdefghijklmn", -1, "**************"),  # show_first negative, same as zero
+        (None, 0, None),  # Non-string input with show_first zero, expect same as input
     ],
 )
 def test_api_key_mask(api_key, show_first, expected):
