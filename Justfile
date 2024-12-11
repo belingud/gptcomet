@@ -60,9 +60,11 @@ docs-test:
 docs:
     pdm run mkdocs serve
 
+# Generate changelog
 changelog:
     git cliff -l --prepend CHANGELOG.md
 
+# Build executable
 pyinstaller:
     pdm run pyinstaller gptcomet/clis/__main__.py \
     --name gptcomet \
