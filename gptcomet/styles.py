@@ -57,6 +57,8 @@ def stylize(text: str, *styles: str) -> Text:
     Returns:
         str: The formatted text.
     """
+    if text is None:
+        return text
     styles = tuple(safe_decode(s) for s in styles)
     if isinstance(text, (int, float, Decimal)):
         text = str(text)
