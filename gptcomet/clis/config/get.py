@@ -7,6 +7,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.exceptions import ConfigKeyError
 from gptcomet.log import logger, set_debug
+from gptcomet.utils import mask_api_keys
 
 
 def entry(
@@ -20,6 +21,7 @@ def entry(
         logger.debug(f"Using Config path: {cfg.current_config_path}")
     try:
         value: Union[str, CommentedSeq, CommentedMap] = cfg.get(key)
+        value = mask_api_keys(value)
         styled_key: str = typer.style(key, fg=typer.colors.GREEN)
         v = orjson.dumps(value, option=orjson.OPT_INDENT_2).decode("utf-8")
         typer.echo(f"{styled_key}: {typer.style(v, fg=typer.colors.GREEN)}")
