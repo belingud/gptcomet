@@ -1,5 +1,18 @@
 
 ---
+## [0.1.1](https://github.com/belingud/gptcomet/compare/v0.1.0..v0.1.1) - 2024-12-12
+
+### ⛰️  Features
+
+- add API key masking to config retrieval - ([a886726](https://github.com/belingud/gptcomet/commit/a886726ddf4fdbeec41991a9cdb74355a6c08863)) - belingud
+
+### 📚 Documentation
+
+- update README table of contents - ([5e248b9](https://github.com/belingud/gptcomet/commit/5e248b98a5f75526bfb23d7dab40b340b47b445b)) - belingud
+- update changelog for v0.1.0 release - ([e418a4c](https://github.com/belingud/gptcomet/commit/e418a4c09f40bd072244c184e79b0c92d4488d3c)) - belingud
+
+
+---
 ## [0.1.0](https://github.com/belingud/gptcomet/compare/v0.0.24..v0.1.0) - 2024-12-12
 
 ### ⛰️  Features
