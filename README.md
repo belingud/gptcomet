@@ -7,22 +7,25 @@
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 
 <!-- TOC -->
-- [Overview](#overview)
-- [Features](#features)
-- [Installation](#installation)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Commands](#commands)
-- [Configuration](#configuration)
-  - [file_ignore](#file_ignore)
-  - [provider](#provider)
-  - [output](#output)
-  - [console](#console)
-- [Supported Keys](#supported-keys)
-- [Example](#example)
-- [Development](#development)
-- [License](#license)
-- [Contact](#contact)
+
+- [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Setup](#setup)
+  - [Usage](#usage)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
+    - [file\_ignore](#file_ignore)
+    - [provider](#provider)
+    - [output](#output)
+    - [console](#console)
+  - [Supported Keys](#supported-keys)
+  - [Example](#example)
+  - [Development](#development)
+  - [License](#license)
+  - [Contact](#contact)
+
 <!-- /TOC -->
 
 ## Overview
