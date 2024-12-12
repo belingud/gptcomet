@@ -69,6 +69,8 @@ def edit_text_in_place(initial_message: str) -> Optional[str]:
     Returns:
         Optional[str]: The edited message or None if cancelled.
     """
+    if not initial_message:
+        return None
     bottom_bar = (
         "[VIM mode] Support multiple lines. Press ESC then Enter to save, Ctrl+C to cancel."
     )
@@ -235,7 +237,6 @@ def entry(
                 commit_message = edit_text_in_place(commit_message)
             elif user_input == "r":
                 commit_message = None
-
         except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
             console.print(stylize(str(error), Colors.YELLOW))
             raise typer.Exit(1) from None

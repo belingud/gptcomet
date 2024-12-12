@@ -1,5 +1,70 @@
 
 ---
+## [0.1.0](https://github.com/belingud/gptcomet/compare/v0.0.24..v0.1.0) - 2024-12-12
+
+### ⛰️  Features
+
+- add new languages to documentation and mapping - ([06820d2](https://github.com/belingud/gptcomet/commit/06820d224c852f05bb83672e550cd2292264a748)) - belingud
+- add default values for GPT configuration - ([d82e106](https://github.com/belingud/gptcomet/commit/d82e106a2204221da15a4d0839a7daaad0e33a2a)) - belingud
+- add verbose logging and translation support - ([d77bf9c](https://github.com/belingud/gptcomet/commit/d77bf9c64a3b27e86b8001a2908641faa17b81e7)) - belingud
+- enhance API key masking and CLI interaction - ([03dc20e](https://github.com/belingud/gptcomet/commit/03dc20ef913438efd126e6d7fd07aaa077a338ee)) - belingud
+
+### 🐛 Bug Fixes
+
+- correct package version in .bumpversion.cfg - ([018c170](https://github.com/belingud/gptcomet/commit/018c1700b531a0aa16e394c86e513f7b7e7122f7)) - belingud
+- correct package version - ([0a492b6](https://github.com/belingud/gptcomet/commit/0a492b6db98c2a0b92e5f2ad3d7d9c34e31b9d1b)) - belingud
+
+### 🚜 Refactor
+
+- remove unused variable in commit entry - ([f00abb6](https://github.com/belingud/gptcomet/commit/f00abb6324f7c77ebbad1e3783307387c700710a)) - belingud
+- handle empty inputs in commit and style functions - ([a3f88a2](https://github.com/belingud/gptcomet/commit/a3f88a2230111d94a1c99421b350c590aa21264a)) - belingud
+- improve commit message console output readability - ([834cc8f](https://github.com/belingud/gptcomet/commit/834cc8f8025dc68b7b2e7c92e4c3a72c09a5044f)) - belingud
+
+### 📚 Documentation
+
+- update README with new configuration options - ([0e1feaf](https://github.com/belingud/gptcomet/commit/0e1feaffe1c0b80998a043c1e24fb6a3c4b5366e)) - belingud
+- remove documentation files - ([117d511](https://github.com/belingud/gptcomet/commit/117d511091560687d1194793c17a1485a1b840f9)) - belingud
+
+### 🧪 Testing
+
+- add more detailed test cases - ([8b30e55](https://github.com/belingud/gptcomet/commit/8b30e5542b570f4befd4009b6f6eb49796bf2fd3)) - belingud
+- fix and add comments in api key tests - ([cea0399](https://github.com/belingud/gptcomet/commit/cea03990a7454d9d3498705fc05ef98383aaaf00)) - belingud
+
+### Build
+
+- update version to 0.1.0 - ([b06b47b](https://github.com/belingud/gptcomet/commit/b06b47ba7edfc4d99210cf342f702839c470e5fb)) - belingud
+
+
+---
+## [0.1.0](https://github.com/belingud/gptcomet/compare/v0.0.24..v0.1.0) - 2024-12-11
+
+### ⛰️  Features
+
+- add new languages to documentation and mapping - ([06820d2](https://github.com/belingud/gptcomet/commit/06820d224c852f05bb83672e550cd2292264a748)) - belingud
+- add default values for GPT configuration - ([d82e106](https://github.com/belingud/gptcomet/commit/d82e106a2204221da15a4d0839a7daaad0e33a2a)) - belingud
+- add verbose logging and translation support - ([d77bf9c](https://github.com/belingud/gptcomet/commit/d77bf9c64a3b27e86b8001a2908641faa17b81e7)) - belingud
+- enhance API key masking and CLI interaction - ([03dc20e](https://github.com/belingud/gptcomet/commit/03dc20ef913438efd126e6d7fd07aaa077a338ee)) - belingud
+
+### 🐛 Bug Fixes
+
+- correct package version in .bumpversion.cfg - ([018c170](https://github.com/belingud/gptcomet/commit/018c1700b531a0aa16e394c86e513f7b7e7122f7)) - belingud
+- correct package version - ([0a492b6](https://github.com/belingud/gptcomet/commit/0a492b6db98c2a0b92e5f2ad3d7d9c34e31b9d1b)) - belingud
+
+### 🚜 Refactor
+
+- improve commit message console output readability - ([834cc8f](https://github.com/belingud/gptcomet/commit/834cc8f8025dc68b7b2e7c92e4c3a72c09a5044f)) - belingud
+
+### 📚 Documentation
+
+- update README with new configuration options - ([0e1feaf](https://github.com/belingud/gptcomet/commit/0e1feaffe1c0b80998a043c1e24fb6a3c4b5366e)) - belingud
+- remove documentation files - ([117d511](https://github.com/belingud/gptcomet/commit/117d511091560687d1194793c17a1485a1b840f9)) - belingud
+
+### 🧪 Testing
+
+- fix and add comments in api key tests - ([cea0399](https://github.com/belingud/gptcomet/commit/cea03990a7454d9d3498705fc05ef98383aaaf00)) - belingud
+
+
+---
 ## [0.0.23](https://github.com/belingud/gptcomet/compare/v0.0.22..v0.0.23) - 2024-11-29
 
 ### 🐛 Bug Fixes

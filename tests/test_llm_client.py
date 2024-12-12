@@ -28,11 +28,13 @@ def mock_config_manager():
                 "top_p": "1",
                 "frequency_penalty": "0",
                 "presence_penalty": "0",
+                "extra_headers": '{"X-Custom": "value"}',
             },
             "prompt": {
                 "system": "You are a helpful assistant.",
                 "user": "Hello!",
             },
+            "console.verbose": True,
         },
         key,
         default=default,
@@ -57,6 +59,9 @@ class TestLLMClientInitialization:
         assert client.api_base == "https://api.openai.com/v1"
         assert client.retries == 3
         assert client.conversation_history == []
+        assert client.proxy == ""
+        assert client.completion_path == "/chat/completions"
+        assert client.content_path == "choices.0.message.content"
 
     def test_missing_api_key(self, mock_config_manager):
         """Test initialization without API key"""
@@ -87,45 +92,52 @@ class TestLLMClientInitialization:
 
 
 class TestLLMClientGenerate:
-    def test_generate_without_history(self, llm_client):
+    @patch("gptcomet.llm_client.LLMClient.completion_with_retries")
+    def test_generate_without_history(self, mock_completion, llm_client, mock_config_manager):
         """Test generation without history"""
         mock_response = {
             "choices": [{"message": {"content": "Test response"}}],
             "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
         }
+        mock_completion.return_value = mock_response
+        response = llm_client.generate("Hello", use_history=False)
 
-        with patch("gptcomet.llm_client.LLMClient.completion_with_retries") as mock_completion:
-            mock_completion.return_value = mock_response
-            response = llm_client.generate("Hello", use_history=False)
+        assert response == "Test response"
+        assert len(llm_client.conversation_history) == 0
+        mock_completion.assert_called_once()
+        mock_completion.assert_called_with(
+            model="gpt-3.5-turbo",
+            api_key="test-key",
+            api_base="https://api.openai.com/v1",
+            messages=[{"role": "user", "content": "Hello"}],
+            max_tokens=100,
+            temperature=0.7,
+            top_p=1.0,
+            extra_headers={"X-Custom": "value"},
+        )
 
-            assert response == "Test response"
-            assert len(llm_client.conversation_history) == 0
-            mock_completion.assert_called_once()
-
-    def test_generate_with_history(self, llm_client):
+    @patch("gptcomet.llm_client.LLMClient.completion_with_retries")
+    def test_generate_with_history(self, mock_completion, llm_client):
         """Test generation with history"""
         mock_response = {
             "choices": [{"message": {"content": "Test response"}}],
             "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
         }
+        mock_completion.return_value = mock_response
+        response = llm_client.generate("Hello", use_history=True)
 
-        with patch("gptcomet.llm_client.LLMClient.completion_with_retries") as mock_completion:
-            mock_completion.return_value = mock_response
-            response = llm_client.generate("Hello", use_history=True)
+        assert response == "Test response"
+        assert len(llm_client.conversation_history) == 2
+        assert llm_client.conversation_history[-2]["role"] == "user"
+        assert llm_client.conversation_history[-1]["role"] == "assistant"
 
-            assert response == "Test response"
-            assert len(llm_client.conversation_history) == 2
-            assert llm_client.conversation_history[-2]["role"] == "user"
-            assert llm_client.conversation_history[-1]["role"] == "assistant"
-
-    def test_generate_without_usage_info(self, llm_client):
+    @patch("gptcomet.llm_client.LLMClient.completion_with_retries")
+    def test_generate_without_usage_info(self, mock_completion, llm_client):
         """Test generation when response has no usage info"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
-
-        with patch("gptcomet.llm_client.LLMClient.completion_with_retries") as mock_completion:
-            mock_completion.return_value = mock_response
-            response = llm_client.generate("Hello")
-            assert response == "Test response"
+        mock_completion.return_value = mock_response
+        response = llm_client.generate("Hello")
+        assert response == "Test response"
 
 
 class TestLLMClientHistory:
@@ -140,15 +152,20 @@ class TestLLMClientHistory:
 
 
 class TestLLMClientCompletionWithRetries:
-    def test_successful_completion(self, llm_client):
+    def test_successful_completion(self, mock_config_manager):
         """Test successful completion request"""
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
         with patch("httpx.Client") as mock_client:
-            mock_instance = Mock()
-            mock_instance.post.return_value.json.return_value = mock_response
-            mock_instance.post.return_value.raise_for_status.return_value = None
+            llm_client = LLMClient(mock_config_manager)
+            mock_instance = Mock(name="instance")
+            mock_post_resp = Mock(name="post_response")
+            mock_client.post.return_value = mock_post_resp
+            mock_post_resp.json.return_value = mock_response
+            # mock_post_resp.return_value = mock_post_resp
+            # mock_instance.post.return_value.raise_for_status.return_value = None
             mock_client.return_value = mock_instance
+            llm_client._http_client = mock_client
 
             response = llm_client.completion_with_retries(
                 api_base="https://api.openai.com/v1",
@@ -160,16 +177,29 @@ class TestLLMClientCompletionWithRetries:
 
             assert response == mock_response
 
-    def test_completion_with_proxy(self, llm_client):
+    def test_completion_with_proxy(self, mock_config_manager):
         """Test completion request with proxy"""
-        llm_client.proxy = "http://proxy:8080"
+        mock_config_manager.get.side_effect = lambda key, default=None: glom.glom(
+            {
+                "provider": "openai",
+                "openai": {
+                    "api_key": "test-key",
+                    "model": "gpt-3.5-turbo",
+                    "proxy": "http://proxy:8080",
+                },
+            },
+            key,
+            default=default,
+        )
         mock_response = {"choices": [{"message": {"content": "Test response"}}]}
 
         with patch("httpx.Client") as mock_client:
+            llm_client = LLMClient(mock_config_manager)
             mock_instance = Mock()
             mock_instance.post.return_value.json.return_value = mock_response
             mock_instance.post.return_value.raise_for_status.return_value = None
             mock_client.return_value = mock_instance
+            llm_client._http_client = mock_client
 
             llm_client.completion_with_retries(
                 api_base="https://api.openai.com/v1",
@@ -179,15 +209,20 @@ class TestLLMClientCompletionWithRetries:
                 max_tokens=100,
             )
 
-            mock_client.assert_called_once()
+            mock_client.post.assert_called_once()
             assert mock_client.call_args[1]["proxy"] == "http://proxy:8080"
 
     def test_completion_http_error(self, llm_client):
-        """Test HTTP error handling"""
+        """Test HTTP error handling in completion_with_retries method"""
         with patch("httpx.Client") as mock_client:
+            mock_response = Mock()
+            mock_response = httpx.Response(status_code=500, json={"error": "Internal Server Error"})
+            mock_response.request = Mock()
             mock_instance = Mock()
-            mock_instance.post.side_effect = httpx.HTTPError("API Error")
+            mock_instance.post.return_value = mock_response
             mock_client.return_value = mock_instance
+
+            llm_client._http_client = mock_client.return_value
 
             with pytest.raises(httpx.HTTPError):
                 llm_client.completion_with_retries(
@@ -197,6 +232,9 @@ class TestLLMClientCompletionWithRetries:
                     messages=[],
                     max_tokens=100,
                 )
+
+            # 验证post方法被调用
+            mock_instance.post.assert_called_once()
 
     def test_completion_with_retries_url_handling(self, mock_config_manager):
         """Test URL path handling"""
@@ -220,11 +258,12 @@ class TestLLMClientCompletionWithRetries:
         )
 
         client = LLMClient(mock_config_manager)
-        with patch("httpx.Client.post") as mock_post:
-            mock_post.return_value.json.return_value = {
+        with patch("httpx.Client") as mock_post:
+            mock_post.post.return_value.json.return_value = {
                 "choices": [{"message": {"content": "test response"}}]
             }
-            mock_post.return_value.status_code = 200
+            mock_post.post.return_value.status_code = 200
+            client._http_client = mock_post
 
             client.completion_with_retries(
                 api_base="https://api.openai.com/",
@@ -234,8 +273,8 @@ class TestLLMClientCompletionWithRetries:
                 max_tokens=100,
             )
 
-            mock_post.assert_called_once()
-            assert mock_post.call_args[0][0] == "https://api.openai.com/chat/completions"
+            mock_post.post.assert_called_once()
+            assert mock_post.post.call_args[0][0] == "https://api.openai.com/chat/completions"
 
 
 class TestLLMClientGenChatParams:
@@ -345,8 +384,6 @@ class TestLLMClientGenChatParams:
         )
         mock_config_manager.is_api_key_set = True
 
-        client = LLMClient(mock_config_manager)
-
         # Mock httpx.Client
         class MockResponse:
             def __init__(self):
@@ -372,10 +409,14 @@ class TestLLMClientGenChatParams:
             def __exit__(self, *args):
                 pass
 
+            def close(self):
+                pass
+
         import httpx
 
         original_client = httpx.Client
         httpx.Client = MockClient
+        client = LLMClient(mock_config_manager)
 
         try:
             response = client.completion_with_retries(
@@ -387,6 +428,7 @@ class TestLLMClientGenChatParams:
                 temperature=0.7,
                 top_p=0.9,
                 frequency_penalty=0.5,
+                extra_headers={"X-Custom": "value"},
             )
 
             assert response == {"choices": [{"message": {"content": "test response"}}]}
