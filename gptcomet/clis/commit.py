@@ -216,7 +216,6 @@ def entry(
         raise typer.Exit(1) from None
 
     commit_message: Optional[str] = None
-    # edited_message: Optional[str] = None
     while True:
         try:
             if not commit_message:
