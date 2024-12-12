@@ -159,13 +159,21 @@ def test_entry_config_error(mock_message_generator_class, mock_console):
 
 
 @patch("gptcomet.clis.commit.MessageGenerator")
-def test_entry_no_message(mock_message_generator_class, mock_console):
-    mock_generator = Mock()
-    mock_generator.generate_commit_message.return_value = ""
-    mock_message_generator_class.return_value = mock_generator
+def test_entry_config_error_local(mock_message_generator_class, mock_console):
+    error = ConfigError(ConfigErrorEnum.API_KEY_MISSING, provider="test")
+    mock_message_generator_class.side_effect = error
     with pytest.raises(typer.Exit):
-        entry()
-    mock_console.print.assert_called_with(stylize("No commit message generated.", Colors.MAGENTA))
+        entry(local=True)
+    mock_console.print.assert_called_with(stylize(str(error), Colors.YELLOW))
+
+
+@patch("gptcomet.clis.commit.MessageGenerator")
+def test_entry_config_path(mock_message_generator_class, mock_console, tmp_path):
+    error = ConfigError(ConfigErrorEnum.API_KEY_MISSING, provider="test")
+    mock_message_generator_class.side_effect = error
+    with pytest.raises(typer.Exit):
+        entry(config_path=tmp_path / "test.yaml")
+    mock_console.print.assert_called_with(stylize(str(error), Colors.YELLOW))
 
 
 @patch("gptcomet.clis.commit.MessageGenerator")

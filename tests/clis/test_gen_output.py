@@ -8,28 +8,28 @@ from gptcomet.const import COMMIT_OUTPUT_TEMPLATE
 
 def test_gen_output(repo, commit):
     output = gen_output(repo, commit)
-    assert output.startswith(
+    assert output == (
         COMMIT_OUTPUT_TEMPLATE.format(
             author=":construction_worker: [green]John Doe[/]",
             email="[blue]john@example.com[/blue]",
             branch="master",
             commit_hash="123456",
             commit_msg="test commit message",
-            git_show_stat=repo.git.show(),
+            git_show_stat="git show",
         )
     )
 
 
 def test_gen_output_rich_false(repo, commit):
     output = gen_output(repo, commit, rich=False)
-    assert output.startswith(
+    assert output == (
         COMMIT_OUTPUT_TEMPLATE.format(
             author="John Doe",
             email="john@example.com",
             branch="master",
             commit_hash="123456",
             commit_msg="test commit message",
-            git_show_stat=repo.git.show(),
+            git_show_stat="git show",
         )
     )
 
@@ -37,14 +37,14 @@ def test_gen_output_rich_false(repo, commit):
 def test_gen_output_commit_msg_empty(repo, commit):
     commit.message = ""
     output = gen_output(repo, commit)
-    assert output.startswith(
+    assert output == (
         COMMIT_OUTPUT_TEMPLATE.format(
             author=":construction_worker: [green]John Doe[/]",
             email="[blue]john@example.com[/blue]",
             branch="master",
             commit_hash="123456",
             commit_msg="",
-            git_show_stat=repo.git.show(),
+            git_show_stat="git show",
         )
     )
 
@@ -59,7 +59,7 @@ def test_gen_output_author_email_empty(repo, commit):
         branch="master",
         commit_hash="123456",
         commit_msg="test commit message",
-        git_show_stat=repo.git.show(),
+        git_show_stat="git show",
     )
     assert output == form
 
