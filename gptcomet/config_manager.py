@@ -1,7 +1,8 @@
+from collections import ChainMap
 from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Dict, Iterator, Optional, Union
 
 import click
 import orjson as json
@@ -99,6 +100,35 @@ class ConfigManager:
     @classmethod
     def make_config_path(cls, local: bool = False) -> Path:
         return Path.cwd() / ".git" / "gptcomet.yaml" if local else cls.global_config_file
+
+    def set_cli_overrides(
+        self, provider: Optional[str] = None, api_config: Dict[str, Any] = {}
+    ) -> None:
+        """
+        Set command line overrides for configuration values.
+
+        Args:
+            provider (Optional[str]): The provider to use.
+            api_config (Dict[str, Any]): The API configuration to use.
+        """
+        overrides = {}
+        if provider:
+            if not isinstance(provider, str):
+                raise TypeError("Provider must be a string")
+            overrides["provider"] = provider
+        api_config = {k: v for k, v in api_config.items() if v is not None}
+        if api_config:
+            provider_from_file = self.get("provider")
+            provider_from_cli = provider or provider_from_file
+            if not provider_from_cli:
+                raise ValueError("Provider is required")
+            existing_config = self.get(provider_from_cli, {})
+            if isinstance(existing_config, dict):
+                merged_api_config = {**existing_config, **api_config}
+            else:
+                merged_api_config = api_config
+            overrides[provider_from_cli] = merged_api_config
+        self._cache["config"] = {**self.config, **overrides}
 
     def is_api_key_set(self) -> bool:
         """

@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from typing import Annotated, Literal, Optional, cast
 
+import click
 import typer
 from git import (
     Commit,
@@ -197,6 +198,70 @@ def entry(
             resolve_path=True,
         ),
     ] = None,
+    api_key: Annotated[
+        Optional[str],
+        typer.Option("--api-key", help="API key for the provider.", click_type=click.STRING),
+    ] = None,
+    api_base: Annotated[
+        Optional[str],
+        typer.Option("--api-base", help="Base URL for the API.", click_type=click.STRING),
+    ] = None,
+    model: Annotated[
+        Optional[str],
+        typer.Option("--model", help="Model to use for generation.", click_type=click.STRING),
+    ] = None,
+    provider: Annotated[
+        Optional[str],
+        typer.Option(
+            "--provider",
+            help="Provider to use (e.g., openai, anthropic).",
+            click_type=click.STRING,
+        ),
+    ] = None,
+    proxy: Annotated[
+        Optional[str],
+        typer.Option("--proxy", help="Proxy URL to use for API calls.", click_type=click.STRING),
+    ] = None,
+    max_tokens: Annotated[
+        Optional[int],
+        typer.Option(
+            "--max-tokens",
+            help="Maximum tokens for generation.",
+            click_type=click.IntRange(min=1),
+        ),
+    ] = None,
+    top_p: Annotated[
+        Optional[float],
+        typer.Option(
+            "--top-p",
+            help="Top-p sampling parameter.",
+            click_type=click.FloatRange(min=0, max=1),
+        ),
+    ] = None,
+    temperature: Annotated[
+        Optional[float],
+        typer.Option(
+            "--temperature",
+            help="Temperature for generation.",
+            click_type=click.FloatRange(min=0, max=1),
+        ),
+    ] = None,
+    extra_headers: Annotated[
+        Optional[str],
+        typer.Option(
+            "--extra-headers",
+            help="Extra headers for API calls (JSON string).",
+            click_type=click.STRING,
+        ),
+    ] = None,
+    frequency_penalty: Annotated[
+        Optional[float],
+        typer.Option(
+            "--frequency-penalty",
+            help="Frequency penalty for generation.",
+            click_type=click.FloatRange(min=0, max=1),
+        ),
+    ] = None,
 ) -> None:
     """
     Generate and commit a message based on staged changes.
@@ -209,6 +274,25 @@ def entry(
     config_manager = (
         ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
     )
+
+    cli_args = {
+        k: v
+        for k, v in {
+            "api_key": api_key,
+            "api_base": api_base,
+            "model": model,
+            "proxy": proxy,
+            "max_tokens": max_tokens,
+            "top_p": top_p,
+            "temperature": temperature,
+            "extra_headers": extra_headers,
+            "frequency_penalty": frequency_penalty,
+        }.items()
+        if v is not None
+    }
+    if provider or cli_args:
+        config_manager.set_cli_overrides(provider=provider, api_config=cli_args)
+
     try:
         message_generator = MessageGenerator(config_manager)
     except (ConfigError, InvalidGitRepositoryError, NoSuchPathError) as error:

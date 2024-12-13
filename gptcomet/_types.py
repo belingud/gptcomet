@@ -8,7 +8,7 @@ CacheKeys = t.Literal["default_config", "config"]
 
 class CacheType(t.TypedDict):
     default_config: t.Optional[CommentedMap]
-    config: t.Optional[CommentedMap]
+    config: t.Optional[t.Any]
 
 
 class CompleteParams(t.TypedDict, total=False):

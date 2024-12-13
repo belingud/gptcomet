@@ -82,7 +82,7 @@ class LLMClient:
             raise ConfigError(ConfigErrorEnum.PROVIDER_CONFIG_MISSING, self.provider)
 
         self.api_key: str = self.config_manager.get(f"{self.provider}.api_key")
-        if not self.config_manager.is_api_key_set:
+        if not self.api_key or not self.config_manager.is_api_key_set:
             raise ConfigError(ConfigErrorEnum.API_KEY_MISSING, self.provider)
 
         self.model: str = self.config_manager.get(f"{self.provider}.model", DEFAULT_MODEL)
