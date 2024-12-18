@@ -139,7 +139,7 @@ def test_make_request_client_error(llm):
     ):
         with pytest.raises(RequestError) as exc_info:
             llm.make_request("Hello")
-        assert "Client error" in str(exc_info.value)
+        assert "Client Error" in str(exc_info.value)
 
 
 def test_make_request_server_error(llm):

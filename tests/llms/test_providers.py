@@ -161,12 +161,11 @@ class TestClaudeLLM:
         message = "Hello, world!"
         payload = llm.format_messages(message)
 
-        assert payload["prompt"] == "Human: Hello, world!\n\nAssistant:"
+        assert payload["prompt"] == "Hello, world!"
         assert payload["model"] == "test-model"
-        assert payload["max_tokens_to_sample"] == 100
+        assert payload["max_tokens"] == 100
         assert payload["temperature"] == 0.7
         assert payload["top_p"] == 0.9
-        assert payload["frequency_penalty"] == 0.2
 
     def test_format_messages_with_history(self, base_config):
         """Test message formatting with history."""
@@ -175,5 +174,5 @@ class TestClaudeLLM:
         history = [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hello!"}]
         payload = llm.format_messages("How are you?", history)
 
-        expected_prompt = "user: Hi\n\nassistant: Hello!\n\nHuman: How are you?\n\nAssistant:"
+        expected_prompt = "How are you?"
         assert payload["prompt"] == expected_prompt

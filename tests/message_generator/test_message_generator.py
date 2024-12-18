@@ -8,7 +8,7 @@ from git import Repo
 from gptcomet.exceptions import GitNoStagedChanges
 from gptcomet.message_generator import MessageGenerator
 
-PROJECT_ROOT = str(Path(__file__).parent.parent.absolute())
+PROJECT_ROOT = str(Path(__file__).parent.parent.parent.absolute())
 
 
 @pytest.fixture
