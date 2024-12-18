@@ -9,8 +9,8 @@ class SambanovaLLM(OpenaiLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://api.sambanova.ai/v1"
-        self.model = self.model or "Meta-Llama-3.3-70B-Instruct"
+        self.api_base = config.get("api_base") or "https://api.sambanova.ai/v1"
+        self.model = config.get("model") or "Meta-Llama-3.3-70B-Instruct"
 
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:

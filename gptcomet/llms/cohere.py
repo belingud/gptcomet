@@ -9,8 +9,8 @@ class CohereLLM(BaseLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://api.cohere.ai/v1"
-        self.model = self.model or "command-r"
+        self.api_base = config.get("api_base") or "https://api.cohere.ai/v1"
+        self.model = config.get("model") or "command-r"
 
     def build_headers(self):
         return {

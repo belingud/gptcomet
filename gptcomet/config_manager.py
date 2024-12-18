@@ -8,7 +8,7 @@ import orjson as json
 from glom import glom
 from ruamel.yaml import YAML, CommentedMap
 
-from gptcomet._types import CacheType, Provider
+from gptcomet._types import CacheType
 from gptcomet.const import LANGUAGE_KEY
 from gptcomet.exceptions import (
     ConfigKeyError,

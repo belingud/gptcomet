@@ -9,8 +9,8 @@ class GroqLLM(OpenaiLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://api.groq.com/openai/v1"
-        self.model = self.model or "llama3-8b-8192"
+        self.api_base = config.get("api_base") or "https://api.groq.com/openai/v1"
+        self.model = config.get("model") or "llama3-8b-8192"
 
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:

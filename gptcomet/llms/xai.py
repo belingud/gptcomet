@@ -9,8 +9,8 @@ class XaiLLM(OpenaiLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://api.x.ai/v1/"
-        self.model = self.model or "grok-beta"
+        self.api_base = config.get("api_base") or "https://api.x.ai/v1/"
+        self.model = config.get("model") or "grok-beta"
 
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:

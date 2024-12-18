@@ -2,7 +2,7 @@ import fnmatch
 import sys
 import typing as t
 
-from prompt_toolkit import Application, prompt
+from prompt_toolkit import Application
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Layout, Window
 from rich import get_console

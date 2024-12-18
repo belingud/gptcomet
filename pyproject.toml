@@ -65,6 +65,8 @@ profile = "black"
 target-version = "py39"
 line-length = 100
 fix = true
+exclude = ["tests/*"]
+src = ["gptcomet"]
 
 [tool.ruff.lint]
 select = [

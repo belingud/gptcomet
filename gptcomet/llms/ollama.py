@@ -9,10 +9,10 @@ class OllamaLLM(BaseLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "http://localhost:11434/api"
-        self.model = self.model or "llama2"
-        self.completion_path = self.completion_path or "generate"
-        self.answer_path = self.answer_path or "response"
+        self.api_base = config.get("api_base") or "http://localhost:11434/api"
+        self.model = config.get("model") or "llama2"
+        self.completion_path = config.get("completion_path") or "generate"
+        self.answer_path = config.get("answer_path") or "response"
         self.seed = self.config.get("seed")
         self.top_k = self.config.get("top_k")
         self.num_gpu = self.config.get("num_gpu")
@@ -29,7 +29,7 @@ class OllamaLLM(BaseLLM):
             "prompt": message,
             "options": {
                 "num_predict": self.max_tokens,
-            }
+            },
         }
 
         if self.temperature is not None:

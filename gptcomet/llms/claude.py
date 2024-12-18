@@ -7,12 +7,12 @@ class ClaudeLLM(BaseLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://api.anthropic.com/v1"
-        self.model = self.model or "claude-3-5-sonnet"
-        self.completion_path = self.completion_path or "messages"
-        self.answer_path = self.answer_path or "content.0.text"
-        self.anthropic_version = self.config.get("anthropic-version", "2023-06-01")
-        self.top_k = self.config.get("top_k")
+        self.api_base = config.get("api_base") or "https://api.anthropic.com/v1"
+        self.model = config.get("model") or "claude-3-5-sonnet"
+        self.completion_path = config.get("completion_path") or "messages"
+        self.answer_path = config.get("answer_path") or "content.0.text"
+        self.anthropic_version = config.get("anthropic-version", "2023-06-01")
+        self.top_k = config.get("top_k")
 
     def build_headers(self):
         headers = {
@@ -25,17 +25,9 @@ class ClaudeLLM(BaseLLM):
     def format_messages(
         self, message: str, history: Optional[list[dict[str, str]]] = None
     ) -> dict[str, Any]:
-        formatted_message = f"Human: {message}\n\nAssistant:"
-        if history:
-            formatted_message = (
-                "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
-                + "\n\n"
-                + formatted_message
-            )
-
         payload = {
             "model": self.model,
-            "prompt": formatted_message,
+            "prompt": message,
             "max_tokens": self.max_tokens,
         }
         if self.top_k:

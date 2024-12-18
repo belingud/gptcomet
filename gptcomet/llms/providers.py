@@ -12,6 +12,7 @@ from .ollama import OllamaLLM
 from .openai import OpenaiLLM
 from .sambanova import SambanovaLLM
 from .tongyi import TongyiLLM
+from .vertexllm import VertexLLM
 from .xai import XaiLLM
 
 
@@ -32,6 +33,8 @@ class ProviderRegistry:
         "chatglm": ChatGLMLLM,
         "xai": XaiLLM,
         "sambanova": SambanovaLLM,
+        "openai": OpenaiLLM,
+        "vertex": VertexLLM,
     }
 
     _tongyi_default_config: ClassVar[dict[str, Any]] = {

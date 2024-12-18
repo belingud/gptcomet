@@ -26,11 +26,15 @@ def get_provider_name() -> str:
         provider = create_select_menu(available_providers)
         if provider != "INPUT_REQUIRED" and provider is not None:
             return provider
-        provider = prompt(
-            "Enter provider name: ",
-            completer=provider_completer,
-            complete_while_typing=True,
-        ).lower().strip()
+        provider = (
+            prompt(
+                "Enter provider name: ",
+                completer=provider_completer,
+                complete_while_typing=True,
+            )
+            .lower()
+            .strip()
+        )
         if not provider:
             console.print("Provider name cannot be empty.", style=Colors.RED)
             raise typer.Exit(1)

@@ -9,8 +9,10 @@ class TongyiLLM(BaseLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://dashscope.aliyuncs.com/compatible-mode/v1"
-        self.model = self.model or "qwen-turbo"
+        self.api_base = (
+            config.get("api_base") or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        )
+        self.model = config.get("model") or "qwen-turbo"
 
     def build_headers(self):
         """Build request headers."""
@@ -27,15 +29,9 @@ class TongyiLLM(BaseLLM):
 
         if history:
             for msg in history:
-                messages.append({
-                    "role": msg["role"],
-                    "content": msg["content"]
-                })
+                messages.append({"role": msg["role"], "content": msg["content"]})
 
-        messages.append({
-            "role": "user",
-            "content": message
-        })
+        messages.append({"role": "user", "content": message})
 
         payload = {
             "model": self.model,
@@ -58,7 +54,10 @@ class TongyiLLM(BaseLLM):
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:
         return {
-            "api_base": ("https://dashscope.aliyuncs.com/compatible-mode/v1", "Enter Tongyi API Base URL"),
+            "api_base": (
+                "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                "Enter Tongyi API Base URL",
+            ),
             "model": ("qwen-turbo", "Enter model name"),
             "api_key": ("", "Enter API key"),
             "max_tokens": ("1024", "Enter max tokens"),

@@ -9,8 +9,8 @@ class OpenaiLLM(BaseLLM):
     def __init__(self, config: dict[str, Any]):
         super().__init__(config)
 
-        self.api_base = self.api_base or "https://api.openai.com/v1"
-        self.model = self.model or "gpt-4o"
+        self.api_base = config.get("api_base") or "https://api.openai.com/v1"
+        self.model = config.get("model") or "gpt-4o"
         self.completion_path = self.completion_path or "chat/completions"
         self.answer_path = self.answer_path or "choices.0.message.content"
 

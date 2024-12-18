@@ -21,6 +21,7 @@ class AzureLLM(OpenaiLLM):
         return {
             "Content-Type": "application/json",
             "api-key": self.api_key,
+            "api-version": self.api_version,
         }
 
     def build_url(self) -> str:
@@ -30,7 +31,10 @@ class AzureLLM(OpenaiLLM):
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:
         return {
-            "api_base": ("", "Enter Azure OpenAI endpoint URL (e.g., https://YOUR_RESOURCE_NAME.openai.azure.com)"),
+            "api_base": (
+                "",
+                "Enter Azure OpenAI endpoint URL (e.g., https://YOUR_RESOURCE_NAME.openai.azure.com)",
+            ),
             "deployment_name": ("", "Enter Azure OpenAI deployment name"),
             "api_version": ("2024-02-15-preview", "Enter API version"),
             "model": ("gpt-4o", "Enter model name"),

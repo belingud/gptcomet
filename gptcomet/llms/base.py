@@ -1,7 +1,5 @@
-import time
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
-from functools import wraps
 from typing import Any, Optional, ParamSpec, TypeVar, Union
 
 import glom
@@ -16,49 +14,6 @@ from gptcomet.utils import console
 
 P = ParamSpec("P")
 T = TypeVar("T", bound=Any)
-
-
-def retry_with_backoff(base_delay: float = 1.0, max_delay: float = 10.0):
-    """Retry a function with exponential backoff."""
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            self = args[0] if args else None
-            if not isinstance(self, BaseLLM):
-                # Check if the first argument is an instance of BaseLLM
-                msg = "retry_with_backoff can only be used with BaseLLM methods"
-                raise TypeError(msg)
-
-            last_exception = None
-            for attempt in range(self.retries + 1):
-                try:
-                    return func(*args, **kwargs)
-                except httpx.TimeoutException as e:
-                    last_exception = RequestError(f"Request timed out: {e!s}")
-                except httpx.HTTPStatusError as e:
-                    # Don't retry on client errors (4xx)
-                    msg = f"Client error: {e!s}"
-                    if e.response.status_code >= 400 and e.response.status_code < 500:
-                        raise RequestError(msg) from None
-                    last_exception = RequestError(msg)
-                except Exception as e:
-                    msg = f"Unexpected error: {e!s}"
-                    last_exception = RequestError(msg)
-
-                if attempt < self.retries:
-                    delay = min(base_delay * (2**attempt), max_delay)
-                    logger.debug(
-                        f"Request failed with error: {last_exception}. "
-                        f"Retrying in {delay} seconds... ({self.retries - attempt} retries left)"
-                    )
-                    time.sleep(delay)
-                else:
-                    raise last_exception
-
-        return wrapper
-
-    return decorator
 
 
 class BaseLLM(ABC):
@@ -174,16 +129,26 @@ class BaseLLM(ABC):
         headers = self.build_headers()
         payload = self.format_messages(message, history)
 
-        with self.managed_client() as client:
-            response = client.post(url, json=payload, headers=headers)
-            logger.debug(f"Request URL: {url}")
-            logger.debug(f"Response: {response.json()}")
-            response.raise_for_status()
-            data = response.json()
-            usage = self.get_usage(data)
-            if usage:
-                console.print(usage)
-            return self.parse_response(data)
+        try:
+            with self.managed_client() as client:
+                response = client.post(url, json=payload, headers=headers)
+                logger.debug(f"Request URL: {url}")
+                logger.debug(f"Response: {response.json()}")
+                response.raise_for_status()
+                data = response.json()
+                usage = self.get_usage(data)
+                if usage:
+                    console.print(usage)
+                return self.parse_response(data)
+        except httpx.TimeoutException as e:
+            msg = f"Request timed out: {e}"
+            raise RequestError(msg) from e
+        except httpx.HTTPStatusError as e:
+            msg = f"Request failed with status code {e.response.status_code}: {e}"
+            raise RequestError(msg) from e
+        except Exception as e:
+            msg = f"Request failed with error: {e}"
+            raise RequestError(msg) from e
 
     def __del__(self):
         """Cleanup method to close HTTP client."""
