@@ -1,7 +1,9 @@
 import sys
 from pathlib import Path
-from typing import Annotated, Literal, Optional, cast
+from typing import Annotated, Any, Literal, Optional, cast
 
+import click
+import httpx
 import typer
 from git import (
     Commit,
@@ -11,7 +13,6 @@ from git import (
     Repo,
     safe_decode,
 )
-from httpx import HTTPStatusError
 from prompt_toolkit import prompt
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
@@ -177,6 +178,63 @@ def commit(
         raise typer.Exit(1) from None
 
 
+def _setup_config(
+    config_path: Optional[Path],
+    local: bool,
+    provider: Optional[str],
+    cli_args: dict[str, Any],
+) -> ConfigManager:
+    """Set up configuration manager with CLI overrides."""
+    config_manager = (
+        ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
+    )
+    if provider or cli_args:
+        config_manager.set_cli_overrides(provider=provider, api_config=cli_args)
+    return config_manager
+
+
+def _get_cli_args(**kwargs: Any) -> dict[str, Any]:
+    """Extract CLI arguments for API configuration."""
+    return {k: v for k, v in kwargs.items() if v is not None}
+
+
+def _generate_message(
+    message_generator: MessageGenerator,
+    rich: bool,
+    dry_run: bool,
+) -> Optional[str]:
+    """Generate and handle commit message with user interaction."""
+    commit_message: Optional[str] = None
+    while True:
+        try:
+            if not commit_message:
+                console.print(
+                    stylize("🤖 Hang tight, I'm cooking up something good!", Colors.GREEN)
+                )
+                commit_message = message_generator.generate_commit_message(rich=rich)
+
+            console.print("\nCommit message:")
+            console.print(Panel(stylize(commit_message, Colors.GREEN)))
+            if dry_run:
+                console.print(stylize("Commit message not saved.", Colors.YELLOW))
+                return None
+
+            user_input = ask_for_retry()
+            if user_input == "y":
+                return commit_message
+            if user_input == "n":
+                console.print(stylize("Commit message discarded.", Colors.YELLOW))
+                return None
+            if user_input == "e":
+                commit_message = edit_text_in_place(commit_message)
+            elif user_input == "r":
+                commit_message = None
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Operation cancelled by user.[/yellow]")
+            return None
+    return None
+
+
 def entry(
     rich: Annotated[
         bool, typer.Option("--rich", "-r", help="Generate rich commit message.")
@@ -197,6 +255,78 @@ def entry(
             resolve_path=True,
         ),
     ] = None,
+    api_key: Annotated[
+        Optional[str],
+        typer.Option("--api-key", help="API key for the provider.", click_type=click.STRING),
+    ] = None,
+    api_base: Annotated[
+        Optional[str],
+        typer.Option("--api-base", help="Base URL for the API.", click_type=click.STRING),
+    ] = None,
+    model: Annotated[
+        Optional[str],
+        typer.Option("--model", help="Model to use for generation.", click_type=click.STRING),
+    ] = None,
+    provider: Annotated[
+        Optional[str],
+        typer.Option(
+            "--provider",
+            help="Provider to use (e.g., openai, anthropic).",
+            click_type=click.STRING,
+        ),
+    ] = None,
+    proxy: Annotated[
+        Optional[str],
+        typer.Option("--proxy", help="Proxy URL to use for API calls.", click_type=click.STRING),
+    ] = None,
+    max_tokens: Annotated[
+        Optional[int],
+        typer.Option(
+            "--max-tokens",
+            help="Maximum tokens for generation.",
+            click_type=click.IntRange(min=1),
+        ),
+    ] = None,
+    top_p: Annotated[
+        Optional[float],
+        typer.Option(
+            "--top-p",
+            help="Top-p sampling parameter.",
+            click_type=click.FloatRange(min=0, max=1),
+        ),
+    ] = None,
+    temperature: Annotated[
+        Optional[float],
+        typer.Option(
+            "--temperature",
+            help="Temperature for generation.",
+            click_type=click.FloatRange(min=0, max=1),
+        ),
+    ] = None,
+    extra_headers: Annotated[
+        Optional[str],
+        typer.Option(
+            "--extra-headers",
+            help="Extra headers for API calls (JSON string).",
+            click_type=click.STRING,
+        ),
+    ] = None,
+    frequency_penalty: Annotated[
+        Optional[float],
+        typer.Option(
+            "--frequency-penalty",
+            help="Frequency penalty for generation.",
+            click_type=click.FloatRange(min=0, max=1),
+        ),
+    ] = None,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Print the commit message without committing.",
+            is_eager=True,
+        ),
+    ] = False,
 ) -> None:
     """
     Generate and commit a message based on staged changes.
@@ -206,43 +336,37 @@ def entry(
     """
     debug and set_debug()
 
-    config_manager = (
-        ConfigManager(config_path=config_path) if config_path else get_config_manager(local=local)
+    cli_args = _get_cli_args(
+        api_key=api_key,
+        api_base=api_base,
+        model=model,
+        proxy=proxy,
+        max_tokens=max_tokens,
+        top_p=top_p,
+        temperature=temperature,
+        extra_headers=extra_headers,
+        frequency_penalty=frequency_penalty,
     )
+
     try:
+        config_manager = _setup_config(config_path, local, provider, cli_args)
         message_generator = MessageGenerator(config_manager)
     except (ConfigError, InvalidGitRepositoryError, NoSuchPathError) as error:
         console.print(stylize(str(error), Colors.YELLOW))
+        import traceback
+
+        print(f"?????????????????????{traceback.format_exc()}")
         raise typer.Exit(1) from None
 
-    commit_message: Optional[str] = None
-    while True:
-        try:
-            if not commit_message:
-                console.print(
-                    stylize("🤖 Hang tight, I'm cooking up something good!", Colors.GREEN)
-                )
-                commit_message = message_generator.generate_commit_message(rich=rich)
-
-            console.print("\nCommit message:")
-            console.print(Panel(stylize(commit_message, Colors.GREEN)))
-
-            user_input = ask_for_retry()
-            if user_input == "y":
-                break
-            elif user_input == "n":
-                console.print(stylize("Commit message discarded.", Colors.YELLOW))
-                return
-            elif user_input == "e":
-                commit_message = edit_text_in_place(commit_message)
-            elif user_input == "r":
-                commit_message = None
-        except (KeyNotFound, GitNoStagedChanges, HTTPStatusError) as error:
-            console.print(stylize(str(error), Colors.YELLOW))
-            raise typer.Exit(1) from None
-        except KeyboardInterrupt:
-            console.print("\n[yellow]Operation cancelled by user.[/yellow]")
-            return
-
-    # Commit and show the output
-    commit(message_generator, commit_message, rich)
+    try:
+        commit_message = _generate_message(message_generator, rich, dry_run)
+        if commit_message:
+            commit(message_generator, commit_message, rich)
+    except (
+        KeyNotFound,
+        GitNoStagedChanges,
+        httpx.HTTPStatusError,
+        httpx.TimeoutException,
+    ) as error:
+        console.print(stylize(str(error), Colors.YELLOW))
+        raise typer.Exit(1) from None

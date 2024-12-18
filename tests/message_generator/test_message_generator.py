@@ -1,42 +1,47 @@
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import glom
 import pytest
 from git import Repo
 
 from gptcomet.exceptions import GitNoStagedChanges
 from gptcomet.message_generator import MessageGenerator
 
-PROJECT_ROOT = str(Path(__file__).parent.parent.absolute())
+PROJECT_ROOT = str(Path(__file__).parent.parent.parent.absolute())
 
 
 @pytest.fixture
 def mock_config_manager():
     """Create a mock configuration manager"""
     config = Mock()
-    config.get.side_effect = lambda key, default=None: {
-        "provider": "openai",
-        "openai": {
-            "api_key": "test-key",
-            "model": "gpt-3.5-turbo",
-            "api_base": "https://api.openai.com/v1",
-            "retries": "3",
-            "completion_path": "/chat/completions",
-            "answer_path": "choices.0.message.content",
-            "proxy": "",
-            "max_tokens": "100",
-            "temperature": "0.7",
-            "top_p": "1",
-            "frequency_penalty": "0",
-            "presence_penalty": "0",
+    config.get.side_effect = lambda key, default=None: glom.glom(
+        {
+            "provider": "openai",
+            "openai": {
+                "api_key": "test-key",
+                "model": "gpt-3.5-turbo",
+                "api_base": "https://api.openai.com/v1",
+                "retries": "3",
+                "completion_path": "/chat/completions",
+                "answer_path": "choices.0.message.content",
+                "proxy": "",
+                "max_tokens": "100",
+                "temperature": "0.7",
+                "top_p": "1",
+                "frequency_penalty": "0",
+                "presence_penalty": "0",
+            },
+            "file_ignore": ["*.log", "*.tmp"],
+            "language": "en",
+            "prompt.brief_commit_message": "Generate commit message for: {{ placeholder }}",
+            "prompt.rich_commit_message": "Generate rich commit message for: {{ placeholder }} using {{ rich_template }}",
+            "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
+            "output.rich_template": "type: message\n\n- details",
         },
-        "file_ignore": ["*.log", "*.tmp"],
-        "language": "en",
-        "prompt.brief_commit_message": "Generate commit message for: {{ placeholder }}",
-        "prompt.rich_commit_message": "Generate rich commit message for: {{ placeholder }} using {{ rich_template }}",
-        "prompt.translation": "Translate: {{ placeholder }} to {{ output_language }}",
-        "output.rich_template": "type: message\n\n- details",
-    }.get(key, default)
+        key,
+        default=default,
+    )
     config.is_api_key_set = True
     return config
 
@@ -54,8 +59,7 @@ def mock_repo():
 @pytest.fixture
 def create_message_generator(mock_config_manager, mock_repo):
     """Create MessageGenerator instance"""
-    mock_repo_class = patch("git.Repo")
-    # Ensure Repo() call returns repo with correct working directory
+    mock_repo_class = patch("git.Repo").start()
     mock_repo_class.return_value = mock_repo
     # Explicitly pass project root directory
     msg_generator = MessageGenerator(mock_config_manager, repo_path=PROJECT_ROOT)

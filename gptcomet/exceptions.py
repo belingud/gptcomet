@@ -29,13 +29,19 @@ class GitNoStagedChanges(GPTCometError):
 class ConfigErrorEnum(enum.IntEnum):
     """Enum for config error."""
 
+    _description: str
+
     def __new__(cls, code, description):
         obj = int.__new__(cls, code)
         obj._value_ = code
-        obj.description = description
+        obj._description = description
         return obj
 
-    API_KEY_MISSING = 0, "Missing API key in config file for provider '{provider}'"
+    @property
+    def description(self):
+        return self._description
+
+    API_KEY_MISSING = 0, "Missing API key config for provider '{provider}'"
     PROVIDER_KEY_MISSING = 1, "No LLM provider specified in config file"
     PROVIDER_CONFIG_MISSING = 2, "Configuration for provider '{provider}' not found"
 
@@ -90,3 +96,11 @@ class KeyNotSupportError(GPTCometError):
 
     def __str__(self):
         return f"Key '{self.key}' not support."
+
+
+class RequestError(Exception):
+    """Exception raised for errors during API requests."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)

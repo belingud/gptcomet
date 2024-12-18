@@ -1,7 +1,7 @@
 [project]
 name = "gptcomet"
 version = "0.1.1"
-description = "gptcomet: A tool that leverages AI to automatically generate Git commit messages."
+description = "gptcomet: AI-Powered Git Commit Message Generator."
 authors = [{ name = "belingud", email = "im.victor@qq.com" }]
 readme = "README.md"
 packages = [{ include = "gptcomet" }]
@@ -65,6 +65,8 @@ profile = "black"
 target-version = "py39"
 line-length = 100
 fix = true
+exclude = ["tests/*"]
+src = ["gptcomet"]
 
 [tool.ruff.lint]
 select = [

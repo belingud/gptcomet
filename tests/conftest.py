@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
@@ -36,3 +36,8 @@ def commit():
         message="test commit message",
         author=Author(name="John Doe", email="john@example.com"),
     )
+
+
+@pytest.fixture
+def mock_console():
+    return Mock()
