@@ -1,8 +1,7 @@
-from collections import ChainMap
 from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, Iterator, Optional, Union
+from typing import Any, Optional, Union
 
 import click
 import orjson as json
@@ -33,16 +32,37 @@ class ProviderConfig:
     api_key: str = field(default="")
     max_tokens: int = field(default=1024)
     retries: int = field(default=2)
+    _extra_fields: dict[str, Any] = field(default_factory=dict, repr=False)
 
-    def to_dict(self) -> Provider:
+    def __init__(
+        self,
+        provider: str = "openai",
+        api_base: str = "https://api.openai.com/v1/",
+        model: str = "",
+        api_key: str = "",
+        max_tokens: int = 1024,
+        retries: int = 2,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize provider config with optional extra fields."""
+        self.provider = provider
+        self.api_base = api_base
+        self.model = model
+        self.api_key = api_key
+        self.max_tokens = max_tokens
+        self.retries = retries
+        self._extra_fields = kwargs
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to provider dictionary."""
-        return {
+        base_config = {
             "api_base": self.api_base,
             "api_key": self.api_key,
             "model": self.model,
             "max_tokens": self.max_tokens,
             "retries": self.retries,
         }
+        return {**base_config, **self._extra_fields}
 
 
 class ConfigManager:
@@ -52,7 +72,6 @@ class ConfigManager:
         "current_config_path",
     )
     current_config_path: Path
-    _cache: CacheType
 
     global_config_file: Path = Path.home() / ".config" / "gptcomet" / "gptcomet.yaml"
     default_config_file: Path = Path(__file__).parent / "gptcomet.yaml"
@@ -102,7 +121,7 @@ class ConfigManager:
         return Path.cwd() / ".git" / "gptcomet.yaml" if local else cls.global_config_file
 
     def set_cli_overrides(
-        self, provider: Optional[str] = None, api_config: Dict[str, Any] = {}
+        self, provider: Optional[str] = None, api_config: Optional[dict[str, Any]] = None
     ) -> None:
         """
         Set command line overrides for configuration values.
@@ -111,17 +130,21 @@ class ConfigManager:
             provider (Optional[str]): The provider to use.
             api_config (Dict[str, Any]): The API configuration to use.
         """
+        if not api_config:
+            api_config = {}
         overrides = {}
         if provider:
             if not isinstance(provider, str):
-                raise TypeError("Provider must be a string")
+                msg = "Provider must be a string"
+                raise TypeError(msg)
             overrides["provider"] = provider
         api_config = {k: v for k, v in api_config.items() if v is not None}
         if api_config:
             provider_from_file = self.get("provider")
             provider_from_cli = provider or provider_from_file
             if not provider_from_cli:
-                raise ValueError("Provider is required")
+                msg = "Provider is required when using --api-base or --api-key"
+                raise ValueError(msg)
             existing_config = self.get(provider_from_cli, {})
             if isinstance(existing_config, dict):
                 merged_api_config = {**existing_config, **api_config}

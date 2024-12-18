@@ -1,54 +1,97 @@
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter
 
 from gptcomet.config_manager import ConfigManager, ProviderConfig, get_config_manager
 from gptcomet.const import GPTCOMET_PRE
 from gptcomet.exceptions import ConfigError
+from gptcomet.llms.providers import ProviderRegistry
 from gptcomet.log import logger, set_debug
 from gptcomet.styles import Colors, stylize
 from gptcomet.utils import console
 
 
+def get_provider_name() -> str:
+    """Get provider name from user with autocomplete support."""
+    available_providers = list(ProviderRegistry._providers.keys())
+    provider_completer = WordCompleter(available_providers, ignore_case=True)
+
+    console.print("\nAvailable providers:", style=Colors.CYAN)
+    for provider in available_providers:
+        console.print(f"  - {provider}", style=Colors.LIGHT_CYAN_RGB)
+    console.print(
+        "\nYou can either select one from the list or enter a custom provider name.",
+        style=Colors.CYAN,
+    )
+
+    while True:
+        try:
+            provider = (
+                prompt(
+                    "Enter provider name: ",
+                    completer=provider_completer,
+                    complete_while_typing=True,
+                )
+                .lower()
+                .strip()
+            )
+
+            if provider:
+                return provider
+            console.print("Provider name cannot be empty.", style=Colors.RED)
+        except KeyboardInterrupt:
+            console.print("\nOperation cancelled by user.", style=Colors.MAGENTA)
+            raise typer.Exit(1) from None
+
+
 def create_provider_config() -> ProviderConfig:
     """Create provider config from user input."""
     try:
-        provider = typer.prompt(
-            "Enter provider name (lowercase)", default="openai", type=str
-        ).lower()
+        # Get provider name with autocomplete
+        provider = get_provider_name()
 
-        api_base = typer.prompt(
-            "Enter API Base URL: ",
-            default="https://api.openai.com/v1/",
-        )
+        # Get provider-specific configuration requirements
+        provider_class = ProviderRegistry.get_provider(provider)
+        config_requirements = provider_class.get_required_config()
 
-        model = typer.prompt(
-            "Enter model name: ",
-            default="text-davinci-003",
-        )
+        # Initialize config dict
+        config_dict = {"provider": provider}
 
-        api_key = prompt(
-            "Enter API key: ",
-            is_password=True,
-        )
+        # Get provider-specific configuration
+        for key, (default_value, prompt_message) in config_requirements.items():
+            if key == "api_key":
+                value = prompt(
+                    f"{prompt_message}: ",
+                    is_password=True,
+                )
+            else:
+                value = typer.prompt(
+                    prompt_message,
+                    default=default_value,
+                    type=str,
+                )
+            config_dict[key] = value
 
-        max_tokens = typer.prompt(
-            "Enter max tokens",
-            default=1024,
-            type=int,
-        )
-
+        # Convert to ProviderConfig
         return ProviderConfig(
             provider=provider,
-            api_base=api_base,
-            model=model,
-            api_key=api_key,
-            max_tokens=max_tokens,
+            api_base=config_dict["api_base"],
+            model=config_dict["model"],
+            api_key=config_dict["api_key"],
+            max_tokens=int(config_dict.get("max_tokens", 1024)),
+            retries=int(config_dict.get("retries", 2)),
+            **{
+                k: v
+                for k, v in config_dict.items()
+                if k not in ["provider", "api_base", "model", "api_key", "max_tokens", "retries"]
+            },
         )
+
     except KeyboardInterrupt as e:
-        console.print(stylize("Operation cancelled by user.", Colors.MAGENTA))
+        console.print(stylize("\nOperation cancelled by user.", Colors.MAGENTA))
         raise typer.Exit(1) from e
 
 

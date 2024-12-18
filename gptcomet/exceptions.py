@@ -96,3 +96,11 @@ class KeyNotSupportError(GPTCometError):
 
     def __str__(self):
         return f"Key '{self.key}' not support."
+
+
+class RequestError(Exception):
+    """Exception raised for errors during API requests."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)

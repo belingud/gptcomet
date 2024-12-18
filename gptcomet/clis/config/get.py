@@ -1,5 +1,5 @@
 from typing import Annotated, Any
-    
+
 import orjson
 import typer
 
