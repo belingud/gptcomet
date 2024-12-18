@@ -11,3 +11,13 @@ class GroqLLM(OpenaiLLM):
 
         self.api_base = self.api_base or "https://api.groq.com/openai/v1"
         self.model = self.model or "llama3-8b-8192"
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        """Get Groq-specific configuration requirements."""
+        return {
+            "api_base": ("https://api.groq.com/openai/v1", "Enter Groq API Base URL"),
+            "model": ("llama3-8b-8192", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }

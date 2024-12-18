@@ -57,3 +57,13 @@ class ClaudeLLM(BaseLLM):
             f"Token usage: input tokens: {usage.get('input_tokens')}, "
             f"output tokens: {usage.get('output_tokens')}, "
         )
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        return {
+            "api_base": ("https://api.anthropic.com/v1", "Enter Anthropic API Base URL"),
+            "model": ("claude-3-5-sonnet", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+            "anthropic-version": ("2023-06-01", "Enter Anthropic API version"),
+        }

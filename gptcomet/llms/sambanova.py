@@ -11,3 +11,12 @@ class SambanovaLLM(OpenaiLLM):
 
         self.api_base = self.api_base or "https://api.sambanova.ai/v1"
         self.model = self.model or "Meta-Llama-3.3-70B-Instruct"
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        return {
+            "api_base": ("https://api.sambanova.ai/v1", "Enter Sambanova API Base URL"),
+            "model": ("Meta-Llama-3.3-70B-Instruct", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }

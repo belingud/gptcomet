@@ -2,6 +2,9 @@ import fnmatch
 import sys
 import typing as t
 
+from prompt_toolkit import Application, prompt
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.layout import FormattedTextControl, Layout, Window
 from rich import get_console
 
 defenc = sys.getdefaultencoding()
@@ -187,3 +190,58 @@ def mask_api_keys(data, show_first: int = 3):
         elif isinstance(value, dict):
             mask_api_keys(value, show_first)
     return data
+
+
+def create_select_menu(options: list) -> t.Optional[str]:
+    """
+    Create a select menu using prompt_toolkit.
+
+    Args:
+        options (list): A list of options to display in the select menu.
+
+    Returns:
+        The selected option from the menu.
+    """
+    options = [*options, "Input manually"]
+    selected_index = [0]
+
+    def get_formatted_options():
+        result = []
+        for i, option in enumerate(options):
+            if i == selected_index[0]:
+                result.append(("fg:green", f"> {option}\n"))
+            else:
+                result.append(("", f"  {option}\n"))
+        return result
+
+    kb = KeyBindings()
+
+    @kb.add("up")
+    def up_key(event):
+        selected_index[0] = (selected_index[0] - 1) % len(options)
+
+    @kb.add("down")
+    def down_key(event):
+        selected_index[0] = (selected_index[0] + 1) % len(options)
+
+    @kb.add("enter")
+    def enter_key(event):
+        selected = options[selected_index[0]]
+        if selected == "Input manually":
+            event.app.exit(result="INPUT_REQUIRED")
+        else:
+            event.app.exit(result=selected)
+
+    @kb.add("c-c")
+    def keyboard_interrupt(event):
+        # event.app.exit(result=None)
+        raise KeyboardInterrupt
+
+    window = Window(
+        content=FormattedTextControl(get_formatted_options),
+        always_hide_cursor=True,
+    )
+
+    app = Application(layout=Layout(window), key_bindings=kb, mouse_support=True, full_screen=False)
+
+    return app.run()

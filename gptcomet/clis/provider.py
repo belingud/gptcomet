@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, Optional
 
 import typer
 from prompt_toolkit import prompt
@@ -11,7 +11,7 @@ from gptcomet.exceptions import ConfigError
 from gptcomet.llms.providers import ProviderRegistry
 from gptcomet.log import logger, set_debug
 from gptcomet.styles import Colors, stylize
-from gptcomet.utils import console
+from gptcomet.utils import console, create_select_menu
 
 
 def get_provider_name() -> str:
@@ -19,32 +19,27 @@ def get_provider_name() -> str:
     available_providers = list(ProviderRegistry._providers.keys())
     provider_completer = WordCompleter(available_providers, ignore_case=True)
 
-    console.print("\nAvailable providers:", style=Colors.CYAN)
-    for provider in available_providers:
-        console.print(f"  - {provider}", style=Colors.LIGHT_CYAN_RGB)
     console.print(
-        "\nYou can either select one from the list or enter a custom provider name.",
-        style=Colors.CYAN,
+        "You can either select one from the list or enter a custom provider name.",
     )
-
-    while True:
-        try:
-            provider = (
-                prompt(
-                    "Enter provider name: ",
-                    completer=provider_completer,
-                    complete_while_typing=True,
-                )
-                .lower()
-                .strip()
-            )
-
-            if provider:
-                return provider
+    try:
+        provider = create_select_menu(available_providers)
+        if provider != "INPUT_REQUIRED" and provider is not None:
+            return provider
+        provider = prompt(
+            "Enter provider name: ",
+            completer=provider_completer,
+            complete_while_typing=True,
+        ).lower().strip()
+        if not provider:
             console.print("Provider name cannot be empty.", style=Colors.RED)
-        except KeyboardInterrupt:
-            console.print("\nOperation cancelled by user.", style=Colors.MAGENTA)
-            raise typer.Exit(1) from None
+            raise typer.Exit(1)
+        else:
+            return provider
+
+    except KeyboardInterrupt as e:
+        console.print(stylize("\nOperation cancelled by user.", Colors.MAGENTA))
+        raise typer.Exit(1) from e
 
 
 def create_provider_config() -> ProviderConfig:
@@ -67,12 +62,18 @@ def create_provider_config() -> ProviderConfig:
                     f"{prompt_message}: ",
                     is_password=True,
                 )
+                if not value:
+                    console.print("API key cannot be empty.", style=Colors.RED)
+                    raise typer.Exit(1)
             else:
                 value = typer.prompt(
                     prompt_message,
                     default=default_value,
                     type=str,
                 )
+                if not default_value and not value:
+                    console.print(f"{key} cannot be empty.", style=Colors.RED)
+                    raise typer.Exit(1)
             config_dict[key] = value
 
         # Convert to ProviderConfig

@@ -52,3 +52,13 @@ class OpenaiLLM(BaseLLM):
             payload["presence_penalty"] = float(self.presence_penalty)
 
         return payload
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        """Get OpenAI-specific configuration requirements."""
+        return {
+            "api_base": ("https://api.openai.com/v1", "Enter OpenAI API Base URL"),
+            "model": ("gpt-4o", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }

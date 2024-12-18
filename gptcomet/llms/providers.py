@@ -107,7 +107,7 @@ class ProviderRegistry:
         "qwen": _tongyi_default_config,
         "chatglm": {
             "api_base": "http://localhost:8000",
-            "model": "chatglm3-6b",
+            "model": "glm-4-flash",
             "completion_path": "v1/chat/completions",
             "answer_path": "response",
             "retries": 2,

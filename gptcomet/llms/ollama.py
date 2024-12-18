@@ -52,3 +52,12 @@ class OllamaLLM(BaseLLM):
             payload["options"]["main_gpu"] = int(self.main_gpu)
 
         return payload
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        return {
+            "api_base": ("http://localhost:11434/api", "Enter Ollama API Base URL"),
+            "model": ("llama2", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }

@@ -54,3 +54,12 @@ class TongyiLLM(BaseLLM):
             payload["top_p"] = float(self.top_p)
 
         return payload
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        return {
+            "api_base": ("https://dashscope.aliyuncs.com/compatible-mode/v1", "Enter Tongyi API Base URL"),
+            "model": ("qwen-turbo", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }

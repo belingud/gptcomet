@@ -90,7 +90,7 @@ class BaseLLM(ABC):
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:
         """Get provider-specific configuration requirements.
-        
+
         Returns a dictionary where:
         - key: configuration field name
         - value: tuple of (default_value, prompt_message)

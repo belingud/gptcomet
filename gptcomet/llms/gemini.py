@@ -90,3 +90,12 @@ class GeminiLLM(BaseLLM):
                 f"candidatesTokenCount: {usage.get('candidatesTokenCount')}, "
                 f"totalTokenCount: {usage.get('totalTokenCount')}"
             )
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        return {
+            "api_base": ("https://generativelanguage.googleapis.com/v1beta/models", "Enter Gemini API base"),
+            "model": ("gemini-pro", "Enter Gemini model"),
+            "api_key": ("", "Enter Gemini API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }

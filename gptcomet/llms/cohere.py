@@ -57,3 +57,12 @@ class CohereLLM(BaseLLM):
             return None
         else:
             return f"Token usage> input tokens: {usage.get('input_tokens')}, output tokens: {usage.get('output_tokens')}"
+
+    @classmethod
+    def get_required_config(cls) -> dict[str, tuple[str, str]]:
+        return {
+            "api_base": ("https://api.cohere.ai/v1", "Enter Cohere API Base URL"),
+            "model": ("command-r", "Enter model name"),
+            "api_key": ("", "Enter API key"),
+            "max_tokens": ("1024", "Enter max tokens"),
+        }
