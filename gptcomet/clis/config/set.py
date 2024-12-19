@@ -6,7 +6,7 @@ from gptcomet._validator import KEYS_VALIDATOR
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.const import GPTCOMET_PRE
 from gptcomet.exceptions import ConfigKeyError
-from gptcomet.log import logger, set_debug
+from gptcomet.log import set_debug
 from gptcomet.utils import console
 
 
@@ -19,7 +19,7 @@ def entry(
     cfg: ConfigManager = get_config_manager(local=local)
     if debug:
         set_debug()
-        logger.debug(f"Using Config path: {cfg.current_config_path}")
+    console.print(f"Using Config path: {cfg.current_config_path}")
     try:
         if key in KEYS_VALIDATOR and not KEYS_VALIDATOR[key]["validator"](value):
             console.print(f"{GPTCOMET_PRE} Invalid value for {key}.")
