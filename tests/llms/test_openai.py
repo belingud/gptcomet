@@ -79,7 +79,7 @@ def test_openai_format_messages_with_penalties(openai_config, sample_message):
         "frequency_penalty": 0.5,
         "presence_penalty": 0.3,
     })
-    
+
     llm = OpenaiLLM(config)
     payload = llm.format_messages(sample_message)
 

@@ -55,7 +55,7 @@ def test_gemini_format_messages_with_history(gemini_config, sample_message, samp
 
     contents = payload["contents"]
     assert len(contents) == len(sample_history) + 1
-    
+
     for i, msg in enumerate(sample_history):
         assert contents[i]["parts"][0]["text"] == msg["content"]
 
