@@ -48,56 +48,51 @@ def get_provider_name() -> str:
 
 def create_provider_config() -> ProviderConfig:
     """Create provider config from user input."""
-    try:
-        # Get provider name with autocomplete
-        provider = get_provider_name()
+    # Get provider name with autocomplete
+    provider = get_provider_name()
 
-        # Get provider-specific configuration requirements
-        provider_class = ProviderRegistry.get_provider(provider)
-        config_requirements = provider_class.get_required_config()
+    # Get provider-specific configuration requirements
+    provider_class = ProviderRegistry.get_provider(provider)
+    config_requirements = provider_class.get_required_config()
 
-        # Initialize config dict
-        config_dict = {"provider": provider}
+    # Initialize config dict
+    config_dict = {"provider": provider}
 
-        # Get provider-specific configuration
-        for key, (default_value, prompt_message) in config_requirements.items():
-            if key == "api_key":
-                value = prompt(
-                    f"{prompt_message}: ",
-                    is_password=True,
-                )
-                if not value:
-                    console.print("API key cannot be empty.", style=Colors.RED)
-                    raise typer.Exit(1)
-            else:
-                value = typer.prompt(
-                    prompt_message,
-                    default=default_value,
-                    type=str,
-                )
-                if not default_value and not value:
-                    console.print(f"{key} cannot be empty.", style=Colors.RED)
-                    raise typer.Exit(1)
-            config_dict[key] = value
+    # Get provider-specific configuration
+    for key, (default_value, prompt_message) in config_requirements.items():
+        if key == "api_key":
+            value = prompt(
+                f"{prompt_message}: ",
+                is_password=True,
+            )
+            if not value:
+                console.print("API key cannot be empty.", style=Colors.RED)
+                raise typer.Exit(1)
+        else:
+            value = typer.prompt(
+                prompt_message,
+                default=default_value,
+                type=str,
+            )
+            if not default_value and not value:
+                console.print(f"{key} cannot be empty.", style=Colors.RED)
+                raise typer.Exit(1)
+        config_dict[key] = value
 
-        # Convert to ProviderConfig
-        return ProviderConfig(
-            provider=provider,
-            api_base=config_dict["api_base"],
-            model=config_dict["model"],
-            api_key=config_dict.get("api_key", ""),
-            max_tokens=int(config_dict.get("max_tokens", 1024)),
-            retries=int(config_dict.get("retries", 2)),
-            **{
-                k: v
-                for k, v in config_dict.items()
-                if k not in ["provider", "api_base", "model", "api_key", "max_tokens", "retries"]
-            },
-        )
-
-    except KeyboardInterrupt as e:
-        console.print(stylize("\nOperation cancelled by user.", Colors.MAGENTA))
-        raise typer.Exit(1) from e
+    # Convert to ProviderConfig
+    return ProviderConfig(
+        provider=provider,
+        api_base=config_dict["api_base"],
+        model=config_dict["model"],
+        api_key=config_dict.get("api_key", ""),
+        max_tokens=int(config_dict.get("max_tokens", 1024)),
+        retries=int(config_dict.get("retries", 2)),
+        **{
+            k: v
+            for k, v in config_dict.items()
+            if k not in ["provider", "api_base", "model", "api_key", "max_tokens", "retries"]
+        },
+    )
 
 
 def entry(
@@ -148,6 +143,9 @@ def entry(
 
     except ConfigError as e:
         console.print(stylize(f"Configuration error: {e!s}", Colors.RED))
+        raise typer.Exit(1) from None
+    except KeyboardInterrupt:
+        console.print(stylize("\nOperation cancelled by user.", Colors.MAGENTA))
         raise typer.Exit(1) from None
     except Exception as e:
         console.print(stylize(f"Unexpected error: {e!s}", Colors.RED))
