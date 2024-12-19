@@ -67,6 +67,7 @@ class GeminiLLM(BaseLLM):
         url = self.build_url()
         headers = self.build_headers()
         payload = self.format_messages(message, history)
+        logger.debug("Sending request...")
 
         with self.managed_client() as client:
             response = client.post(url, json=payload, headers=headers)
