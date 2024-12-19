@@ -74,7 +74,7 @@ def test_vertex_build_payload_with_penalties(vertex_config, sample_message):
         "frequency_penalty": 0.5,
         "presence_penalty": 0.3,
     })
-    
+
     llm = VertexLLM(config)
     payload = llm.format_messages(sample_message)
 

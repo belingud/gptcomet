@@ -88,7 +88,7 @@ def test_azure_format_messages_with_penalties(azure_config, sample_message):
         "frequency_penalty": 0.5,
         "presence_penalty": 0.3,
     })
-    
+
     llm = AzureLLM(config)
     payload = llm.format_messages(sample_message)
 

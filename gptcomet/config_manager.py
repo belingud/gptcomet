@@ -296,6 +296,7 @@ class ConfigManager:
 
     def set_new_provider(self, provider: str, provider_info: dict):
         self.config[provider] = provider_info
+        self.config["provider"] = provider
         self.save_config()
 
     def set(self, key: str, value: str):

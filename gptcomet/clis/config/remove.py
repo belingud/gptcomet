@@ -5,7 +5,7 @@ import typer
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.const import GPTCOMET_PRE
 from gptcomet.exceptions import ConfigKeyTypeError, NotModified
-from gptcomet.log import logger, set_debug
+from gptcomet.log import set_debug
 from gptcomet.styles import Colors, stylize
 from gptcomet.utils import console
 
@@ -20,7 +20,7 @@ def entry(
     cfg: ConfigManager = get_config_manager(local=local)
     if debug:
         set_debug()
-        logger.debug(f"Using Config path: {cfg.current_config_path}")
+    console.print(f"Using Config path: {cfg.current_config_path}")
     try:
         cfg.remove(key, value)
         console.print(stylize(f"{GPTCOMET_PRE} Removed {value} from {key}", Colors.GREEN))

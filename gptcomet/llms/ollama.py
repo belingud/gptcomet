@@ -58,6 +58,5 @@ class OllamaLLM(BaseLLM):
         return {
             "api_base": ("http://localhost:11434/api", "Enter Ollama API Base URL"),
             "model": ("llama2", "Enter model name"),
-            "api_key": ("", "Enter API key"),
             "max_tokens": ("1024", "Enter max tokens"),
         }

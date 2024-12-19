@@ -5,8 +5,8 @@ import typer
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.exceptions import ConfigKeyError
-from gptcomet.log import logger, set_debug
-from gptcomet.utils import mask_api_keys
+from gptcomet.log import set_debug
+from gptcomet.utils import console, mask_api_keys
 
 
 def entry(
@@ -17,7 +17,7 @@ def entry(
     cfg: ConfigManager = get_config_manager(local=local)
     if debug:
         set_debug()
-        logger.debug(f"Using Config path: {cfg.current_config_path}")
+    console.print(f"Using Config path: {cfg.current_config_path}")
     try:
         value: Any = cfg.get(key)
         if isinstance(value, (dict, list)) or "api_key" in key:

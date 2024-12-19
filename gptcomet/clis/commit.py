@@ -353,9 +353,6 @@ def entry(
         message_generator = MessageGenerator(config_manager)
     except (ConfigError, InvalidGitRepositoryError, NoSuchPathError) as error:
         console.print(stylize(str(error), Colors.YELLOW))
-        import traceback
-
-        print(f"?????????????????????{traceback.format_exc()}")
         raise typer.Exit(1) from None
 
     try:

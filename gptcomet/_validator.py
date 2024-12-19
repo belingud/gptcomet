@@ -17,6 +17,10 @@ KEYS_VALIDATOR = {
         "validator": lambda x: is_float(x) and -2 <= float(x) <= 2,
         "msg": "`frequency_penalty` must be a float in the interval [-2, 2]",
     },
+    "presence_penalty": {
+        "validator": lambda x: is_float(x) and -2 <= float(x) <= 2,
+        "msg": "`presence_penalty` must be a float in the interval [-2, 2]",
+    },
 }
 
 

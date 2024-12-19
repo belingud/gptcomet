@@ -30,6 +30,8 @@ class BaseLLM(ABC):
         self.retries = int(config.get("retries", 2))
         self.timeout = int(config.get("timeout", 30))
         self.proxy = str(config.get("proxy", ""))
+        if self.proxy:
+            logger.debug(f"Using proxy: {self.proxy}")
         self.max_tokens = int(config.get("max_tokens", 100))
         self.temperature = float(config.get("temperature", 0.7))
         self.top_p = float(config.get("top_p", 1.0))
@@ -128,6 +130,7 @@ class BaseLLM(ABC):
         url = self.build_url()
         headers = self.build_headers()
         payload = self.format_messages(message, history)
+        logger.debug("Sending request...")
 
         try:
             with self.managed_client() as client:

@@ -9,22 +9,32 @@
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-  - [Overview](#overview)
-  - [Features](#features)
-  - [Installation](#installation)
-  - [Setup](#setup)
-  - [Usage](#usage)
-  - [Commands](#commands)
-  - [Configuration](#configuration)
-    - [file\_ignore](#file_ignore)
-    - [provider](#provider)
-    - [output](#output)
-    - [console](#console)
-  - [Supported Keys](#supported-keys)
-  - [Example](#example)
-  - [Development](#development)
-  - [License](#license)
-  - [Contact](#contact)
+    - [Overview](#overview)
+    - [Features](#features)
+    - [Installation](#installation)
+    - [Usage](#usage)
+    - [Setup](#setup)
+        - [Configuration Methods](#configuration-methods)
+        - [Provider Setup Guide](#provider-setup-guide)
+            - [OpenAI](#openai)
+            - [Gemini](#gemini)
+            - [Claude/Anthropic](#claudeanthropic)
+            - [Vertex](#vertex)
+            - [Azure](#azure)
+            - [Ollama](#ollama)
+            - [Other Supported Providers](#other-supported-providers)
+        - [Manual Provider Setup](#manual-provider-setup)
+    - [Commands](#commands)
+    - [Configuration](#configuration)
+        - [file_ignore](#file_ignore)
+        - [provider](#provider)
+        - [output](#output)
+        - [console](#console)
+    - [Supported Keys](#supported-keys)
+    - [Example](#example)
+    - [Development](#development)
+    - [License](#license)
+    - [Contact](#contact)
 
 <!-- /TOC -->
 
@@ -70,45 +80,177 @@ Install by `uv`
 uv tool install gptcomet
 ```
 
-## Setup
-
-Before using GPTComet, you need to configure it with your OpenAI API key and other settings.
-You can do this by running the following command:
-
-```shell
-gmsg config set openai.api_key YOUR_API_KEY
-gmsg config set openai.model gpt-4o
-```
-
-Replace `YOUR_API_KEY` with your actual API key for the OpenAI provider.
-The configuration file will be created at `~/.config/gptcomet/gptcomet.yaml`
-
-Or you can use `gmsg newprovider` to setup a custom provider.
-
-```shell
-$ gmsg newprovider
-Enter provider name (lowercase) [openai]:
-Enter API Base URL:  [https://api.openai.com/v1/]: https://api.siliconflow.cn/v1
-Enter model name:  [text-davinci-003]: Qwen/Qwen2.5-7B-Instruct
-Enter API key: ***************************************************
-Enter max tokens [1024]:
-[GPTComet] Provider silicon configured successfully.
-```
-
 ## Usage
 
 To use gptcomet, follow these steps:
 
 1.  **Install GPTComet**: Install GPTComet through pypi.
-2.  **Configure GPTComet**: Configure GPTComet with your api_key The configuration file should contain the following keys:
+2.  **Configure GPTComet**: See [Setup](#setup). Configure GPTComet with your api_key and other required keys like:
   * `provider`: The provider of the language model (default `openai`).
   * `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
   * `api_key`: The API key for the provider.
   * `model`: The model used for generating commit messages (default `text-davinci-003`).
-  * `retries`: The number of retries for the API request (default `2`).
 3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg commit`.
 
 If you are using `openai` provider, and finished set `api_key`, you can run `gmsg commit` directly.
+
+## Setup
+
+### Configuration Methods
+
+1. **Direct Configuration**
+   - Configure directly in `~/.config/gptcomet/gptcomet.yaml`.
+
+2. **Interactive Setup**
+   - Use the `gmsg newprovider` command for guided setup.
+
+### Provider Setup Guide
+
+#### OpenAI
+
+OpenAI api key page: https://platform.openai.com/api-keys
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+  ...
+  sambanova
+> openai
+  vertex
+  Input manually
+
+Enter OpenAI API Base URL [https://api.openai.com/v1]:
+Enter model name [gpt-4o]:
+Enter API key: ********************************************************************************************************************************************************************
+Enter max tokens [1024]:
+[GPTComet] Provider openai configured successfully.
+```
+
+#### Gemini
+
+Gemini api key page: https://aistudio.google.com/u/1/apikey
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+> gemini
+  ...
+  Input manually
+
+Enter Gemini API base [https://generativelanguage.googleapis.com/v1beta/models]:
+Enter Gemini model [gemini-pro]: gemini-2.0-flash-exp
+Enter Gemini API key: ***************************************
+Enter max tokens [1024]: 500
+[GPTComet] Provider gemini configured successfully.
+```
+
+#### Claude/Anthropic
+
+I don't have an anthropic account yet, please see [Anthropic console](https://console.anthropic.com)
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+  gemini
+  cohere
+> claude
+  ...
+  Input manually
+
+Enter Anthropic API Base URL [https://api.anthropic.com/v1]:
+Enter model name [claude-3-5-sonnet]:
+Enter API key: ***************************************
+Enter max tokens [1024]:
+Enter Anthropic API version [2023-06-01]:
+[GPTComet] Provider claude configured successfully.
+```
+
+#### Vertex
+
+Vertex console page: https://console.cloud.google.com
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+  ...
+  openai
+> vertex
+  Input manually
+
+Enter Vertex AI API Base URL [https://us-central1-aiplatform.googleapis.com/v1]:
+Enter model name [gemini-pro]:
+Enter API key: ********************************
+Enter Google Cloud project ID []: test-project-id
+Enter location (e.g., us-central1) [us-central1]:
+Enter max tokens [1024]:
+[GPTComet] Provider vertex configured successfully.
+```
+
+#### Azure
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+  ...
+  mistral
+> azure
+  ...
+  Input manually
+
+Enter Azure OpenAI endpoint URL (e.g., https://YOUR_RESOURCE_NAME.openai.azure.com) []: https://gptcomet.openai.azure.com
+Enter Azure OpenAI deployment name []: gpt4o
+Enter API version [2024-02-15-preview]:
+Enter model name [gpt-4o]:
+Enter API key: ********************************
+Enter max tokens [1024]:
+[GPTComet] Provider azure configured successfully.
+```
+
+#### Ollama
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+  azure
+> ollama
+  ...
+  Input manually
+
+Enter Ollama API Base URL [http://localhost:11434/api]:
+Enter model name [llama2]:
+Enter max tokens [1024]:
+[GPTComet] Provider ollama configured successfully.
+```
+
+#### Other Supported Providers
+
+- Groq
+- Mistral
+- Tongyi/Qwen
+- XAI
+- Sambanova
+- Silicon
+- Deepseek
+- ChatGLM
+
+### Manual Provider Setup
+
+Or you can enter the provider name manually, and setup config manually.
+
+```shell
+gmsg newprovider
+You can either select one from the list or enter a custom provider name.
+  ...
+  vertex
+> Input manually
+
+Enter provider name: test
+Enter OpenAI API Base URL [https://api.openai.com/v1]:
+Enter model name [gpt-4o]:
+Enter API key: ************************************
+Enter max tokens [1024]:
+[GPTComet] Provider test configured successfully.
+```
 
 ## Commands
 
