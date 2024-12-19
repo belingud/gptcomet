@@ -1,5 +1,46 @@
 
 ---
+## [0.1.3](https://github.com/belingud/gptcomet/compare/v0.1.1..v0.1.3) - 2024-12-19
+
+> !Important
+> Add support for Deepseek, Kimi, Silicon and other LLM providers
+
+### ⛰️  Features
+
+- add presence_penalty and other input validation - ([f3cff3f](https://github.com/belingud/gptcomet/commit/f3cff3f08b31db1e7626525fae2875e5415d0235)) - belingud
+- add debug logging for proxy and requests - ([217f933](https://github.com/belingud/gptcomet/commit/217f9338c66e02be7e1169243d906868941813ba)) - belingud
+- add Deepseek, Kimi and Silicon LLM providers - ([00e6229](https://github.com/belingud/gptcomet/commit/00e62297a00dfca1bd5d7c43a4f5d3f9f2b132fa)) - belingud
+- add CLI options and provider config overrides - ([8613f18](https://github.com/belingud/gptcomet/commit/8613f1878951ad1c7618cf396094b7f6b6904c65)) - belingud
+
+### 🐛 Bug Fixes
+
+- remove traceback print from commit cli - ([a52ae4a](https://github.com/belingud/gptcomet/commit/a52ae4aa104cd89075a36cd14483d9bde81936f7)) - belingud
+
+### 🚜 Refactor
+
+- replace logger with console print in config clis - ([f121ca5](https://github.com/belingud/gptcomet/commit/f121ca5af03df1a539a0412d43e818fa439331d8)) - belingud
+- improve config handling and error management - ([c05f8a4](https://github.com/belingud/gptcomet/commit/c05f8a4a79c4cbc7e1eddda2a662d7a55ce9d08d)) - belingud
+- improve provider selection and config management - ([aa1d28a](https://github.com/belingud/gptcomet/commit/aa1d28a2f17e2fce392abe802333c7109b3c5778)) - belingud
+- support gemini and other provider - ([03407ae](https://github.com/belingud/gptcomet/commit/03407ae2d968eb4ff35b0ff9270de04d8194c0de)) - belingud
+
+### 📚 Documentation
+
+- update README for new provider setup - ([6aa77fe](https://github.com/belingud/gptcomet/commit/6aa77fefc2518aa2e6e1f104f3734cbfbbaa2eb1)) - belingud
+
+### 🎨 Styling
+
+- fix minor whitespace issues in tests - ([41bd91a](https://github.com/belingud/gptcomet/commit/41bd91abea6e6f7408a9239fd9713042e70932fa)) - belingud
+
+### 🧪 Testing
+
+- add multiple test files for LLM implementations - ([1489781](https://github.com/belingud/gptcomet/commit/1489781f2e939ea4f30d1862ccd85b99fcb43b03)) - belingud
+
+### Build
+
+- bump version to 0.1.1 - ([0939fc6](https://github.com/belingud/gptcomet/commit/0939fc63d7878917c7d75df43d0685ceec4bf575)) - belingud
+
+
+---
 ## [0.1.1](https://github.com/belingud/gptcomet/compare/v0.1.0..v0.1.1) - 2024-12-12
 
 ### ⛰️  Features
