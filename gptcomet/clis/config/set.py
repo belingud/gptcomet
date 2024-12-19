@@ -2,10 +2,12 @@ from typing import Annotated
 
 import typer
 
+from gptcomet._validator import KEYS_VALIDATOR
 from gptcomet.config_manager import ConfigManager, get_config_manager
 from gptcomet.const import GPTCOMET_PRE
 from gptcomet.exceptions import ConfigKeyError
 from gptcomet.log import logger, set_debug
+from gptcomet.utils import console
 
 
 def entry(
@@ -19,6 +21,9 @@ def entry(
         set_debug()
         logger.debug(f"Using Config path: {cfg.current_config_path}")
     try:
+        if key in KEYS_VALIDATOR and not KEYS_VALIDATOR[key]["validator"](value):
+            console.print(f"{GPTCOMET_PRE} Invalid value for {key}.")
+            raise typer.Exit(1)
         cfg.set(key, value)
         styled_key: str = typer.style(key, fg=typer.colors.GREEN)
         styled_value: str = typer.style(value, fg=typer.colors.GREEN)
