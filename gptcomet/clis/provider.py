@@ -85,7 +85,7 @@ def create_provider_config() -> ProviderConfig:
             provider=provider,
             api_base=config_dict["api_base"],
             model=config_dict["model"],
-            api_key=config_dict["api_key"],
+            api_key=config_dict.get("api_key", ""),
             max_tokens=int(config_dict.get("max_tokens", 1024)),
             retries=int(config_dict.get("retries", 2)),
             **{

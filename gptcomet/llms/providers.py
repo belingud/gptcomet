@@ -5,12 +5,15 @@ from .base import BaseLLM
 from .chatglm import ChatGLMLLM
 from .claude import ClaudeLLM
 from .cohere import CohereLLM
+from .deepseek import DeepseekLLM
 from .gemini import GeminiLLM
 from .groq import GroqLLM
+from .kimi import KimiLLM
 from .mistral import MistralLLM
 from .ollama import OllamaLLM
 from .openai import OpenaiLLM
 from .sambanova import SambanovaLLM
+from .siliconllm import SiliconLLM
 from .tongyi import TongyiLLM
 from .vertexllm import VertexLLM
 from .xai import XaiLLM
@@ -30,11 +33,14 @@ class ProviderRegistry:
         "ollama": OllamaLLM,
         "tongyi": TongyiLLM,
         "qwen": TongyiLLM,
+        "silicon": SiliconLLM,
         "chatglm": ChatGLMLLM,
         "xai": XaiLLM,
         "sambanova": SambanovaLLM,
         "openai": OpenaiLLM,
         "vertex": VertexLLM,
+        "kimi": KimiLLM,
+        "deepseek": DeepseekLLM,
     }
 
     _tongyi_default_config: ClassVar[dict[str, Any]] = {
