@@ -1,23 +1,11 @@
 import time
 import typing as t
 
+from gptcomet.exceptions import ConfigError, ConfigErrorEnum, GPTCometError
 from gptcomet.llms import ProviderRegistry
+from gptcomet.log import logger
 from gptcomet.styles import Colors
 from gptcomet.utils import console
-
-try:
-    import socksio  # noqa: F401
-except ImportError as e:
-    msg = e.msg
-    if "socksio" in msg:
-        msg = (
-            "Using SOCKS proxy, but the 'socksio' package is not installed. "
-            "Make sure to install it with `pip install socksio`."
-        )
-    raise ImportError(msg) from None
-
-from gptcomet.exceptions import ConfigError, ConfigErrorEnum, GPTCometError
-from gptcomet.log import logger
 
 if t.TYPE_CHECKING:
     from gptcomet.config_manager import ConfigManager

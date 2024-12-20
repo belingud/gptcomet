@@ -1,10 +1,11 @@
+import json
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from typing import Any, Optional, ParamSpec, TypeVar, Union
 
 import glom
-import httpx
-import orjson as json
+import requests
+from requests.adapters import HTTPAdapter
 from rich.text import Text
 
 from gptcomet.exceptions import ConfigError, ConfigErrorEnum, RequestError
@@ -42,7 +43,7 @@ class BaseLLM(ABC):
         if self.completion_path:
             self.completion_path = self.completion_path.lstrip("/")
         self.answer_path = config.get("answer_path")  # choices.0.message.content
-        self._client = None
+        self._session = None
 
     @classmethod
     def get_required_config(cls) -> dict[str, tuple[str, str]]:
@@ -60,26 +61,27 @@ class BaseLLM(ABC):
         }
 
     @property
-    def client(self) -> httpx.Client:
-        """Lazy initialization of HTTP client."""
-        if self._client is None:
-            limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
-            transport = httpx.HTTPTransport(retries=self.retries, limits=limits)
-            client_params = {"transport": transport, "timeout": self.timeout}
+    def session(self) -> requests.Session:
+        """Lazy initialization of HTTP session."""
+        if self._session is None:
+            session = requests.Session()
             if self.proxy:
-                client_params["proxy"] = self.proxy
-            self._client = httpx.Client(**client_params)
-        return self._client
+                session.proxies = {"http": self.proxy, "https": self.proxy}
+            adapter = HTTPAdapter(max_retries=self.retries)
+            session.mount("http://", adapter)
+            session.mount("https://", adapter)
+            self._session = session
+        return self._session
 
     @contextmanager
-    def managed_client(self):
-        """Context manager for HTTP client."""
+    def managed_session(self):
+        """Context manager for HTTP session."""
         try:
-            yield self.client
+            yield self.session
         finally:
-            if self._client is not None:
-                self._client.close()
-                self._client = None
+            if self._session is not None:
+                self._session.close()
+                self._session = None
 
     @abstractmethod
     def format_messages(
@@ -133,8 +135,8 @@ class BaseLLM(ABC):
         logger.debug("Sending request...")
 
         try:
-            with self.managed_client() as client:
-                response = client.post(url, json=payload, headers=headers)
+            with self.managed_session() as session:
+                response = session.post(url, json=payload, headers=headers, timeout=self.timeout)
                 logger.debug(f"Request URL: {url}")
                 logger.debug(f"Response: {response.json()}")
                 response.raise_for_status()
@@ -143,10 +145,10 @@ class BaseLLM(ABC):
                 if usage:
                     console.print(usage)
                 return self.parse_response(data)
-        except httpx.TimeoutException as e:
+        except requests.Timeout as e:
             msg = f"Request timed out: {e}"
             raise RequestError(msg) from e
-        except httpx.HTTPStatusError as e:
+        except requests.HTTPError as e:
             msg = f"Request failed with status code {e.response.status_code}: {e}"
             raise RequestError(msg) from e
         except Exception as e:
@@ -154,14 +156,14 @@ class BaseLLM(ABC):
             raise RequestError(msg) from e
 
     def __del__(self):
-        """Cleanup method to close HTTP client."""
-        if hasattr(self, "_client") and self._client is not None:
-            self._client.close()
+        """Cleanup method to close HTTP session."""
+        if hasattr(self, "_session") and self._session is not None:
+            self._session.close()
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if hasattr(self, "_client") and self._client is not None:
-            self._client.close()
-            self._client = None
+        if hasattr(self, "_session") and self._session is not None:
+            self._session.close()
+            self._session = None

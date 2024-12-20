@@ -1,10 +1,10 @@
+import json
 from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from typing import Any, Optional, Union
 
 import click
-import orjson as json
 from glom import glom
 from ruamel.yaml import YAML, CommentedMap
 
