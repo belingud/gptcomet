@@ -42,7 +42,8 @@ build: clean-build
 # Publish a release to PyPI
 publish:
     @echo "🚀 Publishing."
-    pdm publish --username __token__
+    rm -rf dist
+    uv-publish
 
 # Publish a release to TestPyPI
 publish-test:
@@ -85,4 +86,29 @@ pyinstaller:
     --exclude-module doctest \
     --exclude-module pydoc \
     --exclude-module Tkinter \
-    --exclude-module pyreadline
+    --exclude-module pyreadline \
+    --exclude-module bumpversion \
+    --exclude-module tox \
+    --exclude-module pytest
+
+# Build single executable using Nuitka
+nuitka:
+    pdm run nuitka \
+        --standalone \
+        --onefile \
+        --nofollow-imports \
+        --include-module=typer \
+        --include-module=requests \
+        --include-module=git \
+        --include-module=prompt_toolkit \
+        --include-module=rich \
+        --include-package=gptcomet \
+        --disable-console \
+        --output-dir=dist \
+        --output-filename=gptcomet \
+        --noinclude-setuptools-mode=allow \
+        --noinclude-pytest-mode=allow \
+        --no-pyi-file \
+        --no-debug \
+        --lto=yes \
+        gptcomet/__main__.py
