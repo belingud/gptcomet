@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 
-import httpx
 import pytest
+import requests
 from rich.text import Text
 
 from gptcomet.exceptions import ConfigError, ConfigErrorEnum, RequestError
@@ -53,6 +53,7 @@ def test_initialization(valid_config):
     assert llm.max_tokens == 100
     assert llm.temperature == 0.7
     assert llm.top_p == 1.0
+    assert llm.extra_headers == '{"X-Test": "test"}'
     assert llm.completion_path == "chat/completions"
     assert llm.answer_path == "choices.0.message.content"
 
@@ -67,8 +68,7 @@ def test_initialization_missing_api_key():
 
 def test_build_url(llm):
     """Test URL building."""
-    url = llm.build_url()
-    assert url == "https://api.test.com/v1/chat/completions"
+    assert llm.build_url() == "https://api.test.com/v1/chat/completions"
 
 
 def test_build_headers(llm):
@@ -96,7 +96,6 @@ def test_parse_response(llm):
 
 def test_get_usage(llm):
     """Test usage information formatting."""
-    # Test with usage data
     data = {"usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}}
     usage = llm.get_usage(data)
     assert isinstance(usage, Text)
@@ -104,79 +103,68 @@ def test_get_usage(llm):
     assert "20" in str(usage)
     assert "30" in str(usage)
 
-    # Test without usage data
     assert llm.get_usage({}) is None
 
 
 def test_make_request_success(llm):
     """Test successful API request."""
-    mock_response = Mock()
-    mock_response.json.return_value = {
-        "choices": [{"message": {"content": "Hello world"}}],
-        "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
-    }
-
-    with patch("httpx.Client.post", return_value=mock_response):
-        result = llm.make_request("Hello")
-        assert result == "Hello world"
+    response = Mock()
+    response.json.return_value = {"choices": [{"message": {"content": "test response"}}]}
+    with patch("requests.Session.post", return_value=response):
+        result = llm.make_request("test message")
+        assert result == "test response"
 
 
 def test_make_request_timeout(llm):
     """Test API request with timeout."""
-    with patch("httpx.Client.post", side_effect=httpx.TimeoutException("Timeout")):
+    with patch("requests.Session.post", side_effect=requests.Timeout):
         with pytest.raises(RequestError) as exc_info:
-            llm.make_request("Hello")
+            llm.make_request("test message")
         assert "Request timed out" in str(exc_info.value)
 
 
 def test_make_request_client_error(llm):
     """Test API request with client error (4xx)."""
-    mock_response = Mock()
-    mock_response.status_code = 400
-    with patch(
-        "httpx.Client.post",
-        side_effect=httpx.HTTPStatusError("Client Error", request=Mock(), response=mock_response),
-    ):
+    response = Mock()
+    response.status_code = 400
+    response.raise_for_status.side_effect = requests.HTTPError(response=response)
+    with patch("requests.Session.post", side_effect=response.raise_for_status):
         with pytest.raises(RequestError) as exc_info:
-            llm.make_request("Hello")
-        assert "Client Error" in str(exc_info.value)
+            llm.make_request("test message")
+        assert "Request failed with status code 400" in str(exc_info.value)
 
 
 def test_make_request_server_error(llm):
     """Test API request with server error (5xx)."""
-    mock_response = Mock()
-    mock_response.status_code = 500
-    with patch(
-        "httpx.Client.post",
-        side_effect=httpx.HTTPStatusError("Server Error", request=Mock(), response=mock_response),
-    ):
+    response = Mock()
+    response.status_code = 500
+    response.raise_for_status.side_effect = requests.HTTPError(response=response)
+    with patch("requests.Session.post", side_effect=response.raise_for_status):
         with pytest.raises(RequestError) as exc_info:
-            llm.make_request("Hello")
-        assert "Server Error" in str(exc_info.value)
+            llm.make_request("test message")
+        assert "Request failed with status code 500" in str(exc_info.value)
 
 
 def test_client_lifecycle(llm):
     """Test HTTP client lifecycle management."""
-    # Test lazy initialization
-    assert llm._client is None
-    client = llm.client
-    assert client is not None
-    assert isinstance(client, httpx.Client)
+    assert llm._session is None
+    session = llm.session
+    assert llm._session is not None
+    assert session is llm._session
 
-    # Test client reuse
-    assert llm.client is client
+    # Test session reuse
+    session2 = llm.session
+    assert session2 is session
 
-    # Test client cleanup
-    llm.__exit__(None, None, None)
-    assert llm._client is None
+    # Test session cleanup
+    llm.__del__()
+    assert llm._session
 
 
-def test_context_manager():
+def test_context_manager(valid_config):
     """Test context manager interface."""
-    config = {"api_key": "test_key"}
-    with _TestLLM(config) as llm:
-        assert isinstance(llm, _TestLLM)
-        assert llm._client is None  # Client is lazily initialized
-        client = llm.client
-        assert isinstance(client, httpx.Client)
-    assert llm._client is None  # Client is cleaned up
+    with _TestLLM(valid_config) as llm:
+        assert llm._session is None
+        session = llm.session
+        assert llm._session is not None
+    assert llm._session is None

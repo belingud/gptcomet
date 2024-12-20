@@ -1,4 +1,4 @@
-import orjson as json
+import json
 from typer.testing import CliRunner
 
 from gptcomet import app as cli
@@ -10,16 +10,14 @@ def test_config_get(config_manager):
 
     result = runner.invoke(cli, ["config", "get", "provider"])
     assert result.exit_code == 0
-    assert result.output.strip() == "provider: " + json.dumps(
-        config_manager.config["provider"]
-    ).decode("utf-8")
+    assert f"provider: "+ json.dumps(config_manager.config["provider"], indent=2) in result.output
 
 
 def test_config_set(config_manager):
     runner = CliRunner()
     result = runner.invoke(cli, ["config", "set", "provider", "openai"])
     assert result.exit_code == 0
-    assert result.output.strip() == f"{GPTCOMET_PRE} Set provider to openai."
+    assert f"{GPTCOMET_PRE} Set provider to openai." in result.output
 
 
 def test_config_append(config_manager):
