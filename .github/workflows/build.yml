@@ -1,0 +1,125 @@
+name: Build Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            arch: amd64
+          - os: macos-13
+            platform: macos
+            arch: amd64
+          - os: macos-14
+            platform: macos
+            arch: arm64
+          - os: ubuntu-latest
+            platform: linux
+            arch: amd64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+            qemu: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        if: matrix.qemu
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PDM
+        run: |
+          python -m pip install --upgrade pip
+          pip install pdm
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Install Nuitka
+        run: pdm add nuitka
+
+      - name: Build with Nuitka (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          pdm run nuitka \
+            --standalone \
+            --onefile \
+            --nofollow-imports \
+            --include-module=typer \
+            --include-module=requests \
+            --include-module=git \
+            --include-module=prompt_toolkit \
+            --include-module=rich \
+            --include-package=gptcomet \
+            --disable-console \
+            --output-dir=dist \
+            --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }} \
+            --noinclude-setuptools-mode=allow \
+            --noinclude-pytest-mode=allow \
+            --no-pyi-file \
+            --no-debug \
+            --lto=yes \
+            gptcomet/__main__.py
+
+      - name: Build with Nuitka (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          pdm run nuitka \
+            --standalone \
+            --onefile \
+            --nofollow-imports \
+            --include-module=typer \
+            --include-module=requests \
+            --include-module=git \
+            --include-module=prompt_toolkit \
+            --include-module=rich \
+            --include-package=gptcomet \
+            --disable-console \
+            --output-dir=dist \
+            --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }} \
+            --noinclude-setuptools-mode=allow \
+            --noinclude-pytest-mode=allow \
+            --no-pyi-file \
+            --no-debug \
+            --lto=yes \
+            gptcomet/__main__.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gptcomet-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
