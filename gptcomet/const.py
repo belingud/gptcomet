@@ -17,5 +17,5 @@ Auther: {author} <{email}>
 
 {commit_msg}
 
-{git_show_stat}
+ {git_show_stat}
 """
