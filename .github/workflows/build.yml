@@ -31,7 +31,8 @@ jobs:
             qemu: true
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
         if: matrix.qemu
@@ -55,9 +56,20 @@ jobs:
       - name: Install Nuitka
         run: pdm add nuitka
 
+      # Windows Build
       - name: Build with Nuitka (Windows)
         if: matrix.platform == 'windows'
+        shell: pwsh
         run: |
+          echo "Starting Nuitka build for Windows..."
+          echo "Current directory: $(Get-Location)"
+
+          $outputName = "gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}"
+          echo "Output name will be: $outputName"
+
+          # Create dist directory if it doesn't exist
+          New-Item -ItemType Directory -Force -Path dist
+
           pdm run nuitka `
           --standalone `
           --onefile `
@@ -68,9 +80,8 @@ jobs:
           --include-module=prompt_toolkit `
           --include-module=rich `
           --include-package=gptcomet `
-          --disable-console `
           --output-dir=dist `
-          --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }} `
+          --output-filename=$outputName `
           --noinclude-setuptools-mode=allow `
           --noinclude-pytest-mode=allow `
           --no-pyi-file `
@@ -78,14 +89,42 @@ jobs:
           --lto=yes `
           gptcomet/__main__.py
 
+          echo "Nuitka build completed"
+          echo "Checking dist directory contents:"
+          Get-ChildItem dist -Recurse | Format-Table Name, Length, LastWriteTime
+
+      # Windows Test
       - name: Test built executable (Windows)
         if: matrix.platform == 'windows'
+        shell: pwsh
         run: |
-          .\dist\gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.exe --version
+          echo "Testing Windows executable..."
+          $exeName = "gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.exe"
+          $exePath = Join-Path (Get-Location) "dist" $exeName
 
+          if (Test-Path $exePath) {
+              echo "Found executable at: $exePath"
+              echo "File details:"
+              Get-Item $exePath | Format-List
+
+              echo "Attempting to run executable..."
+              & $exePath --version
+          } else {
+              echo "ERROR: Executable not found at expected path: $exePath"
+              echo "Directory contents:"
+              Get-ChildItem dist -Recurse
+              exit 1
+          }
+
+      # Unix Build
       - name: Build with Nuitka (Unix)
         if: matrix.platform != 'windows'
         run: |
+          echo "Starting Nuitka build for Unix..."
+          echo "Current directory: $(pwd)"
+
+          mkdir -p dist
+
           pdm run nuitka \
             --standalone \
             --onefile \
@@ -96,7 +135,6 @@ jobs:
             --include-module=prompt_toolkit \
             --include-module=rich \
             --include-package=gptcomet \
-            --disable-console \
             --output-dir=dist \
             --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }} \
             --noinclude-setuptools-mode=allow \
@@ -106,11 +144,33 @@ jobs:
             --lto=yes \
             gptcomet/__main__.py
 
+          echo "Nuitka build completed"
+          echo "Checking dist directory contents:"
+          ls -la dist/
+
+      # Unix Test
       - name: Test built executable (Unix)
         if: matrix.platform != 'windows'
         run: |
-          chmod +x ./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}
-          ./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }} --version
+          echo "Testing Unix executable..."
+          EXECUTABLE="./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}"
+
+          if [ -f "$EXECUTABLE" ]; then
+              echo "Found executable at: $EXECUTABLE"
+              echo "File details:"
+              ls -l "$EXECUTABLE"
+
+              echo "Setting executable permissions..."
+              chmod +x "$EXECUTABLE"
+
+              echo "Attempting to run executable..."
+              "$EXECUTABLE" --version
+          else
+              echo "ERROR: Executable not found at expected path: $EXECUTABLE"
+              echo "Directory contents:"
+              ls -la dist/
+              exit 1
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -125,32 +185,28 @@ jobs:
       contents: write
 
     steps:
-      # download all artifacts
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
 
-      # list contents
       - name: List contents of dist
-        run: ls -al dist/
+        run: |
+          echo "Listing contents of dist directory:"
+          ls -la dist/
 
-      # get version
       - name: Get version
         id: get_version
         run: echo "VERSION=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
-      # checkout code for git-cliff
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # install git-cliff
       - name: Install git-cliff
         uses: kenji-miyake/setup-git-cliff@v1
 
-      # generate release notes
       - name: Generate Release Notes
         run: |
           # Generate changelog for the current tag
@@ -163,20 +219,22 @@ jobs:
           echo "* macOS (x64, arm64)" >> release_notes.md
           echo "* Linux (x64, arm64)" >> release_notes.md
 
-      # create GitHub Release
+          echo "Generated release notes:"
+          cat release_notes.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: dist/gptcomet-*
           body_path: release_notes.md
-          draft: false        # no draft
-          prerelease: false   # no prerelease
-          generate_release_notes: true  # generate release notes
+          draft: false
+          prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # notification
       - name: Notification
         if: success()
         run: |
           echo "Release ${{ steps.get_version.outputs.VERSION }} has been published successfully!"
+          echo "Artifacts can be found in the GitHub release page."
