@@ -81,7 +81,7 @@ jobs:
       - name: Test built executable (Windows)
         if: matrix.platform == 'windows'
         run: |
-          ./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/}.exe --version
+          .\dist\gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/}.exe --version
 
       - name: Build with Nuitka (Unix)
         if: matrix.platform != 'windows'

@@ -9,11 +9,12 @@ from glom import glom
 from ruamel.yaml import YAML, CommentedMap
 
 from gptcomet._types import CacheType
-from gptcomet.const import LANGUAGE_KEY
+from gptcomet.const import LANGUAGE_KEY, PROVIDER_KEY
 from gptcomet.exceptions import (
     ConfigKeyError,
     ConfigKeyTypeError,
     LanguageNotSupportError,
+    NoSuchProvider,
     NotModified,
 )
 from gptcomet.support_keys import SUPPORT_KEYS
@@ -321,6 +322,8 @@ class ConfigManager:
             raise LanguageNotSupportError(key)
         if key.split(".")[-1] not in SUPPORT_KEYS:
             raise ConfigKeyError(key)
+        if key == PROVIDER_KEY and not self.config.get(value):
+            raise NoSuchProvider(value)
         toml_value = self.convert2yaml_value(value)
         self.set_nested_value(self.config, key, toml_value)
         self.save_config()

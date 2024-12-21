@@ -26,6 +26,14 @@ class GitNoStagedChanges(GPTCometError):
         return "No staged changes to commit"
 
 
+class NoSuchProvider(GPTCometError):
+    def __init__(self, provider: str):
+        self.provider = provider
+
+    def __str__(self):
+        return f"Provider '{self.provider}' not found"
+
+
 class ConfigErrorEnum(enum.IntEnum):
     """Enum for config error."""
 
