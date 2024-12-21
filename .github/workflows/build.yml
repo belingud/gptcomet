@@ -56,7 +56,7 @@ jobs:
       - name: Install Nuitka
         run: pdm add nuitka
 
-      # Windows Build
+      # Windows Build - 修改后的构建步骤
       - name: Build with Nuitka (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
@@ -67,10 +67,12 @@ jobs:
           $outputName = "gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}"
           echo "Output name will be: $outputName"
 
-          # Create dist directory if it doesn't exist
+          # 创建并清理 dist 目录
+          Remove-Item -Path dist -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path dist
 
-          pdm run nuitka `
+          # 使用 --output-dir 和 --output-filename 参数确保文件直接输出到正确位置
+          pdm run python -m nuitka `
           --standalone `
           --onefile `
           --nofollow-imports `
@@ -80,20 +82,21 @@ jobs:
           --include-module=prompt_toolkit `
           --include-module=rich `
           --include-package=gptcomet `
-          --output-dir=dist `
-          --output-filename=$outputName `
+          --output-dir="dist" `
+          --output-filename="$outputName" `
           --noinclude-setuptools-mode=allow `
           --noinclude-pytest-mode=allow `
           --no-pyi-file `
           --no-debug `
           --lto=yes `
+          --remove-output `
           gptcomet/__main__.py
 
           echo "Nuitka build completed"
           echo "Checking dist directory contents:"
-          Get-ChildItem dist -Recurse | Format-Table Name, Length, LastWriteTime
+          Get-ChildItem dist -Recurse | Format-Table FullName, Length, LastWriteTime
 
-      # Windows Test
+      # Windows Test - 简化的测试步骤
       - name: Test built executable (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
@@ -104,15 +107,12 @@ jobs:
 
           if (Test-Path $exePath) {
               echo "Found executable at: $exePath"
-              echo "File details:"
-              Get-Item $exePath | Format-List
-
               echo "Attempting to run executable..."
               & $exePath --version
           } else {
-              echo "ERROR: Executable not found at expected path: $exePath"
+              echo "ERROR: Executable not found at path: $exePath"
               echo "Directory contents:"
-              Get-ChildItem dist -Recurse
+              Get-ChildItem "dist" -Recurse | Format-Table FullName, Length, LastWriteTime
               exit 1
           }
 
@@ -123,9 +123,11 @@ jobs:
           echo "Starting Nuitka build for Unix..."
           echo "Current directory: $(pwd)"
 
+          # 清理并创建 dist 目录
+          rm -rf dist
           mkdir -p dist
 
-          pdm run nuitka \
+          pdm run python -m nuitka \
             --standalone \
             --onefile \
             --nofollow-imports \
@@ -135,13 +137,14 @@ jobs:
             --include-module=prompt_toolkit \
             --include-module=rich \
             --include-package=gptcomet \
-            --output-dir=dist \
-            --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }} \
+            --output-dir="dist" \
+            --output-filename="gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}" \
             --noinclude-setuptools-mode=allow \
             --noinclude-pytest-mode=allow \
             --no-pyi-file \
             --no-debug \
             --lto=yes \
+            --remove-output \
             gptcomet/__main__.py
 
           echo "Nuitka build completed"
@@ -157,16 +160,11 @@ jobs:
 
           if [ -f "$EXECUTABLE" ]; then
               echo "Found executable at: $EXECUTABLE"
-              echo "File details:"
-              ls -l "$EXECUTABLE"
-
-              echo "Setting executable permissions..."
               chmod +x "$EXECUTABLE"
-
               echo "Attempting to run executable..."
               "$EXECUTABLE" --version
           else
-              echo "ERROR: Executable not found at expected path: $EXECUTABLE"
+              echo "ERROR: Executable not found at: $EXECUTABLE"
               echo "Directory contents:"
               ls -la dist/
               exit 1
