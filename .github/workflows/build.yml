@@ -70,13 +70,18 @@ jobs:
           --include-package=gptcomet `
           --disable-console `
           --output-dir=dist `
-          --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }} `
+          --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/} `
           --noinclude-setuptools-mode=allow `
           --noinclude-pytest-mode=allow `
           --no-pyi-file `
           --no-debug `
           --lto=yes `
           gptcomet/__main__.py
+
+      - name: Test built executable (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          ./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/}.exe --version
 
       - name: Build with Nuitka (Unix)
         if: matrix.platform != 'windows'
@@ -93,7 +98,7 @@ jobs:
             --include-package=gptcomet \
             --disable-console \
             --output-dir=dist \
-            --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }} \
+            --output-filename=gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/} \
             --noinclude-setuptools-mode=allow \
             --noinclude-pytest-mode=allow \
             --no-pyi-file \
@@ -101,11 +106,17 @@ jobs:
             --lto=yes \
             gptcomet/__main__.py
 
+      - name: Test built executable (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          chmod +x ./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/}
+          ./dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/} --version
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gptcomet-${{ matrix.platform }}-${{ matrix.arch }}
-          path: dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}*
+          name: gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/}
+          path: dist/gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${GITHUB_REF#refs/tags/}*
 
   release:
     needs: build
