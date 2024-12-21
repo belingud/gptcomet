@@ -110,16 +110,54 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
     steps:
+      # download all artifacts
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
 
+      # list contents
+      - name: List contents of dist
+        run: ls -al dist/
+
+      # get version
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      # generate release notes
+      - name: Generate Release Notes
+        run: |
+          echo "# Release ${{ steps.get_version.outputs.VERSION }}" > release_notes.md
+          echo "" >> release_notes.md
+          echo "## What's Changed" >> release_notes.md
+          echo "* Add your release notes here" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## Artifacts" >> release_notes.md
+          echo "* Windows (x64)" >> release_notes.md
+          echo "* macOS (x64, arm64)" >> release_notes.md
+          echo "* Linux (x64, arm64)" >> release_notes.md
+
+      # create GitHub Release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: dist/gptcomet-*
+          body_path: release_notes.md
+          draft: false        # no draft
+          prerelease: false   # no prerelease
+          generate_release_notes: true  # generate release notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # notification
+      - name: Notification
+        if: success()
+        run: |
+          echo "Release ${{ steps.get_version.outputs.VERSION }} has been published successfully!"
+  
