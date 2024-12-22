@@ -182,12 +182,23 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
+          path: artifacts
           merge-multiple: true
 
-      - name: List contents of dist
+      - name: Debug file structure
         run: |
-          echo "Listing contents of dist directory:"
+          echo "Current directory structure:"
+          pwd
+          ls -R
+          echo "\nContents of artifacts directory:"
+          ls -la artifacts/ || echo "artifacts directory not found"
+
+      - name: Prepare release files
+        run: |
+          mkdir -p dist
+          # Move all executable files to dist directory
+          find artifacts -type f -name "gptcomet-*" -exec mv {} dist/ \;
+          echo "\nContents of dist directory after moving files:"
           ls -la dist/
 
       - name: Get version
@@ -209,7 +220,6 @@ jobs:
           # Append artifacts information
           echo "" >> release_notes.md
           echo "## Artifacts" >> release_notes.md
-          echo "* Windows (x64)" >> release_notes.md
           echo "* macOS (x64, arm64)" >> release_notes.md
           echo "* Linux (x64, arm64)" >> release_notes.md
 
@@ -219,7 +229,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/gptcomet-*
+          files: dist/*
           body_path: release_notes.md
           draft: false
           prerelease: false
