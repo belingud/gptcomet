@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
-            platform: windows
-            arch: amd64
+          # - os: windows-latest
+          #   platform: windows
+          #   arch: amd64
           - os: macos-13
             platform: macos
             arch: amd64
