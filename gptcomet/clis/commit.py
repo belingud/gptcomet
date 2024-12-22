@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal, Optional, cast
 
 import click
-import httpx
+import requests
 import typer
 from git import (
     Commit,
@@ -362,8 +362,8 @@ def entry(
     except (
         KeyNotFound,
         GitNoStagedChanges,
-        httpx.HTTPStatusError,
-        httpx.TimeoutException,
+        requests.RequestException,
+        requests.Timeout,
     ) as error:
         console.print(stylize(str(error), Colors.YELLOW))
         raise typer.Exit(1) from None

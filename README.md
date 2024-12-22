@@ -70,7 +70,6 @@ $ pipx install gptcomet
   installed package gptcomet 0.0.3, installed using Python 3.12.3
   These apps are now globally available
   - gmsg
-  - gptcomet
 done! ✨ 🌟 ✨
 ```
 
@@ -78,6 +77,39 @@ Install by `uv`
 
 ```shell
 uv tool install gptcomet
+Resolved 29 packages in 14.16s
+Prepared 1 package in 58ms
+Installed 29 packages in 56ms
+ + anyio==4.7.0
+ + attrs==24.3.0
+ + boltons==24.1.0
+ + certifi==2024.12.14
+ + click==8.1.7
+ + face==24.0.0
+ + gitdb==4.0.11
+ + gitpython==3.1.43
+ + glom==24.11.0
+ + gptcomet==0.1.3
+ + h11==0.14.0
+ + httpcore==1.0.7
+ + httpx==0.28.1
+ + idna==3.10
+ + markdown-it-py==3.0.0
+ + mdurl==0.1.2
+ + orjson==3.10.12
+ + prompt-toolkit==3.0.48
+ + pygments==2.18.0
+ + rich==13.9.4
+ + ruamel-yaml==0.18.6
+ + ruamel-yaml-clib==0.2.12
+ + shellingham==1.5.4
+ + smmap==5.0.1
+ + sniffio==1.3.1
+ + socksio==1.0.0
+ + typer==0.15.1
+ + typing-extensions==4.12.2
+ + wcwidth==0.2.13
+Installed 1 executable: gmsg
 ```
 
 ## Usage

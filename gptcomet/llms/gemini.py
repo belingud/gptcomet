@@ -69,8 +69,8 @@ class GeminiLLM(BaseLLM):
         payload = self.format_messages(message, history)
         logger.debug("Sending request...")
 
-        with self.managed_client() as client:
-            response = client.post(url, json=payload, headers=headers)
+        with self.managed_session() as session:
+            response = session.post(url, json=payload, headers=headers, timeout=self.timeout)
             logger.debug(f"Request payload: {payload}")
             logger.debug(f"Response: {response.json()}")
             response.raise_for_status()

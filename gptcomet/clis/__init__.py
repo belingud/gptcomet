@@ -20,7 +20,8 @@ app.command("newprovider")(provider.entry)
 
 def version_callback(value: bool):
     if value:
-        typer.echo(f"GPTComet Version: {__version__}")
+        typer.echo("GPTComet: AI powered git commit message generator")
+        typer.echo(f"Version: {__version__}")
         raise typer.Exit()
 
 

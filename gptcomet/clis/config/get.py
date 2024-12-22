@@ -1,6 +1,6 @@
+import json
 from typing import Annotated, Any
 
-import orjson
 import typer
 
 from gptcomet.config_manager import ConfigManager, get_config_manager
@@ -23,7 +23,7 @@ def entry(
         if isinstance(value, (dict, list)) or "api_key" in key:
             value = mask_api_keys(value)
         styled_key: str = typer.style(key, fg=typer.colors.GREEN)
-        v: str = orjson.dumps(value, option=orjson.OPT_INDENT_2).decode("utf-8")
+        v: str = json.dumps(value, indent=2)
         typer.echo(f"{styled_key}: {typer.style(v, fg=typer.colors.GREEN)}")
     except ValueError as e:
         typer.echo(f"Error: {e!s}")

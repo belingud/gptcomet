@@ -1,5 +1,46 @@
 
 ---
+## [0.1.4](https://github.com/belingud/gptcomet/compare/v0.1.3..v0.1.4) - 2024-12-22
+
+### 🐛 Bug Fixes
+
+- handle NoSuchProvider error in config - ([50a6f8d](https://github.com/belingud/gptcomet/commit/50a6f8d5aeaf93b66932b438c6e14e93bd8a91fa)) - belingud
+
+### 🚜 Refactor
+
+- remove try/except block in create_provider_config - ([73476a8](https://github.com/belingud/gptcomet/commit/73476a81769e48041837d2b9356b520b2e7c42d3)) - belingud
+
+### 🎨 Styling
+
+- fix spacing in commit message template - ([10221bd](https://github.com/belingud/gptcomet/commit/10221bdc1db7486f88b600164474d78212ad326f)) - belingud
+
+### 🧪 Testing
+
+- use requests and fix test assertions - ([bc2eba9](https://github.com/belingud/gptcomet/commit/bc2eba9628dea5c1e4f5281f5458697cae2d0719)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- comment out windows build in github action - ([6898774](https://github.com/belingud/gptcomet/commit/68987743de25af7362f5488fd4f522d0b83914ee)) - belingud
+- simplify windows build workflow - ([651273e](https://github.com/belingud/gptcomet/commit/651273ef79795410908b544f4998e659280a0551)) - belingud
+- improve build workflow with Nuitka - ([012d4ff](https://github.com/belingud/gptcomet/commit/012d4ffa31dca7d8a68f55cafac1e712d0f2a521)) - belingud
+- Improve build and release workflow - ([ee1122e](https://github.com/belingud/gptcomet/commit/ee1122e238d32daaf38359be397a6c9893a236b1)) - belingud
+- update release file pattern - ([06be8e1](https://github.com/belingud/gptcomet/commit/06be8e19ba70b76b0b5f2071d976d97935965b73)) - belingud
+- use github.ref_name for build output - ([b237421](https://github.com/belingud/gptcomet/commit/b237421a25b69fceab6fed9345847bd5ec763b4a)) - belingud
+- add tag to build output and test executable - ([d19f078](https://github.com/belingud/gptcomet/commit/d19f078ae2f1bf0798e333180e0c7e6f1237d885)) - belingud
+- use git-cliff to generate release notes - ([06837fc](https://github.com/belingud/gptcomet/commit/06837fcd9bf4fc57a31dab3242ad247e7eed4627)) - belingud
+- add release notes generation and notification - ([f04074e](https://github.com/belingud/gptcomet/commit/f04074e7781524442109fce5a820ca5dca2a3051)) - belingud
+- format nuitka command - ([4f38133](https://github.com/belingud/gptcomet/commit/4f381331a80ea846fe37d549889b48c3e72242ab)) - belingud
+- remove unused dev and build dependencies - ([3815e98](https://github.com/belingud/gptcomet/commit/3815e988032a9d5744134e02d78de53af5a77508)) - belingud
+- add build workflow for executables - ([c9ed91a](https://github.com/belingud/gptcomet/commit/c9ed91a706799f04ff38680feb215e30cda02f71)) - belingud
+- update imports and build system, replace httpx with requests, modify config and LLM handling - ([a88124d](https://github.com/belingud/gptcomet/commit/a88124dc1e3afc695bd31a3158f6ad1c14b2eea2)) - belingud
+- bump version to 0.1.3 - ([123ba6a](https://github.com/belingud/gptcomet/commit/123ba6accdd6e3e4804f9eb67d2844948d9ea87a)) - belingud
+
+### Build
+
+- Add nuitka build, update publish, uv install docs - ([9d1d2b0](https://github.com/belingud/gptcomet/commit/9d1d2b098c430e9ea47ea2b6486ffe0f2b36ba81)) - belingud
+
+
+---
 ## [0.1.3](https://github.com/belingud/gptcomet/compare/v0.1.1..v0.1.3) - 2024-12-19
 
 > !Important
