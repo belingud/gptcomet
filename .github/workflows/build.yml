@@ -201,36 +201,10 @@ jobs:
           echo "\nContents of dist directory after moving files:"
           ls -la dist/
 
-      - name: Get version
-        id: get_version
-        run: echo "VERSION=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install git-cliff
-        uses: kenji-miyake/setup-git-cliff@v1
-
-      - name: Generate Release Notes
-        run: |
-          # Generate changelog for the current tag
-          git cliff --current > release_notes.md
-
-          # Append artifacts information
-          echo "" >> release_notes.md
-          echo "## Artifacts" >> release_notes.md
-          echo "* macOS (x64, arm64)" >> release_notes.md
-          echo "* Linux (x64, arm64)" >> release_notes.md
-
-          echo "Generated release notes:"
-          cat release_notes.md
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*
-          body_path: release_notes.md
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -240,5 +214,5 @@ jobs:
       - name: Notification
         if: success()
         run: |
-          echo "Release ${{ steps.get_version.outputs.VERSION }} has been published successfully!"
+          echo "Release ${{ github.ref_name }} has been published successfully!"
           echo "Artifacts can be found in the GitHub release page."
