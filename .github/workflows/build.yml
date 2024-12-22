@@ -182,45 +182,29 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
+          path: artifacts
           merge-multiple: true
 
-      - name: List contents of dist
+      - name: Debug file structure
         run: |
-          echo "Listing contents of dist directory:"
+          echo "Current directory structure:"
+          pwd
+          ls -R
+          echo "\nContents of artifacts directory:"
+          ls -la artifacts/ || echo "artifacts directory not found"
+
+      - name: Prepare release files
+        run: |
+          mkdir -p dist
+          # Move all executable files to dist directory
+          find artifacts -type f -name "gptcomet-*" -exec mv {} dist/ \;
+          echo "\nContents of dist directory after moving files:"
           ls -la dist/
-
-      - name: Get version
-        id: get_version
-        run: echo "VERSION=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install git-cliff
-        uses: kenji-miyake/setup-git-cliff@v1
-
-      - name: Generate Release Notes
-        run: |
-          # Generate changelog for the current tag
-          git cliff --current > release_notes.md
-
-          # Append artifacts information
-          echo "" >> release_notes.md
-          echo "## Artifacts" >> release_notes.md
-          echo "* Windows (x64)" >> release_notes.md
-          echo "* macOS (x64, arm64)" >> release_notes.md
-          echo "* Linux (x64, arm64)" >> release_notes.md
-
-          echo "Generated release notes:"
-          cat release_notes.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/gptcomet-*
-          body_path: release_notes.md
+          files: dist/*
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -230,5 +214,5 @@ jobs:
       - name: Notification
         if: success()
         run: |
-          echo "Release ${{ steps.get_version.outputs.VERSION }} has been published successfully!"
+          echo "Release ${{ github.ref_name }} has been published successfully!"
           echo "Artifacts can be found in the GitHub release page."

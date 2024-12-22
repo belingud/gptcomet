@@ -51,6 +51,7 @@ Documentation = "https://github.com/belingud/gptcomet"
 
 [project.scripts]
 gmsg = "gptcomet.clis.__main__:app"
+gptcomet = "gptcomet.clis.__main__:app"
 
 [build-system]
 requires = ["hatchling"]
