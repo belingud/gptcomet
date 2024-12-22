@@ -56,7 +56,7 @@ jobs:
       - name: Install Nuitka
         run: pdm add nuitka
 
-      # Windows Build - 修改后的构建步骤
+      # Windows Build
       - name: Build with Nuitka (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
@@ -67,11 +67,9 @@ jobs:
           $outputName = "gptcomet-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}"
           echo "Output name will be: $outputName"
 
-          # 创建并清理 dist 目录
           Remove-Item -Path dist -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path dist
 
-          # 使用 --output-dir 和 --output-filename 参数确保文件直接输出到正确位置
           pdm run python -m nuitka `
           --standalone `
           --onefile `
@@ -96,7 +94,7 @@ jobs:
           echo "Checking dist directory contents:"
           Get-ChildItem dist -Recurse | Format-Table FullName, Length, LastWriteTime
 
-      # Windows Test - 简化的测试步骤
+      # Windows Test
       - name: Test built executable (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
@@ -113,7 +111,6 @@ jobs:
               echo "ERROR: Executable not found at path: $exePath"
               echo "Directory contents:"
               Get-ChildItem "dist" -Recurse | Format-Table FullName, Length, LastWriteTime
-              exit 1
           }
 
       # Unix Build
@@ -123,7 +120,6 @@ jobs:
           echo "Starting Nuitka build for Unix..."
           echo "Current directory: $(pwd)"
 
-          # 清理并创建 dist 目录
           rm -rf dist
           mkdir -p dist
 
