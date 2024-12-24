@@ -9,32 +9,32 @@
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-    - [Overview](#overview)
-    - [Features](#features)
-    - [Installation](#installation)
-    - [Usage](#usage)
-    - [Setup](#setup)
-        - [Configuration Methods](#configuration-methods)
-        - [Provider Setup Guide](#provider-setup-guide)
-            - [OpenAI](#openai)
-            - [Gemini](#gemini)
-            - [Claude/Anthropic](#claudeanthropic)
-            - [Vertex](#vertex)
-            - [Azure](#azure)
-            - [Ollama](#ollama)
-            - [Other Supported Providers](#other-supported-providers)
-        - [Manual Provider Setup](#manual-provider-setup)
-    - [Commands](#commands)
-    - [Configuration](#configuration)
-        - [file_ignore](#file_ignore)
-        - [provider](#provider)
-        - [output](#output)
-        - [console](#console)
-    - [Supported Keys](#supported-keys)
-    - [Example](#example)
-    - [Development](#development)
-    - [License](#license)
-    - [Contact](#contact)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Setup](#setup)
+    - [Configuration Methods](#configuration-methods)
+    - [Provider Setup Guide](#provider-setup-guide)
+      - [OpenAI](#openai)
+      - [Gemini](#gemini)
+      - [Claude/Anthropic](#claudeanthropic)
+      - [Vertex](#vertex)
+      - [Azure](#azure)
+      - [Ollama](#ollama)
+      - [Other Supported Providers](#other-supported-providers)
+    - [Manual Provider Setup](#manual-provider-setup)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
+    - [file\_ignore](#file_ignore)
+    - [provider](#provider)
+    - [output](#output)
+    - [console](#console)
+  - [Supported Keys](#supported-keys)
+  - [Example](#example)
+  - [Development](#development)
+  - [Contact](#contact)
+  - [License](#license)
 
 <!-- /TOC -->
 
@@ -76,40 +76,37 @@ done! ✨ 🌟 ✨
 Install by `uv`
 
 ```shell
-uv tool install gptcomet
-Resolved 29 packages in 14.16s
-Prepared 1 package in 58ms
-Installed 29 packages in 56ms
- + anyio==4.7.0
+uv tool install gptcomet --index https://pypi.org/simple
+Resolved 25 packages in 9ms
+   Built ruamel-yaml-clib==0.2.12
+Prepared 18 packages in 12.53s
+Installed 25 packages in 28ms
  + attrs==24.3.0
  + boltons==24.1.0
  + certifi==2024.12.14
- + click==8.1.7
+ + charset-normalizer==3.4.0
+ + click==8.1.8
  + face==24.0.0
  + gitdb==4.0.11
  + gitpython==3.1.43
  + glom==24.11.0
- + gptcomet==0.1.3
- + h11==0.14.0
- + httpcore==1.0.7
- + httpx==0.28.1
+ + gptcomet==0.1.4
  + idna==3.10
  + markdown-it-py==3.0.0
  + mdurl==0.1.2
- + orjson==3.10.12
  + prompt-toolkit==3.0.48
  + pygments==2.18.0
+ + requests==2.32.3
  + rich==13.9.4
  + ruamel-yaml==0.18.6
  + ruamel-yaml-clib==0.2.12
  + shellingham==1.5.4
  + smmap==5.0.1
- + sniffio==1.3.1
- + socksio==1.0.0
  + typer==0.15.1
  + typing-extensions==4.12.2
+ + urllib3==2.3.0
  + wcwidth==0.2.13
-Installed 1 executable: gmsg
+Installed 2 executables: gmsg, gptcomet
 ```
 
 ## Usage
@@ -509,10 +506,12 @@ Or use `pdm` directly `pdm install`.
 
 Then, you can submit a pull request.
 
+## Contact
+
+If you have any questions or suggestions, feel free to contact.
+
 ## License
 
 GPTComet is licensed under the MIT License.
 
-## Contact
-
-If you have any questions or suggestions, feel free to contact.
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbelingud%2Fgptcomet.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbelingud%2Fgptcomet?ref=badge_large&issueType=license)
