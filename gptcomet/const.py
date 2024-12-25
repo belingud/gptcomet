@@ -1,7 +1,7 @@
 GPTCOMET_PRE = "[GPTComet]"
 
 DEFAULT_API_BASE = "https://api.openai.com/v1"
-DEFAULT_MODEL = "text-davinci-003"
+DEFAULT_MODEL = "gpt-4o"
 DEFAULT_RETRIES = 2
 
 # GPTComet config keys
