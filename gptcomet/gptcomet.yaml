@@ -25,10 +25,11 @@ console:
 openai:
   api_base: "https://api.openai.com/v1"  # GPT base URL, default openai api
   api_key: "sk-xxxxxx"
-  model: "text-davinci-003"
+  model: "gpt-4o"
   retries: 2
+  timeout: 30
   proxy: ""
-  max_tokens: 2048
+  max_tokens: 1024
   top_p: 0.7
   temperature: 0.7
   frequency_penalty: 0
