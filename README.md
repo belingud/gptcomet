@@ -66,10 +66,11 @@ pipx install gptcomet
 After installing GPTComet, you will have two commands: `gptcomet` and `gmsg`.
 
 ```shell
-$ pipx install gptcomet
-  installed package gptcomet 0.0.3, installed using Python 3.12.3
+pipx install gptcomet
+  installed package gptcomet 0.1.4, installed using Python 3.12.3
   These apps are now globally available
-  - gmsg
+    - gmsg
+    - gptcomet
 done! ✨ 🌟 ✨
 ```
 
@@ -405,9 +406,10 @@ output:
   rich_template: "<title>:<summary>\n\n<detail>"
 ```
 
-You can set `lang` to change the language of the commit message.
+You can set `rich_template` to change the template of the rich commit message,
+and set `lang` to change the language of the commit message.
 
-Supported languages:
+### Supported languages
 
 * `en`: English
 * `zh-cn`: Simplified Chinese
@@ -444,8 +446,6 @@ Supported languages:
 * `sl`: Slovenian
 * `mk`: Macedonian
 * `lv`: Latvian
-
-You can set `rich_template` to change the template of the rich commit message.
 
 ### console
 
