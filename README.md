@@ -367,7 +367,7 @@ openai:
   top_p: 0.7
   frequency_penalty: 0
   extra_headers: {}
-  answer_path: choices[0].message.content
+  answer_path: choices.0.message.content
   completion_path: /chat/completions
 ```
 
