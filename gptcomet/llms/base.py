@@ -92,7 +92,10 @@ class BaseLLM(ABC):
 
     def build_url(self) -> str:
         """Build the API URL."""
-        return f"{self.api_base}/{self.completion_path}"
+        completion_path = self.completion_path
+        if completion_path:
+            completion_path = completion_path.lstrip("/")
+        return f"{self.api_base.rstrip('/')}/{completion_path}"
 
     def build_headers(self) -> dict[str, str]:
         """Build request headers."""
@@ -131,6 +134,8 @@ class BaseLLM(ABC):
         """Make a request to the API."""
         url = self.build_url()
         headers = self.build_headers()
+        logger.debug(f"Request URL: {url}")
+        logger.debug(f"Request headers: {headers}")
         payload = self.format_messages(message, history)
         logger.debug("Sending request...")
 

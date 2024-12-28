@@ -11,6 +11,8 @@ class CohereLLM(BaseLLM):
 
         self.api_base = config.get("api_base") or "https://api.cohere.ai/v1"
         self.model = config.get("model") or "command-r"
+        self.answer_path = config.get("answer_path") or "text"
+        self.completion_path = config.get("completion_path") or "/chat"
 
     def build_headers(self):
         return {

@@ -1,9 +1,9 @@
 from typing import Any, Optional
 
-from .base import BaseLLM
+from .openai import OpenaiLLM
 
 
-class TongyiLLM(BaseLLM):
+class TongyiLLM(OpenaiLLM):
     """Tongyi (通义) LLM provider implementation."""
 
     def __init__(self, config: dict[str, Any]):
