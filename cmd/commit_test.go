@@ -5,9 +5,9 @@ import (
 	"context"
 	"net/http"
 	"os"
-	"testing"
 	"os/exec"
 	"path/filepath"
+	"testing"
 
 	"github.com/belingud/go-gptcomet/internal/git"
 	"github.com/belingud/go-gptcomet/internal/testutils"
@@ -42,18 +42,18 @@ func TestNewCommitCmd(t *testing.T) {
 }
 
 func TestCommitCmd_Git(t *testing.T) {
-    gitPath, err := exec.LookPath("git")
-    if err != nil || !isExecutable(gitPath) {
-        t.Skip("git command not found or not executable")
-    }
-    testCommitCmd(t, false)
+	gitPath, err := exec.LookPath("git")
+	if err != nil || !isExecutable(gitPath) {
+		t.Skip("git command not found or not executable")
+	}
+	testCommitCmd(t, false)
 }
 
 func TestCommitCmd_SVN(t *testing.T) {
-    if _, err := exec.LookPath("svnadmin"); err != nil {
-        t.Skip("svnadmin command not found, skipping test")
-    }
-    testCommitCmd(t, true)
+	if _, err := exec.LookPath("svnadmin"); err != nil {
+		t.Skip("svnadmin command not found, skipping test")
+	}
+	testCommitCmd(t, true)
 }
 
 func testCommitCmd(t *testing.T, useSVN bool) {
@@ -119,23 +119,23 @@ func setupTestRepo(t *testing.T, vcsType git.VCSType) (git.VCS, string, func()) 
 	require.NoError(t, err)
 
 	if vcsType == git.Git {
-        gitPath, err := exec.LookPath("git")
-        if err != nil || !isExecutable(gitPath) {
-            t.Skip("git command not found or not executable")
-        }
-        
-        // 确保使用绝对路径执行git命令
-        gitCmd := filepath.Clean(gitPath)
-        err = testutils.RunCommand(t, dir, gitCmd, "init")
+		gitPath, err := exec.LookPath("git")
+		if err != nil || !isExecutable(gitPath) {
+			t.Skip("git command not found or not executable")
+		}
+
+		// 确保使用绝对路径执行git命令
+		gitCmd := filepath.Clean(gitPath)
+		err = testutils.RunCommand(t, dir, gitCmd, "init")
 		require.NoError(t, err)
 		err = testutils.RunCommand(t, dir, gitCmd, "config", "user.email", "test@example.com")
 		require.NoError(t, err)
 		err = testutils.RunCommand(t, dir, gitCmd, "config", "user.name", "Test User")
 		require.NoError(t, err)
 	} else {
-        if _, err := exec.LookPath("svnadmin"); err != nil {
-            t.Skip("svnadmin command not found")
-        }
+		if _, err := exec.LookPath("svnadmin"); err != nil {
+			t.Skip("svnadmin command not found")
+		}
 		err = testutils.RunCommand(t, dir, "svnadmin", "create", "repo")
 		require.NoError(t, err)
 		err = testutils.RunCommand(t, dir, "svn", "checkout", "file://"+dir+"/repo", dir)
@@ -150,64 +150,64 @@ func setupTestRepo(t *testing.T, vcsType git.VCSType) (git.VCS, string, func()) 
 }
 
 func isExecutable(path string) bool {
-    info, err := os.Stat(path)
-    if err != nil {
-        return false
-    }
-    return (info.Mode() & 0111) != 0
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return (info.Mode() & 0111) != 0
 }
 
 func TestCommitCmd_NoStagedChanges(t *testing.T) {
-    testCases := []struct {
-        name    string
-        vcsType git.VCSType
-        setup   func(t *testing.T) bool
-    }{
-        {
-            name:    "Git",
-            vcsType: git.Git,
-            setup: func(t *testing.T) bool {
-                if _, err := exec.LookPath("git"); err != nil {
-                    t.Skip("git command not found")
-                    return false
-                }
-                return true
-            },
-        },
-        {
-            name:    "SVN",
-            vcsType: git.SVN,
-            setup: func(t *testing.T) bool {
-                if _, err := exec.LookPath("svnadmin"); err != nil {
-                    t.Skip("svnadmin command not found")
-                    return false
-                }
-                return true
-            },
-        },
-    }
+	testCases := []struct {
+		name    string
+		vcsType git.VCSType
+		setup   func(t *testing.T) bool
+	}{
+		{
+			name:    "Git",
+			vcsType: git.Git,
+			setup: func(t *testing.T) bool {
+				if _, err := exec.LookPath("git"); err != nil {
+					t.Skip("git command not found")
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name:    "SVN",
+			vcsType: git.SVN,
+			setup: func(t *testing.T) bool {
+				if _, err := exec.LookPath("svnadmin"); err != nil {
+					t.Skip("svnadmin command not found")
+					return false
+				}
+				return true
+			},
+		},
+	}
 
-    for _, tc := range testCases {
-        t.Run(tc.name, func(t *testing.T) {
-            if !tc.setup(t) {
-                return
-            }
-            _, _, cleanup := setupTestRepo(t, tc.vcsType)
-            defer cleanup()
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if !tc.setup(t) {
+				return
+			}
+			_, _, cleanup := setupTestRepo(t, tc.vcsType)
+			defer cleanup()
 
-            cmd := NewCommitCmd()
-            if tc.vcsType == git.SVN {
-                cmd.SetArgs([]string{"--svn"})
-            }
+			cmd := NewCommitCmd()
+			if tc.vcsType == git.SVN {
+				cmd.SetArgs([]string{"--svn"})
+			}
 
-            var buf bytes.Buffer
-            cmd.SetOut(&buf)
+			var buf bytes.Buffer
+			cmd.SetOut(&buf)
 
-            err := cmd.Execute()
-            require.Error(t, err)
-            assert.Contains(t, err.Error(), "no staged changes found")
-        })
-    }
+			err := cmd.Execute()
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "no staged changes found")
+		})
+	}
 }
 
 // Mock LLM implementation for testing

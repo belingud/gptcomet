@@ -109,20 +109,20 @@ development. Please note this documentation assumes you already have
 
    .. code-block:: bash
 
-        make check
+        just check
 
 | 8. Now, validate that all unit tests are passing:
 
    .. code-block:: bash
 
-        make test
+        just test
 
 | 9. Before raising a pull request you should also run tox. This will run the
    tests across different versions of Python:
 
    .. code-block:: bash
 
-        tox
+        pdm run tox
 
    This requires you to have multiple versions of python installed.
    This step is also triggered in the CI/CD pipeline, so you could also choose to skip this

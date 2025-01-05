@@ -30,6 +30,7 @@
     - [Manual Provider Setup](#manual-provider-setup)
   - [Commands](#commands)
   - [Configuration](#configuration)
+    - [Supported Configuration Keys](#supported-configuration-keys)
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
     - [output](#output)
@@ -126,25 +127,25 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
 ```bash
 gmsg newprovider
 
-    Select Provider           
-                              
-  > 1. azure                  
-    2. chatglm                
-    3. claude                 
-    4. cohere                 
-    5. deepseek               
-    6. gemini                 
-    7. kimi                   
-    8. mistral                
-    9. ollama                 
-    10. openai                
-    11. sambanova             
-    12. silicon               
-    13. tongyi                
-    14. vertex                
-    15. xai                   
-    16. Input Manually        
-                              
+    Select Provider
+
+  > 1. azure
+    2. chatglm
+    3. claude
+    4. cohere
+    5. deepseek
+    6. gemini
+    7. kimi
+    8. mistral
+    9. ollama
+    10. openai
+    11. sambanova
+    12. silicon
+    13. tongyi
+    14. vertex
+    15. xai
+    16. Input Manually
+
     ↑/k up • ↓/j down • ? more
 ```
 
@@ -154,7 +155,7 @@ OpenAI api key page: https://platform.openai.com/api-keys
 
 ```shell
 gmsg newprovider
-                         
+
 Selected provider: openai
 Configure provider:
 
@@ -164,7 +165,7 @@ Previous inputs:
   Enter max tokens: 1024
 
 Enter Enter model name (default: gpt-4o):
-> gpt-4o                                   
+> gpt-4o
 
 
 Provider openai configured successfully!
@@ -185,7 +186,7 @@ Previous inputs:
   Enter max tokens: 1024
 
 Enter Enter model name (default: gemini-1.5-flash):
-> gemini-2.0-flash-exp                     
+> gemini-2.0-flash-exp
 
 Provider gemini already has a configuration. Do you want to overwrite it? (y/N): y
 
@@ -213,7 +214,7 @@ Previous inputs:
   Enter model name: gemini-1.5-pro
 
 Enter Enter Google Cloud project ID:
-> test-project                             
+> test-project
 
 
 Provider vertex configured successfully!
@@ -223,7 +224,7 @@ Provider vertex configured successfully!
 
 ```shell
 gmsg newprovider
-                        
+
 Selected provider: azure
 Configure provider:
 
@@ -235,7 +236,7 @@ Previous inputs:
   Enter max tokens: 1024
 
 Enter Enter deployment name (default: gpt-4o):
-> gpt-4o                                   
+> gpt-4o
 
 
 Provider azure configured successfully!
@@ -253,7 +254,7 @@ Previous inputs:
   Enter max tokens: 1024
 
 Enter Enter model name (default: llama2):
-> llama2                                   
+> llama2
 
 
 Provider ollama configured successfully!
@@ -294,15 +295,26 @@ Enter max tokens [1024]:
 The following are the available commands for GPTComet:
 
 -   `gmsg config`: Config manage commands group.
-    -   `set`: Set a configuration value.
-    -   `get`: Get a configuration value.
-    -   `list`: List all configuration values.
-    -   `reset`: Reset the configuration to its default values.
-    -   `keys`: List all supported keys.
-    -   `append`: Append a value to a configuration key. (List value only, like `fileignore`)
-    -   `remove`: Remove a value from a configuration key. (List value only, like `fileignore`)
+    -   `get <key>`: Get the value of a configuration key.
+    -   `list`: List the entire configuration content.
+    -   `reset`: Reset the configuration to default values (optionally reset only the prompt section with `--prompt`).
+    -   `set <key> <value>`: Set a configuration value.
+    -   `path`: Get the configuration file path.
+    -   `remove <key> [value]`: Remove a configuration key or a value from a list. (List value only, like `fileignore`)
+    -   `append <key> <value>`: Append a value to a list configuration.(List value only, like `fileignore`)
+    -   `keys`: List all supported configuration keys.
 -   `gmsg commit`: Generate commit message by changes/diff.
+    -   `--svn`: Generate commit message for svn.
+    -   `--dry-run`: Dry run the command without actually generating the commit message.
+    -   `-y/--yes`: Skip the confirmation prompt.
 -   `gmsg newprovider`: Add a new provider.
+
+Global flags:
+
+```shell
+  -c, --config string   Config file path
+  -d, --debug           Enable debug mode
+```
 
 ## Configuration
 
@@ -330,6 +342,37 @@ The configuration file for GPTComet is `gptcomet.yaml`. The file should contain 
     -   `output.lang`: The language of the commit message (default `en`).
     -   `output.rich_template`: The template for generating rich commit messages.
 
+### Supported Configuration Keys
+
+Here's a summary of the main configuration keys:
+
+| Key                            | Description                                                | Default Value                     |
+| :----------------------------- | :--------------------------------------------------------- | :-------------------------------- |
+| `provider`                     | The name of the LLM provider to use.                       | `openai`                          |
+| `file_ignore`                  | A list of file patterns to ignore in the diff.             | (See [file_ignore](#file_ignore)) |
+| `output.lang`                  | The language for commit message generation.                | `en`                              |
+| `output.rich_template`         | The template to use for rich commit messages.              | `<title>:<summary>\n\n<detail>`   |
+| `console.verbose`              | Enable verbose output.                                     | `true`                            |
+| `<provider>.api_base`          | The API base URL for the provider.                         | (Provider-specific)               |
+| `<provider>.api_key`           | The API key for the provider.                              |                                   |
+| `<provider>.model`             | The model name to use.                                     | (Provider-specific)               |
+| `<provider>.retries`           | The number of retry attempts for API requests.             | `2`                               |
+| `<provider>.proxy`             | The proxy URL to use (if needed).                          |                                   |
+| `<provider>.max_tokens`        | The maximum number of tokens to generate.                  | `2048`                            |
+| `<provider>.top_p`             | The top-p value for nucleus sampling.                      | `0.7`                             |
+| `<provider>.temperature`       | The temperature value for controlling randomness.          | `0.7`                             |
+| `<provider>.frequency_penalty` | The frequency penalty value.                               | `0`                               |
+| `<provider>.extra_headers`     | Extra headers to include in API requests (JSON string).    | `{}`                              |
+| `<provider>.completion_path`   | The API path for completion requests.                      | (Provider-specific)               |
+| `<provider>.answer_path`       | The JSON path to extract the answer from the API response. | (Provider-specific)               |
+| `prompt.brief_commit_message`  | The prompt template for generating brief commit messages.  | (See `defaults/defaults.go`)      |
+| `prompt.rich_commit_message`   | The prompt template for generating rich commit messages.   | (See `defaults/defaults.go`)      |
+| `prompt.translation`           | The prompt template for translating commit messages.       | (See `defaults/defaults.go`)      |
+
+**Note:** `<provider>` should be replaced with the actual provider name (e.g., `openai`, `gemini`, `claude`).
+
+Some providers require specific keys, such as Vertex needing project ID, location, etc.
+
 ### file_ignore
 
 The file to ignore when generating a commit. The default value is
@@ -346,7 +389,6 @@ The file to ignore when generating a commit. The default value is
 - pdm.lock
 - Pipfile.lock
 - "*.py[cod]"
-- go.mod
 - go.sum
 - uv.lock
 ```

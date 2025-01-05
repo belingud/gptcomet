@@ -72,11 +72,11 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 }
 
 type ProviderSelector struct {
-	list         list.Model
-	choice       string
-	quitting     bool
-	manualInput  textinput.Model
-	inputMode    bool
+	list        list.Model
+	choice      string
+	quitting    bool
+	manualInput textinput.Model
+	inputMode   bool
 }
 
 func NewProviderSelector(providers []string) *ProviderSelector {
@@ -113,7 +113,7 @@ func NewProviderSelector(providers []string) *ProviderSelector {
 	input.Width = defaultWidth
 
 	return &ProviderSelector{
-		list: l,
+		list:        l,
 		manualInput: input,
 	}
 }
