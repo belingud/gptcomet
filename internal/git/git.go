@@ -133,14 +133,14 @@ func ShouldIgnoreFile(file string, ignorePatterns []string) bool {
 // The function will return an empty string if there are no staged files in the repository.
 // If the git command fails, it returns a detailed error message including the exit code.
 func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager *config.Manager) (string, error) {
-	// First get staged files
-	files, err := g.GetStagedFiles(repoPath)
-	debug.Printf("Staged files: %v", files)
+	// get staged files
+	stagedFiles, err := g.GetStagedFiles(repoPath)
 	if err != nil {
 		return "", err
 	}
+	debug.Printf("Staged files: %v", stagedFiles)
 
-	// Get ignore patterns from config
+	// get ignore patterns
 	var ignorePatterns []string
 	if patterns, ok := cfgManager.Get("file_ignore"); ok {
 		if patternList, ok := patterns.([]interface{}); ok {
@@ -151,38 +151,43 @@ func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager *config.Manag
 			}
 		}
 	}
+	debug.Printf("Ignore patterns: %v", ignorePatterns)
 
-	// Filter files based on ignore patterns
-	var filteredFiles []string
-	for _, file := range files {
-		if !ShouldIgnoreFile(file, ignorePatterns) {
-			filteredFiles = append(filteredFiles, file)
+	// if no ignore patterns, return the diff as is
+	if len(ignorePatterns) == 0 {
+		cmd := exec.Command("git", "diff", "--staged", "-U2")
+		return g.runCommand(cmd, repoPath)
+	}
+
+	// filter out ignored files
+	var excludeFiles []string
+	for _, file := range stagedFiles {
+		if ShouldIgnoreFile(file, ignorePatterns) {
+			// git diff --staged -U2 -- :!file
+			excludeFiles = append(excludeFiles, ":!"+file)
 		}
 	}
-	debug.Printf("Filtered files: %v", filteredFiles)
+	debug.Printf("Files to exclude: %v", excludeFiles)
 
-	if len(filteredFiles) == 0 {
+	// return if all staged files are ignored
+	if len(excludeFiles) == len(stagedFiles) {
+		fmt.Println("All staged files are ignored")
 		return "", nil
 	}
 
-	// Get diff for filtered files
-	args := append([]string{"diff", "--staged", "-U2"}, filteredFiles...)
-	debug.Printf("Diff args: %v", args)
-	cmd := exec.Command("git", args...)
-	cmd.Dir = repoPath
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	output, err := cmd.Output()
-	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			return "", fmt.Errorf("git diff command failed with exit code %d: %w\nGit output: %s", exitError.ExitCode(), err, stderr.String())
-		}
-		return "", fmt.Errorf("failed to get diff: %w\nGit output: %s", err, stderr.String())
+	// if there are no ignored files, return the diff directly
+	if len(excludeFiles) == 0 {
+		cmd := exec.Command("git", "diff", "--staged", "-U2")
+		return g.runCommand(cmd, repoPath)
 	}
 
-	return string(output), nil
+	// git diff --staged -U2 -- :!file1 :!file2
+	args := []string{"diff", "--staged", "-U2", "--"}
+	args = append(args, excludeFiles...)
+	debug.Printf("Diff command: git %v", args)
+
+	cmd := exec.Command("git", args...)
+	return g.runCommand(cmd, repoPath)
 }
 
 // GetCurrentBranch returns the name of the current branch in the git repository
