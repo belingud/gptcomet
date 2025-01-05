@@ -287,7 +287,17 @@ func (g *GitVCS) CreateCommit(repoPath string, message string) error {
 	return err
 }
 
-// runCommand 执行命令并返回输出
+// runCommand executes a given git command in the specified repository path and returns its output.
+// It captures both stdout and stderr, returning the stdout output as a string if successful.
+// If the command fails, it returns an error that includes both the original error and stderr output.
+//
+// Parameters:
+//   - cmd: The prepared exec.Cmd to be executed
+//   - repoPath: The directory path where the command should be executed
+//
+// Returns:
+//   - string: The command's stdout output
+//   - error: Any error that occurred during command execution
 func (g *GitVCS) runCommand(cmd *exec.Cmd, repoPath string) (string, error) {
 	debug.Printf("Running command: %v", cmd.Args)
 	cmd.Dir = repoPath
