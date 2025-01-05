@@ -1,5 +1,13 @@
 
 ---
+## [0.1.6](https://github.com/belingud/gptcomet/compare/v0.1.6-dev..v0.1.6) - 2025-01-05
+
+### ⚙️ Miscellaneous Tasks
+
+- Update release workflow - ([f3778be](https://github.com/belingud/gptcomet/commit/f3778befbd6332cd5264843801b5e092c39f2df9)) - belingud
+
+
+---
 ## [0.1.5](https://github.com/belingud/gptcomet/compare/v0.1.4..v0.1.5) - 2024-12-28
 
 ### ⛰️  Features
