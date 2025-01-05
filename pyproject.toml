@@ -144,6 +144,5 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [dependency-groups]
 dev = [
-    "pre-commit>=3.8.0",
     "bump2version>=1.0.1",
 ]
