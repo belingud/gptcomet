@@ -1,6 +1,6 @@
 [project]
 name = "gptcomet"
-version = "0.1.6"
+version = "0.1.7"
 description = "GPTComet: AI-Powered Git Commit Message Generator."
 authors = [{ name = "belingud", email = "im.victor@qq.com" }]
 readme = "README.md"
@@ -144,6 +144,5 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [dependency-groups]
 dev = [
-    "pre-commit>=3.8.0",
     "bump2version>=1.0.1",
 ]
