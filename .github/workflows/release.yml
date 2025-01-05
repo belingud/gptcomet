@@ -37,21 +37,20 @@ jobs:
     needs: goreleaser
     runs-on: ubuntu-latest
     outputs:
-      is_prerelease: ${{ steps.check_tag.outputs.is_prerelease }}
+      is_dev: ${{ steps.check_tag.outputs.is_dev }}
     steps:
       - name: Check if version is prerelease
         id: check_tag
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          if [[ $VERSION =~ .*-.*$ ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          if [[ $VERSION =~ .*-dev$ ]]; then
+            echo "is_dev=true" >> $GITHUB_OUTPUT
           else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "is_dev=false" >> $GITHUB_OUTPUT
           fi
 
   python-package:
     needs: check-version
-    if: needs.check-version.outputs.is_prerelease != 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -171,7 +170,7 @@ jobs:
 
   publish:
     needs: [check-version, python-package]
-    if: needs.check-version.outputs.is_prerelease != 'true'
+    environment: ${{ needs.check-version.outputs.is_dev == 'true' && 'testpypi' || 'pypi' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -208,4 +207,10 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           echo "Publishing to PyPI"
-          twine upload final_dist/* --verbose --repository-url https://test.pypi.org/legacy/
+          if ${{ needs.check-version.outputs.is_dev }} == 'true'; then
+            echo "Publishing to TestPyPI"
+            twine upload final_dist/* --verbose --repository-url https://test.pypi.org/legacy/
+          else
+            echo "Publishing to PyPI"
+            twine upload final_dist/* --verbose
+          fi
