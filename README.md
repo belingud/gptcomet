@@ -6,6 +6,8 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 
+![](artwork/commit.gif)
+
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
@@ -29,6 +31,7 @@
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
     - [output](#output)
+    - [Supported languages](#supported-languages)
     - [console](#console)
   - [Supported Keys](#supported-keys)
   - [Example](#example)
@@ -37,76 +40,55 @@
   - [License](#license)
 
 <!-- /TOC -->
-
+<!-- /TOC -->
+<!-- /TOC -->
 ## Overview
 
-GPTComet is a Python library designed to automate the process of generating commit messages for Git repositories.
+GPTComet is a go library designed to automate the process of generating commit messages for Git repositories.
 It leverages the power of AI to create meaningful commit messages based on the changes made in the codebase.
 
 ## Features
 
-* **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
-* **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
-* **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs, such llm model and prompt.
-* **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
+-   **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
+-   **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
+-   **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs, such llm model and prompt.
+-   **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
+-   **Support for Multiple Providers**: GPTComet supports multiple providers, including OpenAI, Gemini, Claude/Anthropic, Vertex, Azure, Ollama, and others.
+-   **Support SVN and Git**: GPTComet supports both SVN and Git repositories.
 
 ## Installation
 
-To use GPTComet, you need to have Python installed on your system. You can install the library using pip:
+To use GPTComet, you can download from [Github release](https://github.com/belingud/gptcomet/releases/latest), or by install scripts:
+
+```bash
+curl -sSL https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.sh | bash
+```
+
+Windows:
+
+```powershell
+irm https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.ps1 | iex
+```
+
+If you prefer to run in python, you can install by `pip` directly, it packaged the binary files corresponding to the platform already.
 
 ```shell
 pip install gptcomet
 ```
 
-Install use `pipx` on Mac or Linux.
+Install use `pipx` or `uv` on Mac, Linux or Windows.
 
 ```shell
 pipx install gptcomet
-```
-After installing GPTComet, you will have two commands: `gptcomet` and `gmsg`.
-
-```shell
-pipx install gptcomet
-  installed package gptcomet 0.1.4, installed using Python 3.12.3
-  These apps are now globally available
-    - gmsg
-    - gptcomet
-done! ✨ 🌟 ✨
 ```
 
 Install by `uv`
 
 ```shell
-uv tool install gptcomet --index https://pypi.org/simple
-Resolved 25 packages in 9ms
-   Built ruamel-yaml-clib==0.2.12
-Prepared 18 packages in 12.53s
-Installed 25 packages in 28ms
- + attrs==24.3.0
- + boltons==24.1.0
- + certifi==2024.12.14
- + charset-normalizer==3.4.0
- + click==8.1.8
- + face==24.0.0
- + gitdb==4.0.11
- + gitpython==3.1.43
- + glom==24.11.0
- + gptcomet==0.1.4
- + idna==3.10
- + markdown-it-py==3.0.0
- + mdurl==0.1.2
- + prompt-toolkit==3.0.48
- + pygments==2.18.0
- + requests==2.32.3
- + rich==13.9.4
- + ruamel-yaml==0.18.6
- + ruamel-yaml-clib==0.2.12
- + shellingham==1.5.4
- + smmap==5.0.1
- + typer==0.15.1
- + typing-extensions==4.12.2
- + urllib3==2.3.0
- + wcwidth==0.2.13
+uv tool install gptcomet
+Resolved 1 package in 1.33s
+Installed 1 package in 8ms
+ + gptcomet==0.1.6
 Installed 2 executables: gmsg, gptcomet
 ```
 
@@ -116,10 +98,12 @@ To use gptcomet, follow these steps:
 
 1.  **Install GPTComet**: Install GPTComet through pypi.
 2.  **Configure GPTComet**: See [Setup](#setup). Configure GPTComet with your api_key and other required keys like:
-  * `provider`: The provider of the language model (default `openai`).
-  * `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
-  * `api_key`: The API key for the provider.
-  * `model`: The model used for generating commit messages (default `text-davinci-003`).
+
+-   `provider`: The provider of the language model (default `openai`).
+-   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
+-   `api_key`: The API key for the provider.
+-   `model`: The model used for generating commit messages (default `text-davinci-003`).
+
 3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg commit`.
 
 If you are using `openai` provider, and finished set `api_key`, you can run `gmsg commit` directly.
@@ -129,12 +113,40 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
 ### Configuration Methods
 
 1. **Direct Configuration**
-   - Configure directly in `~/.config/gptcomet/gptcomet.yaml`.
+
+    - Configure directly in `~/.config/gptcomet/gptcomet.yaml`.
 
 2. **Interactive Setup**
-   - Use the `gmsg newprovider` command for guided setup.
+    - Use the `gmsg newprovider` command for guided setup.
 
 ### Provider Setup Guide
+
+![](artwork/newprovider.gif)
+
+```bash
+gmsg newprovider
+
+    Select Provider           
+                              
+  > 1. azure                  
+    2. chatglm                
+    3. claude                 
+    4. cohere                 
+    5. deepseek               
+    6. gemini                 
+    7. kimi                   
+    8. mistral                
+    9. ollama                 
+    10. openai                
+    11. sambanova             
+    12. silicon               
+    13. tongyi                
+    14. vertex                
+    15. xai                   
+    16. Input Manually        
+                              
+    ↑/k up • ↓/j down • ? more
+```
 
 #### OpenAI
 
@@ -142,18 +154,20 @@ OpenAI api key page: https://platform.openai.com/api-keys
 
 ```shell
 gmsg newprovider
-You can either select one from the list or enter a custom provider name.
-  ...
-  sambanova
-> openai
-  vertex
-  Input manually
+                         
+Selected provider: openai
+Configure provider:
 
-Enter OpenAI API Base URL [https://api.openai.com/v1]:
-Enter model name [gpt-4o]:
-Enter API key: ********************************************************************************************************************************************************************
-Enter max tokens [1024]:
-[GPTComet] Provider openai configured successfully.
+Previous inputs:
+  Enter OpenAI API base: https://api.openai.com/v1
+  Enter API key: sk-abc*********************************************
+  Enter max tokens: 1024
+
+Enter Enter model name (default: gpt-4o):
+> gpt-4o                                   
+
+
+Provider openai configured successfully!
 ```
 
 #### Gemini
@@ -162,38 +176,25 @@ Gemini api key page: https://aistudio.google.com/u/1/apikey
 
 ```shell
 gmsg newprovider
-You can either select one from the list or enter a custom provider name.
-> gemini
-  ...
-  Input manually
+Selected provider: gemini
+Configure provider:
 
-Enter Gemini API base [https://generativelanguage.googleapis.com/v1beta/models]:
-Enter Gemini model [gemini-pro]: gemini-2.0-flash-exp
-Enter Gemini API key: ***************************************
-Enter max tokens [1024]: 500
-[GPTComet] Provider gemini configured successfully.
+Previous inputs:
+  Enter Gemini API base: https://generativelanguage.googleapis.com/v1beta/models
+  Enter API key: AIz************************************
+  Enter max tokens: 1024
+
+Enter Enter model name (default: gemini-1.5-flash):
+> gemini-2.0-flash-exp                     
+
+Provider gemini already has a configuration. Do you want to overwrite it? (y/N): y
+
+Provider gemini configured successfully!
 ```
 
 #### Claude/Anthropic
 
 I don't have an anthropic account yet, please see [Anthropic console](https://console.anthropic.com)
-
-```shell
-gmsg newprovider
-You can either select one from the list or enter a custom provider name.
-  gemini
-  cohere
-> claude
-  ...
-  Input manually
-
-Enter Anthropic API Base URL [https://api.anthropic.com/v1]:
-Enter model name [claude-3-5-sonnet]:
-Enter API key: ***************************************
-Enter max tokens [1024]:
-Enter Anthropic API version [2023-06-01]:
-[GPTComet] Provider claude configured successfully.
-```
 
 #### Vertex
 
@@ -201,67 +202,73 @@ Vertex console page: https://console.cloud.google.com
 
 ```shell
 gmsg newprovider
-You can either select one from the list or enter a custom provider name.
-  ...
-  openai
-> vertex
-  Input manually
+Selected provider: vertex
+Configure provider:
 
-Enter Vertex AI API Base URL [https://us-central1-aiplatform.googleapis.com/v1]:
-Enter model name [gemini-pro]:
-Enter API key: ********************************
-Enter Google Cloud project ID []: test-project-id
-Enter location (e.g., us-central1) [us-central1]:
-Enter max tokens [1024]:
-[GPTComet] Provider vertex configured successfully.
+Previous inputs:
+  Enter Vertex AI API Base URL: https://us-central1-aiplatform.googleapis.com/v1
+  Enter API key: sk-awz*********************************************
+  Enter location (e.g., us-central1): us-central1
+  Enter max tokens: 1024
+  Enter model name: gemini-1.5-pro
+
+Enter Enter Google Cloud project ID:
+> test-project                             
+
+
+Provider vertex configured successfully!
 ```
 
 #### Azure
 
 ```shell
 gmsg newprovider
-You can either select one from the list or enter a custom provider name.
-  ...
-  mistral
-> azure
-  ...
-  Input manually
+                        
+Selected provider: azure
+Configure provider:
 
-Enter Azure OpenAI endpoint URL (e.g., https://YOUR_RESOURCE_NAME.openai.azure.com) []: https://gptcomet.openai.azure.com
-Enter Azure OpenAI deployment name []: gpt4o
-Enter API version [2024-02-15-preview]:
-Enter model name [gpt-4o]:
-Enter API key: ********************************
-Enter max tokens [1024]:
-[GPTComet] Provider azure configured successfully.
+Previous inputs:
+  Enter Azure OpenAI endpoint: https://gptcomet.openai.azure.com
+  Enter API key: ********************************
+  Enter API version: 2024-02-15-preview
+  Enter Azure OpenAI deployment name: gpt4o
+  Enter max tokens: 1024
+
+Enter Enter deployment name (default: gpt-4o):
+> gpt-4o                                   
+
+
+Provider azure configured successfully!
 ```
 
 #### Ollama
 
 ```shell
 gmsg newprovider
-You can either select one from the list or enter a custom provider name.
-  azure
-> ollama
-  ...
-  Input manually
+Selected provider: ollama
+Configure provider:
 
-Enter Ollama API Base URL [http://localhost:11434/api]:
-Enter model name [llama2]:
-Enter max tokens [1024]:
-[GPTComet] Provider ollama configured successfully.
+Previous inputs:
+  Enter Ollama API Base URL: http://localhost:11434/api
+  Enter max tokens: 1024
+
+Enter Enter model name (default: llama2):
+> llama2                                   
+
+
+Provider ollama configured successfully!
 ```
 
 #### Other Supported Providers
 
-- Groq
-- Mistral
-- Tongyi/Qwen
-- XAI
-- Sambanova
-- Silicon
-- Deepseek
-- ChatGLM
+-   Groq
+-   Mistral
+-   Tongyi/Qwen
+-   XAI
+-   Sambanova
+-   Silicon
+-   Deepseek
+-   ChatGLM
 
 ### Manual Provider Setup
 
@@ -286,47 +293,47 @@ Enter max tokens [1024]:
 
 The following are the available commands for GPTComet:
 
-* `gmsg config`: Config manage commands group.
-  * `set`: Set a configuration value.
-  * `get`: Get a configuration value.
-  * `list`: List all configuration values.
-  * `reset`: Reset the configuration to its default values.
-  * `keys`: List all supported keys.
-  * `append`: Append a value to a configuration key. (List value only, like `fileignore`)
-  * `remove`: Remove a value from a configuration key. (List value only, like `fileignore`)
-* `gmsg commit`: Generate commit message by changes/diff.
-* `gmsg newprovider`: Add a new provider.
-
+-   `gmsg config`: Config manage commands group.
+    -   `set`: Set a configuration value.
+    -   `get`: Get a configuration value.
+    -   `list`: List all configuration values.
+    -   `reset`: Reset the configuration to its default values.
+    -   `keys`: List all supported keys.
+    -   `append`: Append a value to a configuration key. (List value only, like `fileignore`)
+    -   `remove`: Remove a value from a configuration key. (List value only, like `fileignore`)
+-   `gmsg commit`: Generate commit message by changes/diff.
+-   `gmsg newprovider`: Add a new provider.
 
 ## Configuration
 
 The configuration file for GPTComet is `gptcomet.yaml`. The file should contain the following keys:
 
-* `file_ignore`: The file to ignore when generating a commit.
-* `provider`: The provider of the language model (default `openai`).
-  * `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
-  * `api_key`: The API key for the provider.
-  * `model`: The model used for generating commit messages (default `text-davinci-003`).
-  * `retries`: The number of retries for the API request (default `2`).
-  * `proxy`: The proxy URL for the provider.
-  * `max_tokens`: The maximum number of tokens for the provider.
-  * `top_p`: The top_p parameter for the provider (default `0.7`).
-  * `temperature`: The temperature parameter for the provider (default `0.7`).
-  * `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
-  * `extra_headers`: The extra headers for the provider, json string.
-  * `answer_path`: The json path for the answer. Default `choices[0].message.content`
-  * `completion_path`: The url path for the completion api. Default `/chat/completions`
-* `prompt`: The prompt for generating commit messages.
-  * `brief_commit_message`: The prompt for generating brief commit messages.
-  * `rich_commit_message`: The prompt for generating rich commit messages.
-  * `translation`: The prompt for translating commit messages to a target language.
-* `output`: The output configuration.
-  * `output.lang`: The language of the commit message (default `en`).
-  * `output.rich_template`: The template for generating rich commit messages.
+-   `file_ignore`: The file to ignore when generating a commit.
+-   `provider`: The provider of the language model (default `openai`).
+    -   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
+    -   `api_key`: The API key for the provider.
+    -   `model`: The model used for generating commit messages (default `text-davinci-003`).
+    -   `retries`: The number of retries for the API request (default `2`).
+    -   `proxy`: The proxy URL for the provider.
+    -   `max_tokens`: The maximum number of tokens for the provider.
+    -   `top_p`: The top_p parameter for the provider (default `0.7`).
+    -   `temperature`: The temperature parameter for the provider (default `0.7`).
+    -   `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
+    -   `extra_headers`: The extra headers for the provider, json string.
+    -   `answer_path`: The json path for the answer. Default `choices[0].message.content`
+    -   `completion_path`: The url path for the completion api. Default `/chat/completions`
+-   `prompt`: The prompt for generating commit messages.
+    -   `brief_commit_message`: The prompt for generating brief commit messages.
+    -   `rich_commit_message`: The prompt for generating rich commit messages.
+    -   `translation`: The prompt for translating commit messages to a target language.
+-   `output`: The output configuration.
+    -   `output.lang`: The language of the commit message (default `en`).
+    -   `output.rich_template`: The template for generating rich commit messages.
 
 ### file_ignore
 
 The file to ignore when generating a commit. The default value is
+
 ```yaml
 - bun.lockb
 - Cargo.lock
@@ -338,7 +345,7 @@ The file to ignore when generating a commit. The default value is
 - yarn.lock
 - pdm.lock
 - Pipfile.lock
-- '*.py[cod]'
+- "*.py[cod]"
 - go.mod
 - go.sum
 - uv.lock
@@ -358,17 +365,17 @@ Provider config just like:
 ```yaml
 provider: openai
 openai:
-  api_base: https://api.openai.com/v1
-  api_key: YOUR_API_KEY
-  model: gpt-4o
-  retries: 2
-  max_tokens: 1024
-  temperature: 0.7
-  top_p: 0.7
-  frequency_penalty: 0
-  extra_headers: {}
-  answer_path: choices.0.message.content
-  completion_path: /chat/completions
+    api_base: https://api.openai.com/v1
+    api_key: YOUR_API_KEY
+    model: gpt-4o
+    retries: 2
+    max_tokens: 1024
+    temperature: 0.7
+    top_p: 0.7
+    frequency_penalty: 0
+    extra_headers: {}
+    answer_path: choices.0.message.content
+    completion_path: /chat/completions
 ```
 
 If you are using `openai`, just leave the `api_base` as default. Set your `api_key` in the `config` section.
@@ -400,10 +407,11 @@ and set `api_base` to `https://api.siliconflow.cn/v1`.
 The output configuration of the commit message.
 
 The default output is
+
 ```yaml
 output:
-  lang: en
-  rich_template: "<title>:<summary>\n\n<detail>"
+    lang: en
+    rich_template: "<title>:<summary>\n\n<detail>"
 ```
 
 You can set `rich_template` to change the template of the rich commit message,
@@ -411,41 +419,41 @@ and set `lang` to change the language of the commit message.
 
 ### Supported languages
 
-* `en`: English
-* `zh-cn`: Simplified Chinese
-* `zh-tw`: Traditional Chinese
-* `fr`: French
-* `vi`: Vietnamese
-* `ja`: Japanese
-* `ko`: Korean
-* `ru`: Russian
-* `tr`: Turkish
-* `id`: Indonesian
-* `th`: Thai
-* `de`: German
-* `es`: Spanish
-* `pt`: Portuguese
-* `it`: Italian
-* `ar`: Arabic
-* `hi`: Hindi
-* `el`: Greek
-* `pl`: Polish
-* `nl`: Dutch
-* `sv`: Swedish
-* `fi`: Finnish
-* `hu`: Hungarian
-* `cs`: Czech
-* `ro`: Romanian
-* `bg`: Bulgarian
-* `uk`: Ukrainian
-* `he`: Hebrew
-* `lt`: Lithuanian
-* `la`: Latin
-* `ca`: Catalan
-* `sr`: Serbian
-* `sl`: Slovenian
-* `mk`: Macedonian
-* `lv`: Latvian
+-   `en`: English
+-   `zh-cn`: Simplified Chinese
+-   `zh-tw`: Traditional Chinese
+-   `fr`: French
+-   `vi`: Vietnamese
+-   `ja`: Japanese
+-   `ko`: Korean
+-   `ru`: Russian
+-   `tr`: Turkish
+-   `id`: Indonesian
+-   `th`: Thai
+-   `de`: German
+-   `es`: Spanish
+-   `pt`: Portuguese
+-   `it`: Italian
+-   `ar`: Arabic
+-   `hi`: Hindi
+-   `el`: Greek
+-   `pl`: Polish
+-   `nl`: Dutch
+-   `sv`: Swedish
+-   `fi`: Finnish
+-   `hu`: Hungarian
+-   `cs`: Czech
+-   `ro`: Romanian
+-   `bg`: Bulgarian
+-   `uk`: Ukrainian
+-   `he`: Hebrew
+-   `lt`: Lithuanian
+-   `la`: Latin
+-   `ca`: Catalan
+-   `sr`: Serbian
+-   `sl`: Slovenian
+-   `mk`: Macedonian
+-   `lv`: Latvian
 
 ### console
 
@@ -455,7 +463,7 @@ The default console is
 
 ```yaml
 console:
-  verbose: true
+    verbose: true
 ```
 
 When `verbose` is true, more information will be printed in the console.
@@ -469,20 +477,21 @@ You can use `gmsg config keys` to check supported keys.
 Here is an example of how to use GPTComet:
 
 1.  When you first set your OpenAI KEY by `gmsg config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.yaml`, includes:
-  ```
-  provider: "openai"
-  api_base: "https://api.openai.com/v1"
-  api_key: "YOUR_API_KEY"
-  model: "gpt-4o"
-  retries: 2
-  output:
-    lang: "en"
-  ```
+
+```
+provider: "openai"
+api_base: "https://api.openai.com/v1"
+api_key: "YOUR_API_KEY"
+model: "gpt-4o"
+retries: 2
+output:
+  lang: "en"
+```
+
 2.  Run the following command to generate a commit message: `gmsg commit`
 3.  GPTComet will generate a commit message based on the changes made in the code and display it in the console.
 
 Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
-
 
 ## Development
 
