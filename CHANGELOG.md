@@ -14,6 +14,8 @@
 
 ### 📚 Documentation
 
+- add comment to runCommand function - ([50b5346](https://github.com/belingud/gptcomet/commit/50b53464ff30028d87d7d1f8fc13bce5aa833043)) - belingud
+- update changelog for v0.1.8 - ([a468c10](https://github.com/belingud/gptcomet/commit/a468c1050325ae615628a9e80b0a6f3096bd0a6b)) - belingud
 - update README with configuration details - ([8800952](https://github.com/belingud/gptcomet/commit/880095227deec34fa596d46ef6b70ccf4879f9cc)) - belingud
 
 ### ⚙️ Miscellaneous Tasks
