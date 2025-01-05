@@ -8,10 +8,15 @@
 devins
 # docs
 docs/source
+# test binaries
+py/gptcomet/bin/gptcomet_amd64_mac
+py/gptcomet/bin/gptcomet_amd64_linux
+py/gptcomet/bin/gptcomet_amd64_windows.exe
+py/gptcomet/bin/gptcomet_arm64_mac
 
 # From https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 
- Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
