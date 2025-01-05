@@ -41,7 +41,7 @@ def main():
         process = subprocess.run(args)  # noqa: S603
         sys.exit(process.returncode)
     else:
-        os.execvpe(binary, [binary, *sys.argv[1:]], env=os.environ)
+        os.execvpe(binary, [binary, *sys.argv[1:]], env=os.environ)  # noqa: S606
 
 
 if __name__ == "__main__":
