@@ -45,7 +45,7 @@ func NewProvider(name string, config *types.ClientConfig) (LLM, error) {
 
 	constructor, ok := providers[name]
 	if !ok {
-		return nil, fmt.Errorf("unknown provider: %s", name)
+		return &DefaultLLM{}, nil
 	}
 	return constructor(config), nil
 }

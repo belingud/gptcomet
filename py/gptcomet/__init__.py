@@ -1,6 +1,5 @@
 import os
 import platform
-import shlex
 import subprocess
 import sys
 
@@ -39,10 +38,10 @@ def main():
     args = [binary] + sys.argv[1:]
     if sys.platform == "win32":
         # no need shell=True for windows
-        subprocess.run(args, check=True)  # noqa: S603
+        process = subprocess.run(args)  # noqa: S603
+        sys.exit(process.returncode)
     else:
-        command = shlex.join(args)
-        subprocess.run(command, shell=True, check=True)  # noqa: S602
+        os.execvpe(binary, [binary, *sys.argv[1:]], env=os.environ)
 
 
 if __name__ == "__main__":

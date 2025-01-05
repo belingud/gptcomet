@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 
 	internal_cfg "github.com/belingud/go-gptcomet/internal/config"
@@ -73,9 +72,11 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 }
 
 type ProviderSelector struct {
-	list     list.Model
-	choice   string
-	quitting bool
+	list         list.Model
+	choice       string
+	quitting     bool
+	manualInput  textinput.Model
+	inputMode    bool
 }
 
 func NewProviderSelector(providers []string) *ProviderSelector {
@@ -106,8 +107,14 @@ func NewProviderSelector(providers []string) *ProviderSelector {
 	l.DisableQuitKeybindings()
 	l.SetShowPagination(false)
 
+	// initialize manual input
+	input := textinput.New()
+	input.Placeholder = "Enter provider name"
+	input.Width = defaultWidth
+
 	return &ProviderSelector{
 		list: l,
+		manualInput: input,
 	}
 }
 
@@ -138,6 +145,26 @@ func (m *ProviderSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		// if in manual
+		if m.inputMode {
+			switch msg.Type {
+			case tea.KeyEsc:
+				m.inputMode = false
+				return m, nil
+			case tea.KeyEnter:
+				if value := m.manualInput.Value(); value != "" {
+					m.choice = value
+					return m, tea.Quit
+				}
+			default:
+				var cmd tea.Cmd
+				m.manualInput, cmd = m.manualInput.Update(msg)
+				return m, cmd
+			}
+			return m, nil
+		}
+
+		// if not in manual
 		switch keypress := msg.String(); keypress {
 		case "q", "ctrl+c":
 			m.quitting = true
@@ -146,6 +173,11 @@ func (m *ProviderSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
+				if i.Title() == "Input Manually" {
+					m.inputMode = true
+					m.manualInput.Focus()
+					return m, nil
+				}
 				m.choice = i.Title()
 			}
 			return m, tea.Quit
@@ -164,6 +196,12 @@ func (m *ProviderSelector) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("Configuration cancelled.")
 	}
+	if m.inputMode {
+		return fmt.Sprintf(
+			"\nEnter provider name:\n\n%s\n\n(Press Enter to confirm, Esc to go back)\n",
+			m.manualInput.View(),
+		)
+	}
 	return "\n" + m.list.View()
 }
 
@@ -172,6 +210,7 @@ func (m *ProviderSelector) Selected() string {
 }
 
 type ConfigInput struct {
+	// provider   string
 	inputs     []textinput.Model
 	configs    map[string]config.ConfigRequirement
 	configKeys []string
@@ -184,11 +223,10 @@ func NewConfigInput(configs map[string]config.ConfigRequirement) *ConfigInput {
 	var inputs []textinput.Model
 	var configKeys []string
 
-	// sort keys
+	// collect keys without sorting
 	for k := range configs {
 		configKeys = append(configKeys, k)
 	}
-	sort.Strings(configKeys)
 
 	// create input for each config
 	for _, key := range configKeys {
