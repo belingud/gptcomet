@@ -24,6 +24,8 @@ format:
     pdm run ruff format . --config pyproject.toml
     @echo "🚀 Formatting code: Running isort"
     pdm run isort . --settings-path pyproject.toml
+    @echo "🚀 Formatting code: Running go fmt"
+    go fmt ./...
 
 # Test the code with pytest
 test:
@@ -53,62 +55,6 @@ publish-test:
 # Build and publish
 build-and-publish: build publish
 
-# Test if documentation can be built without warnings or errors
-docs-test:
-    pdm run mkdocs build -s
-
-# Build and serve the documentation
-docs:
-    pdm run mkdocs serve
-
 # Update changelog
 changelog:
     git cliff -l --prepend CHANGELOG.md
-
-# Build the executable
-pyinstaller:
-    pdm run pyinstaller gptcomet/clis/__main__.py \
-    --name gptcomet \
-    --onefile \
-    --clean \
-    --noupx \
-    --hidden-import=click \
-    --hidden-import=typer \
-    --hidden-import=rich \
-    --hidden-import=gitpython \
-    --hidden-import=ruamel.yaml \
-    --hidden-import=glom \
-    --hidden-import=prompt_toolkit \
-    --hidden-import=httpx \
-    --hidden-import=socksio \
-    --exclude-module _tkinter \
-    --exclude-module unittest \
-    --exclude-module doctest \
-    --exclude-module pydoc \
-    --exclude-module Tkinter \
-    --exclude-module pyreadline \
-    --exclude-module bumpversion \
-    --exclude-module tox \
-    --exclude-module pytest
-
-# Build single executable using Nuitka
-nuitka:
-    pdm run nuitka \
-        --standalone \
-        --onefile \
-        --nofollow-imports \
-        --include-module=typer \
-        --include-module=requests \
-        --include-module=git \
-        --include-module=prompt_toolkit \
-        --include-module=rich \
-        --include-package=gptcomet \
-        --disable-console \
-        --output-dir=dist \
-        --output-filename=gptcomet \
-        --noinclude-setuptools-mode=allow \
-        --noinclude-pytest-mode=allow \
-        --no-pyi-file \
-        --no-debug \
-        --lto=yes \
-        gptcomet/__main__.py
