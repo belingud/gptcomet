@@ -1,6 +1,6 @@
 [project]
 name = "gptcomet"
-version = "0.1.5"
+version = "0.1.6"
 description = "GPTComet: AI-Powered Git Commit Message Generator."
 authors = [{ name = "belingud", email = "im.victor@qq.com" }]
 readme = "README.md"
@@ -41,8 +41,8 @@ Repository = "https://github.com/belingud/gptcomet"
 Documentation = "https://github.com/belingud/gptcomet"
 
 [project.scripts]
-gmsg = "gptcomet.clis.__main__:app"
-gptcomet = "gptcomet.clis.__main__:app"
+gmsg = "gptcomet:main"
+gptcomet = "gptcomet:main"
 
 [build-system]
 requires = ["pdm-backend"]
