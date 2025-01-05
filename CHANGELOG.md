@@ -1,5 +1,32 @@
 
 ---
+## [0.1.6](https://github.com/belingud/gptcomet/compare/v0.1.6-dev..v0.1.6) - 2025-01-05
+
+### ⚙️ Miscellaneous Tasks
+
+- Update release workflow - ([f3778be](https://github.com/belingud/gptcomet/commit/f3778befbd6332cd5264843801b5e092c39f2df9)) - belingud
+
+
+---
+## [0.1.5](https://github.com/belingud/gptcomet/compare/v0.1.4..v0.1.5) - 2024-12-28
+
+### ⛰️  Features
+
+- update default model to gpt-4o - ([57b1bd8](https://github.com/belingud/gptcomet/commit/57b1bd8c9e72159c868093e5a0051505a3214016)) - belingud
+
+### 🚜 Refactor
+
+- enhance logging and update config handling - ([dac110f](https://github.com/belingud/gptcomet/commit/dac110fa73614ad20acd0c0aa95c54539acbb591)) - belingud
+- simplify log level setting - ([c9bead4](https://github.com/belingud/gptcomet/commit/c9bead47cfb5434c4f50fc7d97661742585aed18)) - belingud
+
+### 📚 Documentation
+
+- update answer path in README - ([ee5a9e4](https://github.com/belingud/gptcomet/commit/ee5a9e4bb291624cc5e46f1fe667e622b11b6422)) - belingud
+- update install guide and supported languages - ([d479c30](https://github.com/belingud/gptcomet/commit/d479c30d111beb8ac3aad8c36f37560c551c6002)) - belingud
+- update README with uv install and license - ([423a78a](https://github.com/belingud/gptcomet/commit/423a78a326d8c754c5c2b3169b9989c005c6c967)) - belingud
+
+
+---
 ## [0.1.4](https://github.com/belingud/gptcomet/compare/v0.1.3..v0.1.4) - 2024-12-22
 
 ### 🐛 Bug Fixes
