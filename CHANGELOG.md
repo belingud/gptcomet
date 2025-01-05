@@ -1,5 +1,28 @@
 
 ---
+## [0.1.8](https://github.com/belingud/gptcomet/compare/v0.1.7..v0.1.8) - 2025-01-05
+
+### 🐛 Bug Fixes
+
+- improve staged diff filtering logic - ([be6fce3](https://github.com/belingud/gptcomet/commit/be6fce3335840f14da3b9436c2f57acd99015d58)) - belingud
+- fix depend issue - ([0c64116](https://github.com/belingud/gptcomet/commit/0c641161ad1cfa0a0ce7458fd876bbf587333bc3)) - belingud
+
+### 🚜 Refactor
+
+- rearrange and simplify test setup - ([f08a81e](https://github.com/belingud/gptcomet/commit/f08a81e4b1e37abf359de8ffde9ce0234f41dfbc)) - belingud
+- Update default config values - ([0eaf5ab](https://github.com/belingud/gptcomet/commit/0eaf5ab5d7cecf3f47c2c451d9d3dff901e13079)) - belingud
+
+### 📚 Documentation
+
+- update README with configuration details - ([8800952](https://github.com/belingud/gptcomet/commit/880095227deec34fa596d46ef6b70ccf4879f9cc)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- Update build commands and remove pre-commit - ([43935bd](https://github.com/belingud/gptcomet/commit/43935bd7c5194fc9cb639c271676266fdb3c2132)) - belingud
+- Remove pre-commit from dev dependencies - ([a525959](https://github.com/belingud/gptcomet/commit/a525959e8470bd2c7ebd3aacfab6f7072b71e921)) - belingud
+
+
+---
 ## [0.1.7](https://github.com/belingud/gptcomet/compare/v0.1.6..v0.1.7) - 2025-01-05
 
 ### ⛰️  Features
