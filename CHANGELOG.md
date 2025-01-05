@@ -1,5 +1,23 @@
 
 ---
+## [0.1.7](https://github.com/belingud/gptcomet/compare/v0.1.6..v0.1.7) - 2025-01-05
+
+### ⛰️  Features
+
+- add manual provider input, improve config input - ([3cbb9ec](https://github.com/belingud/gptcomet/commit/3cbb9ec8ce920c2fd63cf41baf6fa4ce76610227)) - belingud
+
+### 📚 Documentation
+
+- update README with install script and gif - ([bbf5941](https://github.com/belingud/gptcomet/commit/bbf5941eb4d35658701eca6c2bf04bd02c4d41ba)) - belingud
+- update changelog for release 0.1.6 - ([7cb49ad](https://github.com/belingud/gptcomet/commit/7cb49ad3c90800f2eeffac3444bc9d5c086d5aa8)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- add pygmsg command to pyproject.toml - ([68f4366](https://github.com/belingud/gptcomet/commit/68f4366f902113095cf9863d129d772e380a0efe)) - belingud
+- update gitignore to exclude test binaries - ([3fb4da6](https://github.com/belingud/gptcomet/commit/3fb4da6cf5cb491fd7d67182fede4d4e6a19e55c)) - belingud
+
+
+---
 ## [0.1.6](https://github.com/belingud/gptcomet/compare/v0.1.6-dev..v0.1.6) - 2025-01-05
 
 ### ⚙️ Miscellaneous Tasks
