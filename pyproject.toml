@@ -6,16 +6,7 @@ authors = [{ name = "belingud", email = "im.victor@qq.com" }]
 readme = "README.md"
 packages = [{ include = "gptcomet" }]
 requires-python = ">=3.9,<4.0"
-dependencies = [
-    "gitpython>=3.1.43",
-    "click>=8.1.7",
-    "ruamel-yaml>=0.18.6",
-    "glom>=23.5.0",
-    "typer>=0.12.5",
-    "rich>=13.8.0",
-    "prompt-toolkit>=3.0.47",
-    "requests>=2.32.3",
-]
+dependencies = []
 license = { text = "MIT license" }
 keywords = [
     "ai",
@@ -54,18 +45,25 @@ gmsg = "gptcomet.clis.__main__:app"
 gptcomet = "gptcomet.clis.__main__:app"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
-[tool.hatch.build.targets.wheel]
-include = ["gptcomet"]
-package = ["gptcomet"]
-exclude = ["tests"]
+[tool.pdm.build]
+package-dir = "py"
+excludes = ["**/tests", "**/.gitkeep"]
+is-purelib = false
+platforms = [
+    "linux_x86_64",
+    "linux_aarch64",
+    "win_amd64",
+    "win_arm64",
+    "macos_x86_64",
+    "macos_arm64",
+]
+source-includes = ["LICENSE", "README.md", "pyproject.toml"]
 
-[tool.hatch.build.targets.sdist]
-include = ["gptcomet"]
-package = ["gptcomet"]
-exclude = ["tests"]
+[tool.pdm.build.wheel-data]
+plat-name = {win32 = "win_amd64", linux_x86_64 = "manylinux2014_x86_64", darwin_x86_64 = "macosx_10_9_x86_64", darwin_arm64 = "macosx_11_0_arm64"}
 
 [tool.isort]
 profile = "black"
@@ -145,17 +143,6 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [dependency-groups]
 dev = [
-    "deptry>=0.6.4",
     "pre-commit>=3.8.0",
-    "tox>=3.25.1",
-    "ruff>=0.5.6",
     "bump2version>=1.0.1",
-]
-test = [
-    "pytest>=7.2.0",
-    "pytest-cov>=4.0.0",
-]
-profile = ["pyinstrument>=4.7.2", "line-profiler>=4.1.3"]
-build = [
-    "nuitka>=2.5.7",
 ]
