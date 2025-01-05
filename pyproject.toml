@@ -132,6 +132,7 @@ distribution = true
 [tool.pdm.scripts]
 bump = "bump2version {args}"
 gen_keys = "python scripts/gen_support_keys.py"
+pygmsg = ".venv/bin/gmsg"
 
 [tool.pytest.ini_options]
 addopts = "-rsxX -s -l --tb=short --strict"
