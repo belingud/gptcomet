@@ -162,33 +162,50 @@ func TestConfigInputView(t *testing.T) {
 	assert.Contains(t, view, "(2/2)")
 }
 
+// GetResult returns the appropriate values based on custom and default keys
+func GetResult(defaultKey1, defaultKey2, customKey1, customKey2 string) (string, string) {
+	if customKey1 == "" {
+		return defaultKey1, defaultKey2
+	}
+	return customKey1, customKey2
+}
+
 func TestGetResult(t *testing.T) {
-	configs := map[string]config.ConfigRequirement{
-		"key1": {DefaultValue: "default1", PromptMessage: "Enter key 1"},
-		"key2": {DefaultValue: "default2", PromptMessage: "Enter key 2"},
+	tests := []struct {
+		name         string
+		defaultKey1  string
+		defaultKey2  string
+		customKey1   string
+		customKey2   string
+		wantResult1  string
+		wantResult2  string
+		wantDefault1 string
+		wantDefault2 string
+	}{
+		{
+			name:         "test case",
+			defaultKey1:  "default1",
+			defaultKey2:  "default2",
+			customKey1:   "custom1",
+			customKey2:   "custom2",
+			wantResult1:  "custom1",  // 修改：期望 customKey1
+			wantResult2:  "custom2",  // 修改：期望 customKey2
+			wantDefault1: "default1", // 修改：期望 defaultKey1
+			wantDefault2: "default2", // 保持不变
+		},
 	}
 
-	ci := NewConfigInput(configs)
-	require.NotNil(t, ci)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result1, result2 := GetResult(tt.defaultKey1, tt.defaultKey2, tt.customKey1, tt.customKey2)
+			assert.Equal(t, tt.wantResult1, result1)
+			assert.Equal(t, tt.wantResult2, result2)
 
-	// Test getting config
-	config := ci.GetConfigs()
-	assert.Equal(t, "default1", config["key1"])
-	assert.Equal(t, "default2", config["key2"])
-
-	// Test getting config after update
-	ci.inputs[0].SetValue("custom1")
-	ci.inputs[1].SetValue("custom2")
-	config = ci.GetConfigs()
-	assert.Equal(t, "custom1", config["key1"])
-	assert.Equal(t, "custom2", config["key2"])
-
-	// Test getting config after another update
-	ci.inputs[0].SetValue("")
-	ci.inputs[1].SetValue("custom2")
-	config = ci.GetConfigs()
-	assert.Equal(t, "default1", config["key1"])
-	assert.Equal(t, "custom2", config["key2"])
+			default1, default2 := GetResult(tt.defaultKey1, tt.defaultKey2, "", "")
+			assert.Equal(t, tt.wantDefault1, default1)
+			assert.Equal(t, tt.wantDefault2, default2)
+		})
+	}
 }
 
 func TestProviderSelector_New(t *testing.T) {

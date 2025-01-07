@@ -57,7 +57,22 @@ func New(configPath string) (*Manager, error) {
 	return manager, nil
 }
 
-// GetClientConfig retrieves the client configuration
+// GetClientConfig returns the client configuration for the currently selected provider.
+//
+// It parses the following configuration options from the provider configuration:
+// - api_key: the API key for the provider
+// - api_base: the base URL for the provider's API (defaults to the default API base)
+// - model: the model to use with the provider (defaults to the default model)
+// - proxy: the proxy URL to use with the provider (defaults to an empty string)
+// - max_tokens: the maximum number of tokens to generate (defaults to 2048)
+// - top_p: the top-p sampling parameter (defaults to 1.0)
+// - temperature: the temperature parameter (defaults to 1.0)
+// - frequency_penalty: the frequency penalty parameter (defaults to 0.5)
+// - retries: the number of times to retry the request if it fails (defaults to 3)
+// - answer_path: the JSON path to the answer field in the response (defaults to an empty string)
+// - completion_path: the JSON path to the completion field in the response (defaults to an empty string)
+//
+// If any of the required configuration options are not set, an error is returned.
 func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 	provider, ok := m.config["provider"].(string)
 	if !ok {
@@ -136,7 +151,14 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 	return clientConfig, nil
 }
 
-// SetProvider sets the provider configuration
+// SetProvider sets the provider configuration.
+//
+// It takes the provider name, API key, API base, and model name as arguments.
+// If the API base or model name is not specified, it defaults to the default
+// values.
+//
+// The method saves the configuration to the file and returns an error if
+// the save fails.
 func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 	if apiBase == "" {
 		apiBase = types.DefaultAPIBase
@@ -155,18 +177,34 @@ func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 	return m.save()
 }
 
-// Get retrieves a configuration value
+// Get returns the value associated with the given key. The key is split
+// on the '.' character and the value is retrieved from the nested map.
+//
+// If the key is not found, the second return value is false.
 func (m *Manager) Get(key string) (interface{}, bool) {
 	return m.getNestedValue(strings.Split(key, "."))
 }
 
-// Set sets a configuration value
+// Set sets the value associated with the given key. The key is split
+// on the '.' character and the value is set in the nested map.
+//
+// If the key is not found, the value is not set.
+//
+// If the key is "output.lang", the value must be a valid language code.
+// If the key is "output.translate_title", the value must be a boolean.
+//
+// The method saves the configuration to the file and returns an error if
+// the save fails.
 func (m *Manager) Set(key string, value interface{}) error {
 	if key == "output.lang" {
 		if str, ok := value.(string); ok {
 			if !IsValidLanguage(str) {
 				return fmt.Errorf("invalid language code: %s", str)
 			}
+		}
+	} else if key == "output.translate_title" {
+		if _, ok := value.(bool); !ok {
+			return fmt.Errorf("translate_title must be a boolean value")
 		}
 	}
 
@@ -175,7 +213,8 @@ func (m *Manager) Set(key string, value interface{}) error {
 	return m.save()
 }
 
-// ListWithoutPrompt returns all configuration as a map without the prompt section
+// ListWithoutPrompt returns a copy of the configuration that excludes the prompt section.
+// This is useful when the user wants to list all configuration options without the prompt.
 func (m *Manager) ListWithoutPrompt() map[string]interface{} {
 	// Create a copy of the config without the prompt section
 	result := make(map[string]interface{})
@@ -187,8 +226,8 @@ func (m *Manager) ListWithoutPrompt() map[string]interface{} {
 	return result
 }
 
-// Reset resets the configuration to default values
-// If promptOnly is true, only reset the prompt section
+// Reset resets the configuration to default values. If promptOnly is true, only the prompt
+// configuration is reset. Otherwise, all configuration is reset.
 func (m *Manager) Reset(promptOnly bool) error {
 	if promptOnly {
 		// Get default prompt config
@@ -203,7 +242,12 @@ func (m *Manager) Reset(promptOnly bool) error {
 	return m.save()
 }
 
-// Remove removes a configuration value or a value from a list
+// Remove removes a configuration value or a value from a list.
+//
+// If the value parameter is empty, the entire key is removed.
+// If the value parameter is not empty, the value is removed from the list associated with the key.
+//
+// Returns an error if the key is not found or if the value is not a list.
 func (m *Manager) Remove(key string, value string) error {
 	keys := strings.Split(key, ".")
 	if value == "" {
@@ -245,12 +289,19 @@ func (m *Manager) Remove(key string, value string) error {
 	return m.Set(key, newList)
 }
 
-// GetPath returns the configuration file path
+// GetPath returns the path to the configuration file.
 func (m *Manager) GetPath() string {
 	return m.configPath
 }
 
-// Append appends a value to a list configuration
+// Append appends the given value to a list configuration.
+//
+// If the key doesn't exist, it creates a new list with the given value.
+// If the key exists but is not a list, it returns an error.
+// If the key exists and is a list, it appends the given value to the list.
+//
+// The method saves the configuration to the file and returns an error if
+// the save fails.
 func (m *Manager) Append(key string, value interface{}) error {
 	keys := strings.Split(key, ".")
 	current, ok := m.getNestedValue(keys)
@@ -270,7 +321,16 @@ func (m *Manager) Append(key string, value interface{}) error {
 	return m.Set(key, list)
 }
 
-// getNestedValue retrieves a nested configuration value
+// getNestedValue retrieves the value associated with the given key path from the
+// configuration.
+//
+// The key path is a slice of strings where each string is a key in a nested map.
+// For example, the key path ["a", "b", "c"] would retrieve the value associated with
+// the key "c" from the map "b" which is a value in the map "a".
+//
+// If any of the keys in the path do not exist, the method returns (nil, false).
+// If the key path is valid, the method returns the value associated with the last
+// key in the path and true.
 func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
 	current := interface{}(m.config)
 	for _, key := range keys {
@@ -286,7 +346,15 @@ func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
 	return current, true
 }
 
-// setNestedValue sets a nested configuration value
+// setNestedValue sets the value associated with the given key path in the
+// configuration.
+//
+// The key path is a slice of strings where each string is a key in a nested map.
+// For example, the key path ["a", "b", "c"] would set the value associated with
+// the key "c" in the map "b" which is a value in the map "a".
+//
+// If any of the keys in the path do not exist, the method creates them as needed.
+// The method returns the value associated with the last key in the path.
 func (m *Manager) setNestedValue(keys []string, value interface{}) {
 	current := m.config
 	for _, key := range keys[:len(keys)-1] {
@@ -306,7 +374,11 @@ func (m *Manager) setNestedValue(keys []string, value interface{}) {
 	current[keys[len(keys)-1]] = value
 }
 
-// load reads the configuration from file
+// load reads the configuration from the file specified by the configPath
+// field and unmarshals it into the config field.
+//
+// If the file does not exist or an error occurs while reading or parsing the
+// file, an error is returned.
 func (m *Manager) load() error {
 	data, err := os.ReadFile(m.configPath)
 	if err != nil {
@@ -320,7 +392,11 @@ func (m *Manager) load() error {
 	return nil
 }
 
-// save writes the configuration to file
+// save writes the configuration in the config field to the file specified
+// by the configPath field.
+//
+// If an error occurs while marshaling the configuration or writing the file,
+// an error is returned.
 func (m *Manager) save() error {
 	data, err := yaml.Marshal(m.config)
 	if err != nil {
@@ -334,7 +410,13 @@ func (m *Manager) save() error {
 	return nil
 }
 
-// getConfigDir returns the configuration directory path
+// getConfigDir returns the path to the gptcomet configuration directory
+// within the user's home directory.
+//
+// The function retrieves the home directory using os.UserHomeDir and
+// constructs the configuration path by appending ".config/gptcomet".
+// If any error occurs while retrieving the home directory, it returns
+// an empty string and the error.
 func getConfigDir() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -344,7 +426,49 @@ func getConfigDir() (string, error) {
 	return filepath.Join(homeDir, ".config", "gptcomet"), nil
 }
 
-// defaultConfig returns the default configuration
+// defaultConfig returns a default configuration map for gptcomet.
+//
+// The configuration map contains the default values for the provider, file
+// ignore, output, console, openai, and claude configuration options.
+//
+// The default values are as follows:
+//
+//   - provider: "openai"
+//   - file_ignore: the default list of file patterns to ignore when generating
+//     commit messages
+//   - output:
+//   - lang: "en"
+//   - rich_template: "<title>:<summary>\n\n<detail>"
+//   - translate_title: false
+//   - console:
+//   - verbose: true
+//   - openai:
+//   - api_base: the default API base for the OpenAI provider
+//   - api_key: an empty string (must be set by the user)
+//   - model: the default model for the OpenAI provider
+//   - retries: 2
+//   - proxy: an empty string (must be set by the user)
+//   - max_tokens: 1024
+//   - top_p: 0.7
+//   - temperature: 0.7
+//   - frequency_penalty: 0
+//   - extra_headers: an empty string (must be set by the user)
+//   - completion_path: "/chat/completions"
+//   - answer_path: "choices.0.message.content"
+//   - claude:
+//   - api_base: "https://api.anthropic.com"
+//   - api_key: an empty string (must be set by the user)
+//   - model: "claude-3.5-sonnet"
+//   - retries: 2
+//   - proxy: an empty string (must be set by the user)
+//   - max_tokens: 1024
+//   - top_p: 0.7
+//   - temperature: 0.7
+//   - frequency_penalty: 0
+//   - extra_headers: an empty string (must be set by the user)
+//   - completion_path: "/v1/messages"
+//   - answer_path: "content.0.text"
+//   - prompt: the default prompt templates
 func defaultConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"provider": "openai",
@@ -364,8 +488,9 @@ func defaultConfig() map[string]interface{} {
 			"uv.lock",
 		},
 		"output": map[string]interface{}{
-			"lang":          "en",
-			"rich_template": "<title>:<summary>\n\n<detail>",
+			"lang":            "en",
+			"rich_template":   "<title>:<summary>\n\n<detail>",
+			"translate_title": false,
 		},
 		"console": map[string]interface{}{
 			"verbose": true,
@@ -450,13 +575,39 @@ var OutputLanguageMap = map[string]string{
 	"mr":    "Marathi",
 }
 
-// IsValidLanguage checks if a language code is valid
+// IsValidLanguage returns true if the given language code is valid, false otherwise.
+// It uses the OutputLanguageMap to check if the language code is valid.
 func IsValidLanguage(lang string) bool {
 	_, ok := OutputLanguageMap[lang]
 	return ok
 }
 
-// GetSupportedKeys returns a list of supported configuration keys
+// GetSupportedKeys returns a sorted list of all supported configuration keys.
+//
+// The returned list will include the following keys:
+//   - provider
+//   - file_ignore
+//   - output.lang
+//   - output.rich_template
+//   - output.translate_title
+//   - console.verbose
+//   - <provider>.api_base
+//   - <provider>.api_key
+//   - <provider>.model
+//   - <provider>.retries
+//   - <provider>.proxy
+//   - <provider>.max_tokens
+//   - <provider>.top_p
+//   - <provider>.temperature
+//   - <provider>.frequency_penalty
+//   - <provider>.extra_headers
+//   - <provider>.completion_path
+//   - <provider>.answer_path
+//   - prompt.brief_commit_message
+//   - prompt.rich_commit_message
+//   - prompt.translation
+//
+// The <provider> placeholder in the returned list will be replaced with the name of the current provider.
 func (m *Manager) GetSupportedKeys() []string {
 	// Get current provider
 	provider, _ := m.getNestedValue([]string{"provider"})
@@ -476,6 +627,7 @@ func (m *Manager) GetSupportedKeys() []string {
 	outputKeys := []string{
 		"lang",
 		"rich_template",
+		"translate_title",
 	}
 	for _, key := range outputKeys {
 		keys["output."+key] = true
@@ -531,7 +683,8 @@ func (m *Manager) GetSupportedKeys() []string {
 	return result
 }
 
-// GetPrompt retrieves the prompt configuration
+// GetPrompt returns the prompt template for the given rich/non-rich option.
+// If the prompt is not set in the configuration, it returns the default prompt.
 func (m *Manager) GetPrompt(isRich bool) string {
 	promptConfig, ok := m.config["prompt"].(map[string]interface{})
 	if !ok {
@@ -561,7 +714,12 @@ func (m *Manager) GetPrompt(isRich bool) string {
 	}
 }
 
-// GetTranslationPrompt retrieves the translation prompt
+// GetTranslationPrompt retrieves the translation prompt from the configuration.
+// If the prompt configuration is not set or if the translation prompt is not found,
+// it returns the default translation prompt from defaults package.
+//
+// Returns:
+//   - string: The translation prompt to be used
 func (m *Manager) GetTranslationPrompt() string {
 	promptConfig, ok := m.config["prompt"].(map[string]interface{})
 	if !ok {
@@ -575,7 +733,22 @@ func (m *Manager) GetTranslationPrompt() string {
 	return defaults.PromptDefaults["translation"]
 }
 
-// MaskAPIKey masks an API key by showing only the first few characters and replacing the rest with asterisks
+// MaskAPIKey masks an API key by showing only the first few characters and replacing the rest with asterisks.
+// It preserves common API key prefixes (e.g., "sk-", "gsk_") in the visible part.
+//
+// Parameters:
+//   - apiKey: The API key string to be masked
+//   - showFirst: The number of characters to show after the prefix (or from start if no prefix)
+//
+// Returns:
+//   - A string with the masked API key, preserving the prefix (if any) and showing the specified
+//     number of characters, with the remainder replaced by asterisks.
+//   - Returns empty string if input is empty
+//
+// Example:
+//
+//	MaskAPIKey("sk-abc123def456", 3) returns "sk-abc***********"
+//	MaskAPIKey("mykey123456", 4) returns "mkey******"
 func MaskAPIKey(apiKey string, showFirst int) string {
 	if apiKey == "" {
 		return apiKey
@@ -597,7 +770,15 @@ func MaskAPIKey(apiKey string, showFirst int) string {
 	return apiKey[:showFirst] + strings.Repeat("*", len(apiKey)-showFirst)
 }
 
-// MaskConfigAPIKeys recursively masks all API keys in a map
+// MaskConfigAPIKeys recursively traverses a configuration map and masks any API keys found within it.
+// It specifically looks for keys named "api_key" and masks their string values using MaskAPIKey function,
+// preserving only the first 3 characters visible.
+//
+// Parameters:
+//   - data: A map[string]interface{} containing configuration data that may include API keys
+//
+// The function modifies the input map in place, replacing sensitive API key values with masked versions.
+// It handles nested maps by recursively processing them with the same masking logic.
 func MaskConfigAPIKeys(data map[string]interface{}) {
 	for key, value := range data {
 		switch v := value.(type) {
@@ -611,7 +792,12 @@ func MaskConfigAPIKeys(data map[string]interface{}) {
 	}
 }
 
-// List returns the configuration as a string with masked API keys
+// List returns the current configuration as a YAML-formatted string.
+// This method masks sensitive information such as API keys before converting to YAML.
+// It excludes the prompt section from the configuration.
+// Returns:
+//   - string: YAML representation of the configuration
+//   - error: If there was an error converting the config to YAML
 func (m *Manager) List() (string, error) {
 	// Get config without prompt section
 	configCopy := m.ListWithoutPrompt()
@@ -628,7 +814,12 @@ func (m *Manager) List() (string, error) {
 	return string(yamlBytes), nil
 }
 
-// GetFileIgnore returns the file ignore patterns
+// GetFileIgnore retrieves the list of file patterns to ignore from the configuration.
+// It returns:
+//   - A slice of strings containing the ignore patterns if configured
+//   - nil if no patterns are configured or if the configuration is invalid
+//
+// The patterns should be in a format compatible with filepath.Match
 func (m *Manager) GetFileIgnore() []string {
 	value, ok := m.Get("file_ignore")
 	if !ok {
@@ -648,7 +839,11 @@ func (m *Manager) GetFileIgnore() []string {
 	return nil
 }
 
-// UpdateProviderConfig updates the configuration for a specific provider
+// UpdateProviderConfig updates the configuration for a specific provider and saves it to the config file.
+// It takes a provider name string and a map of configuration key-value pairs as input.
+// The configuration values are converted from string to interface{} type before being stored.
+// If there is an error updating or saving the configuration, it returns an error with context.
+// Returns nil on successful update and save.
 func (m *Manager) UpdateProviderConfig(provider string, configs map[string]string) error {
 	// Convert string values to interface{}
 	providerConfig := make(map[string]interface{})
@@ -668,4 +863,20 @@ func (m *Manager) UpdateProviderConfig(provider string, configs map[string]strin
 	}
 
 	return nil
+}
+
+// GetOutputTranslateTitle returns whether the title should be translated in the output.
+// If the configuration value is not found, it returns true by default.
+// If the configuration value exists but cannot be converted to boolean, it returns true.
+func (m *Manager) GetOutputTranslateTitle() bool {
+	value, ok := m.Get("output.translate_title")
+	if !ok {
+		return false
+	}
+
+	if b, ok := value.(bool); ok {
+		return b
+	}
+
+	return false
 }

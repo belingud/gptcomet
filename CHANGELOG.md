@@ -1,5 +1,33 @@
 
 ---
+## [0.1.9](https://github.com/belingud/gptcomet/compare/v0.1.8..v0.1.9) - 2025-01-07
+
+### ⛰️  Features
+
+- add configuration management subcommands and commit flow enhancements - ([c3ba2c1](https://github.com/belingud/gptcomet/commit/c3ba2c1557d2e685b320746b2bfc6dfe2e962815)) - belingud
+
+### 🚜 Refactor
+
+- update LLM provider registration and configuration methods - ([56cb381](https://github.com/belingud/gptcomet/commit/56cb3817ba935941d9fe41a750dc83a375b5a3c5)) - belingud
+
+### 📚 Documentation
+
+- add documentation for output.translate_title and console.verbose - ([fe66ef2](https://github.com/belingud/gptcomet/commit/fe66ef20ca69bf50105acd50309dc0b7a20f0227)) - belingud
+- add github actions badge to README - ([a140715](https://github.com/belingud/gptcomet/commit/a140715fca0a225987d7570f9c06ac2e3864f3c7)) - belingud
+- update changelog for v0.1.8 - ([e038799](https://github.com/belingud/gptcomet/commit/e03879970eef34cca2a57ab107d676f280723393)) - belingud
+
+### 🧪 Testing
+
+- add new test cases and improve test utilities - ([b8d5a46](https://github.com/belingud/gptcomet/commit/b8d5a4670e01e44a40574d27fe3676509931070e)) - belingud
+- delete useless python test case - ([013c4ad](https://github.com/belingud/gptcomet/commit/013c4adafec5c7bd7154211d6dc5d36b3b82be61)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update go dependencies - ([faf773c](https://github.com/belingud/gptcomet/commit/faf773c81ade4f29165eb1a1e2ee5b89503baae9)) - belingud
+- use uv instead of pdm in release workflow - ([a49fa77](https://github.com/belingud/gptcomet/commit/a49fa77b7c23b32ad0285cc2207afef287ea29b7)) - belingud
+
+
+---
 ## [0.1.8](https://github.com/belingud/gptcomet/compare/v0.1.7..v0.1.8) - 2025-01-05
 
 ### 🐛 Bug Fixes

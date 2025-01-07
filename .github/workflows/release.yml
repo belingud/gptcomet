@@ -152,13 +152,13 @@ jobs:
               run: |
                   echo "Installing dependencies"
                   python -m pip install --upgrade pip
-                  pip install pdm
-                  pdm --version
+                  pip install uv
+                  uv --version
 
             - name: Build package
               run: |
                   echo "Building package on ${{ matrix.os }} with arch ${{ matrix.arch }}"
-                  pdm build --no-sdist
+                  uv build --wheel
                   ls dist/
 
             - name: Upload wheel artifact
@@ -180,10 +180,10 @@ jobs:
               with:
                   python-version: "3.8"
 
-            - name: Install pdm
+            - name: Install UV
               run: |
                   python -m pip install --upgrade pip
-                  pip install pdm
+                  pip install uv
 
             - name: Download all artifacts
               uses: actions/download-artifact@v3

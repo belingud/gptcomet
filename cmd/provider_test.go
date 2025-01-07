@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/belingud/go-gptcomet/internal/llm"
+	"github.com/belingud/go-gptcomet/internal/testutils"
 	"github.com/belingud/go-gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,7 +29,7 @@ func TestNewProviderCmd(t *testing.T) {
 
 	// Register test provider
 	llm.RegisterProvider("test-provider", func(config *types.ClientConfig) llm.LLM {
-		return &mockLLM{name: "test-provider"}
+		return &testutils.MockLLM{}
 	})
 
 	// Execute command in non-interactive mode
@@ -51,7 +52,7 @@ func TestProviderCmd_NonInteractive(t *testing.T) {
 
 	// Register test provider
 	llm.RegisterProvider("test-provider", func(config *types.ClientConfig) llm.LLM {
-		return &mockLLM{name: "test-provider"}
+		return &testutils.MockLLM{}
 	})
 
 	// Execute command
@@ -84,6 +85,24 @@ func TestProviderCmd_EmptyProvidersList(t *testing.T) {
 	assert.Contains(t, output, "Available providers:")
 }
 
+// TestProvider1 用于测试的LLM实现
+type TestProvider1 struct {
+	*testutils.MockLLM
+}
+
+func (m *TestProvider1) Name() string {
+	return "test-provider1"
+}
+
+// TestProvider2 用于测试的LLM实现
+type TestProvider2 struct {
+	*testutils.MockLLM
+}
+
+func (m *TestProvider2) Name() string {
+	return "test-provider2"
+}
+
 func TestProviderCmd_MultipleProviders(t *testing.T) {
 	cmd := NewProviderCmd()
 	var buf bytes.Buffer
@@ -94,10 +113,10 @@ func TestProviderCmd_MultipleProviders(t *testing.T) {
 
 	// Register multiple test providers
 	llm.RegisterProvider("test-provider1", func(config *types.ClientConfig) llm.LLM {
-		return &mockLLM{name: "test-provider1"}
+		return &TestProvider1{&testutils.MockLLM{}}
 	})
 	llm.RegisterProvider("test-provider2", func(config *types.ClientConfig) llm.LLM {
-		return &mockLLM{name: "test-provider2"}
+		return &TestProvider2{&testutils.MockLLM{}}
 	})
 
 	// Execute command

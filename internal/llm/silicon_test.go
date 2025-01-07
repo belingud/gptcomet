@@ -26,7 +26,7 @@ func TestNewSiliconLLM(t *testing.T) {
 				completionPath string
 				answerPath     string
 			}{
-				apiBase:        "https://api.silicon.cn/v1",
+				apiBase:        "https://api.siliconflow.cn/v1",
 				model:          "Qwen/Qwen2.5-7B-Instruct",
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
@@ -97,9 +97,9 @@ func TestSiliconLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
-	if got["api_base"].DefaultValue != "https://api.silicon.cn/v1" {
-		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
+	// check default values
+	if got["api_base"].DefaultValue != "https://api.siliconflow.cn/v1" {
+		t.Errorf("Unexpected default value for api_base, wanted https://api.siliconflow.cn/v1, got %s", got["api_base"].DefaultValue)
 	}
 	if got["model"].DefaultValue != "Qwen/Qwen2.5-7B-Instruct" {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
@@ -115,18 +115,18 @@ func TestSiliconLLM_BuildURL(t *testing.T) {
 		{
 			name: "standard url",
 			config: &types.ClientConfig{
-				APIBase:        "https://api.silicon.cn/v1",
+				APIBase:        "https://api.siliconflow.cn/v1",
 				CompletionPath: "chat/completions",
 			},
-			want: "https://api.silicon.cn/v1/chat/completions",
+			want: "https://api.siliconflow.cn/v1/chat/completions",
 		},
 		{
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
-				APIBase:        "https://api.silicon.cn/v1/",
+				APIBase:        "https://api.siliconflow.cn/v1/",
 				CompletionPath: "/chat/completions",
 			},
-			want: "https://api.silicon.cn/v1/chat/completions",
+			want: "https://api.siliconflow.cn/v1/chat/completions",
 		},
 	}
 

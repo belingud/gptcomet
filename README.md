@@ -4,6 +4,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/belingud/gptcomet?style=for-the-badge)
 [![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/belingud/gptcomet?style=for-the-badge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/belingud/gptcomet/release.yml?style=for-the-badge)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/belingud/gptcomet/total?style=for-the-badge&label=Release%20Download)
@@ -341,6 +342,15 @@ The configuration file for GPTComet is `gptcomet.yaml`. The file should contain 
 -   `output`: The output configuration.
     -   `output.lang`: The language of the commit message (default `en`).
     -   `output.rich_template`: The template for generating rich commit messages.
+    -   `output.translate_title`: Whether to translate the title of the commit message.
+-   `console`: The console configuration.
+    -   `console.verbose`: Whether to enable verbose output.
+
+`output.translate_title` is used to determine whether to translate the title of the commit message.
+
+For example in `output.lang: zh-cn`, the title of the commit message is `feat: Add new feature`
+
+If `output.translate_title` is set to `true`, the commit message will be translated to `功能：新增功能`. otherwise, the commit message will be translated to `feat: 新增功能`:
 
 ### Supported Configuration Keys
 
@@ -353,6 +363,7 @@ Here's a summary of the main configuration keys:
 | `output.lang`                  | The language for commit message generation.                | `en`                              |
 | `output.rich_template`         | The template to use for rich commit messages.              | `<title>:<summary>\n\n<detail>`   |
 | `console.verbose`              | Enable verbose output.                                     | `true`                            |
+| `output.translate_title`       | Translate the title of the commit message.                 | `false`                           |
 | `<provider>.api_base`          | The API base URL for the provider.                         | (Provider-specific)               |
 | `<provider>.api_key`           | The API key for the provider.                              |                                   |
 | `<provider>.model`             | The model name to use.                                     | (Provider-specific)               |

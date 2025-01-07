@@ -13,7 +13,7 @@ type SiliconLLM struct {
 // NewSiliconLLM creates a new SiliconLLM
 func NewSiliconLLM(config *types.ClientConfig) *SiliconLLM {
 	if config.APIBase == "" {
-		config.APIBase = "https://api.silicon.cn/v1"
+		config.APIBase = "https://api.siliconflow.cn/v1"
 	}
 	if config.Model == "" {
 		config.Model = "Qwen/Qwen2.5-7B-Instruct"
