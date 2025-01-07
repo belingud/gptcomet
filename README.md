@@ -4,6 +4,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/belingud/gptcomet?style=for-the-badge)
 [![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/belingud/gptcomet?style=for-the-badge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/belingud/gptcomet/release.yml?style=for-the-badge)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/belingud/gptcomet/total?style=for-the-badge&label=Release%20Download)
