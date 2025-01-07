@@ -140,24 +140,6 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 	return transport, nil
 }
 
-// sendRawRequest sends a completion request to the LLM provider and returns the raw JSON response
-func (c *Client) sendRawRequest(req *types.CompletionRequest) (string, error) {
-	// Create a transport with proxy if configured
-	transport, err := c.createProxyTransport()
-	if err != nil {
-		return "", fmt.Errorf("failed to create proxy transport: %w", err)
-	}
-
-	// Create a client with the configured transport and timeout
-	client := &http.Client{
-		Transport: transport,
-		Timeout:   time.Duration(c.config.Timeout) * time.Second,
-	}
-
-	// Make the request using the LLM provider
-	return c.llm.MakeRequest(context.Background(), client, req.Messages[len(req.Messages)-1].Content, req.Messages[:len(req.Messages)-1])
-}
-
 // getClient returns an HTTP client configured with proxy settings if specified
 func (c *Client) getClient() (*http.Client, error) {
 	// Create a transport with proxy if configured

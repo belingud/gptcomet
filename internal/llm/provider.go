@@ -7,7 +7,7 @@ import (
 	"github.com/belingud/go-gptcomet/pkg/types"
 )
 
-// ProviderConstructor 是创建 LLM 实例的函数类型
+// ProviderConstructor is a function that creates a new LLM instance
 type ProviderConstructor func(config *types.ClientConfig) LLM
 
 var (
@@ -15,7 +15,7 @@ var (
 	providers = make(map[string]ProviderConstructor)
 )
 
-// RegisterProvider 注册一个新的 provider
+// RegisterProvider registers a new LLM provider constructor
 func RegisterProvider(name string, constructor ProviderConstructor) error {
 	if name == "" {
 		return fmt.Errorf("provider name cannot be empty")
@@ -23,6 +23,7 @@ func RegisterProvider(name string, constructor ProviderConstructor) error {
 	if constructor == nil {
 		return fmt.Errorf("constructor cannot be nil")
 	}
+
 	providers[name] = constructor
 	return nil
 }
@@ -37,16 +38,31 @@ func GetProviders() []string {
 	return names
 }
 
-// NewProvider 根据名称创建对应的 LLM 实例
-func NewProvider(name string, config *types.ClientConfig) (LLM, error) {
+// NewProvider creates a new LLM provider instance with the given name and config
+func NewProvider(providerName string, config *types.ClientConfig) (LLM, error) {
 	if config == nil {
 		return nil, fmt.Errorf("config cannot be nil")
 	}
 
-	constructor, ok := providers[name]
+	constructor, ok := providers[providerName]
 	if !ok {
-		return &DefaultLLM{}, nil
+		return nil, fmt.Errorf("unknown provider: %s", providerName)
 	}
+
+	return constructor(config), nil
+}
+
+// CreateProvider creates a new provider instance with given config
+func CreateProvider(config *types.ClientConfig) (LLM, error) {
+	if config == nil {
+		return nil, fmt.Errorf("config cannot be nil")
+	}
+
+	constructor, ok := providers[config.Provider]
+	if !ok {
+		return nil, fmt.Errorf("unknown provider: %s", config.Provider)
+	}
+
 	return constructor(config), nil
 }
 
