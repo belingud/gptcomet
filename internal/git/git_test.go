@@ -10,15 +10,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// setupVCSTest 创建测试仓库并返回路径和清理函数
+// setupVCSTest creates a test repository and returns the path and cleanup function
 func setupVCSTest(t *testing.T, vcsType VCSType) (vcs VCS, dir string, cleanup func()) {
 	t.Helper()
+	if vcsType == SVN {
+		skipIfSVNNotAvailable(t)
+	}
 	dir = t.TempDir()
 
 	v, err := NewVCS(vcsType)
 	require.NoError(t, err)
 
 	if vcsType == Git {
+		// Setup Git repository
 		err = testutils.RunGitCommand(t, dir, "init")
 		require.NoError(t, err)
 
@@ -27,7 +31,7 @@ func setupVCSTest(t *testing.T, vcsType VCSType) (vcs VCS, dir string, cleanup f
 		err = testutils.RunGitCommand(t, dir, "config", "user.name", "Test User")
 		require.NoError(t, err)
 	} else if vcsType == SVN {
-		// 为 SVN 设置测试仓库
+		 // Setup SVN repository
 		err = testutils.RunCommand(t, dir, "svnadmin", "create", "repo")
 		require.NoError(t, err)
 		err = testutils.RunCommand(t, dir, "svn", "checkout", "file://"+filepath.Join(dir, "repo"), dir)
@@ -45,25 +49,29 @@ func TestVCSImplementations(t *testing.T) {
 	testCases := []struct {
 		name    string
 		vcsType VCSType
+		skip    func(t *testing.T)
 	}{
 		{
 			name:    "Git VCS",
 			vcsType: Git,
+			skip:    func(t *testing.T) {}, // Git tests always run
 		},
 		{
 			name:    "SVN VCS",
 			vcsType: SVN,
+			skip:    skipIfSVNNotAvailable,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			tc.skip(t) // Skip if necessary
 			vcs, dir, cleanup := setupVCSTest(t, tc.vcsType)
 			defer cleanup()
 
-			// 测试添加文件和获取差异
+			 // Test file addition and diff retrieval
 			t.Run("GetDiff", func(t *testing.T) {
-				// 创建测试文件
+				// Create test file
 				err := os.WriteFile(filepath.Join(dir, "test.txt"), []byte("test content"), 0644)
 				require.NoError(t, err)
 
@@ -74,32 +82,32 @@ func TestVCSImplementations(t *testing.T) {
 				}
 				require.NoError(t, err)
 
-				// 测试 GetDiff
+				 // Test GetDiff
 				diff, err := vcs.GetDiff(dir)
 				require.NoError(t, err)
 				assert.Contains(t, diff, "test content")
 			})
 
-			// 测试检查变更
+			 // Test change detection
 			t.Run("HasStagedChanges", func(t *testing.T) {
 				hasChanges, err := vcs.HasStagedChanges(dir)
 				require.NoError(t, err)
 				assert.True(t, hasChanges)
 			})
 
-			// 测试获取变更文件列表
+			 // Test getting list of changed files
 			t.Run("GetStagedFiles", func(t *testing.T) {
 				files, err := vcs.GetStagedFiles(dir)
 				require.NoError(t, err)
 				assert.Contains(t, files, "test.txt")
 			})
 
-			// 测试创建提交
+			 // Test commit creation
 			t.Run("CreateCommit", func(t *testing.T) {
 				err := vcs.CreateCommit(dir, "test commit")
 				require.NoError(t, err)
 
-				// 验证提交是否成功
+				 // Verify commit success
 				hash, err := vcs.GetLastCommitHash(dir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, hash)
@@ -109,7 +117,7 @@ func TestVCSImplementations(t *testing.T) {
 				assert.Contains(t, info, "test commit")
 			})
 
-			// 测试获取当前分支
+			 // Test getting current branch
 			t.Run("GetCurrentBranch", func(t *testing.T) {
 				branch, err := vcs.GetCurrentBranch(dir)
 				require.NoError(t, err)

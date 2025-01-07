@@ -191,10 +191,10 @@ func TestNewProvider(t *testing.T) {
 			provider:    "unknown",
 			config:      &types.ClientConfig{},
 			wantErr:     true,
-			errContains: "unknown provider: unknown",
+			errContains: "unknown provider",
 		},
 		{
-			name:        "Create provider with nil config",
+			name:        "Create with nil config",
 			provider:    "mock",
 			config:      nil,
 			wantErr:     true,
@@ -208,11 +208,12 @@ func TestNewProvider(t *testing.T) {
 			if tt.wantErr {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errContains)
+				assert.Nil(t, provider)
 				return
 			}
 			require.NoError(t, err)
-			mock := provider.(*MockProvider)
-			assert.Equal(t, tt.provider, mock.name)
+			assert.NotNil(t, provider)
+			assert.Equal(t, tt.provider, provider.Name())
 		})
 	}
 }
@@ -239,10 +240,10 @@ func TestListProviders(t *testing.T) {
 }
 
 func TestCreateProvider(t *testing.T) {
-	// Clear providers
+	// Reset providers before test
 	providers = make(map[string]ProviderConstructor)
 
-	// Register test provider
+	// Register a mock provider
 	err := RegisterProvider("mock", func(config *types.ClientConfig) LLM {
 		return &MockProvider{name: "mock"}
 	})
@@ -250,40 +251,45 @@ func TestCreateProvider(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		provider    string
 		config      *types.ClientConfig
 		wantErr     bool
 		errContains string
 	}{
 		{
-			name:     "Valid provider",
-			provider: "mock",
-			config:   &types.ClientConfig{},
-			wantErr:  false,
+			name: "Valid provider",
+			config: &types.ClientConfig{
+				Provider: "mock",
+			},
+			wantErr: false,
 		},
 		{
-			name:        "Unknown provider",
-			provider:    "unknown",
-			config:      &types.ClientConfig{},
+			name: "Unknown provider",
+			config: &types.ClientConfig{
+				Provider: "unknown",
+			},
 			wantErr:     true,
-			errContains: "unknown provider: unknown",
+			errContains: "unknown provider",
+		},
+		{
+			name:        "Nil config",
+			config:      nil,
+			wantErr:     true,
+			errContains: "config cannot be nil",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			provider, err := NewProvider(tt.provider, tt.config)
+			provider, err := CreateProvider(tt.config)
 			if tt.wantErr {
-				assert.Error(t, err)
-				if tt.errContains != "" {
-					assert.Contains(t, err.Error(), tt.errContains)
-				}
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errContains)
+				assert.Nil(t, provider)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, provider)
-			mock := provider.(*MockProvider)
-			assert.Equal(t, tt.provider, mock.name)
+			assert.Equal(t, tt.config.Provider, provider.Name())
 		})
 	}
 }
