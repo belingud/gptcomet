@@ -1,5 +1,26 @@
 
 ---
+## [0.2.0](https://github.com/belingud/gptcomet/compare/v0.1.9..v0.2.0) - 2025-01-08
+
+### ⛰️  Features
+
+- add Groq LLM support - ([2600d23](https://github.com/belingud/gptcomet/commit/2600d23a86a5518b63b8b42a2e025214b4596f5d)) - belingud
+
+### 🐛 Bug Fixes
+
+- rename go package to gptcomet - ([bf2cdbc](https://github.com/belingud/gptcomet/commit/bf2cdbcd2d7fec9b512c958f1e95bbc0e92cfaf6)) - belingud
+
+### 📚 Documentation
+
+- update changelog for v0.1.9 release - ([fff951f](https://github.com/belingud/gptcomet/commit/fff951f0b8b7ca82e64eca219bb0560d8e66d5c1)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update uv lock - ([0db92b4](https://github.com/belingud/gptcomet/commit/0db92b4be3d8083114a0f243f19fb7d03a7fecd6)) - belingud
+- update ignore files - ([3a01f7b](https://github.com/belingud/gptcomet/commit/3a01f7bfb2f48673ac772781d0ad1e647146d9c8)) - belingud
+- update uv lock - ([aa1d625](https://github.com/belingud/gptcomet/commit/aa1d6250efcfbd295603d765bf2ff091ddb858b1)) - belingud
+
+---
 ## [0.1.9](https://github.com/belingud/gptcomet/compare/v0.1.8..v0.1.9) - 2025-01-07
 
 ### ⛰️  Features
