@@ -8,8 +8,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // ClaudeLLM is the Claude LLM provider implementation

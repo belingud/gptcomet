@@ -11,9 +11,9 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/belingud/go-gptcomet/internal/debug"
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // OpenAILLM is the OpenAI LLM provider implementation
@@ -118,7 +118,7 @@ func (o *OpenAILLM) MakeRequest(ctx context.Context, client *http.Client, messag
 		return "", fmt.Errorf("failed to format messages: %w", err)
 	}
 
-	debug.Printf("Sending request...")
+	debug.Printf("📤 Sending request...")
 
 	reqBody, err := json.Marshal(payload)
 	if err != nil {

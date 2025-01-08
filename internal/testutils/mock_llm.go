@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // Mock LLM implementation for testing

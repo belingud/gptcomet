@@ -9,8 +9,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/tidwall/gjson"
 )
 
@@ -226,6 +227,8 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
+
+	debug.Printf("📤 Sending request to %s...", provider.Name())
 
 	resp, err := client.Do(req)
 	if err != nil {

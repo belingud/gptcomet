@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // ProviderConstructor is a function that creates a new LLM instance
@@ -141,5 +141,10 @@ func init() {
 	// XAI
 	RegisterProvider("xai", func(config *types.ClientConfig) LLM {
 		return &XAILLM{}
+	})
+
+	// Groq
+	RegisterProvider("groq", func(config *types.ClientConfig) LLM {
+		return &GroqLLM{}
 	})
 }

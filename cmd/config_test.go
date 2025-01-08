@@ -3,9 +3,10 @@ package cmd
 import (
 	"context"
 	"testing"
-	"github.com/stretchr/testify/assert"
+
+	"github.com/belingud/gptcomet/internal/testutils"
 	"github.com/spf13/cobra"
-	"github.com/belingud/go-gptcomet/internal/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 // setupTest 创建测试环境
@@ -23,7 +24,7 @@ func setupTest() (*cobra.Command, *testutils.MockConfigManager) {
 
 func TestConfigManagerContext(t *testing.T) {
 	cmd, mock := setupTest()
-	
+
 	got, err := getConfigManager(cmd)
 	assert.NoError(t, err)
 	assert.Equal(t, mock, got)

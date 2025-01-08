@@ -11,9 +11,9 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/belingud/go-gptcomet/internal/debug"
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // GeminiLLM implements the LLM interface for Gemini

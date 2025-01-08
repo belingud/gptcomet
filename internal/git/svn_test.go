@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/belingud/go-gptcomet/internal/testutils"
+	"github.com/belingud/gptcomet/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -70,40 +70,40 @@ func TestSVNVCS(t *testing.T) {
 	})
 
 	t.Run("Add and commit file", func(t *testing.T) {
-		 // Create test file
+		// Create test file
 		testFile := filepath.Join(dir, "test.txt")
 		err := os.WriteFile(testFile, []byte("test content"), 0644)
 		require.NoError(t, err)
 
-		 // Add file to SVN
+		// Add file to SVN
 		err = testutils.RunCommand(t, dir, "svn", "add", testFile)
 		require.NoError(t, err)
 
-		 // Check for pending changes
+		// Check for pending changes
 		hasChanges, err := vcs.HasStagedChanges(dir)
 		require.NoError(t, err)
 		assert.True(t, hasChanges)
 
-		 // Get differences
+		// Get differences
 		diff, err := vcs.GetDiff(dir)
 		require.NoError(t, err)
 		assert.Contains(t, diff, "test content")
 
-		 // Get staged files
+		// Get staged files
 		files, err := vcs.GetStagedFiles(dir)
 		require.NoError(t, err)
 		assert.Contains(t, files, "test.txt")
 
-		 // Create commit
+		// Create commit
 		err = vcs.CreateCommit(dir, "test commit")
 		require.NoError(t, err)
 
-		 // Verify commit
+		// Verify commit
 		hash, err := vcs.GetLastCommitHash(dir)
 		require.NoError(t, err)
 		assert.Equal(t, "1", hash) // First commit should be revision 1
 
-		 // Verify commit message
+		// Verify commit message
 		info, err := vcs.GetCommitInfo(dir, hash)
 		require.NoError(t, err)
 		assert.Contains(t, info, "test commit")

@@ -13,9 +13,9 @@ import (
 
 	"golang.org/x/net/proxy"
 
-	"github.com/belingud/go-gptcomet/internal/debug"
-	"github.com/belingud/go-gptcomet/internal/llm"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/llm"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // Client represents an LLM client
@@ -58,6 +58,8 @@ func New(config *types.ClientConfig) *Client {
 		provider = llm.NewSiliconLLM(config)
 	case "sambanova":
 		provider = llm.NewSambanovaLLM(config)
+	case "groq":
+		provider = llm.NewGroqLLM(config)
 	default:
 		// Default to OpenAI if provider is not specified
 		provider = llm.NewOpenAILLM(config)
@@ -73,14 +75,18 @@ func New(config *types.ClientConfig) *Client {
 func (c *Client) Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error) {
 	client, err := c.getClient()
 	if err != nil {
+		debug.Printf("❌ Get client failed: %v", err)
 		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
+
+	debug.Printf("🔌 Using proxy: %s", c.config.Proxy)
 
 	content, err := c.llm.MakeRequest(ctx, client, message, history)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 
+	debug.Printf("✅ Request succeeded")
 	return &types.CompletionResponse{
 		Content: content,
 		Raw:     make(map[string]interface{}),
@@ -89,6 +95,7 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 
 // createProxyTransport creates an http.Transport with proxy settings based on the configuration
 func (c *Client) createProxyTransport() (*http.Transport, error) {
+	debug.Printf("Starting proxy configuration with proxy URL: %s", c.config.Proxy)
 	transport := &http.Transport{
 		MaxIdleConns:       100,
 		IdleConnTimeout:    90 * time.Second,
@@ -97,33 +104,37 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 	}
 
 	if c.config.Proxy != "" {
-		debug.Printf("Using proxy: %s", c.config.Proxy)
+		fmt.Printf("Using proxy: %s\n", c.config.Proxy)
 		proxyURL, err := url.Parse(c.config.Proxy)
 		if err != nil {
+			debug.Printf("Error parsing proxy URL: %v", err)
 			return nil, fmt.Errorf("failed to parse proxy URL: %w", err)
 		}
 
 		switch proxyURL.Scheme {
 		case "http", "https":
 			transport.Proxy = http.ProxyURL(proxyURL)
-			debug.Printf("Using HTTP/HTTPS proxy: %s", proxyURL.String())
 		case "socks5":
 			auth := &proxy.Auth{}
 			if proxyURL.User != nil {
 				auth.User = proxyURL.User.Username()
+				debug.Printf("Using proxy authentication with username: %s", auth.User)
 				if password, ok := proxyURL.User.Password(); ok {
 					auth.Password = password
+					debug.Printf("Proxy password configured")
 				}
 			}
 			dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, auth, proxy.Direct)
 			if err != nil {
+				debug.Printf("SOCKS5 dialer creation failed: %v", err)
 				return nil, fmt.Errorf("failed to create SOCKS5 dialer: %w", err)
 			}
 			transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+				debug.Printf("Attempting to dial via SOCKS5: %s", addr)
 				return dialer.Dial(network, addr)
 			}
-			debug.Printf("Using SOCKS5 proxy: %s", proxyURL.String())
 		default:
+			debug.Printf("Unsupported proxy scheme: %s", proxyURL.Scheme)
 			return nil, fmt.Errorf("unsupported proxy scheme: %s", proxyURL.Scheme)
 		}
 
@@ -136,6 +147,7 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 			debug.Printf("Added proxy authentication")
 		}
 	}
+	debug.Printf("Created transport with proxy: %v", transport.Proxy != nil)
 
 	return transport, nil
 }
@@ -145,7 +157,21 @@ func (c *Client) getClient() (*http.Client, error) {
 	// Create a transport with proxy if configured
 	transport, err := c.createProxyTransport()
 	if err != nil {
+		debug.Printf("❌ Create proxy transport failed: %v", err)
 		return nil, fmt.Errorf("failed to create proxy transport: %w", err)
+	}
+
+	// Add debug logging to the transport
+	transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		debug.Printf("🔌 Connecting: %s %s", network, addr)
+		start := time.Now()
+		conn, err := net.Dial(network, addr)
+		if err != nil {
+			debug.Printf("❌ Connection failed: %v", err)
+			return nil, err
+		}
+		debug.Printf("✅ Connection succeeded, took: %v", time.Since(start))
+		return conn, nil
 	}
 
 	// Create a client with the configured transport and timeout
@@ -182,36 +208,4 @@ func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, erro
 	}
 
 	return strings.TrimSpace(resp.Content), nil
-}
-
-// GenerateCodeExplanation generates an explanation for the given code in the specified language
-func (c *Client) GenerateCodeExplanation(message, lang string) (string, error) {
-	const prompt = "Explain the following %s code:\n\n%s"
-	formattedPrompt := fmt.Sprintf(prompt, lang, message)
-
-	// Send the request
-	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(resp.Content), nil
-}
-
-// Stream sends a chat message to the LLM provider and streams the response
-func (c *Client) Stream(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error) {
-	client, err := c.getClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %w", err)
-	}
-
-	content, err := c.llm.MakeRequest(ctx, client, message, history)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
-	}
-
-	return &types.CompletionResponse{
-		Content: content,
-		Raw:     make(map[string]interface{}),
-	}, nil
 }

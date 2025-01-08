@@ -3,7 +3,7 @@ package llm
 import (
 	"testing"
 
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 func TestNewAzureLLM(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/belingud/go-gptcomet/internal/testutils"
+	"github.com/belingud/gptcomet/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,7 +31,7 @@ func setupVCSTest(t *testing.T, vcsType VCSType) (vcs VCS, dir string, cleanup f
 		err = testutils.RunGitCommand(t, dir, "config", "user.name", "Test User")
 		require.NoError(t, err)
 	} else if vcsType == SVN {
-		 // Setup SVN repository
+		// Setup SVN repository
 		err = testutils.RunCommand(t, dir, "svnadmin", "create", "repo")
 		require.NoError(t, err)
 		err = testutils.RunCommand(t, dir, "svn", "checkout", "file://"+filepath.Join(dir, "repo"), dir)
@@ -69,7 +69,7 @@ func TestVCSImplementations(t *testing.T) {
 			vcs, dir, cleanup := setupVCSTest(t, tc.vcsType)
 			defer cleanup()
 
-			 // Test file addition and diff retrieval
+			// Test file addition and diff retrieval
 			t.Run("GetDiff", func(t *testing.T) {
 				// Create test file
 				err := os.WriteFile(filepath.Join(dir, "test.txt"), []byte("test content"), 0644)
@@ -82,32 +82,32 @@ func TestVCSImplementations(t *testing.T) {
 				}
 				require.NoError(t, err)
 
-				 // Test GetDiff
+				// Test GetDiff
 				diff, err := vcs.GetDiff(dir)
 				require.NoError(t, err)
 				assert.Contains(t, diff, "test content")
 			})
 
-			 // Test change detection
+			// Test change detection
 			t.Run("HasStagedChanges", func(t *testing.T) {
 				hasChanges, err := vcs.HasStagedChanges(dir)
 				require.NoError(t, err)
 				assert.True(t, hasChanges)
 			})
 
-			 // Test getting list of changed files
+			// Test getting list of changed files
 			t.Run("GetStagedFiles", func(t *testing.T) {
 				files, err := vcs.GetStagedFiles(dir)
 				require.NoError(t, err)
 				assert.Contains(t, files, "test.txt")
 			})
 
-			 // Test commit creation
+			// Test commit creation
 			t.Run("CreateCommit", func(t *testing.T) {
 				err := vcs.CreateCommit(dir, "test commit")
 				require.NoError(t, err)
 
-				 // Verify commit success
+				// Verify commit success
 				hash, err := vcs.GetLastCommitHash(dir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, hash)
@@ -117,7 +117,7 @@ func TestVCSImplementations(t *testing.T) {
 				assert.Contains(t, info, "test commit")
 			})
 
-			 // Test getting current branch
+			// Test getting current branch
 			t.Run("GetCurrentBranch", func(t *testing.T) {
 				branch, err := vcs.GetCurrentBranch(dir)
 				require.NoError(t, err)
