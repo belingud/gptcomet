@@ -8,6 +8,7 @@
 devins
 # docs
 docs/source
+repomix-output.txt
 # test binaries
 py/gptcomet/bin/gptcomet_amd64_mac
 py/gptcomet/bin/gptcomet_amd64_linux
