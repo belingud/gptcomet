@@ -1,5 +1,23 @@
 
 ---
+## [0.2.1](https://github.com/belingud/gptcomet/compare/v0.2.0..v0.2.1) - 2025-01-08
+
+### 🐛 Bug Fixes
+
+- fix groq tls error, ensure tls check - ([c17f670](https://github.com/belingud/gptcomet/commit/c17f67011649ee0166da6e426b737b416f3f0d06)) - belingud
+- handle unknown provider - ([fa9dfaa](https://github.com/belingud/gptcomet/commit/fa9dfaad7f0a79e86b5f5fecb73fb02395da2836)) - belingud
+
+### 📚 Documentation
+
+- add known issue to README - ([7a1dddc](https://github.com/belingud/gptcomet/commit/7a1dddc6866ac82a9b520b17852ba060296addda)) - belingud
+- update changelog for v0.2.0 - ([d347467](https://github.com/belingud/gptcomet/commit/d347467c7fa63d0ac6eac8a2facfdb4950a09ed1)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update uv lock - ([302483b](https://github.com/belingud/gptcomet/commit/302483bebf1b5fc9091237109363e940f998a393)) - belingud
+
+
+---
 ## [0.2.0](https://github.com/belingud/gptcomet/compare/v0.1.9..v0.2.0) - 2025-01-08
 
 ### ⛰️  Features
