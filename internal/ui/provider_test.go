@@ -3,7 +3,7 @@ package ui
 import (
 	"testing"
 
-	"github.com/belingud/go-gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"

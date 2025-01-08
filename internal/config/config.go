@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/belingud/go-gptcomet/pkg/config/defaults"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/config/defaults"
+	"github.com/belingud/gptcomet/pkg/types"
 
 	"gopkg.in/yaml.v3"
 )

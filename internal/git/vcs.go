@@ -1,6 +1,6 @@
 package git
 
-import "github.com/belingud/go-gptcomet/internal/config"
+import "github.com/belingud/gptcomet/internal/config"
 
 // VCSType represents the type of version control system
 type VCSType string

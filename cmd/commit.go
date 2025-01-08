@@ -7,10 +7,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/belingud/go-gptcomet/internal/client"
-	"github.com/belingud/go-gptcomet/internal/config"
-	"github.com/belingud/go-gptcomet/internal/debug"
-	"github.com/belingud/go-gptcomet/internal/git"
+	"github.com/belingud/gptcomet/internal/client"
+	"github.com/belingud/gptcomet/internal/config"
+	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/git"
 
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/belingud/go-gptcomet/internal/config"
+	"github.com/belingud/gptcomet/internal/config"
 )
 
 // SVNVCS implements the VCS interface for SVN

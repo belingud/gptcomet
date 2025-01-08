@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/belingud/go-gptcomet/internal/llm"
-	"github.com/belingud/go-gptcomet/internal/testutils"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/internal/llm"
+	"github.com/belingud/gptcomet/internal/testutils"
+	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

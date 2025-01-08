@@ -39,6 +39,7 @@
     - [console](#console)
   - [Supported Keys](#supported-keys)
   - [Example](#example)
+  - [known Issue](#known-issue)
   - [Development](#development)
   - [Contact](#contact)
   - [License](#license)
@@ -545,6 +546,10 @@ output:
 3.  GPTComet will generate a commit message based on the changes made in the code and display it in the console.
 
 Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
+
+## known Issue
+
+- Groq with proxy not working as expected, cloudflare blocks the request. Not sure why yet.
 
 ## Development
 

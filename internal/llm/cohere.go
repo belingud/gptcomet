@@ -3,8 +3,8 @@ package llm
 import (
 	"fmt"
 
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/tidwall/gjson"
 )
 

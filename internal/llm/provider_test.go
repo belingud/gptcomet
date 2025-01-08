@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

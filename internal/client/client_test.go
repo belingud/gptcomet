@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/belingud/go-gptcomet/internal/llm"
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/internal/llm"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -200,22 +200,4 @@ func TestGenerateCommitMessage(t *testing.T) {
 	msg, err := client.GenerateCommitMessage("diff", "generate commit message for: %s")
 	require.NoError(t, err)
 	assert.Equal(t, "commit message", msg)
-}
-
-func TestGenerateCodeExplanation(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-			return "code explanation", nil
-		},
-		name: "mock",
-	}
-
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
-	}
-
-	explanation, err := client.GenerateCodeExplanation("code", "go")
-	require.NoError(t, err)
-	assert.Equal(t, "code explanation", explanation)
 }

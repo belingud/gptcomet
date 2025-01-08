@@ -1,8 +1,8 @@
 package llm
 
 import (
-	"github.com/belingud/go-gptcomet/pkg/config"
-	"github.com/belingud/go-gptcomet/pkg/types"
+	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // DeepSeekLLM implements the LLM interface for DeepSeek

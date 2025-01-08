@@ -3,13 +3,13 @@ package main
 import (
 	"os"
 
-	"github.com/belingud/go-gptcomet/cmd"
-	"github.com/belingud/go-gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/cmd"
+	"github.com/belingud/gptcomet/internal/debug"
 
 	"github.com/spf13/cobra"
 )
 
-var version = "0.1.9"
+var version = "0.2.0"
 
 func main() {
 	var (

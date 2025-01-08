@@ -5,8 +5,8 @@ import (
 	"io"
 	"strings"
 
-	internal_cfg "github.com/belingud/go-gptcomet/internal/config"
-	"github.com/belingud/go-gptcomet/pkg/config"
+	internal_cfg "github.com/belingud/gptcomet/internal/config"
+	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"

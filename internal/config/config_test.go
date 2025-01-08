@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/belingud/go-gptcomet/internal/testutils"
+	"github.com/belingud/gptcomet/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -73,30 +73,30 @@ func TestConfig_Set(t *testing.T) {
 		{
 			name:       "Set provider",
 			configData: "",
-			key:       "provider",
-			value:     "openai",
-			wantErr:   false,
+			key:        "provider",
+			value:      "openai",
+			wantErr:    false,
 		},
 		{
 			name:       "Set invalid provider - unknown provider",
 			configData: "",
-			key:       "provider",
-			value:     "invalid",
-			wantErr:   false,
+			key:        "provider",
+			value:      "invalid",
+			wantErr:    false,
 		},
 		{
 			name:       "Set invalid provider - empty string",
 			configData: "",
-			key:       "provider",
-			value:     "",
-			wantErr:   false,
+			key:        "provider",
+			value:      "",
+			wantErr:    false,
 		},
 		{
 			name:       "Set invalid provider - whitespace only",
 			configData: "",
-			key:       "provider",
-			value:     "   ",
-			wantErr:   false,
+			key:        "provider",
+			value:      "   ",
+			wantErr:    false,
 		},
 		{
 			name: "Set value in existing config",
