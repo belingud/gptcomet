@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/base64"
 	"fmt"
 	"net"
@@ -95,61 +94,89 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 
 // createProxyTransport creates an http.Transport with proxy settings based on the configuration
 func (c *Client) createProxyTransport() (*http.Transport, error) {
-	debug.Printf("Starting proxy configuration with proxy URL: %s", c.config.Proxy)
-	transport := &http.Transport{
-		MaxIdleConns:       100,
-		IdleConnTimeout:    90 * time.Second,
-		DisableCompression: true,
-		TLSClientConfig:    &tls.Config{InsecureSkipVerify: false}, // default verification
+	debug.Printf("Starting proxy configuration with URL: %s", c.config.Proxy)
+	var (
+		MaxIdleConns       = 100
+		IdleConnTimeout    = 90 * time.Second
+		DisableCompression = true
+	)
+
+	// Return default transport if no proxy configured
+	if c.config.Proxy == "" {
+		debug.Printf("No proxy configured, using direct connection")
+		return &http.Transport{
+			MaxIdleConns:       MaxIdleConns,
+			IdleConnTimeout:    IdleConnTimeout,
+			DisableCompression: DisableCompression,
+		}, nil
 	}
 
-	if c.config.Proxy != "" {
-		fmt.Printf("Using proxy: %s\n", c.config.Proxy)
-		proxyURL, err := url.Parse(c.config.Proxy)
-		if err != nil {
-			debug.Printf("Error parsing proxy URL: %v", err)
-			return nil, fmt.Errorf("failed to parse proxy URL: %w", err)
+	fmt.Printf("Using proxy: %s\n", c.config.Proxy)
+
+	proxyURL, err := url.Parse(c.config.Proxy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse proxy URL: %w", err)
+	}
+
+	switch proxyURL.Scheme {
+	case "http", "https":
+		debug.Printf("Configuring HTTP/HTTPS proxy: %s", proxyURL.String())
+		transport := &http.Transport{
+			Proxy:              http.ProxyURL(proxyURL),
+			MaxIdleConns:       MaxIdleConns,
+			IdleConnTimeout:    IdleConnTimeout,
+			DisableCompression: DisableCompression,
 		}
 
-		switch proxyURL.Scheme {
-		case "http", "https":
-			transport.Proxy = http.ProxyURL(proxyURL)
-		case "socks5":
-			auth := &proxy.Auth{}
-			if proxyURL.User != nil {
-				auth.User = proxyURL.User.Username()
-				debug.Printf("Using proxy authentication with username: %s", auth.User)
-				if password, ok := proxyURL.User.Password(); ok {
-					auth.Password = password
-					debug.Printf("Proxy password configured")
-				}
-			}
-			dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, auth, proxy.Direct)
-			if err != nil {
-				debug.Printf("SOCKS5 dialer creation failed: %v", err)
-				return nil, fmt.Errorf("failed to create SOCKS5 dialer: %w", err)
-			}
-			transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-				debug.Printf("Attempting to dial via SOCKS5: %s", addr)
-				return dialer.Dial(network, addr)
-			}
-		default:
-			debug.Printf("Unsupported proxy scheme: %s", proxyURL.Scheme)
-			return nil, fmt.Errorf("unsupported proxy scheme: %s", proxyURL.Scheme)
-		}
-
-		// add proxy authentication
+		// Add proxy authentication if provided
 		if proxyURL.User != nil {
-			transport.ProxyConnectHeader = http.Header{}
-			auth := proxyURL.User.String()
-			basicAuth := base64.StdEncoding.EncodeToString([]byte(auth))
-			transport.ProxyConnectHeader.Add("Proxy-Authorization", "Basic "+basicAuth)
-			debug.Printf("Added proxy authentication")
-		}
-	}
-	debug.Printf("Created transport with proxy: %v", transport.Proxy != nil)
+			username := proxyURL.User.Username()
+			password, hasPassword := proxyURL.User.Password()
 
-	return transport, nil
+			if hasPassword {
+				auth := username + ":" + password
+				basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+				transport.ProxyConnectHeader = http.Header{
+					"Proxy-Authorization": []string{basicAuth},
+				}
+				debug.Printf("Added proxy authentication for user: %s", username)
+			}
+		}
+		return transport, nil
+
+	case "socks5":
+		debug.Printf("Configuring SOCKS5 proxy: %s", proxyURL.String())
+
+		// Configure SOCKS5 authentication
+		var auth *proxy.Auth
+		if proxyURL.User != nil {
+			auth = &proxy.Auth{
+				User: proxyURL.User.Username(),
+			}
+			if password, ok := proxyURL.User.Password(); ok {
+				auth.Password = password
+			}
+		}
+
+		// Create SOCKS5 dialer
+		dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, auth, proxy.Direct)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create SOCKS5 dialer: %w", err)
+		}
+
+		return &http.Transport{
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				debug.Printf("Attempting SOCKS5 connection to: %s", addr)
+				return dialer.Dial(network, addr)
+			},
+			MaxIdleConns:       MaxIdleConns,
+			IdleConnTimeout:    IdleConnTimeout,
+			DisableCompression: DisableCompression,
+		}, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported proxy scheme: %s", proxyURL.Scheme)
+	}
 }
 
 // getClient returns an HTTP client configured with proxy settings if specified
@@ -159,19 +186,6 @@ func (c *Client) getClient() (*http.Client, error) {
 	if err != nil {
 		debug.Printf("❌ Create proxy transport failed: %v", err)
 		return nil, fmt.Errorf("failed to create proxy transport: %w", err)
-	}
-
-	// Add debug logging to the transport
-	transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-		debug.Printf("🔌 Connecting: %s %s", network, addr)
-		start := time.Now()
-		conn, err := net.Dial(network, addr)
-		if err != nil {
-			debug.Printf("❌ Connection failed: %v", err)
-			return nil, err
-		}
-		debug.Printf("✅ Connection succeeded, took: %v", time.Since(start))
-		return conn, nil
 	}
 
 	// Create a client with the configured transport and timeout
