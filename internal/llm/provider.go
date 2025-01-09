@@ -11,7 +11,7 @@ import (
 type ProviderConstructor func(config *types.ClientConfig) LLM
 
 var (
-	// providers 存储所有注册的 provider
+	// providers Stores all registered LLM providers
 	providers = make(map[string]ProviderConstructor)
 )
 
@@ -28,7 +28,7 @@ func RegisterProvider(name string, constructor ProviderConstructor) error {
 	return nil
 }
 
-// GetProviders 返回所有已注册的 provider 名称
+// GetProviders returns a list of all registered providers
 func GetProviders() []string {
 	names := make([]string, 0, len(providers))
 	for name := range providers {
@@ -38,7 +38,19 @@ func GetProviders() []string {
 	return names
 }
 
-// NewProvider creates a new LLM provider instance with the given name and config
+// NewProvider creates a new LLM provider instance based on the given provider name and configuration.
+// It returns an LLM interface and an error if any occurs during the creation process.
+//
+// Parameters:
+//   - providerName: A string representing the name of the desired LLM provider.
+//   - config: A pointer to types.ClientConfig containing the configuration for the provider.
+//
+// Returns:
+//   - LLM: An interface representing the created LLM provider instance.
+//   - error: An error if the provider creation fails, or nil if successful.
+//
+// If the specified provider is not registered, it returns a DefaultLLM instance.
+// If the config parameter is nil, it returns an error.
 func NewProvider(providerName string, config *types.ClientConfig) (LLM, error) {
 	if config == nil {
 		return nil, fmt.Errorf("config cannot be nil")
@@ -66,7 +78,30 @@ func CreateProvider(config *types.ClientConfig) (LLM, error) {
 	return constructor(config), nil
 }
 
-// 在 init 函数中注册所有 provider
+// init initializes the LLM providers by registering them with their respective constructors.
+// This function is automatically called when the package is imported.
+//
+// It registers the following providers:
+// - Azure
+// - ChatGLM
+// - Claude
+// - Cohere
+// - Deepseek
+// - Gemini
+// - Kimi
+// - Mistral
+// - Ollama
+// - OpenAI
+// - Vertex
+// - XAI
+// - Sambanova
+// - Silicon
+// - Tongyi
+// - Groq
+// - OpenRouter
+//
+// Each provider is registered with a constructor function that creates a new instance
+// of the corresponding LLM implementation.
 func init() {
 	// Azure
 	RegisterProvider("azure", func(config *types.ClientConfig) LLM {
@@ -146,5 +181,10 @@ func init() {
 	// Groq
 	RegisterProvider("groq", func(config *types.ClientConfig) LLM {
 		return &GroqLLM{}
+	})
+
+	// OpenRouter
+	RegisterProvider("openrouter", func(config *types.ClientConfig) LLM {
+		return &OpenRouterLLM{}
 	})
 }

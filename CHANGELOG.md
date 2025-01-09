@@ -1,5 +1,24 @@
 
 ---
+## [0.2.2](https://github.com/belingud/gptcomet/compare/v0.2.1..v0.2.2) - 2025-01-09
+
+### ⛰️  Features
+
+- add OpenRouter LLM provider - ([701ed0e](https://github.com/belingud/gptcomet/commit/701ed0e78560f963b5bf1180f6f9b9c77bc7a420)) - belingud
+- add default groq model constant - ([42ffdba](https://github.com/belingud/gptcomet/commit/42ffdba769efb790b353deaf9d8be0f5e3634fac)) - belingud
+
+### 📚 Documentation
+
+- update README with new providers and details - ([0bb3e4f](https://github.com/belingud/gptcomet/commit/0bb3e4f2353a48e9a17dc600cef956775d563f93)) - belingud
+- remove known issue section - ([6291d71](https://github.com/belingud/gptcomet/commit/6291d71eb0874b057167386873ffa297307275d2)) - belingud
+- update changelog for v0.2.1 - ([0de9e56](https://github.com/belingud/gptcomet/commit/0de9e564613499d4fc050968709997d7da0b4989)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update uv lock - ([fce6469](https://github.com/belingud/gptcomet/commit/fce646972fef41152c8355cebc789e7f18cbbc64)) - belingud
+
+
+---
 ## [0.2.1](https://github.com/belingud/gptcomet/compare/v0.2.0..v0.2.1) - 2025-01-08
 
 ### 🐛 Bug Fixes

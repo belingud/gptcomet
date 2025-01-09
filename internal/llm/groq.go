@@ -15,6 +15,10 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const (
+	DefaultGroqModel = "llama-3.3-70b-versatile"
+)
+
 // GroqLLM implements the LLM interface for Groq
 type GroqLLM struct {
 	*OpenAILLM
@@ -26,7 +30,7 @@ func NewGroqLLM(config *types.ClientConfig) *GroqLLM {
 		config.APIBase = "https://api.groq.com/openai/v1"
 	}
 	if config.Model == "" {
-		config.Model = "llama3-70b-8192"
+		config.Model = DefaultGroqModel
 	}
 
 	return &GroqLLM{
@@ -50,7 +54,7 @@ func (g *GroqLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter Groq API key",
 		},
 		"model": {
-			DefaultValue:  "llama3-70b-8192",
+			DefaultValue:  DefaultGroqModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

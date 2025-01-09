@@ -59,6 +59,8 @@ func New(config *types.ClientConfig) *Client {
 		provider = llm.NewSambanovaLLM(config)
 	case "groq":
 		provider = llm.NewGroqLLM(config)
+	case "openrouter":
+		provider = llm.NewOpenRouterLLM(config)
 	default:
 		// Default to OpenAI if provider is not specified
 		provider = llm.NewOpenAILLM(config)
