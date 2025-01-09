@@ -44,6 +44,7 @@
   - [License](#license)
 
 <!-- /TOC -->
+
 ## Overview
 
 GPTComet is a go library designed to automate the process of generating commit messages for Git repositories.
@@ -76,17 +77,11 @@ If you prefer to run in python, you can install by `pip` directly, it packaged t
 
 ```shell
 pip install gptcomet
-```
 
-Install use `pipx` or `uv` on Mac, Linux or Windows.
-
-```shell
+# Using pipx
 pipx install gptcomet
-```
 
-Install by `uv`
-
-```shell
+# Using uv
 uv tool install gptcomet
 Resolved 1 package in 1.33s
 Installed 1 package in 8ms
@@ -104,7 +99,7 @@ To use gptcomet, follow these steps:
 -   `provider`: The provider of the language model (default `openai`).
 -   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
 -   `api_key`: The API key for the provider.
--   `model`: The model used for generating commit messages (default `text-davinci-003`).
+-   `model`: The model used for generating commit messages (default `gpt-4o`).
 
 3.  **Run GPTComet**: Run GPTComet using the following command: `gmsg commit`.
 
@@ -136,16 +131,18 @@ gmsg newprovider
     4. cohere
     5. deepseek
     6. gemini
-    7. kimi
-    8. mistral
-    9. ollama
-    10. openai
-    11. sambanova
-    12. silicon
-    13. tongyi
-    14. vertex
-    15. xai
-    16. Input Manually
+    7. groq
+    8. kimi
+    9. mistral
+    10. ollama
+    11. openai
+    12. openrouter
+    13. sambanova
+    14. silicon
+    15. tongyi
+    16. vertex
+    17. xai
+    18. Input Manually
 
     ↑/k up • ↓/j down • ? more
 ```
@@ -271,6 +268,14 @@ Provider ollama configured successfully!
 -   Silicon
 -   Deepseek
 -   ChatGLM
+-   KIMI
+-   Cohere
+-   OpenRouter
+
+Not supported:
+
+-   Baidu ERNIE
+-   Tecent hunyuan
 
 ### Manual Provider Setup
 
@@ -327,13 +332,13 @@ The configuration file for GPTComet is `gptcomet.yaml`. The file should contain 
     -   `api_key`: The API key for the provider.
     -   `model`: The model used for generating commit messages (default `text-davinci-003`).
     -   `retries`: The number of retries for the API request (default `2`).
-    -   `proxy`: The proxy URL for the provider.
+    -   `proxy`: The proxy URL for the provider(default '').
     -   `max_tokens`: The maximum number of tokens for the provider.
     -   `top_p`: The top_p parameter for the provider (default `0.7`).
     -   `temperature`: The temperature parameter for the provider (default `0.7`).
     -   `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
     -   `extra_headers`: The extra headers for the provider, json string.
-    -   `answer_path`: The json path for the answer. Default `choices[0].message.content`
+    -   `answer_path`: The json path for the answer. Default `choices.0.message.content`
     -   `completion_path`: The url path for the completion api. Default `/chat/completions`
 -   `prompt`: The prompt for generating commit messages.
     -   `brief_commit_message`: The prompt for generating brief commit messages.
@@ -342,9 +347,9 @@ The configuration file for GPTComet is `gptcomet.yaml`. The file should contain 
 -   `output`: The output configuration.
     -   `output.lang`: The language of the commit message (default `en`).
     -   `output.rich_template`: The template for generating rich commit messages.
-    -   `output.translate_title`: Whether to translate the title of the commit message.
+    -   `output.translate_title`: Whether to translate the title of the commit message(default `false`).
 -   `console`: The console configuration.
-    -   `console.verbose`: Whether to enable verbose output.
+    -   `console.verbose`: Whether to enable verbose output(default `true`).
 
 `output.translate_title` is used to determine whether to translate the title of the commit message.
 
@@ -465,6 +470,7 @@ The default output is
 output:
     lang: en
     rich_template: "<title>:<summary>\n\n<detail>"
+    translate_title: false
 ```
 
 You can set `rich_template` to change the template of the rich commit message,
@@ -533,10 +539,11 @@ Here is an example of how to use GPTComet:
 
 ```
 provider: "openai"
-api_base: "https://api.openai.com/v1"
-api_key: "YOUR_API_KEY"
-model: "gpt-4o"
-retries: 2
+openai:
+  api_base: "https://api.openai.com/v1"
+  api_key: "YOUR_API_KEY"
+  model: "gpt-4o"
+  retries: 2
 output:
   lang: "en"
 ```
