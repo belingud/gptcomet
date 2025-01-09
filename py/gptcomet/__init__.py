@@ -45,7 +45,7 @@ def find_gptcomet_binary():
 
     binary_path = os.path.join(os.path.dirname(__file__), "bin", binary_name)
     if not os.path.isfile(binary_path):
-        msg = f"gptcomet binary not found for {platform_name}-{arch}, please open an issue on github, thanks."
+        msg = f"gptcomet binary ({binary_name}) not found, please open an issue on github, thanks."
         raise FileNotFoundError(msg)
     return binary_path
 
