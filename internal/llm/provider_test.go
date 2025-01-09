@@ -179,6 +179,7 @@ func TestNewProvider(t *testing.T) {
 		config      *types.ClientConfig
 		wantErr     bool
 		errContains string
+		wantDefault bool // 新增：是否期望返回默认 LLM
 	}{
 		{
 			name:     "Create valid provider",
@@ -187,18 +188,18 @@ func TestNewProvider(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:        "Create unknown provider",
-			provider:    "unknown",
-			config:      &types.ClientConfig{},
-			wantErr:     true,
-			errContains: "unknown provider",
-		},
-		{
 			name:        "Create with nil config",
 			provider:    "mock",
 			config:      nil,
 			wantErr:     true,
 			errContains: "config cannot be nil",
+		},
+		{
+			name:        "Create unknown provider returns default",
+			provider:    "unknown",
+			config:      &types.ClientConfig{},
+			wantErr:     false,
+			wantDefault: true,
 		},
 	}
 
@@ -210,13 +211,21 @@ func TestNewProvider(t *testing.T) {
 				assert.Contains(t, err.Error(), tt.errContains)
 				assert.Nil(t, provider)
 				return
-			}
-			require.NoError(t, err)
-			assert.NotNil(t, provider)
-			assert.Equal(t, tt.provider, provider.Name())
-		})
-	}
-}
+				}
+				
+				require.NoError(t, err)
+				assert.NotNil(t, provider)
+				
+				if tt.wantDefault {
+				// 验证是否返回默认 LLM
+				_, isDefault := provider.(*DefaultLLM)
+				assert.True(t, isDefault, "Expected DefaultLLM for unknown provider")
+				} else {
+				assert.Equal(t, tt.provider, provider.Name())
+				}
+				})
+				}
+				}
 
 func TestListProviders(t *testing.T) {
 	// Clear providers
