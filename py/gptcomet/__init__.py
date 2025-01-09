@@ -5,6 +5,23 @@ import sys
 
 
 def find_gptcomet_binary():
+    """Find the appropriate gptcomet binary for the current platform and architecture.
+
+    This function determines the correct binary name based on the system platform
+    (Windows, macOS, Linux) and architecture (ARM64, AMD64), then locates the binary
+    in the package's bin directory.
+
+    Returns:
+        str: The full path to the gptcomet binary
+
+    Raises:
+        OSError: If the platform or architecture is not supported
+        FileNotFoundError: If the binary file is not found in the expected location
+
+    Examples:
+        >>> find_gptcomet_binary()
+        '/path/to/gptcomet/bin/gptcomet_amd64_mac'
+    """
     platform_name = sys.platform
 
     machine = platform.machine().lower()
@@ -34,6 +51,21 @@ def find_gptcomet_binary():
 
 
 def main():
+    """Launch and execute the gptcomet binary with provided arguments.
+
+    The function behaves differently on Windows vs other platforms:
+    - On Windows: Uses subprocess.run() to execute the binary
+    - On other platforms: Uses os.execvpe() for direct process replacement
+
+    Raises:
+        SystemExit: With code 1 if update command is used, otherwise with binary's return code
+    """
+    subcommand = sys.argv[1] if len(sys.argv) > 1 else ""
+    if subcommand == "update":
+        print(
+            "Installed by pypi does not support update command, please update by the way you install gptcomet."
+        )
+        sys.exit(1)
     binary = find_gptcomet_binary()
     args = [binary] + sys.argv[1:]
     if sys.platform == "win32":
