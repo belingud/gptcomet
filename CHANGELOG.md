@@ -1,5 +1,42 @@
 
 ---
+## [0.2.3](https://github.com/belingud/gptcomet/compare/v0.2.2..v0.2.3) - 2025-01-10
+
+### ⛰️  Features
+
+- add update command - ([77d3527](https://github.com/belingud/gptcomet/commit/77d35273b8634ba9a1d130cbcf94a3d808c93ebd)) - belingud
+- Add docstrings and update command handling - ([eee9879](https://github.com/belingud/gptcomet/commit/eee98796f6131775ec43261f105f3cdc027e173c)) - belingud
+
+### 🐛 Bug Fixes
+
+- improve error message for missing binary - ([9557e62](https://github.com/belingud/gptcomet/commit/9557e62986635b626bcbd48e3ac13468bfdd3a47)) - belingud
+
+### 🚜 Refactor
+
+- add interfaces for update cmd dependency injection - ([afd0164](https://github.com/belingud/gptcomet/commit/afd01646dad5389924b3bc31dca6d49cd0c0bb31)) - belingud
+- migrate test mocks to testify/mock framework - ([94cb318](https://github.com/belingud/gptcomet/commit/94cb3181eb4c943d8596c98c99c5136ab75e5248)) - belingud
+- introduce interfaces for client, config, and text editor - ([849248e](https://github.com/belingud/gptcomet/commit/849248e303aabe7c019960db0238c02705f156a5)) - belingud
+- rename mock LLM and VCS functions - ([32be206](https://github.com/belingud/gptcomet/commit/32be206eb6914dfe7e36b326981c379573e6fe56)) - belingud
+
+### 📚 Documentation
+
+- update README gifs with VHS recordings - ([0bba55a](https://github.com/belingud/gptcomet/commit/0bba55a9b6d165135cb9eceaabb8f9b018ae951b)) - belingud
+- update changelog for v0.2.2 - ([693f3a2](https://github.com/belingud/gptcomet/commit/693f3a293059a768425f888a6efa33c48923a9f6)) - belingud
+
+### 🧪 Testing
+
+- add commit service tests - ([d140752](https://github.com/belingud/gptcomet/commit/d140752ad7f1056dbeeba8d168e525587da0b05d)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- remove unused scripts - ([b1f13bb](https://github.com/belingud/gptcomet/commit/b1f13bb83b34a2d157b35b3349df61b6ff0db1a1)) - belingud
+- Remove tox.ini configuration file - ([c9ee62d](https://github.com/belingud/gptcomet/commit/c9ee62dfe8f1cee50e1beabe653ba30153b6f0a8)) - belingud
+- remove codecov.yaml configuration file - ([bf84ad3](https://github.com/belingud/gptcomet/commit/bf84ad34ff89973c7d7552de6da6ba5d2c6e9455)) - belingud
+- add stretchr/objx dependency to go.mod - ([a5c0033](https://github.com/belingud/gptcomet/commit/a5c0033fe3a662b7551b6f20fed9e68e11084c7b)) - belingud
+- update uv lock - ([61a4ade](https://github.com/belingud/gptcomet/commit/61a4ade5b5e94245cc1346ad7c2acf30aa2020d1)) - belingud
+
+
+---
 ## [0.2.2](https://github.com/belingud/gptcomet/compare/v0.2.1..v0.2.2) - 2025-01-09
 
 ### ⛰️  Features

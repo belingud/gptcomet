@@ -60,26 +60,12 @@ func TestConfig(t *testing.T, content string) (string, func()) {
 func TestGitRepo(t *testing.T) (string, func()) {
 	t.Helper()
 
-	dir, cleanupDir := TestDir(t)
-
-	// Initialize git repository
-	err := os.Chdir(dir)
-	require.NoError(t, err, "Failed to change directory")
-
-	err = RunGitCommand(t, dir, "init")
-	require.NoError(t, err, "Failed to initialize git repository")
-
-	err = RunGitCommand(t, dir, "config", "user.email", "test@example.com")
-	require.NoError(t, err, "Failed to configure git email")
-
-	err = RunGitCommand(t, dir, "config", "user.name", "Test User")
-	require.NoError(t, err, "Failed to configure git username")
-
-	cleanup := func() {
-		cleanupDir()
+	repoPath, cleanup := CreateTestRepo(t)
+	if err := RunGitCommand(t, repoPath, "init"); err != nil {
+		cleanup()
+		t.Fatal(err)
 	}
-
-	return dir, cleanup
+	return repoPath, cleanup
 }
 
 // RunGitCommand runs a git command in the specified directory
@@ -91,7 +77,7 @@ func RunGitCommand(t *testing.T, dir string, args ...string) error {
 		t.Skip("git command not found")
 	}
 
-	// 构建环境变量
+	// create environment variables
 	env := append(os.Environ(),
 		"GIT_CONFIG_NOSYSTEM=1",
 		"GIT_CONFIG_GLOBAL=/dev/null",
@@ -132,7 +118,7 @@ func RunCommand(t *testing.T, dir string, name string, args ...string) error {
 	return nil
 }
 
-// CreateTestConfig 创建一个临时的测试配置文件并返回其路径
+// CreateTestConfig creates a temporary config file for testing
 func CreateTestConfig(t *testing.T, content string) string {
 	t.Helper()
 
@@ -149,7 +135,7 @@ func CreateTestConfig(t *testing.T, content string) string {
 	return configPath
 }
 
-// CreateTestDir 创建测试目录并返回路径和清理函数
+// CreateTestDir creates a temporary directory for testing
 func CreateTestDir(t *testing.T) (string, func()) {
 	t.Helper()
 
@@ -166,7 +152,7 @@ func InitGitRepo(t *testing.T, dir string) error {
 
 	gitCmd := "git"
 
-	// 设置基本环境变量
+	// set environment variables
 	env := []string{
 		"HOME=" + dir,
 		"GIT_CONFIG_NOSYSTEM=1",
@@ -177,7 +163,7 @@ func InitGitRepo(t *testing.T, dir string) error {
 		"GIT_COMMITTER_NAME=Test User",
 	}
 
-	// 初始化Git仓库
+	// init git repository
 	cmds := [][]string{
 		{"init"},
 		{"config", "--local", "user.email", "test@example.com"},
@@ -218,4 +204,19 @@ func StageFile(t *testing.T, dir string, file string) error {
 	}
 
 	return nil
+}
+
+// CreateTestRepo creates a temporary repository for testing
+func CreateTestRepo(t *testing.T) (string, func()) {
+	t.Helper()
+	tmpDir, err := os.MkdirTemp("", "gptcomet-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cleanup := func() {
+		os.RemoveAll(tmpDir)
+	}
+
+	return tmpDir, cleanup
 }

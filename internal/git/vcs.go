@@ -15,7 +15,7 @@ type VCS interface {
 	GetDiff(repoPath string) (string, error)
 	HasStagedChanges(repoPath string) (bool, error)
 	GetStagedFiles(repoPath string) ([]string, error)
-	GetStagedDiffFiltered(repoPath string, cfgManager *config.Manager) (string, error)
+	GetStagedDiffFiltered(repoPath string, cfgManager config.ManagerInterface) (string, error)
 	GetCurrentBranch(repoPath string) (string, error)
 	GetCommitInfo(repoPath, commitHash string) (string, error)
 	GetLastCommitHash(repoPath string) (string, error)

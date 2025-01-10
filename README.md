@@ -9,7 +9,7 @@
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/belingud/gptcomet/total?style=for-the-badge&label=Release%20Download)
 
-![](artwork/commit.gif)
+![Made with VHS](https://vhs.charm.sh/vhs-hU26Jr76ijTPjOV8qFPzB.gif)
 
 <!-- TOC -->
 
@@ -118,7 +118,7 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
 
 ### Provider Setup Guide
 
-![](artwork/newprovider.gif)
+![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)
 
 ```bash
 gmsg newprovider

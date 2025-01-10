@@ -17,6 +17,12 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+type ClientInterface interface {
+	Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error)
+	TranslateMessage(prompt string, message string, lang string) (string, error)
+	GenerateCommitMessage(diff string, prompt string) (string, error)
+}
+
 // Client represents an LLM client
 type Client struct {
 	config *types.ClientConfig

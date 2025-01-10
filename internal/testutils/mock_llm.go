@@ -6,61 +6,65 @@ import (
 
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
+	"github.com/stretchr/testify/mock"
 )
 
-// Mock LLM implementation for testing
+// MockLLM is a mock implementation of LLM interface using testify/mock
 type MockLLM struct {
-	name                  string
-	generateCommitMessage func(diff string, prompt string) (string, error)
-	translateMessage      func(prompt string, message string, lang string) (string, error)
-	makeRequest           func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error)
+	mock.Mock
 }
 
 func (m *MockLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
-	return map[string]config.ConfigRequirement{}
+	args := m.Called()
+	return args.Get(0).(map[string]config.ConfigRequirement)
 }
 
 func (m *MockLLM) BuildHeaders() map[string]string {
-	return map[string]string{}
+	args := m.Called()
+	return args.Get(0).(map[string]string)
 }
 
 func (m *MockLLM) BuildURL() string {
-	return "https://mock.api"
+	args := m.Called()
+	return args.String(0)
 }
 
 func (m *MockLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
-	return message, nil
+	args := m.Called(message, history)
+	return args.Get(0), args.Error(1)
 }
 
 func (m *MockLLM) ParseResponse(response []byte) (string, error) {
-	return string(response), nil
+	args := m.Called(response)
+	return args.String(0), args.Error(1)
 }
 
 func (m *MockLLM) GetUsage(data []byte) (string, error) {
-	return "", nil
+	args := m.Called(data)
+	return args.String(0), args.Error(1)
 }
 
 func (m *MockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	if m.makeRequest != nil {
-		return m.makeRequest(ctx, client, message, history)
-	}
-	return "mock response", nil
+	args := m.Called(ctx, client, message, history)
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockLLM) Complete(message string) (string, error) {
+	args := m.Called(message)
+	return args.String(0), args.Error(1)
 }
 
 func (m *MockLLM) GenerateCommitMessage(diff string, prompt string) (string, error) {
-	if m.generateCommitMessage != nil {
-		return m.generateCommitMessage(diff, prompt)
-	}
-	return "Test commit message", nil
+	args := m.Called(diff, prompt)
+	return args.String(0), args.Error(1)
 }
 
-func (m *MockLLM) TranslateMessage(prompt string, message string, lang string) (string, error) {
-	if m.translateMessage != nil {
-		return m.translateMessage(prompt, message, lang)
-	}
-	return message, nil
+func (m *MockLLM) TranslateMessage(prompt string, message string, targetLang string) (string, error) {
+	args := m.Called(prompt, message, targetLang)
+	return args.String(0), args.Error(1)
 }
 
 func (m *MockLLM) Name() string {
-	return m.name
+	args := m.Called()
+	return args.String(0)
 }

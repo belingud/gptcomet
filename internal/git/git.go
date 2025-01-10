@@ -132,7 +132,7 @@ func ShouldIgnoreFile(file string, ignorePatterns []string) bool {
 //
 // The function will return an empty string if there are no staged files in the repository.
 // If the git command fails, it returns a detailed error message including the exit code.
-func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager *config.Manager) (string, error) {
+func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager config.ManagerInterface) (string, error) {
 	// get staged files
 	stagedFiles, err := g.GetStagedFiles(repoPath)
 	if err != nil {

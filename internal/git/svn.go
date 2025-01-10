@@ -82,7 +82,7 @@ func (s *SVNVCS) GetStagedFiles(repoPath string) ([]string, error) {
 // Returns:
 //   - string: The filtered diff output
 //   - error: An error if the svn command fails or if there are issues accessing the repository
-func (s *SVNVCS) GetStagedDiffFiltered(repoPath string, cfgManager *config.Manager) (string, error) {
+func (s *SVNVCS) GetStagedDiffFiltered(repoPath string, cfgManager config.ManagerInterface) (string, error) {
 	files, err := s.GetStagedFiles(repoPath)
 	if err != nil {
 		return "", err
