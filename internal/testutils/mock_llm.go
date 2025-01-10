@@ -10,10 +10,10 @@ import (
 
 // Mock LLM implementation for testing
 type MockLLM struct {
-	name                  string
-	generateCommitMessage func(diff string, prompt string) (string, error)
-	translateMessage      func(prompt string, message string, lang string) (string, error)
-	makeRequest           func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error)
+	name                      string
+	GenerateCommitMessageFunc func(diff string, prompt string) (string, error)
+	TranslateMessageFunc      func(prompt string, message string, targetLang string) (string, error)
+	makeRequest               func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error)
 }
 
 func (m *MockLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
@@ -48,15 +48,15 @@ func (m *MockLLM) MakeRequest(ctx context.Context, client *http.Client, message 
 }
 
 func (m *MockLLM) GenerateCommitMessage(diff string, prompt string) (string, error) {
-	if m.generateCommitMessage != nil {
-		return m.generateCommitMessage(diff, prompt)
+	if m.GenerateCommitMessageFunc != nil {
+		return m.GenerateCommitMessageFunc(diff, prompt)
 	}
 	return "Test commit message", nil
 }
 
-func (m *MockLLM) TranslateMessage(prompt string, message string, lang string) (string, error) {
-	if m.translateMessage != nil {
-		return m.translateMessage(prompt, message, lang)
+func (m *MockLLM) TranslateMessage(prompt string, message string, targetLang string) (string, error) {
+	if m.TranslateMessageFunc != nil {
+		return m.TranslateMessageFunc(prompt, message, targetLang)
 	}
 	return message, nil
 }
