@@ -13,6 +13,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type ManagerInterface interface {
+	Get(key string) (interface{}, bool)
+	Set(key string, value interface{}) error
+	ListWithoutPrompt() map[string]interface{}
+	List() (string, error)
+	Reset(promptOnly bool) error
+	Remove(key string, value string) error
+	Append(key string, value interface{}) error
+	save() error
+	GetClientConfig() (*types.ClientConfig, error)
+	GetSupportedKeys() []string
+	UpdateProviderConfig(provider string, configs map[string]string) error
+	GetPrompt(isRich bool) string
+	getNestedValue(keys []string) (interface{}, bool)
+	setNestedValue(keys []string, value interface{})
+	load() error
+	GetTranslationPrompt() string
+	GetOutputTranslateTitle() bool
+	GetFileIgnore() []string
+}
+
 // Manager handles configuration management
 type Manager struct {
 	config     map[string]interface{}

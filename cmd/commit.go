@@ -121,6 +121,32 @@ func editText(initialText string) (string, error) {
 	return strings.TrimSpace(finalModel.textarea.Value()), nil
 }
 
+// CommitError represents specific error types that can occur during commit operations
+type CommitError struct {
+	Type    string
+	Message string
+	Err     error
+}
+
+func (e *CommitError) Error() string {
+	if e.Err != nil {
+		return fmt.Sprintf("%s: %s (%v)", e.Type, e.Message, e.Err)
+	}
+	return fmt.Sprintf("%s: %s", e.Type, e.Message)
+}
+
+// TextEditor represents an interface for text editing operations
+type TextEditor interface {
+	Edit(initialText string) (string, error)
+}
+
+// TerminalEditor implements TextEditor for terminal-based editing
+type TerminalEditor struct{}
+
+func (e *TerminalEditor) Edit(initialText string) (string, error) {
+	return editText(initialText)
+}
+
 func formatCommitMessage(msg string) string {
 	return boxStyle.Render(successStyle.Render(msg))
 }
@@ -141,9 +167,10 @@ type CommitOptions struct {
 // API client, and configuration settings.
 type CommitService struct {
 	vcs        git.VCS
-	client     *client.Client
-	cfgManager *config.Manager
+	client     client.ClientInterface
+	cfgManager config.ManagerInterface
 	options    CommitOptions
+	editor     TextEditor
 }
 
 // NewCommitService creates a new CommitService instance with the provided options.
@@ -182,6 +209,7 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 		client:     client.New(clientConfig),
 		cfgManager: cfgManager,
 		options:    options,
+		editor:     &TerminalEditor{},
 	}, nil
 }
 
@@ -370,7 +398,7 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 				return err
 			}
 		case "e", "edit":
-			edited, err := editText(commitMsg)
+			edited, err := s.editor.Edit(commitMsg)
 			if err != nil {
 				fmt.Printf("Error editing message: %v\n", err)
 				continue
