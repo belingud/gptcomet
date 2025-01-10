@@ -9,14 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// setupTest 创建测试环境
+// setupTest creates test environment
 func setupTest() (*cobra.Command, *testutils.MockConfigManager) {
-	mock := &testutils.MockConfigManager{
-		Data: make(map[string]interface{}),
-		Path: "/mock/config/path",
-	}
+	mock := &testutils.MockConfigManager{}
 	cmd := &cobra.Command{}
-	// 初始化 command 的 context
+	// Initialize command context
 	cmd.SetContext(context.Background())
 	setConfigManager(cmd, mock)
 	return cmd, mock
@@ -33,143 +30,104 @@ func TestConfigManagerContext(t *testing.T) {
 func TestGetConfigCmd(t *testing.T) {
 	cmd := newGetConfigCmd()
 	cmd.SetContext(context.Background())
-	mock := &testutils.MockConfigManager{
-		GetFunc: func(key string) (interface{}, bool) {
-			return "test-value", true
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("Get", "test.key").Return("test-value", true)
 	setConfigManager(cmd, mock)
 
 	cmd.SetArgs([]string{"test.key"})
 	err := cmd.Execute()
 	assert.NoError(t, err)
+	mock.AssertExpectations(t)
 }
 
 func TestSetConfigCmd(t *testing.T) {
 	cmd := newSetConfigCmd()
 	cmd.SetContext(context.Background())
-	var setCalled bool
-	mock := &testutils.MockConfigManager{
-		SetFunc: func(key string, value interface{}) error {
-			assert.Equal(t, "test.key", key)
-			assert.Equal(t, "new-value", value)
-			setCalled = true
-			return nil
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("Set", "test.key", "new-value").Return(nil)
 	setConfigManager(cmd, mock)
 
 	cmd.SetArgs([]string{"test.key", "new-value"})
 	err := cmd.Execute()
 	assert.NoError(t, err)
-	assert.True(t, setCalled)
+	mock.AssertExpectations(t)
 }
 
 func TestListConfigCmd(t *testing.T) {
 	cmd := newListConfigCmd()
 	cmd.SetContext(context.Background())
-	mock := &testutils.MockConfigManager{
-		ListFunc: func() (string, error) {
-			return "{\"test\": \"value\"}", nil
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("List").Return("{\"test\": \"value\"}", nil)
 	setConfigManager(cmd, mock)
 
 	err := cmd.Execute()
 	assert.NoError(t, err)
+	mock.AssertExpectations(t)
 }
 
 func TestResetConfigCmd(t *testing.T) {
 	cmd := newResetConfigCmd()
 	cmd.SetContext(context.Background())
-	var resetCalled bool
-	mock := &testutils.MockConfigManager{
-		ResetFunc: func(promptOnly bool) error {
-			assert.False(t, promptOnly)
-			resetCalled = true
-			return nil
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("Reset", false).Return(nil)
 	setConfigManager(cmd, mock)
 
 	cmd.SetArgs([]string{"--prompt=false"})
 	err := cmd.Execute()
 	assert.NoError(t, err)
-	assert.True(t, resetCalled)
+	mock.AssertExpectations(t)
 }
 
 func TestPathConfigCmd(t *testing.T) {
 	cmd := newPathConfigCmd()
 	cmd.SetContext(context.Background())
-	mock := &testutils.MockConfigManager{
-		GetPathFunc: func() string {
-			return "/mock/config/path"
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("GetPath").Return("/mock/config/path")
 	setConfigManager(cmd, mock)
 
 	err := cmd.Execute()
 	assert.NoError(t, err)
+	mock.AssertExpectations(t)
 }
 
 func TestRemoveConfigCmd(t *testing.T) {
 	cmd := newRemoveConfigCmd()
 	cmd.SetContext(context.Background())
-	var removeCalled bool
-	mock := &testutils.MockConfigManager{
-		GetFunc: func(key string) (interface{}, bool) {
-			return "test-value", true
-		},
-		RemoveFunc: func(key string, value string) error {
-			assert.Equal(t, "test.key", key)
-			assert.Equal(t, "", value)
-			removeCalled = true
-			return nil
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("Get", "test.key").Return("test-value", true)
+	mock.On("Remove", "test.key", "").Return(nil)
 	setConfigManager(cmd, mock)
 
 	cmd.SetArgs([]string{"test.key"})
 	err := cmd.Execute()
 	assert.NoError(t, err)
-	assert.True(t, removeCalled)
+	mock.AssertExpectations(t)
 }
 
 func TestAppendConfigCmd(t *testing.T) {
 	cmd := newAppendConfigCmd()
 	cmd.SetContext(context.Background())
-	var appendCalled bool
-	mock := &testutils.MockConfigManager{
-		GetFunc: func(key string) (interface{}, bool) {
-			return []interface{}{}, true
-		},
-		AppendFunc: func(key string, value interface{}) error {
-			assert.Equal(t, "test.list", key)
-			assert.Equal(t, "value1", value)
-			appendCalled = true
-			return nil
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("Get", "test.list").Return([]interface{}{}, true)
+	mock.On("Append", "test.list", "value1").Return(nil)
 	setConfigManager(cmd, mock)
 
 	cmd.SetArgs([]string{"test.list", "value1"})
 	err := cmd.Execute()
 	assert.NoError(t, err)
-	assert.True(t, appendCalled)
+	mock.AssertExpectations(t)
 }
 
 func TestKeysConfigCmd(t *testing.T) {
 	cmd := newKeysConfigCmd()
 	cmd.SetContext(context.Background())
-	mock := &testutils.MockConfigManager{
-		GetSupportedKeysFunc: func() []string {
-			return []string{"test.key", "openai.api_key"}
-		},
-	}
+	mock := &testutils.MockConfigManager{}
+	mock.On("GetSupportedKeys").Return([]string{"test.key", "openai.api_key"})
 	setConfigManager(cmd, mock)
 
 	err := cmd.Execute()
 	assert.NoError(t, err)
+	mock.AssertExpectations(t)
 }
 
 func TestNewConfigCmd(t *testing.T) {

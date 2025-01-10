@@ -1,72 +1,59 @@
 package testutils
 
-// MockConfigManager 实现配置管理器接口用于测试
+import (
+	"github.com/belingud/gptcomet/pkg/types"
+	"github.com/stretchr/testify/mock"
+)
+
+// MockConfigManager is a mock implementation of config.Manager
 type MockConfigManager struct {
-	Data                 map[string]interface{}
-	Path                 string
-	GetFunc              func(key string) (interface{}, bool)
-	ListFunc             func() (string, error)
-	ResetFunc            func(promptOnly bool) error
-	SetFunc              func(key string, value interface{}) error
-	GetPathFunc          func() string
-	RemoveFunc           func(key string, value string) error
-	AppendFunc           func(key string, value interface{}) error
-	GetSupportedKeysFunc func() []string
+	mock.Mock
 }
 
 func (m *MockConfigManager) Get(key string) (interface{}, bool) {
-	if m.GetFunc != nil {
-		return m.GetFunc(key)
-	}
-	val, ok := m.Data[key]
-	return val, ok
-}
-
-func (m *MockConfigManager) List() (string, error) {
-	if m.ListFunc != nil {
-		return m.ListFunc()
-	}
-	return "{\"test\": \"value\"}", nil
-}
-
-func (m *MockConfigManager) Reset(promptOnly bool) error {
-	if m.ResetFunc != nil {
-		return m.ResetFunc(promptOnly)
-	}
-	return nil
+	args := m.Called(key)
+	return args.Get(0), args.Bool(1)
 }
 
 func (m *MockConfigManager) Set(key string, value interface{}) error {
-	if m.SetFunc != nil {
-		return m.SetFunc(key, value)
-	}
-	return nil
+	args := m.Called(key, value)
+	return args.Error(0)
 }
 
-func (m *MockConfigManager) GetPath() string {
-	if m.GetPathFunc != nil {
-		return m.GetPathFunc()
-	}
-	return m.Path
+func (m *MockConfigManager) List() (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockConfigManager) Reset(promptOnly bool) error {
+	args := m.Called(promptOnly)
+	return args.Error(0)
 }
 
 func (m *MockConfigManager) Remove(key string, value string) error {
-	if m.RemoveFunc != nil {
-		return m.RemoveFunc(key, value)
-	}
-	return nil
+	args := m.Called(key, value)
+	return args.Error(0)
 }
 
 func (m *MockConfigManager) Append(key string, value interface{}) error {
-	if m.AppendFunc != nil {
-		return m.AppendFunc(key, value)
+	args := m.Called(key, value)
+	return args.Error(0)
+}
+
+func (m *MockConfigManager) GetPath() string {
+	args := m.Called()
+	return args.String(0)
+}
+
+func (m *MockConfigManager) GetClientConfig() (*types.ClientConfig, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-	return nil
+	return args.Get(0).(*types.ClientConfig), args.Error(1)
 }
 
 func (m *MockConfigManager) GetSupportedKeys() []string {
-	if m.GetSupportedKeysFunc != nil {
-		return m.GetSupportedKeysFunc()
-	}
-	return []string{}
+	args := m.Called()
+	return args.Get(0).([]string)
 }
