@@ -187,4 +187,9 @@ func init() {
 	RegisterProvider("openrouter", func(config *types.ClientConfig) LLM {
 		return &OpenRouterLLM{}
 	})
+
+	// AI21
+	RegisterProvider("ai21", func(config *types.ClientConfig) LLM {
+		return &AI21LLM{}
+	})
 }
