@@ -14,34 +14,34 @@
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-    - [Overview](#overview)
-    - [Features](#features)
-    - [Installation](#installation)
-    - [Usage](#usage)
-    - [Setup](#setup)
-        - [Configuration Methods](#configuration-methods)
-        - [Provider Setup Guide](#provider-setup-guide)
-            - [OpenAI](#openai)
-            - [Gemini](#gemini)
-            - [Claude/Anthropic](#claudeanthropic)
-            - [Vertex](#vertex)
-            - [Azure](#azure)
-            - [Ollama](#ollama)
-            - [Other Supported Providers](#other-supported-providers)
-        - [Manual Provider Setup](#manual-provider-setup)
-    - [Commands](#commands)
-    - [Configuration](#configuration)
-        - [Supported Configuration Keys](#supported-configuration-keys)
-        - [file_ignore](#file_ignore)
-        - [provider](#provider)
-        - [output](#output)
-        - [Supported languages](#supported-languages)
-        - [console](#console)
-    - [Supported Keys](#supported-keys)
-    - [Example](#example)
-    - [Development](#development)
-    - [Contact](#contact)
-    - [License](#license)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Setup](#setup)
+    - [Configuration Methods](#configuration-methods)
+    - [Provider Setup Guide](#provider-setup-guide)
+      - [OpenAI](#openai)
+      - [Gemini](#gemini)
+      - [Claude/Anthropic](#claudeanthropic)
+      - [Vertex](#vertex)
+      - [Azure](#azure)
+      - [Ollama](#ollama)
+      - [Other Supported Providers](#other-supported-providers)
+    - [Manual Provider Setup](#manual-provider-setup)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
+    - [Supported Configuration Keys](#supported-configuration-keys)
+    - [file\_ignore](#file_ignore)
+    - [provider](#provider)
+    - [output](#output)
+    - [Supported languages](#supported-languages)
+    - [console](#console)
+  - [Supported Keys](#supported-keys)
+  - [Example](#example)
+  - [Development](#development)
+  - [Contact](#contact)
+  - [License](#license)
 
 <!-- /TOC -->
 <!-- /TOC -->
@@ -295,6 +295,32 @@ Enter model name [gpt-4o]:
 Enter API key: ************************************
 Enter max tokens [1024]:
 [GPTComet] Provider test configured successfully.
+```
+
+Some special provider may need your custome config. Like `cloudflare`.
+
+> Be aware that the model name is not used in cloudflare api.
+
+```shell
+$ gmsg newprovider
+                             
+Selected provider: cloudflare
+Configure provider:
+
+Previous inputs:
+  Enter API Base URL: https://api.cloudflare.com/client/v4/accounts/<account_id>/ai/run
+  Enter model name: llama-3.3-70b-instruct-fp8-fast
+  Enter API key: abc*************************************
+
+Enter Enter max tokens (default: 1024):
+> 1024                                     
+
+Provider cloudflare already has a configuration. Do you want to overwrite it? (y/N): y
+
+Provider cloudflare configured successfully!
+
+$ gmsg config set cloudflare.completion_path @cf/meta/llama-3.3-70b-instruct-fp8-fast
+$ gmsg config set cloudflare.answer_path result.response
 ```
 
 ## Commands
