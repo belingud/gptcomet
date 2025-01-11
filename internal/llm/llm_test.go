@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewBaseLLM(t *testing.T) {
+	customPath := "custom/path"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -29,7 +30,7 @@ func TestNewBaseLLM(t *testing.T) {
 		{
 			name: "custom config",
 			config: &types.ClientConfig{
-				CompletionPath: "custom/path",
+				CompletionPath: &customPath,
 				AnswerPath:     "custom.path",
 			},
 			want: struct {
@@ -45,8 +46,8 @@ func TestNewBaseLLM(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewBaseLLM(tt.config)
-			if got.Config.CompletionPath != tt.want.completionPath {
-				t.Errorf("CompletionPath = %s, want %s", got.Config.CompletionPath, tt.want.completionPath)
+			if *got.Config.CompletionPath != tt.want.completionPath {
+				t.Errorf("CompletionPath = %s, want %s", *got.Config.CompletionPath, tt.want.completionPath)
 			}
 			if got.Config.AnswerPath != tt.want.answerPath {
 				t.Errorf("AnswerPath = %s, want %s", got.Config.AnswerPath, tt.want.answerPath)
@@ -156,6 +157,7 @@ func TestBaseLLM_BuildHeaders(t *testing.T) {
 }
 
 func TestBaseLLM_BuildURL(t *testing.T) {
+	defaultPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -165,7 +167,7 @@ func TestBaseLLM_BuildURL(t *testing.T) {
 			name: "standard url",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.example.com",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.example.com/chat/completions",
 		},
@@ -173,7 +175,7 @@ func TestBaseLLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.example.com/",
-				CompletionPath: "/chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.example.com/chat/completions",
 		},

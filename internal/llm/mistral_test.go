@@ -89,6 +89,7 @@ func TestMistralLLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestMistralLLM_BuildURL(t *testing.T) {
+	completionPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -98,7 +99,7 @@ func TestMistralLLM_BuildURL(t *testing.T) {
 			name: "standard url",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.mistral.ai/v1",
-				CompletionPath: "chat/completions",
+				CompletionPath: &completionPath,
 			},
 			want: "https://api.mistral.ai/v1/chat/completions",
 		},
@@ -106,7 +107,7 @@ func TestMistralLLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.mistral.ai/v1/",
-				CompletionPath: "chat/completions",
+				CompletionPath: &completionPath,
 			},
 			want: "https://api.mistral.ai/v1/chat/completions",
 		},

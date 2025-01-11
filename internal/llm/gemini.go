@@ -29,8 +29,9 @@ func NewGeminiLLM(config *types.ClientConfig) *GeminiLLM {
 	if config.Model == "" {
 		config.Model = "gemini-1.5-flash"
 	}
-	if config.CompletionPath == "" {
-		config.CompletionPath = "generateContent"
+	if config.CompletionPath == nil {
+		defaultPath := "generateContent"
+		config.CompletionPath = &defaultPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "candidates.0.content.parts.0.text"

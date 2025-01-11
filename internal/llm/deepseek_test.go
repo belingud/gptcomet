@@ -92,6 +92,7 @@ func TestDeepSeekLLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestDeepSeekLLM_BuildURL(t *testing.T) {
+	defaultPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -101,7 +102,7 @@ func TestDeepSeekLLM_BuildURL(t *testing.T) {
 			name: "default url",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.deepseek.com/v1",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.deepseek.com/v1/chat/completions",
 		},
@@ -109,7 +110,7 @@ func TestDeepSeekLLM_BuildURL(t *testing.T) {
 			name: "custom url",
 			config: &types.ClientConfig{
 				APIBase:        "https://custom.api.com",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://custom.api.com/chat/completions",
 		},
@@ -117,7 +118,7 @@ func TestDeepSeekLLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.deepseek.com/v1/",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.deepseek.com/v1/chat/completions",
 		},

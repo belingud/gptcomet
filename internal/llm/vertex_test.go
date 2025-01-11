@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewVertexLLM(t *testing.T) {
+	customPath := "custom/path"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -45,7 +46,7 @@ func TestNewVertexLLM(t *testing.T) {
 				Model:          "custom-model",
 				ProjectID:      "test-project",
 				Location:       "europe-west1",
-				CompletionPath: "custom/path",
+				CompletionPath: &customPath,
 				AnswerPath:     "custom.path",
 			},
 			want: struct {
@@ -81,8 +82,8 @@ func TestNewVertexLLM(t *testing.T) {
 			if got.Config.Location != tt.want.location {
 				t.Errorf("Location = %s, want %s", got.Config.Location, tt.want.location)
 			}
-			if got.Config.CompletionPath != tt.want.completionPath {
-				t.Errorf("CompletionPath = %s, want %s", got.Config.CompletionPath, tt.want.completionPath)
+			if *got.Config.CompletionPath != tt.want.completionPath {
+				t.Errorf("CompletionPath = %s, want %s", *got.Config.CompletionPath, tt.want.completionPath)
 			}
 			if got.Config.AnswerPath != tt.want.answerPath {
 				t.Errorf("AnswerPath = %s, want %s", got.Config.AnswerPath, tt.want.answerPath)

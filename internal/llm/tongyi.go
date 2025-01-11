@@ -18,8 +18,9 @@ func NewTongyiLLM(config *types.ClientConfig) *TongyiLLM {
 	if config.APIBase == "" {
 		config.APIBase = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 	}
-	if config.CompletionPath == "" {
-		config.CompletionPath = "chat/completions"
+	if config.CompletionPath == nil {
+		completionPath := "chat/completions"
+		config.CompletionPath = &completionPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "choices.0.message.content"

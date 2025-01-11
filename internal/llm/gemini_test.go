@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewGeminiLLM(t *testing.T) {
+	customPath := "custom/path"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -37,7 +38,7 @@ func TestNewGeminiLLM(t *testing.T) {
 			config: &types.ClientConfig{
 				APIBase:        "https://custom.api.com",
 				Model:          "custom-model",
-				CompletionPath: "custom/path",
+				CompletionPath: &customPath,
 				AnswerPath:     "custom.path",
 			},
 			want: struct {
@@ -63,7 +64,7 @@ func TestNewGeminiLLM(t *testing.T) {
 			if got.Config.Model != tt.want.model {
 				t.Errorf("Model = %v, want %v", got.Config.Model, tt.want.model)
 			}
-			if got.Config.CompletionPath != tt.want.completionPath {
+			if *got.Config.CompletionPath != tt.want.completionPath {
 				t.Errorf("CompletionPath = %v, want %v", got.Config.CompletionPath, tt.want.completionPath)
 			}
 			if got.Config.AnswerPath != tt.want.answerPath {

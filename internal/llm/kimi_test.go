@@ -89,6 +89,7 @@ func TestKimiLLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestKimiLLM_BuildURL(t *testing.T) {
+	defaultPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -98,7 +99,7 @@ func TestKimiLLM_BuildURL(t *testing.T) {
 			name: "standard url",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.moonshot.cn/v1",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.moonshot.cn/v1/chat/completions",
 		},
@@ -106,7 +107,7 @@ func TestKimiLLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.moonshot.cn/v1/",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.moonshot.cn/v1/chat/completions",
 		},

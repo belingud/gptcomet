@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewClaudeLLM(t *testing.T) {
+	customPath := "custom/path"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -40,7 +41,7 @@ func TestNewClaudeLLM(t *testing.T) {
 			config: &types.ClientConfig{
 				APIBase:          "https://custom.api.com",
 				Model:            "custom-model",
-				CompletionPath:   "custom/path",
+				CompletionPath:   &customPath,
 				AnswerPath:       "custom.path",
 				AnthropicVersion: "2024-02-01",
 			},
@@ -69,8 +70,8 @@ func TestNewClaudeLLM(t *testing.T) {
 			if got.Config.Model != tt.want.model {
 				t.Errorf("Model = %v, want %v", got.Config.Model, tt.want.model)
 			}
-			if got.Config.CompletionPath != tt.want.completionPath {
-				t.Errorf("CompletionPath = %v, want %v", got.Config.CompletionPath, tt.want.completionPath)
+			if *got.Config.CompletionPath != tt.want.completionPath {
+				t.Errorf("CompletionPath = %v, want %v", *got.Config.CompletionPath, tt.want.completionPath)
 			}
 			if got.Config.AnswerPath != tt.want.answerPath {
 				t.Errorf("AnswerPath = %v, want %v", got.Config.AnswerPath, tt.want.answerPath)
@@ -120,6 +121,7 @@ func TestClaudeLLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestClaudeLLM_BuildURL(t *testing.T) {
+	messagePath := "messages"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -129,7 +131,7 @@ func TestClaudeLLM_BuildURL(t *testing.T) {
 			name: "standard url",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.anthropic.com/v1",
-				CompletionPath: "messages",
+				CompletionPath: &messagePath,
 			},
 			want: "https://api.anthropic.com/v1/messages",
 		},
@@ -137,7 +139,7 @@ func TestClaudeLLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.anthropic.com/v1/",
-				CompletionPath: "messages",
+				CompletionPath: &messagePath,
 			},
 			want: "https://api.anthropic.com/v1/messages",
 		},
