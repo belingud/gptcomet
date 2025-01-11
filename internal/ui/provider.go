@@ -221,11 +221,22 @@ type ConfigInput struct {
 
 func NewConfigInput(configs map[string]config.ConfigRequirement) *ConfigInput {
 	var inputs []textinput.Model
+	keys := []string{"api_base", "model", "api_key", "max_tokens"}
 	var configKeys []string
+	processed := make(map[string]bool)
+
+	for _, key := range keys {
+		if _, ok := configs[key]; ok {
+			configKeys = append(configKeys, key)
+			processed[key] = true
+		}
+	}
 
 	// collect keys without sorting
 	for k := range configs {
-		configKeys = append(configKeys, k)
+		if !processed[k] {
+			configKeys = append(configKeys, k)
+		}
 	}
 
 	// create input for each config
