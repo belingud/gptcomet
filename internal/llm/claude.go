@@ -25,8 +25,9 @@ func NewClaudeLLM(config *types.ClientConfig) *ClaudeLLM {
 	if config.Model == "" {
 		config.Model = "claude-3-sonnet"
 	}
-	if config.CompletionPath == "" {
-		config.CompletionPath = "messages"
+	if config.CompletionPath == nil {
+		defaultPath := "messages"
+		config.CompletionPath = &defaultPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "content.0.text"
@@ -93,7 +94,11 @@ func (c *ClaudeLLM) FormatMessages(message string, history []types.Message) (int
 
 // BuildURL builds the API URL
 func (c *ClaudeLLM) BuildURL() string {
-	return fmt.Sprintf("%s/%s", strings.TrimSuffix(c.Config.APIBase, "/"), strings.TrimPrefix(c.Config.CompletionPath, "/"))
+	return fmt.Sprintf(
+		"%s/%s",
+		strings.TrimSuffix(c.Config.APIBase, "/"),
+		strings.TrimPrefix(*c.Config.CompletionPath, "/"),
+	)
 }
 
 // BuildHeaders builds request headers

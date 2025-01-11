@@ -1,5 +1,7 @@
 # GPTComet: AI-Powered Git Commit Message Generator
 
+<a href="https://www.producthunt.com/posts/gptcomet?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-gptcomet" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=774818&theme=light&t=1736583021458" alt="GPTComet - GPTComet&#0058;&#0032;AI&#0045;Powered&#0032;Git&#0032;Commit&#0032;Message&#0032;Generator | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 [![PyPI version](https://img.shields.io/pypi/v/gptcomet?style=for-the-badge)](https://pypi.org/project/gptcomet/)
 ![GitHub Release](https://img.shields.io/github/v/release/belingud/gptcomet?style=for-the-badge)
 [![License](https://img.shields.io/github/license/belingud/gptcomet.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
@@ -8,8 +10,6 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/gptcomet?logo=pypi&style=for-the-badge)
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/belingud/gptcomet/total?style=for-the-badge&label=Release%20Download)
-
-![Made with VHS](https://vhs.charm.sh/vhs-hU26Jr76ijTPjOV8qFPzB.gif)
 
 <!-- TOC -->
 
@@ -43,6 +43,7 @@
   - [Contact](#contact)
   - [License](#license)
 
+<!-- /TOC -->
 <!-- /TOC -->
 
 ## Overview
@@ -294,6 +295,32 @@ Enter model name [gpt-4o]:
 Enter API key: ************************************
 Enter max tokens [1024]:
 [GPTComet] Provider test configured successfully.
+```
+
+Some special provider may need your custome config. Like `cloudflare`.
+
+> Be aware that the model name is not used in cloudflare api.
+
+```shell
+$ gmsg newprovider
+                             
+Selected provider: cloudflare
+Configure provider:
+
+Previous inputs:
+  Enter API Base URL: https://api.cloudflare.com/client/v4/accounts/<account_id>/ai/run
+  Enter model name: llama-3.3-70b-instruct-fp8-fast
+  Enter API key: abc*************************************
+
+Enter Enter max tokens (default: 1024):
+> 1024                                     
+
+Provider cloudflare already has a configuration. Do you want to overwrite it? (y/N): y
+
+Provider cloudflare configured successfully!
+
+$ gmsg config set cloudflare.completion_path @cf/meta/llama-3.3-70b-instruct-fp8-fast
+$ gmsg config set cloudflare.answer_path result.response
 ```
 
 ## Commands

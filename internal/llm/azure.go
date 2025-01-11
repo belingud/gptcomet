@@ -18,7 +18,8 @@ func NewAzureLLM(config *types.ClientConfig) *AzureLLM {
 	if config.Model == "" {
 		config.Model = "gpt-4o"
 	}
-	config.CompletionPath = fmt.Sprintf("deployments/%s/chat/completions", config.DeploymentName)
+	completionPath := fmt.Sprintf("deployments/%s/chat/completions", config.DeploymentName)
+	config.CompletionPath = &completionPath
 
 	return &AzureLLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -71,7 +72,7 @@ func (a *AzureLLM) BuildURL() string {
 	// Azure OpenAI URL format: {endpoint}/deployments/{deployment-id}/chat/completions?api-version={api-version}
 	return fmt.Sprintf("%s/%s?api-version=%s",
 		strings.TrimSuffix(baseURL, "?api-version="+a.Config.APIVersion),
-		strings.TrimPrefix(a.Config.CompletionPath, "/"),
+		strings.TrimPrefix(*a.Config.CompletionPath, "/"),
 		a.Config.APIVersion)
 }
 

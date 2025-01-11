@@ -67,6 +67,8 @@ func New(config *types.ClientConfig) *Client {
 		provider = llm.NewGroqLLM(config)
 	case "openrouter":
 		provider = llm.NewOpenRouterLLM(config)
+	case "ai21":
+		provider = llm.NewAI21LLM(config)
 	default:
 		// Default to OpenAI if provider is not specified
 		provider = llm.NewOpenAILLM(config)

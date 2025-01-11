@@ -6,7 +6,10 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+var customPath = "custom/path"
+
 func TestNewOpenAILLM(t *testing.T) {
+
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -37,7 +40,7 @@ func TestNewOpenAILLM(t *testing.T) {
 			config: &types.ClientConfig{
 				APIBase:        "https://custom.api.com",
 				Model:          "custom-model",
-				CompletionPath: "custom/path",
+				CompletionPath: &customPath,
 				AnswerPath:     "custom.path",
 			},
 			want: struct {
@@ -63,8 +66,8 @@ func TestNewOpenAILLM(t *testing.T) {
 			if got.Config.Model != tt.want.model {
 				t.Errorf("Model = %s, want %s", got.Config.Model, tt.want.model)
 			}
-			if got.Config.CompletionPath != tt.want.completionPath {
-				t.Errorf("CompletionPath = %s, want %s", got.Config.CompletionPath, tt.want.completionPath)
+			if *got.Config.CompletionPath != tt.want.completionPath {
+				t.Errorf("CompletionPath = %s, want %s", *got.Config.CompletionPath, tt.want.completionPath)
 			}
 			if got.Config.AnswerPath != tt.want.answerPath {
 				t.Errorf("AnswerPath = %s, want %s", got.Config.AnswerPath, tt.want.answerPath)
@@ -107,6 +110,7 @@ func TestOpenAILLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestOpenAILLM_BuildURL(t *testing.T) {
+	defaultPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -116,7 +120,7 @@ func TestOpenAILLM_BuildURL(t *testing.T) {
 			name: "standard url",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.openai.com/v1",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.openai.com/v1/chat/completions",
 		},
@@ -124,7 +128,7 @@ func TestOpenAILLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://api.openai.com/v1/",
-				CompletionPath: "/chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://api.openai.com/v1/chat/completions",
 		},

@@ -1,5 +1,25 @@
 
 ---
+## [0.2.4](https://github.com/belingud/gptcomet/compare/v0.2.3..v0.2.4) - 2025-01-11
+
+### ⛰️  Features
+
+- add AI21 provider support - ([08e9c84](https://github.com/belingud/gptcomet/commit/08e9c84d0df775878132d5217886a8ba03dcd68a)) - belingud
+
+### 🚜 Refactor
+
+- change CompletionPath to pointer type - ([d4ba644](https://github.com/belingud/gptcomet/commit/d4ba6447ee520ca99ac6693d7520185cee7f2662)) - belingud
+
+### 📚 Documentation
+
+- update changelog for v0.2.3 - ([cf2f158](https://github.com/belingud/gptcomet/commit/cf2f158640fcf1247dbbb03ba9edca295defd590)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update uv lock - ([414a8c5](https://github.com/belingud/gptcomet/commit/414a8c5ebc3df50ac9e51dcdc88c4fccb2b9e08c)) - belingud
+
+
+---
 ## [0.2.3](https://github.com/belingud/gptcomet/compare/v0.2.2..v0.2.3) - 2025-01-10
 
 ### ⛰️  Features

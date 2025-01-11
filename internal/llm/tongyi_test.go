@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewTongyiLLM(t *testing.T) {
+	customPath := "custom/path"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -37,7 +38,7 @@ func TestNewTongyiLLM(t *testing.T) {
 			config: &types.ClientConfig{
 				APIBase:        "https://custom.api.com",
 				Model:          "custom-model",
-				CompletionPath: "custom/path",
+				CompletionPath: &customPath,
 				AnswerPath:     "custom.path",
 			},
 			want: struct {
@@ -63,8 +64,8 @@ func TestNewTongyiLLM(t *testing.T) {
 			if got.Config.Model != tt.want.model {
 				t.Errorf("Model = %s, want %s", got.Config.Model, tt.want.model)
 			}
-			if got.Config.CompletionPath != tt.want.completionPath {
-				t.Errorf("CompletionPath = %s, want %s", got.Config.CompletionPath, tt.want.completionPath)
+			if *got.Config.CompletionPath != tt.want.completionPath {
+				t.Errorf("CompletionPath = %s, want %s", *got.Config.CompletionPath, tt.want.completionPath)
 			}
 			if got.Config.AnswerPath != tt.want.answerPath {
 				t.Errorf("AnswerPath = %s, want %s", got.Config.AnswerPath, tt.want.answerPath)

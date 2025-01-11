@@ -50,7 +50,7 @@ type ClientConfig struct {
 	APIBase           string            `json:"api_base"`
 	APIKey            string            `json:"api_key,omitempty"`
 	Model             string            `json:"model"`
-	CompletionPath    string            `json:"completion_path,omitempty"`
+	CompletionPath    *string           `json:"completion_path,omitempty"`
 	AnswerPath        string            `json:"answer_path,omitempty"`
 	MaxTokens         int               `json:"max_tokens"`
 	Temperature       float64           `json:"temperature"`

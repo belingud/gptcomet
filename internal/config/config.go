@@ -167,7 +167,7 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 	}
 
 	if completionPath, ok := providerConfig["completion_path"].(string); ok {
-		clientConfig.CompletionPath = completionPath
+		clientConfig.CompletionPath = &completionPath
 	}
 	return clientConfig, nil
 }

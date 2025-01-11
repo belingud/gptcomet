@@ -29,8 +29,9 @@ func NewOpenAILLM(config *types.ClientConfig) *OpenAILLM {
 	if config.Model == "" {
 		config.Model = "gpt-4o"
 	}
-	if config.CompletionPath == "" {
-		config.CompletionPath = "chat/completions"
+	if config.CompletionPath == nil {
+		completionPath := "chat/completions"
+		config.CompletionPath = &completionPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "choices.0.message.content"
@@ -74,7 +75,7 @@ func (o *OpenAILLM) FormatMessages(message string, history []types.Message) (int
 
 // BuildURL builds the API URL
 func (o *OpenAILLM) BuildURL() string {
-	return fmt.Sprintf("%s/%s", strings.TrimSuffix(o.Config.APIBase, "/"), strings.TrimPrefix(o.Config.CompletionPath, "/"))
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(o.Config.APIBase, "/"), strings.TrimPrefix(*o.Config.CompletionPath, "/"))
 }
 
 // BuildHeaders builds request headers

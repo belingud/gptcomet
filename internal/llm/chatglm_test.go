@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewChatGLMLLM(t *testing.T) {
+	defaultPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -21,7 +22,7 @@ func TestNewChatGLMLLM(t *testing.T) {
 						Config: &types.ClientConfig{
 							APIBase:        "https://open.bigmodel.cn/api/paas/v4",
 							Model:          "glm-4-flash",
-							CompletionPath: "chat/completions",
+							CompletionPath: &defaultPath,
 							AnswerPath:     "choices.0.message.content",
 						},
 					},
@@ -40,7 +41,7 @@ func TestNewChatGLMLLM(t *testing.T) {
 						Config: &types.ClientConfig{
 							APIBase:        "https://custom.api.com",
 							Model:          "custom-model",
-							CompletionPath: "chat/completions",
+							CompletionPath: &defaultPath,
 							AnswerPath:     "choices.0.message.content",
 						},
 					},
@@ -58,8 +59,8 @@ func TestNewChatGLMLLM(t *testing.T) {
 			if got.Config.Model != tt.want.Config.Model {
 				t.Errorf("NewChatGLMLLM().Config.Model = %v, want %v", got.Config.Model, tt.want.Config.Model)
 			}
-			if got.Config.CompletionPath != tt.want.Config.CompletionPath {
-				t.Errorf("NewChatGLMLLM().Config.CompletionPath = %v, want %v", got.Config.CompletionPath, tt.want.Config.CompletionPath)
+			if *got.Config.CompletionPath != *tt.want.Config.CompletionPath {
+				t.Errorf("NewChatGLMLLM().Config.CompletionPath = %v, want %v", *got.Config.CompletionPath, *tt.want.Config.CompletionPath)
 			}
 		})
 	}
@@ -100,6 +101,7 @@ func TestChatGLMLLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestChatGLMLLM_BuildURL(t *testing.T) {
+	defaultPath := "chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -109,7 +111,7 @@ func TestChatGLMLLM_BuildURL(t *testing.T) {
 			name: "default url",
 			config: &types.ClientConfig{
 				APIBase:        "https://open.bigmodel.cn/api/paas/v4",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://open.bigmodel.cn/api/paas/v4/chat/completions",
 		},
@@ -117,7 +119,7 @@ func TestChatGLMLLM_BuildURL(t *testing.T) {
 			name: "custom url",
 			config: &types.ClientConfig{
 				APIBase:        "https://custom.api.com",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://custom.api.com/chat/completions",
 		},
@@ -125,7 +127,7 @@ func TestChatGLMLLM_BuildURL(t *testing.T) {
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase:        "https://open.bigmodel.cn/api/paas/v4/",
-				CompletionPath: "chat/completions",
+				CompletionPath: &defaultPath,
 			},
 			want: "https://open.bigmodel.cn/api/paas/v4/chat/completions",
 		},

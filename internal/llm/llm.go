@@ -55,8 +55,9 @@ func NewBaseLLM(config *types.ClientConfig) *BaseLLM {
 		config = &types.ClientConfig{}
 	}
 	// Set default values if not provided
-	if config.CompletionPath == "" {
-		config.CompletionPath = "chat/completions"
+	if config.CompletionPath == nil {
+		defaultPath := "chat/completions"
+		config.CompletionPath = &defaultPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "choices.0.message.content"
@@ -146,7 +147,7 @@ func (b *BaseLLM) BuildHeaders() map[string]string {
 
 // BuildURL builds the API URL by trimming and joining the API base and completion path.
 func (b *BaseLLM) BuildURL() string {
-	return fmt.Sprintf("%s/%s", strings.TrimSuffix(b.Config.APIBase, "/"), strings.TrimPrefix(b.Config.CompletionPath, "/"))
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(b.Config.APIBase, "/"), strings.TrimPrefix(*b.Config.CompletionPath, "/"))
 }
 
 // ParseResponse parses the response from the API according to the provider's
@@ -270,8 +271,9 @@ func NewDefaultLLM(config *types.ClientConfig) *DefaultLLM {
 		config = &types.ClientConfig{}
 	}
 	// Set default values if not provided
-	if config.CompletionPath == "" {
-		config.CompletionPath = "chat/completions"
+	if config.CompletionPath == nil {
+		defaultPath := "chat/completions"
+		config.CompletionPath = &defaultPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "choices.0.message.content"

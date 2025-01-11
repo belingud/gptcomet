@@ -32,9 +32,10 @@ func NewVertexLLM(config *types.ClientConfig) *VertexLLM {
 		config.Location = "us-central1"
 	}
 
-	if config.CompletionPath == "" {
-		config.CompletionPath = fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s:generateContent",
+	if config.CompletionPath == nil {
+		completionPath := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s:generateContent",
 			config.ProjectID, config.Location, config.Model)
+		config.CompletionPath = &completionPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "candidates.0.content.parts.0.text"
@@ -81,7 +82,7 @@ func (v *VertexLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 
 // BuildURL builds the API URL for Vertex AI
 func (v *VertexLLM) BuildURL() string {
-	return fmt.Sprintf("%s/%s", v.Config.APIBase, fmt.Sprintf(v.Config.CompletionPath, v.Config.Model))
+	return fmt.Sprintf("%s/%s", v.Config.APIBase, fmt.Sprintf(*v.Config.CompletionPath, v.Config.Model))
 }
 
 // FormatMessages formats messages for Vertex AI

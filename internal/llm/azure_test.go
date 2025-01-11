@@ -7,6 +7,7 @@ import (
 )
 
 func TestNewAzureLLM(t *testing.T) {
+	completionPath := "deployments/test-deployment/chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -25,7 +26,7 @@ func TestNewAzureLLM(t *testing.T) {
 							APIBase:        "https://test.openai.azure.com",
 							DeploymentName: "test-deployment",
 							Model:          "gpt-4o",
-							CompletionPath: "deployments/test-deployment/chat/completions",
+							CompletionPath: &completionPath,
 						},
 					},
 				},
@@ -45,7 +46,7 @@ func TestNewAzureLLM(t *testing.T) {
 							APIBase:        "https://test.openai.azure.com",
 							DeploymentName: "test-deployment",
 							Model:          "custom-model",
-							CompletionPath: "deployments/test-deployment/chat/completions",
+							CompletionPath: &completionPath,
 						},
 					},
 				},
@@ -59,8 +60,8 @@ func TestNewAzureLLM(t *testing.T) {
 			if got.Config.Model != tt.want.Config.Model {
 				t.Errorf("NewAzureLLM().Config.Model = %v, want %v", got.Config.Model, tt.want.Config.Model)
 			}
-			if got.Config.CompletionPath != tt.want.Config.CompletionPath {
-				t.Errorf("NewAzureLLM().Config.CompletionPath = %v, want %v", got.Config.CompletionPath, tt.want.Config.CompletionPath)
+			if *got.Config.CompletionPath != *tt.want.Config.CompletionPath {
+				t.Errorf("NewAzureLLM().Config.CompletionPath = %v, want %v", *got.Config.CompletionPath, *tt.want.Config.CompletionPath)
 			}
 		})
 	}
@@ -94,6 +95,7 @@ func TestAzureLLM_GetRequiredConfig(t *testing.T) {
 }
 
 func TestAzureLLM_BuildURL(t *testing.T) {
+	completionPath := "deployments/test-deployment/chat/completions"
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -105,7 +107,7 @@ func TestAzureLLM_BuildURL(t *testing.T) {
 				APIBase:        "https://test.openai.azure.com",
 				DeploymentName: "test-deployment",
 				APIVersion:     "2024-02-15-preview",
-				CompletionPath: "deployments/test-deployment/chat/completions",
+				CompletionPath: &completionPath,
 			},
 			want: "https://test.openai.azure.com/deployments/test-deployment/chat/completions?api-version=2024-02-15-preview",
 		},
@@ -115,7 +117,7 @@ func TestAzureLLM_BuildURL(t *testing.T) {
 				APIBase:        "https://test.openai.azure.com/",
 				DeploymentName: "test-deployment",
 				APIVersion:     "2024-02-15-preview",
-				CompletionPath: "deployments/test-deployment/chat/completions",
+				CompletionPath: &completionPath,
 			},
 			want: "https://test.openai.azure.com/deployments/test-deployment/chat/completions?api-version=2024-02-15-preview",
 		},

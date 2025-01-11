@@ -21,8 +21,9 @@ func NewOllamaLLM(config *types.ClientConfig) *OllamaLLM {
 	if config.APIBase == "" {
 		config.APIBase = "http://localhost:11434/api"
 	}
-	if config.CompletionPath == "" {
-		config.CompletionPath = "generate"
+	if config.CompletionPath == nil {
+		completionPath := "generate"
+		config.CompletionPath = &completionPath
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "response"
@@ -118,7 +119,7 @@ func (o *OllamaLLM) MakeRequest(ctx context.Context, client *http.Client, messag
 		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	url := fmt.Sprintf("%s/%s", o.Config.APIBase, o.Config.CompletionPath)
+	url := fmt.Sprintf("%s/%s", o.Config.APIBase, *o.Config.CompletionPath)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqBody))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
