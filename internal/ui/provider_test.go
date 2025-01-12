@@ -206,7 +206,7 @@ func TestProviderSelector_New(t *testing.T) {
 		t.Error("NewProviderSelector returned nil")
 	}
 
-	if len(selector.list.Items()) != len(providers)+1 {
+	if selector != nil && len(selector.list.Items()) != len(providers)+1 {
 		t.Errorf("Expected %d items (including manual input), got %d", len(providers)+1, len(selector.list.Items()))
 	}
 

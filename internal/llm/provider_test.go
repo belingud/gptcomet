@@ -211,21 +211,21 @@ func TestNewProvider(t *testing.T) {
 				assert.Contains(t, err.Error(), tt.errContains)
 				assert.Nil(t, provider)
 				return
-				}
-				
-				require.NoError(t, err)
-				assert.NotNil(t, provider)
-				
-				if tt.wantDefault {
+			}
+
+			require.NoError(t, err)
+			assert.NotNil(t, provider)
+
+			if tt.wantDefault {
 				// 验证是否返回默认 LLM
 				_, isDefault := provider.(*DefaultLLM)
 				assert.True(t, isDefault, "Expected DefaultLLM for unknown provider")
-				} else {
+			} else {
 				assert.Equal(t, tt.provider, provider.Name())
-				}
-				})
-				}
-				}
+			}
+		})
+	}
+}
 
 func TestListProviders(t *testing.T) {
 	// Clear providers

@@ -36,7 +36,7 @@ and "help wanted" is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-Cookiecutter PyPackage could always use more documentation, whether as part of
+GPTComet could always use more documentation, whether as part of
 the official docs, in docstrings, or even on the web in blog posts, articles,
 and such.
 
@@ -57,8 +57,17 @@ Get Started!
 ------------
 
 Ready to contribute? Here's how to set up `gptcomet` for local
-development. Please note this documentation assumes you already have
-`PDM` and `Git` installed and ready to go.
+development.
+
+1. Install Dependencies
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* Install Go (version 1.20 or higher): https://go.dev/doc/install
+* Install Python (version 3.9 or higher): https://www.python.org/downloads/
+* Install uv: pip install uv
+
+2. Fork and Clone
+~~~~~~~~~~~~~~~~~
 
 | 1. Fork the `gptcomet` repo on GitHub.
 
@@ -66,85 +75,116 @@ development. Please note this documentation assumes you already have
 
    .. code-block:: bash
 
-        cd <directory_in_which_repo_should_be_created>
         git clone git@github.com:YOUR_NAME/gptcomet.git
+        cd gptcomet
 
+3. Setup Development Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-| 3. Now we need to install the environment. Navigate into the directory
-
-   .. code-block:: bash
-
-       cd gptcomet
-
-   If you are using ``pyenv``, select a version to use locally. (See installed versions with ``pyenv versions``)
+| 1. Install Go dependencies:
 
    .. code-block:: bash
 
-       pyenv local <x.y.z>
+        go mod download
 
-   Then, install the environment with:
-
-   .. code-block:: bash
-
-        pdm install
-
-| 4. Install pre-commit to run linters/formatters at commit time:
+| 2. Install Python dependencies:
 
    .. code-block:: bash
 
-        pdm run pre-commit install
+        uv sync
 
-| 5. Create a branch for local development:
+4. Development Workflow
+~~~~~~~~~~~~~~~~~~~~~~~
+
+| 1. Create a feature branch:
 
    .. code-block:: bash
 
-        git checkout -b name-of-your-bugfix-or-feature
+        git checkout -b feature/your-feature-name
 
-   Now you can make your changes locally.
+| 2. Make your changes following these guidelines:
+   - Go code should follow standard Go formatting (run `just format`)
+   - Python code should follow PEP 8 guidelines
+   - Write tests for new functionality
+   - Update documentation as needed
 
+| 3. Run tests:
 
-| 6. Don't forget to add test cases for your added functionality to the ``tests`` directory.
+   .. code-block:: bash
 
-| 7. When you're done making changes, check that your changes pass the formatting tests.
+        # Run Go tests
+        just test
+
+        # Run Python tests
+        just test-py
+
+| 4. Check code quality:
 
    .. code-block:: bash
 
         just check
 
-| 8. Now, validate that all unit tests are passing:
-
-   .. code-block:: bash
-
-        just test
-
-| 9. Before raising a pull request you should also run tox. This will run the
-   tests across different versions of Python:
-
-   .. code-block:: bash
-
-        pdm run tox
-
-   This requires you to have multiple versions of python installed.
-   This step is also triggered in the CI/CD pipeline, so you could also choose to skip this
-   step locally.
-
-| 10. Commit your changes and push your branch to GitHub:
+| 5. Commit your changes:
 
    .. code-block:: bash
 
         git add .
         git commit -m "Your detailed description of your changes."
-        git push origin name-of-your-bugfix-or-feature
 
-| 11. Submit a pull request through the GitHub website.
+| 6. Push your branch:
+
+   .. code-block:: bash
+
+        git push origin feature/your-feature-name
+
+| 7. Create a pull request on GitHub.
 
 Pull Request Guidelines
----------------------------
+-----------------------
 
 Before you submit a pull request, check that it meets these guidelines:
 
-1. The pull request should include tests.
+1. The pull request should include tests for both Go and Python code.
+2. Go code should pass all linters and formatters (run `just check`).
+3. Python code should pass all linters and formatters.
+4. If the pull request adds functionality, the docs should be updated.
+5. New Go code should include proper documentation and examples.
+6. Follow the project's coding style and conventions.
 
-2. If the pull request adds functionality, the docs should be updated. Put your
-   new functionality into a function with a docstring, and add the feature to
-   the list in README.rst.
+Code Style
+----------
+
+Go:
+- Use gofmt and goimports for formatting
+- Follow Effective Go guidelines: https://go.dev/doc/effective_go
+- Use descriptive variable names
+- Keep functions small and focused
+
+Python:
+- Follow PEP 8 style guide
+- Use type hints where appropriate
+- Keep functions small and focused
+- Use descriptive variable names
+
+Testing
+-------
+
+We use the following testing frameworks:
+
+- Go: standard testing package
+- Python: pytest
+
+All new code should include appropriate tests. Test coverage should be maintained
+or improved with each contribution.
+
+Documentation
+-------------
+
+Documentation is maintained in the following locations:
+
+- Go: godoc comments in source files
+- Python: docstrings in source files
+- Project documentation: README.md, CONTRIBUTING.rst
+
+Please update relevant documentation when adding new features or changing
+existing functionality.
