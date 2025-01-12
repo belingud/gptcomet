@@ -14,11 +14,11 @@
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator](#gptcomet-ai-powered-git-commit-message-generator)
-  - [Overview](#overview)
-  - [Features](#features)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Setup](#setup)
+  - [💡 Overview](#-overview)
+  - [✨ Features](#-features)
+  - [⬇️ Installation](#️-installation)
+  - [📕 Usage](#-usage)
+  - [🔧 Setup](#-setup)
     - [Configuration Methods](#configuration-methods)
     - [Provider Setup Guide](#provider-setup-guide)
       - [OpenAI](#openai)
@@ -29,29 +29,28 @@
       - [Ollama](#ollama)
       - [Other Supported Providers](#other-supported-providers)
     - [Manual Provider Setup](#manual-provider-setup)
-  - [Commands](#commands)
-  - [Configuration](#configuration)
-    - [Supported Configuration Keys](#supported-configuration-keys)
+  - [⌨️ Commands](#️-commands)
+  - [⚙ Configuration](#-configuration)
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
     - [output](#output)
     - [Supported languages](#supported-languages)
     - [console](#console)
-  - [Supported Keys](#supported-keys)
-  - [Example](#example)
-  - [Development](#development)
-  - [Contact](#contact)
-  - [License](#license)
+  - [🔦 Supported Keys](#-supported-keys)
+  - [📃 Example](#-example)
+  - [💻 Development](#-development)
+  - [📩 Contact](#-contact)
+  - [☕️ Sponsor](#️-sponsor)
+  - [📜 License](#-license)
 
 <!-- /TOC -->
-<!-- /TOC -->
 
-## Overview
+## 💡 Overview
 
 GPTComet is a go library designed to automate the process of generating commit messages for Git repositories.
 It leverages the power of AI to create meaningful commit messages based on the changes made in the codebase.
 
-## Features
+## ✨ Features
 
 -   **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
 -   **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
@@ -60,7 +59,7 @@ It leverages the power of AI to create meaningful commit messages based on the c
 -   **Support for Multiple Providers**: GPTComet supports multiple providers, including OpenAI, Gemini, Claude/Anthropic, Vertex, Azure, Ollama, and others.
 -   **Support SVN and Git**: GPTComet supports both SVN and Git repositories.
 
-## Installation
+## ⬇️ Installation
 
 To use GPTComet, you can download from [Github release](https://github.com/belingud/gptcomet/releases/latest), or by install scripts:
 
@@ -90,7 +89,7 @@ Installed 1 package in 8ms
 Installed 2 executables: gmsg, gptcomet
 ```
 
-## Usage
+## 📕 Usage
 
 To use gptcomet, follow these steps:
 
@@ -106,7 +105,7 @@ To use gptcomet, follow these steps:
 
 If you are using `openai` provider, and finished set `api_key`, you can run `gmsg commit` directly.
 
-## Setup
+## 🔧 Setup
 
 ### Configuration Methods
 
@@ -323,7 +322,7 @@ $ gmsg config set cloudflare.completion_path @cf/meta/llama-3.3-70b-instruct-fp8
 $ gmsg config set cloudflare.answer_path result.response
 ```
 
-## Commands
+## ⌨️ Commands
 
 The following are the available commands for GPTComet:
 
@@ -349,42 +348,7 @@ Global flags:
   -d, --debug           Enable debug mode
 ```
 
-## Configuration
-
-The configuration file for GPTComet is `gptcomet.yaml`. The file should contain the following keys:
-
--   `file_ignore`: The file to ignore when generating a commit.
--   `provider`: The provider of the language model (default `openai`).
-    -   `api_base`: The base URL of the API (default `https://api.openai.com/v1`).
-    -   `api_key`: The API key for the provider.
-    -   `model`: The model used for generating commit messages (default `text-davinci-003`).
-    -   `retries`: The number of retries for the API request (default `2`).
-    -   `proxy`: The proxy URL for the provider(default '').
-    -   `max_tokens`: The maximum number of tokens for the provider.
-    -   `top_p`: The top_p parameter for the provider (default `0.7`).
-    -   `temperature`: The temperature parameter for the provider (default `0.7`).
-    -   `frequency_penalty`: The frequency_penalty parameter for the provider (default `0`).
-    -   `extra_headers`: The extra headers for the provider, json string.
-    -   `answer_path`: The json path for the answer. Default `choices.0.message.content`
-    -   `completion_path`: The url path for the completion api. Default `/chat/completions`
--   `prompt`: The prompt for generating commit messages.
-    -   `brief_commit_message`: The prompt for generating brief commit messages.
-    -   `rich_commit_message`: The prompt for generating rich commit messages.
-    -   `translation`: The prompt for translating commit messages to a target language.
--   `output`: The output configuration.
-    -   `output.lang`: The language of the commit message (default `en`).
-    -   `output.rich_template`: The template for generating rich commit messages.
-    -   `output.translate_title`: Whether to translate the title of the commit message(default `false`).
--   `console`: The console configuration.
-    -   `console.verbose`: Whether to enable verbose output(default `true`).
-
-`output.translate_title` is used to determine whether to translate the title of the commit message.
-
-For example in `output.lang: zh-cn`, the title of the commit message is `feat: Add new feature`
-
-If `output.translate_title` is set to `true`, the commit message will be translated to `功能：新增功能`. otherwise, the commit message will be translated to `feat: 新增功能`:
-
-### Supported Configuration Keys
+## ⚙ Configuration
 
 Here's a summary of the main configuration keys:
 
@@ -394,8 +358,8 @@ Here's a summary of the main configuration keys:
 | `file_ignore`                  | A list of file patterns to ignore in the diff.             | (See [file_ignore](#file_ignore)) |
 | `output.lang`                  | The language for commit message generation.                | `en`                              |
 | `output.rich_template`         | The template to use for rich commit messages.              | `<title>:<summary>\n\n<detail>`   |
-| `console.verbose`              | Enable verbose output.                                     | `true`                            |
 | `output.translate_title`       | Translate the title of the commit message.                 | `false`                           |
+| `console.verbose`              | Enable verbose output.                                     | `true`                            |
 | `<provider>.api_base`          | The API base URL for the provider.                         | (Provider-specific)               |
 | `<provider>.api_key`           | The API key for the provider.                              |                                   |
 | `<provider>.model`             | The model name to use.                                     | (Provider-specific)               |
@@ -415,6 +379,17 @@ Here's a summary of the main configuration keys:
 **Note:** `<provider>` should be replaced with the actual provider name (e.g., `openai`, `gemini`, `claude`).
 
 Some providers require specific keys, such as Vertex needing project ID, location, etc.
+
+The configuration file for GPTComet is `gptcomet.yaml`. The file should contain the following keys:
+
+`output.translate_title` is used to determine whether to translate the title of the commit message.
+
+For example in `output.lang: zh-cn`, the title of the commit message is `feat: Add new feature`
+
+If `output.translate_title` is set to `true`, the commit message will be translated to `功能：新增功能`.
+Otherwise, the commit message will be translated to `feat: 新增功能`.
+
+In some case you can set `complation_path` to empty string, like `<provider>.completion_path: ""`, to use `api_base` endpoint directly.
 
 ### file_ignore
 
@@ -554,11 +529,11 @@ console:
 
 When `verbose` is true, more information will be printed in the console.
 
-## Supported Keys
+## 🔦 Supported Keys
 
 You can use `gmsg config keys` to check supported keys.
 
-## Example
+## 📃 Example
 
 Here is an example of how to use GPTComet:
 
@@ -580,7 +555,7 @@ output:
 
 Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
 
-## Development
+## 💻 Development
 
 If you'd like to contribute to GPTComet, feel free to fork this project and submit a pull request.
 
@@ -602,11 +577,17 @@ Or use `pdm` directly `pdm install`.
 
 Then, you can submit a pull request.
 
-## Contact
+## 📩 Contact
 
 If you have any questions or suggestions, feel free to contact.
 
-## License
+## ☕️ Sponsor
+
+If you like GPTComet, you can buy me a coffee to support me. Any support can help the project go further.
+
+[Buy Me A Coffee](./SPONSOR.md)
+
+## 📜 License
 
 GPTComet is licensed under the MIT License.
 
