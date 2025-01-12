@@ -565,17 +565,13 @@ First, fork the project and clone your repo.
 git clone https://github.com/<yourname>/gptcomet
 ```
 
-Second, make sure you have `pdm`, you can install by `pip`, `brew` or other way in their [installation](https://github.com/pdm-project/pdm?tab=readme-ov-file#installation) docs
+Second, make sure you have `_`, you can install by `pip`, `brew` or other way in their [installation](https://docs.astral.sh/uv/getting-started/installation/) docs
 
 Use `just` command install dependence, `just` is a handy way to save and run project-specific commands, `just` docs [https://github.com/casey/just](https://github.com/casey/just)
 
 ```shell
 just install
 ```
-
-Or use `pdm` directly `pdm install`.
-
-Then, you can submit a pull request.
 
 ## 📩 Contact
 
