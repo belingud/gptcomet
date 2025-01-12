@@ -2,59 +2,87 @@
 help:
     @just --list
 
-# Install the environment
-install:
-    @echo "🚀 Creating virtual environment using pyenv and PDM"
-    pdm install
+# ==============
+# Go Commands
+# ==============
 
-# Run code quality tools
+# Run Go vet and staticcheck
 check:
-    @echo "🚀 Checking pdm lock file consistency with 'pyproject.toml': Running pdm lock --check"
-    pdm lock --check
-    @echo "🚀 Linting code: Running pre-commit"
-    pdm run pre-commit run -a
-    @echo "🚀 Linting with ruff"
-    pdm run ruff check . --config pyproject.toml --exclude tests
-    @echo "🚀 Checking for obsolete dependencies: Running deptry"
-    pdm run deptry .
+    @echo "🚀 Running Go vet and staticcheck"
+    go vet ./...
+    staticcheck ./...
 
-# Format code with ruff and isort
+# Format Go code
 format:
-    @echo "🚀 Formatting code: Running ruff"
-    pdm run ruff format . --config pyproject.toml
-    @echo "🚀 Formatting code: Running isort"
-    pdm run isort . --settings-path pyproject.toml
-    @echo "🚀 Formatting code: Running go fmt"
+    @echo "🚀 Formatting Go code"
     go fmt ./...
+    goimports -w .
 
-# Test the code with pytest
+# Run Go tests with coverage
 test:
-    @echo "🚀 Testing code: Running pytest"
-    pdm run pytest --cov --cov-config=pyproject.toml --cov-report=xml tests
+    @echo "🚀 Running Go tests"
+    go test -coverprofile=coverage.out ./...
+    go tool cover -html=coverage.out -o coverage.html
 
-# Clean build artifacts
-clean-build:
-    rm -rf dist
+# Build Go binaries
+build:
+    @echo "🚀 Building Go binaries"
+    go build -o bin/gptcomet ./cmd
 
-# Build wheel file
-build: clean-build
-    @echo "🚀 Creating wheel file"
-    pdm build
+# Cross-compile Go binaries
+build-all:
+    @echo "🚀 Cross-compiling Go binaries"
+    goreleaser build --snapshot --rm-dist
 
-# Publish a release to PyPI
-publish:
-    @echo "🚀 Publishing."
-    rm -rf dist
-    uv-publish
+# Clean Go build artifacts
+clean:
+    @echo "🚀 Cleaning Go build artifacts"
+    rm -rf bin/ dist/ coverage.out coverage.html
 
-# Publish a release to TestPyPI
-publish-test:
-    @echo "🚀 Publishing to testpypi."
-    pdm publish -r testpypi --username __token__
+# ==============
+# Python Commands
+# ==============
 
-# Build and publish
-build-and-publish: build publish
+# Install Python dependencies
+install:
+    @echo "🚀 Installing Python dependencies"
+    uv sync
+
+# Run Python tests
+test-py:
+    @echo "🚀 Running Python tests"
+    uv run pytest --cov --cov-config=pyproject.toml --cov-report=xml tests
+
+# Build Python wheel
+build-py:
+    @echo "🚀 Building Python wheel"
+    uv build
+
+# Publish Python package
+publish-py:
+    @echo "🚀 Publishing Python package"
+    uv publish
+
+# ==============
+# Release Commands
+# ==============
+
+# Create a new release
+release:
+    @echo "🚀 Creating new release"
+    goreleaser release --rm-dist
+    uv publish
+
+# ==============
+# Utility Commands
+# ==============
 
 # Update changelog
 changelog:
     git cliff -l --prepend CHANGELOG.md
+
+# Generate coverage report
+coverage:
+    @echo "🚀 Generating coverage report"
+    go tool cover -html=coverage.out -o coverage.html
+    open coverage.html
