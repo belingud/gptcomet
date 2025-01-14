@@ -72,8 +72,8 @@ func (c *ClaudeLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 }
 
 // FormatMessages formats messages for Claude API
-func (c *ClaudeLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
-	messages := make([]map[string]interface{}, 0, len(history)+1)
+func (c *ClaudeLLM) FormatMessages(message string) (interface{}, error) {
+	messages := []map[string]interface{}{}
 	messages = append(messages, map[string]interface{}{
 		"role":    "user",
 		"content": message,
@@ -139,6 +139,6 @@ func (c *ClaudeLLM) GetUsage(data []byte) (string, error) {
 }
 
 // MakeRequest makes a request to the API
-func (c *ClaudeLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	return c.BaseLLM.MakeRequest(ctx, client, c, message, history)
+func (c *ClaudeLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return c.BaseLLM.MakeRequest(ctx, client, c, message, stream)
 }

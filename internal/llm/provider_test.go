@@ -31,7 +31,7 @@ func (p *MockProvider) BuildURL() string {
 	return ""
 }
 
-func (p *MockProvider) FormatMessages(message string, history []types.Message) (interface{}, error) {
+func (p *MockProvider) FormatMessages(message string) (interface{}, error) {
 	return nil, nil
 }
 
@@ -43,7 +43,7 @@ func (p *MockProvider) GetUsage(data []byte) (string, error) {
 	return "", nil
 }
 
-func (p *MockProvider) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
+func (p *MockProvider) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
 	return "mock response", nil
 }
 
@@ -60,7 +60,7 @@ type mockLLM struct {
 	name                  string
 	generateCommitMessage func(diff string, prompt string) (string, error)
 	translateMessage      func(prompt string, message string, lang string) (string, error)
-	makeRequest           func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error)
+	makeRequest           func(ctx context.Context, client *http.Client, message string, stream bool) (string, error)
 }
 
 func (m *mockLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
@@ -75,7 +75,7 @@ func (m *mockLLM) BuildURL() string {
 	return ""
 }
 
-func (m *mockLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
+func (m *mockLLM) FormatMessages(message string) (interface{}, error) {
 	return nil, nil
 }
 
@@ -87,9 +87,9 @@ func (m *mockLLM) GetUsage(data []byte) (string, error) {
 	return "", nil
 }
 
-func (m *mockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
+func (m *mockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
 	if m.makeRequest != nil {
-		return m.makeRequest(ctx, client, message, history)
+		return m.makeRequest(ctx, client, message, false)
 	}
 	return "", nil
 }

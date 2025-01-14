@@ -15,10 +15,10 @@ import (
 
 // MockLLM implements the LLM interface for testing
 type MockLLM struct {
-	makeRequestFunc       func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error)
+	makeRequestFunc       func(ctx context.Context, client *http.Client, message string, stream bool) (string, error)
 	buildHeadersFunc      func() map[string]string
 	buildURLFunc          func() string
-	formatMessagesFunc    func(model string, messages []types.Message) (interface{}, error)
+	formatMessagesFunc    func(message string) (interface{}, error)
 	getRequiredConfigFunc func() map[string]config.ConfigRequirement
 	getUsageFunc          func(data []byte) (string, error)
 	parseResponseFunc     func(response []byte) (string, error)
@@ -29,8 +29,8 @@ func (m *MockLLM) Name() string {
 	return m.name
 }
 
-func (m *MockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	return m.makeRequestFunc(ctx, client, message, history)
+func (m *MockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return m.makeRequestFunc(ctx, client, message, stream)
 }
 
 func (m *MockLLM) BuildHeaders() map[string]string {
@@ -47,11 +47,11 @@ func (m *MockLLM) BuildURL() string {
 	return ""
 }
 
-func (m *MockLLM) FormatMessages(model string, messages []types.Message) (interface{}, error) {
+func (m *MockLLM) FormatMessages(message string) (interface{}, error) {
 	if m.formatMessagesFunc != nil {
-		return m.formatMessagesFunc(model, messages)
+		return m.formatMessagesFunc(message)
 	}
-	return messages, nil
+	return message, nil
 }
 
 func (m *MockLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
@@ -83,7 +83,7 @@ func TestNewClient(t *testing.T) {
 	}{
 		{"OpenAI", "openai", &llm.OpenAILLM{}},
 		{"Claude", "claude", &llm.ClaudeLLM{}},
-		{"Default", "", &llm.OpenAILLM{}},
+		{"Default", "", &llm.DefaultLLM{}},
 	}
 
 	for _, tt := range tests {
@@ -133,8 +133,11 @@ func TestCreateProxyTransport(t *testing.T) {
 
 func TestChat(t *testing.T) {
 	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-			return "mock response", nil
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			if !stream {
+				return "mock response", nil
+			}
+			return "", nil
 		},
 		name: "mock",
 	}
@@ -151,7 +154,7 @@ func TestChat(t *testing.T) {
 
 func TestChatError(t *testing.T) {
 	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
 			return "", errors.New("mock error")
 		},
 		name: "mock",
@@ -168,7 +171,7 @@ func TestChatError(t *testing.T) {
 
 func TestTranslateMessage(t *testing.T) {
 	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
 			return "translated message", nil
 		},
 		name: "mock",
@@ -186,7 +189,7 @@ func TestTranslateMessage(t *testing.T) {
 
 func TestGenerateCommitMessage(t *testing.T) {
 	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
 			return "commit message", nil
 		},
 		name: "mock",
@@ -200,4 +203,69 @@ func TestGenerateCommitMessage(t *testing.T) {
 	msg, err := client.GenerateCommitMessage("diff", "generate commit message for: %s")
 	require.NoError(t, err)
 	assert.Equal(t, "commit message", msg)
+}
+
+func TestGenerateReviewComment(t *testing.T) {
+	mockLLM := &MockLLM{
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			return "review comment", nil
+		},
+		name: "mock",
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{Timeout: 10},
+		llm:    mockLLM,
+	}
+
+	comment, err := client.GenerateReviewComment("diff", "generate review comment for: %s")
+	require.NoError(t, err)
+	assert.Equal(t, "review comment", comment)
+}
+
+func TestGenerateReviewCommentStream(t *testing.T) {
+	mockLLM := &MockLLM{
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			return "streamed review comment", nil
+		},
+		name: "mock",
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{Timeout: 10},
+		llm:    mockLLM,
+	}
+
+	var received string
+	err := client.GenerateReviewCommentStream("diff", "generate review comment for: %s", func(comment string) error {
+		received = comment
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "streamed review comment", received)
+}
+
+func TestStream(t *testing.T) {
+	mockLLM := &MockLLM{
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			if stream {
+				return "streamed response", nil
+			}
+			return "", nil
+		},
+		name: "mock",
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{Timeout: 10},
+		llm:    mockLLM,
+	}
+
+	var received string
+	err := client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
+		received = resp.Content
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "streamed response", received)
 }

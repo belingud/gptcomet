@@ -17,14 +17,12 @@ func TestNewChatGLMLLM(t *testing.T) {
 			name:   "default config",
 			config: &types.ClientConfig{},
 			want: &ChatGLMLLM{
-				OpenAILLM: &OpenAILLM{
-					BaseLLM: &BaseLLM{
-						Config: &types.ClientConfig{
-							APIBase:        "https://open.bigmodel.cn/api/paas/v4",
-							Model:          "glm-4-flash",
-							CompletionPath: &defaultPath,
-							AnswerPath:     "choices.0.message.content",
-						},
+				BaseLLM: &BaseLLM{
+					Config: &types.ClientConfig{
+						APIBase:        "https://open.bigmodel.cn/api/paas/v4",
+						Model:          "glm-4-flash",
+						CompletionPath: &defaultPath,
+						AnswerPath:     "choices.0.message.content",
 					},
 				},
 			},
@@ -36,14 +34,12 @@ func TestNewChatGLMLLM(t *testing.T) {
 				Model:   "custom-model",
 			},
 			want: &ChatGLMLLM{
-				OpenAILLM: &OpenAILLM{
-					BaseLLM: &BaseLLM{
-						Config: &types.ClientConfig{
-							APIBase:        "https://custom.api.com",
-							Model:          "custom-model",
-							CompletionPath: &defaultPath,
-							AnswerPath:     "choices.0.message.content",
-						},
+				BaseLLM: &BaseLLM{
+					Config: &types.ClientConfig{
+						APIBase:        "https://custom.api.com",
+						Model:          "custom-model",
+						CompletionPath: &defaultPath,
+						AnswerPath:     "choices.0.message.content",
 					},
 				},
 			},

@@ -73,8 +73,9 @@ func (g *GroqLLM) BuildHeaders() map[string]string {
 	return headers
 }
 
-func (g *GroqLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
-	messages := append(history, types.Message{
+func (g *GroqLLM) FormatMessages(message string) (interface{}, error) {
+	messages := []types.Message{}
+	messages = append(messages, types.Message{
 		Role:    "user",
 		Content: message,
 	})
@@ -115,13 +116,18 @@ func (g *GroqLLM) GetUsage(data []byte) (string, error) {
 }
 
 // MakeRequest makes a request to the API
-func (g *GroqLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
+func (g *GroqLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
 	url := g.BuildURL()
-	debug.Printf("API URL: %s", url)
+	debug.Printf("🔗 URL: %s", url)
 	headers := g.BuildHeaders()
-	payload, err := g.FormatMessages(message, history)
+	payload, err := g.FormatMessages(message)
 	if err != nil {
 		return "", fmt.Errorf("failed to format messages: %w", err)
+	}
+	if stream {
+		if payloadMap, ok := payload.(map[string]interface{}); ok {
+			payloadMap["stream"] = true
+		}
 	}
 
 	reqBody, err := json.Marshal(payload)

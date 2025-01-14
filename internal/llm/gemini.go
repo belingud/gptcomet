@@ -69,7 +69,7 @@ func (g *GeminiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 }
 
 // FormatMessages formats messages for Gemini API
-func (g *GeminiLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
+func (g *GeminiLLM) FormatMessages(message string) (interface{}, error) {
 	var contents []map[string]interface{}
 
 	contents = append(contents, map[string]interface{}{
@@ -106,6 +106,11 @@ func (g *GeminiLLM) BuildURL() string {
 	return fmt.Sprintf("%s/%s:generateContent?key=%s", strings.TrimSuffix(g.Config.APIBase, "/"), g.Config.Model, g.Config.APIKey)
 }
 
+// BuildURL builds the API URL
+func (g *GeminiLLM) BuildStreamURL() string {
+	return fmt.Sprintf("%s/%s:streamGenerateContent?key=%s", strings.TrimSuffix(g.Config.APIBase, "/"), g.Config.Model, g.Config.APIKey)
+}
+
 // BuildHeaders builds request headers
 func (g *GeminiLLM) BuildHeaders() map[string]string {
 	return map[string]string{
@@ -129,10 +134,15 @@ func (g *GeminiLLM) GetUsage(data []byte) (string, error) {
 }
 
 // MakeRequest makes a request to the API
-func (g *GeminiLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	url := g.BuildURL()
+func (g *GeminiLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	var url string
+	if stream {
+		url = g.BuildStreamURL()
+	} else {
+		url = g.BuildURL()
+	}
 	headers := g.BuildHeaders()
-	payload, err := g.FormatMessages(message, history)
+	payload, err := g.FormatMessages(message)
 	if err != nil {
 		return "", fmt.Errorf("failed to format messages: %w", err)
 	}

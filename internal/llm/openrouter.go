@@ -1,6 +1,9 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
@@ -9,7 +12,7 @@ var DefaultOpenrouterModel = "meta-llama/llama-3.1-70b-instruct:free"
 
 // OpenRouterLLM implements the LLM interface for OpenRouter
 type OpenRouterLLM struct {
-	*OpenAILLM
+	*BaseLLM
 }
 
 // NewOpenRouterLLM creates a new OpenRouterLLM
@@ -21,8 +24,16 @@ func NewOpenRouterLLM(config *types.ClientConfig) *OpenRouterLLM {
 		config.Model = DefaultOpenrouterModel
 	}
 
+	if config.CompletionPath == nil {
+		completionPath := "chat/completions"
+		config.CompletionPath = &completionPath
+	}
+	if config.AnswerPath == "" {
+		config.AnswerPath = "choices.0.message.content"
+	}
+
 	return &OpenRouterLLM{
-		OpenAILLM: NewOpenAILLM(config),
+		BaseLLM: NewBaseLLM(config),
 	}
 }
 
@@ -52,10 +63,17 @@ func (o *OpenRouterLLM) GetRequiredConfig() map[string]config.ConfigRequirement 
 	}
 }
 
-// BuildHeaders overrides the parent's BuildHeaders to add OpenRouter specific headers
+// BuildHeaders builds request headers for OpenRouter API.
+// It includes the default headers from BuildHeaders() and adds
+// HTTP-Referer and X-Title headers.
 func (o *OpenRouterLLM) BuildHeaders() map[string]string {
-	headers := o.OpenAILLM.BuildHeaders()
+	headers := o.BaseLLM.BuildHeaders()
 	headers["HTTP-Referer"] = "https://github.com/belingud/gptcomet"
 	headers["X-Title"] = "GPTComet"
 	return headers
+}
+
+// MakeRequest makes a request to the OpenRouter API
+func (o *OpenRouterLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return o.BaseLLM.MakeRequest(ctx, client, o, message, stream)
 }

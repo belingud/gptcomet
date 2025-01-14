@@ -86,7 +86,7 @@ func (v *VertexLLM) BuildURL() string {
 }
 
 // FormatMessages formats messages for Vertex AI
-func (v *VertexLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
+func (v *VertexLLM) FormatMessages(message string) (interface{}, error) {
 	contents := []map[string]interface{}{
 		{
 			"role": "user",
@@ -135,6 +135,6 @@ func (v *VertexLLM) GetUsage(data []byte) (string, error) {
 }
 
 // MakeRequest makes a request to the API
-func (v *VertexLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	return v.BaseLLM.MakeRequest(ctx, client, v, message, history)
+func (v *VertexLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return v.BaseLLM.MakeRequest(ctx, client, v, message, stream)
 }

@@ -17,7 +17,7 @@ func TestNewOpenRouterLLM(t *testing.T) {
 			name:   "empty config should set defaults",
 			config: &types.ClientConfig{},
 			expected: &OpenRouterLLM{
-				OpenAILLM: NewOpenAILLM(&types.ClientConfig{
+				BaseLLM: NewBaseLLM(&types.ClientConfig{
 					APIBase: "https://openrouter.ai/api/v1",
 					Model:   "meta-llama/llama-3.1-70b-instruct:free",
 				}),
@@ -31,7 +31,7 @@ func TestNewOpenRouterLLM(t *testing.T) {
 				APIKey:  "test-key",
 			},
 			expected: &OpenRouterLLM{
-				OpenAILLM: NewOpenAILLM(&types.ClientConfig{
+				BaseLLM: NewBaseLLM(&types.ClientConfig{
 					APIBase: "https://custom.openrouter.ai/v1",
 					Model:   "anthropic/claude-3",
 					APIKey:  "test-key",

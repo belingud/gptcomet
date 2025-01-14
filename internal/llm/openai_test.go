@@ -207,7 +207,7 @@ func TestOpenAILLM_GetUsage(t *testing.T) {
                     "total_tokens": 30
                 }
             }`),
-			want:    "Token usage> prompt tokens: 10, completion tokens: 20, total tokens: 30",
+			want:    "Token usage> prompt: 10, completion: 20, total: 30",
 			wantErr: false,
 		},
 		{

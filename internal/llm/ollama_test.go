@@ -122,7 +122,7 @@ func TestOllamaLLM_FormatMessages(t *testing.T) {
 	})
 
 	message := "test message"
-	got, err := llm.FormatMessages(message, nil)
+	got, err := llm.FormatMessages(message)
 	if err != nil {
 		t.Errorf("FormatMessages() error = %v", err)
 		return
