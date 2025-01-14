@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
 
@@ -15,6 +16,7 @@ import (
 
 type ManagerInterface interface {
 	Get(key string) (interface{}, bool)
+	GetWithDefault(key string, defaultValue interface{}) interface{}
 	Set(key string, value interface{}) error
 	ListWithoutPrompt() map[string]interface{}
 	List() (string, error)
@@ -26,6 +28,7 @@ type ManagerInterface interface {
 	GetSupportedKeys() []string
 	UpdateProviderConfig(provider string, configs map[string]string) error
 	GetPrompt(isRich bool) string
+	GetReviewPrompt() string
 	getNestedValue(keys []string) (interface{}, bool)
 	setNestedValue(keys []string, value interface{})
 	load() error
@@ -68,8 +71,7 @@ func New(configPath string) (*Manager, error) {
 		}
 	} else {
 		// Initialize with default configuration
-		defaultConfig := defaultConfig()
-		manager.config = defaultConfig
+		manager.config = defaults.DefaultConfig
 		if err := manager.save(); err != nil {
 			return nil, fmt.Errorf("failed to save default config: %w", err)
 		}
@@ -206,6 +208,27 @@ func (m *Manager) Get(key string) (interface{}, bool) {
 	return m.getNestedValue(strings.Split(key, "."))
 }
 
+// GetWithDefault retrieves the value associated with the given key from the configuration.
+// If the key is not found, it returns the provided defaultValue.
+//
+// The key is split on the '.' character to navigate the nested map structure.
+//
+// Parameters:
+//
+//	key - The configuration key to look up.
+//	defaultValue - The value to return if the key is not found.
+//
+// Returns:
+//
+//	The configuration value associated with the key, or defaultValue if the key does not exist.
+func (m *Manager) GetWithDefault(key string, defaultValue interface{}) interface{} {
+	value, ok := m.getNestedValue(strings.Split(key, "."))
+	if !ok {
+		return defaultValue
+	}
+	return value
+}
+
 // Set sets the value associated with the given key. The key is split
 // on the '.' character and the value is set in the nested map.
 //
@@ -252,13 +275,12 @@ func (m *Manager) ListWithoutPrompt() map[string]interface{} {
 func (m *Manager) Reset(promptOnly bool) error {
 	if promptOnly {
 		// Get default prompt config
-		defaultCfg := defaultConfig()
-		if promptConfig, ok := defaultCfg["prompt"].(map[string]interface{}); ok {
+		if promptConfig, ok := defaults.DefaultConfig["prompt"].(map[string]interface{}); ok {
 			m.config["prompt"] = promptConfig
 		}
 	} else {
 		// Reset all config
-		m.config = defaultConfig()
+		m.config = defaults.DefaultConfig
 	}
 	return m.save()
 }
@@ -447,107 +469,6 @@ func getConfigDir() (string, error) {
 	return filepath.Join(homeDir, ".config", "gptcomet"), nil
 }
 
-// defaultConfig returns a default configuration map for gptcomet.
-//
-// The configuration map contains the default values for the provider, file
-// ignore, output, console, openai, and claude configuration options.
-//
-// The default values are as follows:
-//
-//   - provider: "openai"
-//   - file_ignore: the default list of file patterns to ignore when generating
-//     commit messages
-//   - output:
-//   - lang: "en"
-//   - rich_template: "<title>:<summary>\n\n<detail>"
-//   - translate_title: false
-//   - console:
-//   - verbose: true
-//   - openai:
-//   - api_base: the default API base for the OpenAI provider
-//   - api_key: an empty string (must be set by the user)
-//   - model: the default model for the OpenAI provider
-//   - retries: 2
-//   - proxy: an empty string (must be set by the user)
-//   - max_tokens: 1024
-//   - top_p: 0.7
-//   - temperature: 0.7
-//   - frequency_penalty: 0
-//   - extra_headers: an empty string (must be set by the user)
-//   - completion_path: "/chat/completions"
-//   - answer_path: "choices.0.message.content"
-//   - claude:
-//   - api_base: "https://api.anthropic.com"
-//   - api_key: an empty string (must be set by the user)
-//   - model: "claude-3.5-sonnet"
-//   - retries: 2
-//   - proxy: an empty string (must be set by the user)
-//   - max_tokens: 1024
-//   - top_p: 0.7
-//   - temperature: 0.7
-//   - frequency_penalty: 0
-//   - extra_headers: an empty string (must be set by the user)
-//   - completion_path: "/v1/messages"
-//   - answer_path: "content.0.text"
-//   - prompt: the default prompt templates
-func defaultConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"provider": "openai",
-		"file_ignore": []string{
-			"bun.lockb",
-			"Cargo.lock",
-			"composer.lock",
-			"Gemfile.lock",
-			"package-lock.json",
-			"pnpm-lock.yaml",
-			"poetry.lock",
-			"yarn.lock",
-			"pdm.lock",
-			"Pipfile.lock",
-			"*.py[cod]",
-			"go.sum",
-			"uv.lock",
-		},
-		"output": map[string]interface{}{
-			"lang":            "en",
-			"rich_template":   "<title>:<summary>\n\n<detail>",
-			"translate_title": false,
-		},
-		"console": map[string]interface{}{
-			"verbose": true,
-		},
-		"openai": map[string]interface{}{
-			"api_base":          types.DefaultAPIBase,
-			"api_key":           "",
-			"model":             types.DefaultModel,
-			"retries":           2,
-			"proxy":             "",
-			"max_tokens":        1024,
-			"top_p":             0.7,
-			"temperature":       0.7,
-			"frequency_penalty": 0,
-			"extra_headers":     "{}",
-			"completion_path":   "/chat/completions",
-			"answer_path":       "choices.0.message.content",
-		},
-		"claude": map[string]interface{}{
-			"api_base":          "https://api.anthropic.com",
-			"api_key":           "",
-			"model":             "claude-3.5-sonnet",
-			"retries":           2,
-			"proxy":             "",
-			"max_tokens":        1024,
-			"top_p":             0.7,
-			"temperature":       0.7,
-			"frequency_penalty": 0,
-			"extra_headers":     "{}",
-			"completion_path":   "/v1/messages",
-			"answer_path":       "content.0.text",
-		},
-		"prompt": defaults.PromptDefaults,
-	}
-}
-
 // OutputLanguageMap maps language codes to their names
 var OutputLanguageMap = map[string]string{
 	"en":    "English",
@@ -733,6 +654,21 @@ func (m *Manager) GetPrompt(isRich bool) string {
 	} else {
 		return defaults.PromptDefaults["brief_commit_message"]
 	}
+}
+
+func (m *Manager) GetReviewPrompt() string {
+	promptConfig, ok := m.config["prompt"].(map[string]interface{})
+	if !ok {
+		// return default prompt if not set in config
+		debug.Printf("Prompt not found in config, using default")
+		return defaults.PromptDefaults["review"]
+	}
+	if review, ok := promptConfig["review"].(string); ok {
+		return review
+	}
+	// return default prompt if not set in config
+	debug.Printf("Using default review prompt in the end")
+	return defaults.PromptDefaults["review"]
 }
 
 // GetTranslationPrompt retrieves the translation prompt from the configuration.
