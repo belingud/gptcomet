@@ -23,15 +23,15 @@ type ManagerInterface interface {
 	Reset(promptOnly bool) error
 	Remove(key string, value string) error
 	Append(key string, value interface{}) error
-	save() error
+	Save() error
 	GetClientConfig() (*types.ClientConfig, error)
 	GetSupportedKeys() []string
 	UpdateProviderConfig(provider string, configs map[string]string) error
 	GetPrompt(isRich bool) string
 	GetReviewPrompt() string
-	getNestedValue(keys []string) (interface{}, bool)
-	setNestedValue(keys []string, value interface{})
-	load() error
+	GetNestedValue(keys []string) (interface{}, bool)
+	SetNestedValue(keys []string, value interface{})
+	Load() error
 	GetTranslationPrompt() string
 	GetOutputTranslateTitle() bool
 	GetFileIgnore() []string
@@ -52,6 +52,11 @@ func New(configPath string) (*Manager, error) {
 			return nil, fmt.Errorf("failed to get config directory: %w", err)
 		}
 		configPath = configPath + "/gptcomet.yaml"
+	} else {
+		// Check if the config file exists
+		if _, err := os.Stat(configPath); err != nil {
+			return nil, fmt.Errorf("config file does not exist: %w", err)
+		}
 	}
 
 	manager := &Manager{
@@ -66,13 +71,13 @@ func New(configPath string) (*Manager, error) {
 
 	// Load existing config if it exists
 	if _, err := os.Stat(configPath); err == nil {
-		if err := manager.load(); err != nil {
+		if err := manager.Load(); err != nil {
 			return nil, fmt.Errorf("failed to load config: %w", err)
 		}
 	} else {
 		// Initialize with default configuration
 		manager.config = defaults.DefaultConfig
-		if err := manager.save(); err != nil {
+		if err := manager.Save(); err != nil {
 			return nil, fmt.Errorf("failed to save default config: %w", err)
 		}
 	}
@@ -197,7 +202,7 @@ func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 	}
 	m.config["provider"] = provider
 
-	return m.save()
+	return m.Save()
 }
 
 // Get returns the value associated with the given key. The key is split
@@ -205,7 +210,7 @@ func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 //
 // If the key is not found, the second return value is false.
 func (m *Manager) Get(key string) (interface{}, bool) {
-	return m.getNestedValue(strings.Split(key, "."))
+	return m.GetNestedValue(strings.Split(key, "."))
 }
 
 // GetWithDefault retrieves the value associated with the given key from the configuration.
@@ -222,7 +227,7 @@ func (m *Manager) Get(key string) (interface{}, bool) {
 //
 //	The configuration value associated with the key, or defaultValue if the key does not exist.
 func (m *Manager) GetWithDefault(key string, defaultValue interface{}) interface{} {
-	value, ok := m.getNestedValue(strings.Split(key, "."))
+	value, ok := m.GetNestedValue(strings.Split(key, "."))
 	if !ok {
 		return defaultValue
 	}
@@ -253,8 +258,8 @@ func (m *Manager) Set(key string, value interface{}) error {
 	}
 
 	keys := strings.Split(key, ".")
-	m.setNestedValue(keys, value)
-	return m.save()
+	m.SetNestedValue(keys, value)
+	return m.Save()
 }
 
 // ListWithoutPrompt returns a copy of the configuration that excludes the prompt section.
@@ -282,7 +287,7 @@ func (m *Manager) Reset(promptOnly bool) error {
 		// Reset all config
 		m.config = defaults.DefaultConfig
 	}
-	return m.save()
+	return m.Save()
 }
 
 // Remove removes a configuration value or a value from a list.
@@ -296,7 +301,7 @@ func (m *Manager) Remove(key string, value string) error {
 	if value == "" {
 		// If no value is provided, remove the entire key
 		lastKey := keys[len(keys)-1]
-		parent, ok := m.getNestedValue(keys[:len(keys)-1])
+		parent, ok := m.GetNestedValue(keys[:len(keys)-1])
 		if !ok {
 			return nil
 		}
@@ -304,11 +309,11 @@ func (m *Manager) Remove(key string, value string) error {
 		if parentMap, ok := parent.(map[string]interface{}); ok {
 			delete(parentMap, lastKey)
 		}
-		return m.save()
+		return m.Save()
 	}
 
 	// If value is provided, try to remove it from a list
-	current, ok := m.getNestedValue(keys)
+	current, ok := m.GetNestedValue(keys)
 	if !ok {
 		return nil
 	}
@@ -347,7 +352,7 @@ func (m *Manager) GetPath() string {
 // the save fails.
 func (m *Manager) Append(key string, value interface{}) error {
 	keys := strings.Split(key, ".")
-	current, ok := m.getNestedValue(keys)
+	current, ok := m.GetNestedValue(keys)
 	if !ok {
 		// If the key doesn't exist, create a new list
 		return m.Set(key, []interface{}{value})
@@ -364,7 +369,7 @@ func (m *Manager) Append(key string, value interface{}) error {
 	return m.Set(key, list)
 }
 
-// getNestedValue retrieves the value associated with the given key path from the
+// GetNestedValue retrieves the value associated with the given key path from the
 // configuration.
 //
 // The key path is a slice of strings where each string is a key in a nested map.
@@ -374,7 +379,7 @@ func (m *Manager) Append(key string, value interface{}) error {
 // If any of the keys in the path do not exist, the method returns (nil, false).
 // If the key path is valid, the method returns the value associated with the last
 // key in the path and true.
-func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
+func (m *Manager) GetNestedValue(keys []string) (interface{}, bool) {
 	current := interface{}(m.config)
 	for _, key := range keys {
 		currentMap, ok := current.(map[string]interface{})
@@ -389,7 +394,7 @@ func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
 	return current, true
 }
 
-// setNestedValue sets the value associated with the given key path in the
+// SetNestedValue sets the value associated with the given key path in the
 // configuration.
 //
 // The key path is a slice of strings where each string is a key in a nested map.
@@ -398,7 +403,7 @@ func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
 //
 // If any of the keys in the path do not exist, the method creates them as needed.
 // The method returns the value associated with the last key in the path.
-func (m *Manager) setNestedValue(keys []string, value interface{}) {
+func (m *Manager) SetNestedValue(keys []string, value interface{}) {
 	current := m.config
 	for _, key := range keys[:len(keys)-1] {
 		next, ok := current[key]
@@ -417,12 +422,12 @@ func (m *Manager) setNestedValue(keys []string, value interface{}) {
 	current[keys[len(keys)-1]] = value
 }
 
-// load reads the configuration from the file specified by the configPath
+// Load reads the configuration from the file specified by the configPath
 // field and unmarshals it into the config field.
 //
 // If the file does not exist or an error occurs while reading or parsing the
 // file, an error is returned.
-func (m *Manager) load() error {
+func (m *Manager) Load() error {
 	data, err := os.ReadFile(m.configPath)
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
@@ -435,12 +440,12 @@ func (m *Manager) load() error {
 	return nil
 }
 
-// save writes the configuration in the config field to the file specified
+// Save writes the configuration in the config field to the file specified
 // by the configPath field.
 //
 // If an error occurs while marshaling the configuration or writing the file,
 // an error is returned.
-func (m *Manager) save() error {
+func (m *Manager) Save() error {
 	data, err := yaml.Marshal(m.config)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config: %w", err)
@@ -552,7 +557,7 @@ func IsValidLanguage(lang string) bool {
 // The <provider> placeholder in the returned list will be replaced with the name of the current provider.
 func (m *Manager) GetSupportedKeys() []string {
 	// Get current provider
-	provider, _ := m.getNestedValue([]string{"provider"})
+	provider, _ := m.GetNestedValue([]string{"provider"})
 	providerStr, ok := provider.(string)
 	if !ok || providerStr == "" {
 		providerStr = "openai"
@@ -815,7 +820,7 @@ func (m *Manager) UpdateProviderConfig(provider string, configs map[string]strin
 	}
 
 	// Save the config
-	if err := m.save(); err != nil {
+	if err := m.Save(); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)
 	}
 

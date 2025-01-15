@@ -43,3 +43,8 @@ func (m *MockVCS) GetFileContent(repoPath string, file string) (string, error) {
 	args := m.Called(repoPath, file)
 	return args.String(0), args.Error(1)
 }
+
+func (m *MockVCS) GetCurrentBranch(repoPath string) (string, error) {
+	args := m.Called(repoPath)
+	return args.String(0), args.Error(1)
+}
