@@ -26,8 +26,10 @@ const (
 //     commit messages
 //   - output:
 //   - lang: "en"
+//   - review_lang: "en"
 //   - rich_template: "<title>:<summary>\n\n<detail>"
 //   - translate_title: false
+//   - markdown_theme: the default markdown theme for the output
 //   - console:
 //   - verbose: true
 //   - openai:
