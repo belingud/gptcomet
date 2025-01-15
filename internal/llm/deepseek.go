@@ -1,13 +1,16 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // DeepSeekLLM implements the LLM interface for DeepSeek
 type DeepSeekLLM struct {
-	*OpenAILLM
+	*BaseLLM
 }
 
 // NewDeepSeekLLM creates a new DeepSeekLLM
@@ -19,8 +22,16 @@ func NewDeepSeekLLM(config *types.ClientConfig) *DeepSeekLLM {
 		config.Model = "deepseek-chat"
 	}
 
+	if config.CompletionPath == nil {
+		defaultPath := "chat/completions"
+		config.CompletionPath = &defaultPath
+	}
+	if config.AnswerPath == "" {
+		config.AnswerPath = "choices.0.message.content"
+	}
+
 	return &DeepSeekLLM{
-		OpenAILLM: NewOpenAILLM(config),
+		BaseLLM: NewBaseLLM(config),
 	}
 }
 
@@ -48,4 +59,9 @@ func (d *DeepSeekLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter max tokens",
 		},
 	}
+}
+
+// MakeRequest makes a request to the DeepSeek API
+func (d *DeepSeekLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return d.BaseLLM.MakeRequest(ctx, client, d, message, stream)
 }

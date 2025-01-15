@@ -1,15 +1,5 @@
 package types
 
-const (
-	DefaultAPIBase          = "https://api.openai.com/v1"
-	DefaultModel            = "gpt-4o"
-	DefaultRetries          = 3
-	DefaultMaxTokens        = 1024
-	DefaultTemperature      = 0.7
-	DefaultTopP             = 1.0
-	DefaultFrequencyPenalty = 0.0
-)
-
 // Message represents a chat message
 type Message struct {
 	Role    string `json:"role"`

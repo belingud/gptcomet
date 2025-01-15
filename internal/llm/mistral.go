@@ -1,13 +1,16 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // MistralLLM implements the LLM interface for Mistral
 type MistralLLM struct {
-	*OpenAILLM
+	*BaseLLM
 }
 
 // NewMistralLLM creates a new MistralLLM
@@ -19,7 +22,7 @@ func NewMistralLLM(config *types.ClientConfig) *MistralLLM {
 		config.Model = "mistral-large-latest"
 	}
 	return &MistralLLM{
-		OpenAILLM: NewOpenAILLM(config),
+		BaseLLM: NewBaseLLM(config),
 	}
 }
 
@@ -47,4 +50,9 @@ func (m *MistralLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter max tokens",
 		},
 	}
+}
+
+// MakeRequest makes a request to the Mistral API
+func (m *MistralLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return m.BaseLLM.MakeRequest(ctx, client, m, message, stream)
 }

@@ -1,5 +1,124 @@
 package defaults
 
+import (
+	"github.com/charmbracelet/glamour/styles"
+)
+
+const (
+	DefaultAPIBase          = "https://api.openai.com/v1"
+	DefaultModel            = "gpt-4o"
+	DefaultRetries          = 3
+	DefaultMaxTokens        = 1024
+	DefaultTemperature      = 0.7
+	DefaultTopP             = 1.0
+	DefaultFrequencyPenalty = 0.0
+)
+
+// defaultConfig returns a default configuration map for gptcomet.
+//
+// The configuration map contains the default values for the provider, file
+// ignore, output, console, openai, and claude configuration options.
+//
+// The default values are as follows:
+//
+//   - provider: "openai"
+//   - file_ignore: the default list of file patterns to ignore when generating
+//     commit messages
+//   - output:
+//   - lang: "en"
+//   - review_lang: "en"
+//   - rich_template: "<title>:<summary>\n\n<detail>"
+//   - translate_title: false
+//   - markdown_theme: the default markdown theme for the output
+//   - console:
+//   - verbose: true
+//   - openai:
+//   - api_base: the default API base for the OpenAI provider
+//   - api_key: an empty string (must be set by the user)
+//   - model: the default model for the OpenAI provider
+//   - retries: 2
+//   - proxy: an empty string (must be set by the user)
+//   - max_tokens: 1024
+//   - top_p: 0.7
+//   - temperature: 0.7
+//   - frequency_penalty: 0
+//   - extra_headers: an empty string (must be set by the user)
+//   - completion_path: "/chat/completions"
+//   - answer_path: "choices.0.message.content"
+//   - claude:
+//   - api_base: "https://api.anthropic.com"
+//   - api_key: an empty string (must be set by the user)
+//   - model: "claude-3.5-sonnet"
+//   - retries: 2
+//   - proxy: an empty string (must be set by the user)
+//   - max_tokens: 1024
+//   - top_p: 0.7
+//   - temperature: 0.7
+//   - frequency_penalty: 0
+//   - extra_headers: an empty string (must be set by the user)
+//   - completion_path: "/v1/messages"
+//   - answer_path: "content.0.text"
+//   - prompt: the default prompt templates
+func defaultConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"provider": "openai",
+		"file_ignore": []string{
+			"bun.lockb",
+			"Cargo.lock",
+			"composer.lock",
+			"Gemfile.lock",
+			"package-lock.json",
+			"pnpm-lock.yaml",
+			"poetry.lock",
+			"yarn.lock",
+			"pdm.lock",
+			"Pipfile.lock",
+			"*.py[cod]",
+			"go.sum",
+			"uv.lock",
+		},
+		"output": map[string]interface{}{
+			"lang":            "en",
+			"rich_template":   "<title>:<summary>\n\n<detail>",
+			"translate_title": false,
+			"review_lang":     "en",
+			"markdown_theme":  styles.AutoStyle,
+		},
+		"console": map[string]interface{}{
+			"verbose": true,
+		},
+		"openai": map[string]interface{}{
+			"api_base":          DefaultAPIBase,
+			"api_key":           "",
+			"model":             DefaultModel,
+			"retries":           2,
+			"proxy":             "",
+			"max_tokens":        1024,
+			"top_p":             0.7,
+			"temperature":       0.7,
+			"frequency_penalty": 0,
+			"extra_headers":     "{}",
+			"completion_path":   "/chat/completions",
+			"answer_path":       "choices.0.message.content",
+		},
+		"claude": map[string]interface{}{
+			"api_base":          "https://api.anthropic.com",
+			"api_key":           "",
+			"model":             "claude-3.5-sonnet",
+			"retries":           2,
+			"proxy":             "",
+			"max_tokens":        1024,
+			"top_p":             0.7,
+			"temperature":       0.7,
+			"frequency_penalty": 0,
+			"extra_headers":     "{}",
+			"completion_path":   "/v1/messages",
+			"answer_path":       "content.0.text",
+		},
+		"prompt": PromptDefaults,
+	}
+}
+
 // PromptDefaults contains default prompt configurations
 var PromptDefaults = map[string]string{
 	"brief_commit_message": `you are an expert software engineer responsible for writing a clear and concise commit message.
@@ -115,4 +234,14 @@ GIT COMMIT MESSAGE:
 
 Remember translate all given git commit message and give me only the translation.
 THE TRANSLATION:`,
+	"review": `Please review the following code patch and provide feedback in {{ output.review_lang }}.:  
+Requirements:  
+1. Identify and list necessary improvements (e.g., bug risks, security vulnerabilities).  
+2. Suggest optional improvements (e.g., code readability, maintainability).  
+Clearly separate necessary improvements from optional suggestions. Only include points relevant to the provided diff.  
+
+THE CODE PATCH TO BE REVIEWED:
+{{ placeholder }}`,
 }
+
+var DefaultConfig = defaultConfig()

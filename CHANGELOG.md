@@ -1,5 +1,38 @@
 
 ---
+## [0.3.0](https://github.com/belingud/gptcomet/compare/v0.2.4..v0.3.0) - 2025-01-15
+
+### ⛰️  Features
+
+- Add review command with GPT integration and tests - ([eefb991](https://github.com/belingud/gptcomet/commit/eefb99134f0b6ffc71a5d7a279fb189c056b37cf)) - belingud
+- add streaming support and refactor LLM interface for consistency - ([b2eabb8](https://github.com/belingud/gptcomet/commit/b2eabb8a6e3b94557231661ee7b2e9744fa08575)) - belingud
+- add GetWithDefault and GetReviewPrompt methods to config manager - ([4f3163d](https://github.com/belingud/gptcomet/commit/4f3163dee9552929940a51e6911bb88d57b2fcab)) - belingud
+
+### 🚜 Refactor
+
+- rename private methods to public in config manager - ([53e1f71](https://github.com/belingud/gptcomet/commit/53e1f71b49492c9e2efd30b0c58bfa476f1425ee)) - belingud
+
+### 📚 Documentation
+
+- update README installation - ([ad441c0](https://github.com/belingud/gptcomet/commit/ad441c0bb62cde32bb4edb90799abc2d946968fc)) - belingud
+- update contributing guidelines and refactor Justfile - ([85973f1](https://github.com/belingud/gptcomet/commit/85973f1eb930aadc2ae45022e4fbb0d5c2c911e7)) - belingud
+- update README with emojis - ([1a6a81f](https://github.com/belingud/gptcomet/commit/1a6a81fc0ee141d7b4f54a2458243af90eb9a84a)) - belingud
+
+### 🎨 Styling
+
+- Change configuration file path print formatting - ([057350e](https://github.com/belingud/gptcomet/commit/057350e182818c7ace496c457e96924f9306c4ae)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update dependencies in go.mod - ([b854bf2](https://github.com/belingud/gptcomet/commit/b854bf29628a053f5dd37f1c6c6decb7ee2a6f95)) - belingud
+
+### Build
+
+- add get_binary_path script and update Justfile build step - ([e3a7456](https://github.com/belingud/gptcomet/commit/e3a74565ca83167cd181352bdbcde291cd6ae54f)) - belingud
+- update install script - ([83c3864](https://github.com/belingud/gptcomet/commit/83c386488076d0c37242796eb81de8e04f3feba1)) - belingud
+
+
+---
 ## [0.2.4](https://github.com/belingud/gptcomet/compare/v0.2.3..v0.2.4) - 2025-01-11
 
 ### ⛰️  Features

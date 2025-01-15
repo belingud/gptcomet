@@ -1,7 +1,9 @@
 package llm
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -65,11 +67,11 @@ func (a *AI21LLM) BuildHeaders() map[string]string {
 	return headers
 }
 
-func (a *AI21LLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
-	messages := append(history, types.Message{
+func (a *AI21LLM) FormatMessages(message string) (interface{}, error) {
+	messages := []interface{}{types.Message{
 		Role:    "user",
 		Content: message,
-	})
+	}}
 
 	payload := map[string]interface{}{
 		"model":      a.Config.Model,
@@ -80,7 +82,12 @@ func (a *AI21LLM) FormatMessages(message string, history []types.Message) (inter
 		payload["temperature"] = a.Config.Temperature
 	}
 	if a.Config.TopP != 0 {
-		payload["top_p"] = a.Config.TopP
+		payload["topP"] = a.Config.TopP
 	}
 	return payload, nil
+}
+
+// MakeRequest implements the LLM interface for AI21
+func (a *AI21LLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return a.BaseLLM.MakeRequest(ctx, client, a, message, stream)
 }

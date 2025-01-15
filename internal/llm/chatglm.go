@@ -1,13 +1,16 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // ChatGLMLLM implements the LLM interface for ChatGLM
 type ChatGLMLLM struct {
-	*OpenAILLM
+	*BaseLLM
 }
 
 // NewChatGLMLLM creates a new ChatGLMLLM
@@ -20,7 +23,7 @@ func NewChatGLMLLM(config *types.ClientConfig) *ChatGLMLLM {
 	}
 
 	return &ChatGLMLLM{
-		OpenAILLM: NewOpenAILLM(config),
+		BaseLLM: NewBaseLLM(config),
 	}
 }
 
@@ -48,4 +51,9 @@ func (c *ChatGLMLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter max tokens",
 		},
 	}
+}
+
+// MakeRequest makes a request to the ChatGLM API
+func (c *ChatGLMLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return c.BaseLLM.MakeRequest(ctx, client, c, message, stream)
 }

@@ -21,6 +21,8 @@ type ClientInterface interface {
 	Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error)
 	TranslateMessage(prompt string, message string, lang string) (string, error)
 	GenerateCommitMessage(diff string, prompt string) (string, error)
+	GenerateReviewComment(diff string, prompt string) (string, error)
+	GenerateReviewCommentStream(diff string, prompt string, callback func(string) error) error
 }
 
 // Client represents an LLM client
@@ -71,7 +73,7 @@ func New(config *types.ClientConfig) *Client {
 		provider = llm.NewAI21LLM(config)
 	default:
 		// Default to OpenAI if provider is not specified
-		provider = llm.NewOpenAILLM(config)
+		provider = llm.NewDefaultLLM(config)
 	}
 
 	return &Client{
@@ -90,7 +92,7 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 
 	debug.Printf("🔌 Using proxy: %s", c.config.Proxy)
 
-	content, err := c.llm.MakeRequest(ctx, client, message, history)
+	content, err := c.llm.MakeRequest(ctx, client, message, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
@@ -223,7 +225,7 @@ func (c *Client) TranslateMessage(prompt string, message string, lang string) (s
 
 // GenerateCommitMessage generates a commit message for the given diff
 func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, error) {
-	formattedPrompt := fmt.Sprintf(prompt, diff)
+	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -232,4 +234,56 @@ func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, erro
 	}
 
 	return strings.TrimSpace(resp.Content), nil
+}
+
+// GenerateReviewComment generates a review comment for the given diff
+func (c *Client) GenerateReviewComment(diff string, prompt string) (string, error) {
+	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+
+	// Send the request
+	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(resp.Content), nil
+}
+
+// GenerateReviewCommentStream generates a review comment for the given diff
+func (c *Client) GenerateReviewCommentStream(diff string, prompt string, callback func(string) error) error {
+	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+
+	// Send the request
+	return c.Stream(context.Background(), formattedPrompt, func(resp *types.CompletionResponse) error {
+		return callback(resp.Content)
+	})
+}
+
+// Stream sends a streaming request to the LLM provider and processes the response
+// using the provided callback function.
+//
+// Parameters:
+//   - ctx: the context for the request, used for cancellation and timeouts
+//   - message: the message to send to the LLM provider
+//   - history: the message history to include in the request
+//   - callback: a function that processes the CompletionResponse received from the LLM provider
+//
+// Returns an error if the client cannot be obtained, the request fails, or the callback function
+// returns an error.
+func (c *Client) Stream(ctx context.Context, message string, callback func(*types.CompletionResponse) error) error {
+	client, err := c.getClient()
+	if err != nil {
+		return fmt.Errorf("failed to get client: %w", err)
+	}
+
+	content, err := c.llm.MakeRequest(ctx, client, message, true)
+	if err != nil {
+		return fmt.Errorf("failed to make request: %w", err)
+	}
+
+	debug.Printf("✅ Request succeeded")
+	return callback(&types.CompletionResponse{
+		Content: content,
+		Raw:     make(map[string]interface{}),
+	})
 }

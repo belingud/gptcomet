@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/belingud/gptcomet/pkg/config"
-	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -29,8 +28,8 @@ func (m *MockLLM) BuildURL() string {
 	return args.String(0)
 }
 
-func (m *MockLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
-	args := m.Called(message, history)
+func (m *MockLLM) FormatMessages(message string) (interface{}, error) {
+	args := m.Called(message)
 	return args.Get(0), args.Error(1)
 }
 
@@ -44,8 +43,8 @@ func (m *MockLLM) GetUsage(data []byte) (string, error) {
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	args := m.Called(ctx, client, message, history)
+func (m *MockLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	args := m.Called(ctx, client, message, stream)
 	return args.String(0), args.Error(1)
 }
 

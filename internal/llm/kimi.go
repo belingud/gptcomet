@@ -1,6 +1,9 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
@@ -48,4 +51,9 @@ func (k *KimiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter max tokens",
 		},
 	}
+}
+
+// MakeRequest makes a request to the Kimi API
+func (k *KimiLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return k.BaseLLM.MakeRequest(ctx, client, k, message, stream)
 }

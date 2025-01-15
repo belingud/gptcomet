@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
 
@@ -15,20 +16,22 @@ import (
 
 type ManagerInterface interface {
 	Get(key string) (interface{}, bool)
+	GetWithDefault(key string, defaultValue interface{}) interface{}
 	Set(key string, value interface{}) error
 	ListWithoutPrompt() map[string]interface{}
 	List() (string, error)
 	Reset(promptOnly bool) error
 	Remove(key string, value string) error
 	Append(key string, value interface{}) error
-	save() error
+	Save() error
 	GetClientConfig() (*types.ClientConfig, error)
 	GetSupportedKeys() []string
 	UpdateProviderConfig(provider string, configs map[string]string) error
 	GetPrompt(isRich bool) string
-	getNestedValue(keys []string) (interface{}, bool)
-	setNestedValue(keys []string, value interface{})
-	load() error
+	GetReviewPrompt() string
+	GetNestedValue(keys []string) (interface{}, bool)
+	SetNestedValue(keys []string, value interface{})
+	Load() error
 	GetTranslationPrompt() string
 	GetOutputTranslateTitle() bool
 	GetFileIgnore() []string
@@ -49,6 +52,11 @@ func New(configPath string) (*Manager, error) {
 			return nil, fmt.Errorf("failed to get config directory: %w", err)
 		}
 		configPath = configPath + "/gptcomet.yaml"
+	} else {
+		// Check if the config file exists
+		if _, err := os.Stat(configPath); err != nil {
+			return nil, fmt.Errorf("config file does not exist: %w", err)
+		}
 	}
 
 	manager := &Manager{
@@ -63,14 +71,13 @@ func New(configPath string) (*Manager, error) {
 
 	// Load existing config if it exists
 	if _, err := os.Stat(configPath); err == nil {
-		if err := manager.load(); err != nil {
+		if err := manager.Load(); err != nil {
 			return nil, fmt.Errorf("failed to load config: %w", err)
 		}
 	} else {
 		// Initialize with default configuration
-		defaultConfig := defaultConfig()
-		manager.config = defaultConfig
-		if err := manager.save(); err != nil {
+		manager.config = defaults.DefaultConfig
+		if err := manager.Save(); err != nil {
 			return nil, fmt.Errorf("failed to save default config: %w", err)
 		}
 	}
@@ -110,12 +117,12 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		return nil, fmt.Errorf("api_key not found for provider: %s", provider)
 	}
 
-	apiBase := types.DefaultAPIBase
+	apiBase := defaults.DefaultAPIBase
 	if base, ok := providerConfig["api_base"].(string); ok {
 		apiBase = base
 	}
 
-	model := types.DefaultModel
+	model := defaults.DefaultModel
 	if m, ok := providerConfig["model"].(string); ok {
 		model = m
 	}
@@ -125,22 +132,22 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		proxy = p
 	}
 
-	maxTokens := types.DefaultMaxTokens
+	maxTokens := defaults.DefaultMaxTokens
 	if m, ok := providerConfig["max_tokens"].(float64); ok {
 		maxTokens = int(m)
 	}
 
-	topP := types.DefaultTopP
+	topP := defaults.DefaultTopP
 	if m, ok := providerConfig["top_p"].(float64); ok {
 		topP = m
 	}
 
-	temperature := types.DefaultTemperature
+	temperature := defaults.DefaultTemperature
 	if m, ok := providerConfig["temperature"].(float64); ok {
 		temperature = m
 	}
 
-	frequencyPenalty := types.DefaultFrequencyPenalty
+	frequencyPenalty := defaults.DefaultFrequencyPenalty
 	if m, ok := providerConfig["frequency_penalty"].(float64); ok {
 		frequencyPenalty = m
 	}
@@ -151,7 +158,7 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		APIKey:           apiKey,
 		Model:            model,
 		Provider:         provider,
-		Retries:          types.DefaultRetries,
+		Retries:          defaults.DefaultRetries,
 		Proxy:            proxy,
 		MaxTokens:        maxTokens,
 		TopP:             topP,
@@ -182,10 +189,10 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 // the save fails.
 func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 	if apiBase == "" {
-		apiBase = types.DefaultAPIBase
+		apiBase = defaults.DefaultAPIBase
 	}
 	if model == "" {
-		model = types.DefaultModel
+		model = defaults.DefaultModel
 	}
 
 	m.config[provider] = map[string]interface{}{
@@ -195,7 +202,7 @@ func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 	}
 	m.config["provider"] = provider
 
-	return m.save()
+	return m.Save()
 }
 
 // Get returns the value associated with the given key. The key is split
@@ -203,7 +210,28 @@ func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 //
 // If the key is not found, the second return value is false.
 func (m *Manager) Get(key string) (interface{}, bool) {
-	return m.getNestedValue(strings.Split(key, "."))
+	return m.GetNestedValue(strings.Split(key, "."))
+}
+
+// GetWithDefault retrieves the value associated with the given key from the configuration.
+// If the key is not found, it returns the provided defaultValue.
+//
+// The key is split on the '.' character to navigate the nested map structure.
+//
+// Parameters:
+//
+//	key - The configuration key to look up.
+//	defaultValue - The value to return if the key is not found.
+//
+// Returns:
+//
+//	The configuration value associated with the key, or defaultValue if the key does not exist.
+func (m *Manager) GetWithDefault(key string, defaultValue interface{}) interface{} {
+	value, ok := m.GetNestedValue(strings.Split(key, "."))
+	if !ok {
+		return defaultValue
+	}
+	return value
 }
 
 // Set sets the value associated with the given key. The key is split
@@ -211,27 +239,28 @@ func (m *Manager) Get(key string) (interface{}, bool) {
 //
 // If the key is not found, the value is not set.
 //
-// If the key is "output.lang", the value must be a valid language code.
+// If the key is "output.lang" or "output.review_lang", the value must be a valid language code.
 // If the key is "output.translate_title", the value must be a boolean.
 //
 // The method saves the configuration to the file and returns an error if
 // the save fails.
 func (m *Manager) Set(key string, value interface{}) error {
-	if key == "output.lang" {
+	switch key {
+	case "output.lang", "output.review_lang":
 		if str, ok := value.(string); ok {
 			if !IsValidLanguage(str) {
 				return fmt.Errorf("invalid language code: %s", str)
 			}
 		}
-	} else if key == "output.translate_title" {
+	case "output.translate_title":
 		if _, ok := value.(bool); !ok {
 			return fmt.Errorf("translate_title must be a boolean value")
 		}
 	}
 
 	keys := strings.Split(key, ".")
-	m.setNestedValue(keys, value)
-	return m.save()
+	m.SetNestedValue(keys, value)
+	return m.Save()
 }
 
 // ListWithoutPrompt returns a copy of the configuration that excludes the prompt section.
@@ -252,15 +281,14 @@ func (m *Manager) ListWithoutPrompt() map[string]interface{} {
 func (m *Manager) Reset(promptOnly bool) error {
 	if promptOnly {
 		// Get default prompt config
-		defaultCfg := defaultConfig()
-		if promptConfig, ok := defaultCfg["prompt"].(map[string]interface{}); ok {
+		if promptConfig, ok := defaults.DefaultConfig["prompt"].(map[string]interface{}); ok {
 			m.config["prompt"] = promptConfig
 		}
 	} else {
 		// Reset all config
-		m.config = defaultConfig()
+		m.config = defaults.DefaultConfig
 	}
-	return m.save()
+	return m.Save()
 }
 
 // Remove removes a configuration value or a value from a list.
@@ -274,7 +302,7 @@ func (m *Manager) Remove(key string, value string) error {
 	if value == "" {
 		// If no value is provided, remove the entire key
 		lastKey := keys[len(keys)-1]
-		parent, ok := m.getNestedValue(keys[:len(keys)-1])
+		parent, ok := m.GetNestedValue(keys[:len(keys)-1])
 		if !ok {
 			return nil
 		}
@@ -282,11 +310,11 @@ func (m *Manager) Remove(key string, value string) error {
 		if parentMap, ok := parent.(map[string]interface{}); ok {
 			delete(parentMap, lastKey)
 		}
-		return m.save()
+		return m.Save()
 	}
 
 	// If value is provided, try to remove it from a list
-	current, ok := m.getNestedValue(keys)
+	current, ok := m.GetNestedValue(keys)
 	if !ok {
 		return nil
 	}
@@ -325,7 +353,7 @@ func (m *Manager) GetPath() string {
 // the save fails.
 func (m *Manager) Append(key string, value interface{}) error {
 	keys := strings.Split(key, ".")
-	current, ok := m.getNestedValue(keys)
+	current, ok := m.GetNestedValue(keys)
 	if !ok {
 		// If the key doesn't exist, create a new list
 		return m.Set(key, []interface{}{value})
@@ -342,7 +370,7 @@ func (m *Manager) Append(key string, value interface{}) error {
 	return m.Set(key, list)
 }
 
-// getNestedValue retrieves the value associated with the given key path from the
+// GetNestedValue retrieves the value associated with the given key path from the
 // configuration.
 //
 // The key path is a slice of strings where each string is a key in a nested map.
@@ -352,7 +380,7 @@ func (m *Manager) Append(key string, value interface{}) error {
 // If any of the keys in the path do not exist, the method returns (nil, false).
 // If the key path is valid, the method returns the value associated with the last
 // key in the path and true.
-func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
+func (m *Manager) GetNestedValue(keys []string) (interface{}, bool) {
 	current := interface{}(m.config)
 	for _, key := range keys {
 		currentMap, ok := current.(map[string]interface{})
@@ -367,7 +395,7 @@ func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
 	return current, true
 }
 
-// setNestedValue sets the value associated with the given key path in the
+// SetNestedValue sets the value associated with the given key path in the
 // configuration.
 //
 // The key path is a slice of strings where each string is a key in a nested map.
@@ -376,7 +404,7 @@ func (m *Manager) getNestedValue(keys []string) (interface{}, bool) {
 //
 // If any of the keys in the path do not exist, the method creates them as needed.
 // The method returns the value associated with the last key in the path.
-func (m *Manager) setNestedValue(keys []string, value interface{}) {
+func (m *Manager) SetNestedValue(keys []string, value interface{}) {
 	current := m.config
 	for _, key := range keys[:len(keys)-1] {
 		next, ok := current[key]
@@ -395,12 +423,12 @@ func (m *Manager) setNestedValue(keys []string, value interface{}) {
 	current[keys[len(keys)-1]] = value
 }
 
-// load reads the configuration from the file specified by the configPath
+// Load reads the configuration from the file specified by the configPath
 // field and unmarshals it into the config field.
 //
 // If the file does not exist or an error occurs while reading or parsing the
 // file, an error is returned.
-func (m *Manager) load() error {
+func (m *Manager) Load() error {
 	data, err := os.ReadFile(m.configPath)
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
@@ -413,12 +441,12 @@ func (m *Manager) load() error {
 	return nil
 }
 
-// save writes the configuration in the config field to the file specified
+// Save writes the configuration in the config field to the file specified
 // by the configPath field.
 //
 // If an error occurs while marshaling the configuration or writing the file,
 // an error is returned.
-func (m *Manager) save() error {
+func (m *Manager) Save() error {
 	data, err := yaml.Marshal(m.config)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config: %w", err)
@@ -445,107 +473,6 @@ func getConfigDir() (string, error) {
 	}
 
 	return filepath.Join(homeDir, ".config", "gptcomet"), nil
-}
-
-// defaultConfig returns a default configuration map for gptcomet.
-//
-// The configuration map contains the default values for the provider, file
-// ignore, output, console, openai, and claude configuration options.
-//
-// The default values are as follows:
-//
-//   - provider: "openai"
-//   - file_ignore: the default list of file patterns to ignore when generating
-//     commit messages
-//   - output:
-//   - lang: "en"
-//   - rich_template: "<title>:<summary>\n\n<detail>"
-//   - translate_title: false
-//   - console:
-//   - verbose: true
-//   - openai:
-//   - api_base: the default API base for the OpenAI provider
-//   - api_key: an empty string (must be set by the user)
-//   - model: the default model for the OpenAI provider
-//   - retries: 2
-//   - proxy: an empty string (must be set by the user)
-//   - max_tokens: 1024
-//   - top_p: 0.7
-//   - temperature: 0.7
-//   - frequency_penalty: 0
-//   - extra_headers: an empty string (must be set by the user)
-//   - completion_path: "/chat/completions"
-//   - answer_path: "choices.0.message.content"
-//   - claude:
-//   - api_base: "https://api.anthropic.com"
-//   - api_key: an empty string (must be set by the user)
-//   - model: "claude-3.5-sonnet"
-//   - retries: 2
-//   - proxy: an empty string (must be set by the user)
-//   - max_tokens: 1024
-//   - top_p: 0.7
-//   - temperature: 0.7
-//   - frequency_penalty: 0
-//   - extra_headers: an empty string (must be set by the user)
-//   - completion_path: "/v1/messages"
-//   - answer_path: "content.0.text"
-//   - prompt: the default prompt templates
-func defaultConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"provider": "openai",
-		"file_ignore": []string{
-			"bun.lockb",
-			"Cargo.lock",
-			"composer.lock",
-			"Gemfile.lock",
-			"package-lock.json",
-			"pnpm-lock.yaml",
-			"poetry.lock",
-			"yarn.lock",
-			"pdm.lock",
-			"Pipfile.lock",
-			"*.py[cod]",
-			"go.sum",
-			"uv.lock",
-		},
-		"output": map[string]interface{}{
-			"lang":            "en",
-			"rich_template":   "<title>:<summary>\n\n<detail>",
-			"translate_title": false,
-		},
-		"console": map[string]interface{}{
-			"verbose": true,
-		},
-		"openai": map[string]interface{}{
-			"api_base":          types.DefaultAPIBase,
-			"api_key":           "",
-			"model":             types.DefaultModel,
-			"retries":           2,
-			"proxy":             "",
-			"max_tokens":        1024,
-			"top_p":             0.7,
-			"temperature":       0.7,
-			"frequency_penalty": 0,
-			"extra_headers":     "{}",
-			"completion_path":   "/chat/completions",
-			"answer_path":       "choices.0.message.content",
-		},
-		"claude": map[string]interface{}{
-			"api_base":          "https://api.anthropic.com",
-			"api_key":           "",
-			"model":             "claude-3.5-sonnet",
-			"retries":           2,
-			"proxy":             "",
-			"max_tokens":        1024,
-			"top_p":             0.7,
-			"temperature":       0.7,
-			"frequency_penalty": 0,
-			"extra_headers":     "{}",
-			"completion_path":   "/v1/messages",
-			"answer_path":       "content.0.text",
-		},
-		"prompt": defaults.PromptDefaults,
-	}
 }
 
 // OutputLanguageMap maps language codes to their names
@@ -631,7 +558,7 @@ func IsValidLanguage(lang string) bool {
 // The <provider> placeholder in the returned list will be replaced with the name of the current provider.
 func (m *Manager) GetSupportedKeys() []string {
 	// Get current provider
-	provider, _ := m.getNestedValue([]string{"provider"})
+	provider, _ := m.GetNestedValue([]string{"provider"})
 	providerStr, ok := provider.(string)
 	if !ok || providerStr == "" {
 		providerStr = "openai"
@@ -733,6 +660,21 @@ func (m *Manager) GetPrompt(isRich bool) string {
 	} else {
 		return defaults.PromptDefaults["brief_commit_message"]
 	}
+}
+
+func (m *Manager) GetReviewPrompt() string {
+	promptConfig, ok := m.config["prompt"].(map[string]interface{})
+	if !ok {
+		// return default prompt if not set in config
+		debug.Printf("Prompt not found in config, using default")
+		return defaults.PromptDefaults["review"]
+	}
+	if review, ok := promptConfig["review"].(string); ok {
+		return review
+	}
+	// return default prompt if not set in config
+	debug.Printf("Using default review prompt in the end")
+	return defaults.PromptDefaults["review"]
 }
 
 // GetTranslationPrompt retrieves the translation prompt from the configuration.
@@ -879,7 +821,7 @@ func (m *Manager) UpdateProviderConfig(provider string, configs map[string]strin
 	}
 
 	// Save the config
-	if err := m.save(); err != nil {
+	if err := m.Save(); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)
 	}
 

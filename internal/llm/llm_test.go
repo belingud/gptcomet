@@ -67,11 +67,8 @@ func TestBaseLLM_FormatMessages(t *testing.T) {
 	})
 
 	message := "test message"
-	history := []types.Message{
-		{Role: "user", Content: "previous message"},
-	}
 
-	got, err := llm.FormatMessages(message, history)
+	got, err := llm.FormatMessages(message)
 	if err != nil {
 		t.Errorf("FormatMessages() error = %v", err)
 		return
@@ -83,7 +80,7 @@ func TestBaseLLM_FormatMessages(t *testing.T) {
 		return
 	}
 
-	// 验证基本字段
+	// validate required parameters
 	if payload["model"] != "test-model" {
 		t.Errorf("model = %v, want test-model", payload["model"])
 	}
@@ -91,7 +88,7 @@ func TestBaseLLM_FormatMessages(t *testing.T) {
 		t.Errorf("max_tokens = %v, want 1024", payload["max_tokens"])
 	}
 
-	// 验证可选参数
+	// validate optional parameters
 	if payload["temperature"] != 0.7 {
 		t.Errorf("temperature = %v, want 0.7", payload["temperature"])
 	}
@@ -99,14 +96,14 @@ func TestBaseLLM_FormatMessages(t *testing.T) {
 		t.Errorf("top_p = %v, want 0.9", payload["top_p"])
 	}
 
-	// 验证消息格式
+	// validate penalties
 	messages, ok := payload["messages"].([]types.Message)
 	if !ok {
 		t.Errorf("messages wrong type")
 		return
 	}
-	if len(messages) != 2 {
-		t.Errorf("got %d messages, want 2", len(messages))
+	if len(messages) != 1 {
+		t.Errorf("got %d messages, want 1", len(messages))
 	}
 }
 

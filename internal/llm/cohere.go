@@ -1,7 +1,9 @@
 package llm
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -55,7 +57,7 @@ func (c *CohereLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 }
 
 // FormatMessages formats messages for Cohere API
-func (c *CohereLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
+func (c *CohereLLM) FormatMessages(message string) (interface{}, error) {
 
 	messages := []map[string]string{
 		{
@@ -67,7 +69,6 @@ func (c *CohereLLM) FormatMessages(message string, history []types.Message) (int
 	payload := map[string]interface{}{
 		"messages":    messages,
 		"model":       c.Config.Model,
-		"stream":      false,
 		"max_tokens":  c.Config.MaxTokens,
 		"temperature": c.Config.Temperature,
 	}
@@ -87,4 +88,9 @@ func (c *CohereLLM) GetUsage(response []byte) (string, error) {
 		usage.Get("input_tokens").Int(),
 		usage.Get("output_tokens").Int(),
 	), nil
+}
+
+// MakeRequest implements the LLM interface for Cohere
+func (c *CohereLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return c.BaseLLM.MakeRequest(ctx, client, c, message, stream)
 }

@@ -26,10 +26,10 @@ type LLM interface {
 	GetRequiredConfig() map[string]config.ConfigRequirement
 
 	// FormatMessages formats messages for the provider's API
-	FormatMessages(message string, history []types.Message) (interface{}, error)
+	FormatMessages(message string) (interface{}, error)
 
 	// MakeRequest makes a request to the API
-	MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error)
+	MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error)
 
 	// GetUsage returns usage information for the provider
 	GetUsage(data []byte) (string, error)
@@ -100,11 +100,8 @@ func (b *BaseLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 //
 // This is a default implementation which should be overridden by the
 // provider if it needs to format the messages differently.
-func (b *BaseLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
-	messages := make([]types.Message, 0, len(history)+1)
-	if history != nil {
-		messages = append(messages, history...)
-	}
+func (b *BaseLLM) FormatMessages(message string) (interface{}, error) {
+	messages := []types.Message{}
 	messages = append(messages, types.Message{
 		Role:    "user",
 		Content: message,
@@ -207,12 +204,18 @@ func (b *BaseLLM) GetUsage(data []byte) (string, error) {
 //
 // The function returns the response from the provider as a string, or an error
 // if the request fails.
-func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider LLM, message string, history []types.Message) (string, error) {
+func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider LLM, message string, stream bool) (string, error) {
 	url := provider.BuildURL()
+	debug.Printf("🔗 URL: %s", url)
 	headers := provider.BuildHeaders()
-	payload, err := provider.FormatMessages(message, history)
+	payload, err := provider.FormatMessages(message)
 	if err != nil {
 		return "", fmt.Errorf("failed to format messages: %w", err)
+	}
+	if stream {
+		if payloadMap, ok := payload.(map[string]interface{}); ok {
+			payloadMap["stream"] = true
+		}
 	}
 
 	reqBody, err := json.Marshal(payload)
@@ -229,7 +232,7 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 		req.Header.Set(k, v)
 	}
 
-	debug.Printf("📤 Sending request to %s...", provider.Name())
+	fmt.Printf("📤 Sending request to %s...\n", provider.Name())
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -289,6 +292,6 @@ func (d *DefaultLLM) Name() string {
 }
 
 // MakeRequest implements the LLM interface for DefaultLLM.
-func (d *DefaultLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	return d.BaseLLM.MakeRequest(ctx, client, d, message, history)
+func (d *DefaultLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return d.BaseLLM.MakeRequest(ctx, client, d, message, stream)
 }

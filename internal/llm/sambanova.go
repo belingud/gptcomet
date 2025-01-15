@@ -1,6 +1,9 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
@@ -48,4 +51,9 @@ func (s *SambanovaLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter max tokens",
 		},
 	}
+}
+
+// MakeRequest makes a request to the SambaNova API
+func (s *SambanovaLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return s.BaseLLM.MakeRequest(ctx, client, s, message, stream)
 }

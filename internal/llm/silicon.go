@@ -1,13 +1,16 @@
 package llm
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
 // SiliconLLM implements the LLM interface for Silicon
 type SiliconLLM struct {
-	*OpenAILLM
+	*BaseLLM
 }
 
 // NewSiliconLLM creates a new SiliconLLM
@@ -20,7 +23,7 @@ func NewSiliconLLM(config *types.ClientConfig) *SiliconLLM {
 	}
 
 	return &SiliconLLM{
-		OpenAILLM: NewOpenAILLM(config),
+		BaseLLM: NewBaseLLM(config),
 	}
 }
 
@@ -48,4 +51,9 @@ func (s *SiliconLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter max tokens",
 		},
 	}
+}
+
+// MakeRequest makes a request to the Silicon API, formats the response, and returns the result as a string.
+func (s *SiliconLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	return s.BaseLLM.MakeRequest(ctx, client, s, message, stream)
 }

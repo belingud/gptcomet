@@ -34,6 +34,7 @@
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
     - [output](#output)
+    - [Markdown theme](#markdown-theme)
     - [Supported languages](#supported-languages)
     - [console](#console)
   - [🔦 Supported Keys](#-supported-keys)
@@ -302,7 +303,7 @@ Some special provider may need your custome config. Like `cloudflare`.
 
 ```shell
 $ gmsg newprovider
-                             
+
 Selected provider: cloudflare
 Configure provider:
 
@@ -312,7 +313,7 @@ Previous inputs:
   Enter API key: abc*************************************
 
 Enter Enter max tokens (default: 1024):
-> 1024                                     
+> 1024
 
 Provider cloudflare already has a configuration. Do you want to overwrite it? (y/N): y
 
@@ -340,6 +341,8 @@ The following are the available commands for GPTComet:
     -   `--dry-run`: Dry run the command without actually generating the commit message.
     -   `-y/--yes`: Skip the confirmation prompt.
 -   `gmsg newprovider`: Add a new provider.
+-   `gmsg review`: Review staged diff or pipe to `gmsg review`.
+    -   `--svn`: Get diff from svn.
 
 Global flags:
 
@@ -359,6 +362,8 @@ Here's a summary of the main configuration keys:
 | `output.lang`                  | The language for commit message generation.                | `en`                              |
 | `output.rich_template`         | The template to use for rich commit messages.              | `<title>:<summary>\n\n<detail>`   |
 | `output.translate_title`       | Translate the title of the commit message.                 | `false`                           |
+| `output.review_lang`           | The language to generate the review message.               | `en`                              |
+| `output.markdown_theme`        | The theme to display markdown_theme content.               | `auto`                            |
 | `console.verbose`              | Enable verbose output.                                     | `true`                            |
 | `<provider>.api_base`          | The API base URL for the provider.                         | (Provider-specific)               |
 | `<provider>.api_key`           | The API key for the provider.                              |                                   |
@@ -473,12 +478,34 @@ output:
     lang: en
     rich_template: "<title>:<summary>\n\n<detail>"
     translate_title: false
+    review_lang: "en"
+    markdown_theme: "auto"
 ```
 
 You can set `rich_template` to change the template of the rich commit message,
 and set `lang` to change the language of the commit message.
 
+### Markdown theme
+
+Supported markdown theme:
+
+-   `auto`: Auto detect markdown theme (default).
+-   `ascii`: ASCII style.
+-   `dark`: Dark theme.
+-   `dracula`: Dracula theme.
+-   `light`: Light theme.
+-   `tokyo-night`: Tokyo Night theme.
+-   `notty`: Notty style, no render.
+-   `pink`: Pink theme.
+
+If you not set `markdown_theme`, the markdown theme will be auto detected.
+If you are using light terminal, the markdown theme will be `dark`, if you are using dark terminal, the markdown theme will be `light`.
+
+GPTComet is using glamour to render markdown, you can preview the markdown theme in [glamour preview](https://github.com/charmbracelet/glamour/tree/master/styles/gallery#glamour-style-section).
+
 ### Supported languages
+
+`output.lang` and `output.review_lang` support the following languages:
 
 -   `en`: English
 -   `zh-cn`: Simplified Chinese

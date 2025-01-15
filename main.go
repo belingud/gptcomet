@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "0.2.4"
+var version = "0.3.0"
 
 func main() {
 	var (
@@ -39,6 +39,7 @@ func main() {
 	rootCmd.AddCommand(cmd.NewCommitCmd())        // commit
 	rootCmd.AddCommand(cmd.NewConfigCmd())        // config
 	rootCmd.AddCommand(cmd.NewUpdateCmd(version)) // update
+	rootCmd.AddCommand(cmd.NewReviewCmd())        // review
 
 	if err := rootCmd.Execute(); err != nil {
 		// fmt.Fprintln(os.Stderr, err)

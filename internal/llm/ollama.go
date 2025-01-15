@@ -60,7 +60,7 @@ func (o *OllamaLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 }
 
 // FormatMessages formats messages for Ollama API
-func (o *OllamaLLM) FormatMessages(message string, history []types.Message) (interface{}, error) {
+func (o *OllamaLLM) FormatMessages(message string) (interface{}, error) {
 	options := map[string]interface{}{
 		"num_predict": o.Config.MaxTokens,
 	}
@@ -108,10 +108,14 @@ func (o *OllamaLLM) GetUsage(data []byte) (string, error) {
 }
 
 // MakeRequest makes a request to the API
-func (o *OllamaLLM) MakeRequest(ctx context.Context, client *http.Client, message string, history []types.Message) (string, error) {
-	payload, err := o.FormatMessages(message, history)
+func (o *OllamaLLM) MakeRequest(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+	payload, err := o.FormatMessages(message)
 	if err != nil {
 		return "", fmt.Errorf("failed to format messages: %w", err)
+	}
+
+	if stream {
+		payload.(map[string]interface{})["stream"] = true
 	}
 
 	reqBody, err := json.Marshal(payload)
