@@ -11,7 +11,27 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
+
+func setupTempConfig(t *testing.T) (string, func()) {
+	tmpDir, err := os.MkdirTemp("", "gptcomet-test-config")
+	require.NoError(t, err)
+
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	err = os.WriteFile(configPath, []byte(`
+provider: openai
+openai:
+  api_key: test-key
+output:
+  lang: en
+`), 0600)
+	require.NoError(t, err)
+
+	return configPath, func() {
+		os.RemoveAll(tmpDir)
+	}
+}
 
 // MockTextEditor implements TextEditor interface for testing
 type MockTextEditor struct {
@@ -101,18 +121,14 @@ func (m *MockClient) GenerateCommitMessage(diff string, prompt string) (string, 
 	return args.String(0), args.Error(1)
 }
 
-// setupTempConfig creates a temporary config file and returns its path and a cleanup function
-func setupTempConfig(t *testing.T) (string, func()) {
-	t.Helper()
-	tempDir, err := os.MkdirTemp("", "gptcomet-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	configPath := filepath.Join(tempDir, "config.yaml")
+func (m *MockClient) GenerateReviewComment(diff string, prompt string) (string, error) {
+	args := m.Called(diff, prompt)
+	return args.String(0), args.Error(1)
+}
 
-	return configPath, func() {
-		os.RemoveAll(tempDir)
-	}
+func (m *MockClient) GenerateReviewCommentStream(diff string, prompt string, callback func(string) error) error {
+	args := m.Called(diff, prompt, callback)
+	return args.Error(0)
 }
 
 func TestNewCommitService(t *testing.T) {

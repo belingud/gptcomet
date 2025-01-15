@@ -39,6 +39,7 @@ func main() {
 	rootCmd.AddCommand(cmd.NewCommitCmd())        // commit
 	rootCmd.AddCommand(cmd.NewConfigCmd())        // config
 	rootCmd.AddCommand(cmd.NewUpdateCmd(version)) // update
+	rootCmd.AddCommand(cmd.NewReviewCmd())        // review
 
 	if err := rootCmd.Execute(); err != nil {
 		// fmt.Fprintln(os.Stderr, err)
