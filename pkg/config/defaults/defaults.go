@@ -1,8 +1,17 @@
 package defaults
 
 import (
-	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/charmbracelet/glamour/styles"
+)
+
+const (
+	DefaultAPIBase          = "https://api.openai.com/v1"
+	DefaultModel            = "gpt-4o"
+	DefaultRetries          = 3
+	DefaultMaxTokens        = 1024
+	DefaultTemperature      = 0.7
+	DefaultTopP             = 1.0
+	DefaultFrequencyPenalty = 0.0
 )
 
 // defaultConfig returns a default configuration map for gptcomet.
@@ -71,15 +80,15 @@ func defaultConfig() map[string]interface{} {
 			"rich_template":   "<title>:<summary>\n\n<detail>",
 			"translate_title": false,
 			"review_lang":     "en",
-			"review_theme":    styles.AutoStyle,
+			"markdown_theme":  styles.AutoStyle,
 		},
 		"console": map[string]interface{}{
 			"verbose": true,
 		},
 		"openai": map[string]interface{}{
-			"api_base":          types.DefaultAPIBase,
+			"api_base":          DefaultAPIBase,
 			"api_key":           "",
-			"model":             types.DefaultModel,
+			"model":             DefaultModel,
 			"retries":           2,
 			"proxy":             "",
 			"max_tokens":        1024,

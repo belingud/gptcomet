@@ -117,12 +117,12 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		return nil, fmt.Errorf("api_key not found for provider: %s", provider)
 	}
 
-	apiBase := types.DefaultAPIBase
+	apiBase := defaults.DefaultAPIBase
 	if base, ok := providerConfig["api_base"].(string); ok {
 		apiBase = base
 	}
 
-	model := types.DefaultModel
+	model := defaults.DefaultModel
 	if m, ok := providerConfig["model"].(string); ok {
 		model = m
 	}
@@ -132,22 +132,22 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		proxy = p
 	}
 
-	maxTokens := types.DefaultMaxTokens
+	maxTokens := defaults.DefaultMaxTokens
 	if m, ok := providerConfig["max_tokens"].(float64); ok {
 		maxTokens = int(m)
 	}
 
-	topP := types.DefaultTopP
+	topP := defaults.DefaultTopP
 	if m, ok := providerConfig["top_p"].(float64); ok {
 		topP = m
 	}
 
-	temperature := types.DefaultTemperature
+	temperature := defaults.DefaultTemperature
 	if m, ok := providerConfig["temperature"].(float64); ok {
 		temperature = m
 	}
 
-	frequencyPenalty := types.DefaultFrequencyPenalty
+	frequencyPenalty := defaults.DefaultFrequencyPenalty
 	if m, ok := providerConfig["frequency_penalty"].(float64); ok {
 		frequencyPenalty = m
 	}
@@ -158,7 +158,7 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 		APIKey:           apiKey,
 		Model:            model,
 		Provider:         provider,
-		Retries:          types.DefaultRetries,
+		Retries:          defaults.DefaultRetries,
 		Proxy:            proxy,
 		MaxTokens:        maxTokens,
 		TopP:             topP,
@@ -189,10 +189,10 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 // the save fails.
 func (m *Manager) SetProvider(provider, apiKey, apiBase, model string) error {
 	if apiBase == "" {
-		apiBase = types.DefaultAPIBase
+		apiBase = defaults.DefaultAPIBase
 	}
 	if model == "" {
-		model = types.DefaultModel
+		model = defaults.DefaultModel
 	}
 
 	m.config[provider] = map[string]interface{}{
@@ -239,19 +239,20 @@ func (m *Manager) GetWithDefault(key string, defaultValue interface{}) interface
 //
 // If the key is not found, the value is not set.
 //
-// If the key is "output.lang", the value must be a valid language code.
+// If the key is "output.lang" or "output.review_lang", the value must be a valid language code.
 // If the key is "output.translate_title", the value must be a boolean.
 //
 // The method saves the configuration to the file and returns an error if
 // the save fails.
 func (m *Manager) Set(key string, value interface{}) error {
-	if key == "output.lang" {
+	switch key {
+	case "output.lang", "output.review_lang":
 		if str, ok := value.(string); ok {
 			if !IsValidLanguage(str) {
 				return fmt.Errorf("invalid language code: %s", str)
 			}
 		}
-	} else if key == "output.translate_title" {
+	case "output.translate_title":
 		if _, ok := value.(bool); !ok {
 			return fmt.Errorf("translate_title must be a boolean value")
 		}
