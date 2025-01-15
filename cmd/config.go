@@ -238,7 +238,7 @@ func newPathConfigCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Printf("Configuration file path: %s\n", cfgManager.GetPath())
+			fmt.Println(cfgManager.GetPath())
 			return nil
 		},
 	}
