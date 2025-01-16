@@ -6,24 +6,30 @@ set -e
 # Detect operating system
 detect_os() {
     case "$(uname -s)" in
-        Darwin*)
-            echo "darwin";;
-        Linux*)
-            echo "linux";;
-        *)
-            echo "Unknown";;
+    Darwin*)
+        echo "darwin"
+        ;;
+    Linux*)
+        echo "linux"
+        ;;
+    *)
+        echo "Unknown"
+        ;;
     esac
 }
 
 # Detect architecture
 detect_arch() {
     case "$(uname -m)" in
-        x86_64|amd64)
-            echo "amd64";;
-        arm64|aarch64)
-            echo "arm64";;
-        *)
-            echo "Unknown";;
+    x86_64 | amd64)
+        echo "amd64"
+        ;;
+    arm64 | aarch64)
+        echo "arm64"
+        ;;
+    *)
+        echo "Unknown"
+        ;;
     esac
 }
 
@@ -42,7 +48,7 @@ cd $TMP_DIR
 
 # Get latest version
 LATEST_VERSION=$(curl -s https://api.github.com/repos/belingud/gptcomet/releases/latest | grep tag_name | cut -d'"' -f4)
-VERSION=${LATEST_VERSION#v}  # Remove 'v' prefix
+VERSION=${LATEST_VERSION#v} # Remove 'v' prefix
 
 # Build download URL based on OS and architecture
 echo "Detected: $OS $ARCH"
