@@ -60,7 +60,6 @@ try {
 
     Write-Host "Installation completed! gptcomet has been installed to $InstallDir"
     Write-Host "You can now run the following commands:"
-    Write-Host "  + gmsg"
     Write-Host "  + gptcomet"
     Write-Host "Please restart your terminal for the PATH changes to take effect"
 }
