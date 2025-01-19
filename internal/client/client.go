@@ -3,7 +3,10 @@ package client
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"math"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -82,7 +85,7 @@ func New(config *types.ClientConfig) *Client {
 	}
 }
 
-// Chat sends a chat message to the LLM provider
+// Chat sends a chat message to the LLM provider with retry logic
 func (c *Client) Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error) {
 	client, err := c.getClient()
 	if err != nil {
@@ -92,16 +95,40 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 
 	debug.Printf("🔌 Using proxy: %s", c.config.Proxy)
 
-	content, err := c.llm.MakeRequest(ctx, client, message, false)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
+	var lastErr error
+	baseDelay := 500 * time.Millisecond
+	maxRetries := c.config.Retries
+
+	for i := 0; i < maxRetries; i++ {
+		content, err := c.llm.MakeRequest(ctx, client, message, false)
+		if err == nil {
+			debug.Printf("✅ Request succeeded after %d retries", i)
+			return &types.CompletionResponse{
+				Content: content,
+				Raw:     make(map[string]interface{}),
+			}, nil
+		}
+
+		lastErr = err
+		fmt.Printf("⚠️ Request failed (attempt %d/%d): %v\n", i+1, maxRetries, err)
+
+		// Don't retry on context cancellation or deadline exceeded
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			break
+		}
+
+		// Exponential backoff with jitter
+		if i < maxRetries {
+			delay := time.Duration(float64(baseDelay) * math.Pow(2, float64(i)))
+			jitter := time.Duration(rand.Int63n(int64(delay / 2))) // Add up to 50% jitter
+			sleepDuration := delay + jitter
+
+			fmt.Printf("⏳ Retrying in %v...\n", sleepDuration)
+			time.Sleep(sleepDuration)
+		}
 	}
 
-	debug.Printf("✅ Request succeeded")
-	return &types.CompletionResponse{
-		Content: content,
-		Raw:     make(map[string]interface{}),
-	}, nil
+	return nil, fmt.Errorf("after %d attempts, last error: %w", maxRetries, lastErr)
 }
 
 // createProxyTransport creates an http.Transport with proxy settings based on the configuration

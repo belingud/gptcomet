@@ -143,7 +143,7 @@ func TestChat(t *testing.T) {
 	}
 
 	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
+		config: &types.ClientConfig{Timeout: 10, Retries: 3},
 		llm:    mockLLM,
 	}
 
@@ -152,21 +152,70 @@ func TestChat(t *testing.T) {
 	assert.Equal(t, "mock response", resp.Content)
 }
 
-func TestChatError(t *testing.T) {
+func TestChatWithRetries(t *testing.T) {
+	var attempt int
 	mockLLM := &MockLLM{
 		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			return "", errors.New("mock error")
+			if attempt < 2 {
+				attempt++
+				return "", errors.New("temporary error")
+			}
+			return "mock response after retries", nil
 		},
 		name: "mock",
 	}
 
 	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
+		config: &types.ClientConfig{Timeout: 10, Retries: 3},
+		llm:    mockLLM,
+	}
+
+	resp, err := client.Chat(context.Background(), "test message", nil)
+	require.NoError(t, err)
+	assert.Equal(t, "mock response after retries", resp.Content)
+	assert.Equal(t, 2, attempt)
+}
+
+func TestChatErrorAfterRetries(t *testing.T) {
+	var attempt int
+	mockLLM := &MockLLM{
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			attempt++
+			return "", errors.New("persistent error")
+		},
+		name: "mock",
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{Timeout: 10, Retries: 3},
 		llm:    mockLLM,
 	}
 
 	_, err := client.Chat(context.Background(), "test message", nil)
 	assert.Error(t, err)
+	assert.Equal(t, 4, attempt) // 1 initial + 3 retries
+	assert.Contains(t, err.Error(), "after 4 attempts")
+}
+
+func TestChatContextCancellation(t *testing.T) {
+	mockLLM := &MockLLM{
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			return "", context.Canceled
+		},
+		name: "mock",
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{Timeout: 10, Retries: 3},
+		llm:    mockLLM,
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := client.Chat(ctx, "test message", nil)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, context.Canceled))
 }
 
 func TestTranslateMessage(t *testing.T) {
