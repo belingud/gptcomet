@@ -1,5 +1,13 @@
 
 ---
+## [0.4.1](https://github.com/belingud/gptcomet/compare/v0.4.0..v0.4.1) - 2025-01-20
+
+### 🚜 Refactor
+
+- improve api_key handling in config manager - ([08ab65a](https://github.com/belingud/gptcomet/commit/08ab65a63771d40e38f48fb23167e6c3cefee87b)) - belingud
+
+
+---
 ## [0.4.0](https://github.com/belingud/gptcomet/compare/v0.3.0..v0.4.0) - 2025-01-20
 
 ### ⛰️  Features
