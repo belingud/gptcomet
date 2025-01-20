@@ -111,10 +111,14 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 	if !ok {
 		return nil, fmt.Errorf("provider config not found: %s", provider)
 	}
-
-	apiKey, ok := providerConfig["api_key"].(string)
-	if !ok || apiKey == "" {
-		return nil, fmt.Errorf("api_key not found for provider: %s", provider)
+	var apiKey string
+	if provider == "ollama" {
+		apiKey = ""
+	} else {
+		apiKey, ok := providerConfig["api_key"].(string)
+		if !ok || apiKey == "" {
+			return nil, fmt.Errorf("api_key not found for provider: %s", provider)
+		}
 	}
 
 	apiBase := defaults.DefaultAPIBase

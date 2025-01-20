@@ -1,5 +1,21 @@
 
 ---
+## [0.4.0](https://github.com/belingud/gptcomet/compare/v0.3.0..v0.4.0) - 2025-01-20
+
+### ⛰️  Features
+
+- add retry logic with exponential backoff to Chat method - ([48fe200](https://github.com/belingud/gptcomet/commit/48fe200d303711f843d3e871717caaab20944809)) - belingud
+
+### 📚 Documentation
+
+- update README and CLI description to include reviewer functionality - ([81444ec](https://github.com/belingud/gptcomet/commit/81444ec49fe93bba28cb73761d5da51d5d172f9e)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- Update install.ps1 - ([16a331f](https://github.com/belingud/gptcomet/commit/16a331f47bf4ef2969b598bc07ad10a24bd2c08f)) - belingud
+
+
+---
 ## [0.3.0](https://github.com/belingud/gptcomet/compare/v0.2.4..v0.3.0) - 2025-01-15
 
 ### ⛰️  Features
