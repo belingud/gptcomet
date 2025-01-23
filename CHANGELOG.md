@@ -1,5 +1,13 @@
 
 ---
+## [0.4.2](https://github.com/belingud/gptcomet/compare/v0.4.1..v0.4.2) - 2025-01-23
+
+### 🚜 Refactor
+
+- rename CLI command from `gptcomet` to `gmsg` - ([f5079e7](https://github.com/belingud/gptcomet/commit/f5079e7eae640467c8e690668045eb792a561e07)) - belingud
+
+
+---
 ## [0.4.1](https://github.com/belingud/gptcomet/compare/v0.4.0..v0.4.1) - 2025-01-20
 
 ### 🚜 Refactor
