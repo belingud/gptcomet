@@ -68,10 +68,20 @@ To use GPTComet, you can download from [Github release](https://github.com/belin
 curl -sSL https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.sh | bash
 ```
 
+
 Windows:
 
 ```powershell
 irm https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.ps1 | iex
+```
+If you want to install specific version, you can use the following script:
+
+```bash
+curl -sSL https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.sh | bash -s -- -v 0.4.2
+```
+
+```powershell
+irm https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.ps1 | iex -CommandArgs @("-v", "0.4.2")
 ```
 
 If you prefer to run in python, you can install by `pip` directly, it packaged the binary files corresponding to the platform already.
