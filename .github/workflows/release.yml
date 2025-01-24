@@ -162,11 +162,12 @@ jobs:
                   ls dist/
 
             - name: Upload wheel artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
-                  name: dist-${{ matrix.os }}-${{ matrix.arch }}
+                  name: dist-${{ matrix.os }}-${{ matrix.arch }}-py${{ matrix.python-version }}
                   path: dist/*.whl
                   retention-days: 1
+                  overwrite: true
 
     publish:
         needs: [check-version, python-package]
@@ -186,7 +187,7 @@ jobs:
                   pip install uv
 
             - name: Download all artifacts
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   path: dist
 

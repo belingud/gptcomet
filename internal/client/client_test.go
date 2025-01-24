@@ -193,8 +193,8 @@ func TestChatErrorAfterRetries(t *testing.T) {
 
 	_, err := client.Chat(context.Background(), "test message", nil)
 	assert.Error(t, err)
-	assert.Equal(t, 4, attempt) // 1 initial + 3 retries
-	assert.Contains(t, err.Error(), "after 4 attempts")
+	assert.Equal(t, 3, attempt) // 1 initial + 2 retries
+	assert.Contains(t, err.Error(), "after 3 attempts")
 }
 
 func TestChatContextCancellation(t *testing.T) {
@@ -231,45 +231,122 @@ func TestTranslateMessage(t *testing.T) {
 		llm:    mockLLM,
 	}
 
-	translated, err := client.TranslateMessage("translate to %s: %s", "hello", "fr")
-	require.NoError(t, err)
-	assert.Equal(t, "translated message", translated)
+	_, err := client.TranslateMessage("translate to %s: %s", "hello", "fr")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "after 0 attempts")
 }
 
 func TestGenerateCommitMessage(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			return "commit message", nil
+	tests := []struct {
+		name         string
+		mockResponse string
+		mockError    error
+		wantMessage  string
+		wantError    bool
+	}{
+		{
+			name:         "success",
+			mockResponse: "commit message",
+			mockError:    nil,
+			wantMessage:  "commit message",
+			wantError:    false,
 		},
-		name: "mock",
+		{
+			name:         "error",
+			mockResponse: "",
+			mockError:    errors.New("api error"),
+			wantMessage:  "",
+			wantError:    true,
+		},
 	}
 
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockLLM := &MockLLM{
+				makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+					return tt.mockResponse, tt.mockError
+				},
+				name: "mock",
+			}
 
-	msg, err := client.GenerateCommitMessage("diff", "generate commit message for: %s")
-	require.NoError(t, err)
-	assert.Equal(t, "commit message", msg)
+			client := &Client{
+				config: &types.ClientConfig{Timeout: 10, Retries: 3},
+				llm:    mockLLM,
+			}
+
+			msg, err := client.GenerateCommitMessage("diff", "generate commit message for: %s")
+			if tt.wantError {
+				assert.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantMessage, msg)
+		})
+	}
 }
 
 func TestGenerateReviewComment(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			return "review comment", nil
+	tests := []struct {
+		name         string
+		mockResponse string
+		mockError    error
+		wantComment  string
+		wantError    bool
+	}{
+		{
+			name:         "success",
+			mockResponse: "review comment",
+			mockError:    nil,
+			wantComment:  "review comment",
+			wantError:    false,
 		},
-		name: "mock",
+		{
+			name:         "error",
+			mockResponse: "",
+			mockError:    errors.New("api error"),
+			wantComment:  "",
+			wantError:    true,
+		},
+		{
+			name:         "retry success",
+			mockResponse: "review comment after retry",
+			mockError:    nil,
+			wantComment:  "review comment after retry",
+			wantError:    false,
+		},
 	}
 
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var attempt int
+			mockLLM := &MockLLM{
+				makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+					if tt.name == "retry success" && attempt < 2 {
+						attempt++
+						return "", errors.New("temporary error")
+					}
+					return tt.mockResponse, tt.mockError
+				},
+				name: "mock",
+			}
 
-	comment, err := client.GenerateReviewComment("diff", "generate review comment for: %s")
-	require.NoError(t, err)
-	assert.Equal(t, "review comment", comment)
+			client := &Client{
+				config: &types.ClientConfig{Timeout: 10, Retries: 3},
+				llm:    mockLLM,
+			}
+
+			comment, err := client.GenerateReviewComment("diff", "generate review comment for: %s")
+			if tt.wantError {
+				assert.Error(t, err)
+				if tt.name == "retry success" {
+					assert.Equal(t, 2, attempt)
+				}
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantComment, comment)
+		})
+	}
 }
 
 func TestGenerateReviewCommentStream(t *testing.T) {

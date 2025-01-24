@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "0.4.1"
+var version = "0.4.3"
 
 func main() {
 	var (
@@ -18,7 +18,8 @@ func main() {
 	)
 
 	var rootCmd = &cobra.Command{
-		Use:          "gptcomet",
+		Use:          "gmsg",
+		Aliases:      []string{"gptcomet"},
 		Short:        "GPTComet - AI-powered Git commit message generator and reviewer",
 		Version:      version,
 		SilenceUsage: true,
