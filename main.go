@@ -19,7 +19,7 @@ func main() {
 
 	var rootCmd = &cobra.Command{
 		Use:          "gmsg",
-		Aliases:      []string{"gmsg"},
+		Aliases:      []string{"gptcomet"},
 		Short:        "GPTComet - AI-powered Git commit message generator and reviewer",
 		Version:      version,
 		SilenceUsage: true,
