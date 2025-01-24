@@ -1,5 +1,27 @@
 
 ---
+## [0.4.3](https://github.com/belingud/gptcomet/compare/v0.4.2..v0.4.3) - 2025-01-24
+
+### 🚜 Refactor
+
+- update command alias in main.go - ([97b25fb](https://github.com/belingud/gptcomet/commit/97b25fb28952d05ed2fa3f0682014eaba61bfbab)) - belingud
+
+### 📚 Documentation
+
+- update CHANGELOG.md for v0.4.2 release and CLI rename - ([d7e7781](https://github.com/belingud/gptcomet/commit/d7e778176edeabc0be929549dbe5a8dfd0ef6cc7)) - belingud
+
+### 🧪 Testing
+
+- update client tests for retry logic and error handling - ([b631e25](https://github.com/belingud/gptcomet/commit/b631e250554c40380dd4bc1a23eb46061030161a)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update uv lock - ([3755808](https://github.com/belingud/gptcomet/commit/375580834e810e50f6d05d0f0151e5a4cc43bf43)) - belingud
+- upgrade upload-artifact action to v4 in release workflow - ([87bc0f4](https://github.com/belingud/gptcomet/commit/87bc0f40a1a0213a1866b6985b2e47bc0b47479b)) - belingud
+- update uv lock - ([ee286f5](https://github.com/belingud/gptcomet/commit/ee286f531bca45717b728223fdad90d02eaf8d2b)) - belingud
+
+
+---
 ## [0.4.2](https://github.com/belingud/gptcomet/compare/v0.4.1..v0.4.2) - 2025-01-23
 
 ### 🚜 Refactor
