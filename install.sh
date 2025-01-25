@@ -117,9 +117,9 @@ if [ ! -d ~/.local/bin ]; then
 fi
 
 # Copy executable file
-cp gptcomet ~/.local/bin/gptcomet
-ln -s ~/.local/bin/gptcomet ~/.local/bin/gmsg
-chmod +x ~/.local/bin/gptcomet
+cp gptcomet ~/.local/bin/gmsg
+ln -s ~/.local/bin/gmsg ~/.local/bin/gptcomet
+chmod +x ~/.local/bin/gmsg
 
 # Clean up temporary files
 cd
