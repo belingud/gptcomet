@@ -1,4 +1,7 @@
 .vscode
+
+# yek output
+repo-serialized
 # Python line_profiler report
 *.lprof
 # Python pyinstrument profile report
