@@ -1,5 +1,18 @@
 
 ---
+## [0.5.1](https://github.com/belingud/gptcomet/compare/v0.5.0..v0.5.1) - 2025-01-29
+
+### 📚 Documentation
+
+- update changelog for v0.5.0 - ([c43a647](https://github.com/belingud/gptcomet/commit/c43a647f305523b560dc89823392e21b32a024e5)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update gptcomet version to 0.5.0 in uv.lock - ([42d78b7](https://github.com/belingud/gptcomet/commit/42d78b798205d7bf946f5cacda2c636f677b27ce)) - belingud
+- remove UPX installation and compression steps; enable UPX configuration in goreleaser - ([534b0d0](https://github.com/belingud/gptcomet/commit/534b0d089f5e905c5b63a97a6693e8d9bae3badd)) - belingud
+
+
+---
 ## [0.5.0](https://github.com/belingud/gptcomet/compare/v0.4.3..v0.5.0) - 2025-01-29
 
 ### ⛰️  Features
