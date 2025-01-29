@@ -1,5 +1,27 @@
 
 ---
+## [0.5.0](https://github.com/belingud/gptcomet/compare/v0.4.3..v0.5.0) - 2025-01-29
+
+### ⛰️  Features
+
+- add version selection support to install scripts - ([65e95cc](https://github.com/belingud/gptcomet/commit/65e95cc504c1f7565eddc3787085fb8e392393c8)) - belingud
+
+### 🚜 Refactor
+
+- swap gptcomet and gmsg symlink in install script - ([e6e93a8](https://github.com/belingud/gptcomet/commit/e6e93a84bcbbac9a20759d284600eeab93f6a975)) - belingud
+
+### 📚 Documentation
+
+- add detailed comments for main.go entry point - ([aaf6a98](https://github.com/belingud/gptcomet/commit/aaf6a98b58e1ccf6e8a5d7b562bab99b9140848c)) - belingud
+- add specific version installation instructions for Windows and Linux - ([d5174c3](https://github.com/belingud/gptcomet/commit/d5174c3afc1adaffcdf37c9413cae78053f4b508)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- Add UPX compression and ignore yek output - ([52703d2](https://github.com/belingud/gptcomet/commit/52703d2ff8a3051c7aac26fc8d6b8c6b1baa488f)) - belingud
+- update uv lock - ([b7b6812](https://github.com/belingud/gptcomet/commit/b7b6812cbb8d36d1ad834486c43fc7d3ec9e253c)) - belingud
+
+
+---
 ## [0.4.3](https://github.com/belingud/gptcomet/compare/v0.4.2..v0.4.3) - 2025-01-24
 
 ### 🚜 Refactor
