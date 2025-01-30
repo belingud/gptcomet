@@ -2,6 +2,7 @@
 builds:
   - env:
       - CGO_ENABLED=0
+    id: "gptcomet"
     goos:
       - linux
       - windows

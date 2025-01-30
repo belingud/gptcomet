@@ -45,7 +45,7 @@ jobs:
                   VERSION=${GITHUB_REF#refs/tags/}
                   if [[ $VERSION =~ .*-dev$ ]]; then
                     echo "is_dev=true" >> $GITHUB_OUTPUT
-                  else
+                  else:
                     echo "is_dev=false" >> $GITHUB_OUTPUT
                   fi
 

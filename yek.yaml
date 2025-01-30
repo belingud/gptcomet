@@ -1,0 +1,44 @@
+output_dir: "./repo-serialized"
+
+# Add patterns to ignore (in addition to .gitignore)
+ignore_patterns:
+  - "repo-serialized/**"
+  - "install.ps1"
+  - "install.sh"
+  - "go.sum"
+  - ".idea"
+  - ".venv"
+  - ".vscode"
+  - "LICENSE"
+  - "pyrightconfig.json"
+  - "SPONSOR.md"
+  - "uv.lock"
+  - "var/"
+  - ".repomixignore"
+  - "artwork"
+  - "dist/"
+  - "cliff.toml"
+  - "CHANGELOG.md"
+  - ".env"
+  - "README.md"
+
+# Configure Git-based priority boost (optional)
+git_boost_max: 100  # Maximum score boost based on Git history (default: 100)
+
+# Define priority rules for processing order
+# Higher scores are processed first
+priority_rules:
+  - score: 100
+    pattern: "^src/lib/"
+  - score: 90
+    pattern: "^src/"
+  - score: 80
+    pattern: "^docs/"
+
+# Add additional binary file extensions to ignore
+# These extend the built-in list (.jpg, .png, .exe, etc.)
+binary_extensions:
+  - ".blend"  # Blender files
+  - ".fbx"    # 3D model files
+  - ".max"    # 3ds Max files
+  - ".psd"    # Photoshop files

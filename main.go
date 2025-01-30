@@ -9,8 +9,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "0.4.3"
+var version = "0.5.1"
 
+// main is the entry point of the GPTComet application. It initializes and configures the command-line interface
+// using cobra. The following commands are available:
+//
+// - provider: Manage AI providers configuration
+// - commit: Generate commit messages using AI
+// - config: Manage application configuration
+// - update: Check and update to latest version
+// - review: Review git changes and commit messages
+//
+// The root command supports the following persistent flags:
+//
+//	--debug, -d: Enable debug mode for verbose logging
+//	--config, -c: Specify a custom config file path
+//
+// If command execution fails, the program exits with status code 1.
 func main() {
 	var (
 		debugEnabled bool
