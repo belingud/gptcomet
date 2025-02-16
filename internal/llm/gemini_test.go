@@ -28,7 +28,7 @@ func TestNewGeminiLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://generativelanguage.googleapis.com/v1beta/models",
-				model:          "gemini-1.5-flash",
+				model:          "gemini-2.0-flash",
 				completionPath: "generateContent",
 				answerPath:     "candidates.0.content.parts.0.text",
 			},
@@ -102,7 +102,7 @@ func TestGeminiLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://generativelanguage.googleapis.com/v1beta/models" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "gemini-1.5-flash" {
+	if got["model"].DefaultValue != "gemini-2.0-flash" {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }
@@ -117,19 +117,19 @@ func TestGeminiLLM_BuildURL(t *testing.T) {
 			name: "standard url",
 			config: &types.ClientConfig{
 				APIBase: "https://generativelanguage.googleapis.com/v1beta/models",
-				Model:   "gemini-1.5-flash",
+				Model:   "gemini-2.0-flash",
 				APIKey:  "test-key",
 			},
-			want: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=test-key",
+			want: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=test-key",
 		},
 		{
 			name: "url with trailing slash",
 			config: &types.ClientConfig{
 				APIBase: "https://generativelanguage.googleapis.com/v1beta/models/",
-				Model:   "gemini-1.5-flash",
+				Model:   "gemini-2.0-flash",
 				APIKey:  "test-key",
 			},
-			want: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=test-key",
+			want: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=test-key",
 		},
 	}
 
