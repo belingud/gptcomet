@@ -16,6 +16,9 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+// Default gemini model
+const DefaultGeminiModel = "gemini-2.0-flash"
+
 // GeminiLLM implements the LLM interface for Gemini
 type GeminiLLM struct {
 	*BaseLLM
@@ -27,7 +30,7 @@ func NewGeminiLLM(config *types.ClientConfig) *GeminiLLM {
 		config.APIBase = "https://generativelanguage.googleapis.com/v1beta/models"
 	}
 	if config.Model == "" {
-		config.Model = "gemini-1.5-flash"
+		config.Model = DefaultGeminiModel
 	}
 	if config.CompletionPath == nil {
 		defaultPath := "generateContent"
@@ -54,7 +57,7 @@ func (g *GeminiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter Gemini API base",
 		},
 		"model": {
-			DefaultValue:  "gemini-1.5-flash",
+			DefaultValue:  DefaultGeminiModel,
 			PromptMessage: "Enter model name",
 		},
 		"api_key": {
