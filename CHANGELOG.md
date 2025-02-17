@@ -1,5 +1,21 @@
 
 ---
+## [1.0.0](https://github.com/belingud/gptcomet/compare/v0.5.1..v1.0.0) - 2025-02-16
+
+### 🚜 Refactor
+
+- use constant for default gemini model - ([a5e72b3](https://github.com/belingud/gptcomet/commit/a5e72b3bd59a67af06c35ec297be775f8e786a9c)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update changelog for v0.5.1 - ([c02707f](https://github.com/belingud/gptcomet/commit/c02707faa38e1518d241f7414f0b47027d115b9b)) - belingud
+
+### Build
+
+- Add build id and remove upx config - ([9017016](https://github.com/belingud/gptcomet/commit/9017016bc006cf64ec365034c46068a43a64bf3b)) - belingud
+
+
+---
 ## [0.5.1](https://github.com/belingud/gptcomet/compare/v0.5.0..v0.5.1) - 2025-01-29
 
 ### 📚 Documentation
