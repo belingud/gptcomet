@@ -288,7 +288,7 @@ func NewDefaultLLM(config *types.ClientConfig) *DefaultLLM {
 
 // Name returns the name of the provider, which is "default" for DefaultLLM.
 func (d *DefaultLLM) Name() string {
-	return "default"
+	return d.Config.Provider
 }
 
 // MakeRequest implements the LLM interface for DefaultLLM.
