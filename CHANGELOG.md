@@ -1,5 +1,21 @@
 
 ---
+## [1.1.0](https://github.com/belingud/gptcomet/compare/v1.0.0..v1.1.0) - 2025-03-06
+
+### ⛰️  Features
+
+- log privider name instead of 'default' - ([9cb016d](https://github.com/belingud/gptcomet/commit/9cb016d67c011fda095d195af6654e89dfee6ac3)) - belingud
+
+### 🐛 Bug Fixes
+
+- update Gemini model version to 2.0-flash - ([058a94d](https://github.com/belingud/gptcomet/commit/058a94d8e6c617b5cb313d513cd0f53584394c76)) - belingud
+
+### 📚 Documentation
+
+- update CHANGELOG for v1.0.0 - ([31b5328](https://github.com/belingud/gptcomet/commit/31b53288ee138571210c52a14c509bc54fbf66b8)) - belingud
+
+
+---
 ## [1.0.0](https://github.com/belingud/gptcomet/compare/v0.5.1..v1.0.0) - 2025-02-16
 
 ### 🚜 Refactor
