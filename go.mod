@@ -1,6 +1,7 @@
 module github.com/belingud/gptcomet
 
 go 1.21
+toolchain go1.23.7
 
 require (
 	github.com/charmbracelet/bubbles v0.20.0
@@ -10,8 +11,8 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
-	golang.org/x/net v0.33.0
-	golang.org/x/term v0.27.0
+	golang.org/x/net v0.36.0
+	golang.org/x/term v0.29.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -46,8 +47,8 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/yuin/goldmark v1.7.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.3 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
