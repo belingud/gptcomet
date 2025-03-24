@@ -49,27 +49,29 @@ func (g *GitVCS) GetDiff(repoPath string) (string, error) {
 // false if it exits with code 0 (no staged changes), and an error for any other exit code or
 // if the command fails to execute.
 func (g *GitVCS) HasStagedChanges(repoPath string) (bool, error) {
-	cmd := exec.Command("git", "diff", "--staged", "--quiet")
+	// First check if there are any staged changes using git diff --staged --name-only
+	// This is more reliable than using --quiet and checking exit codes
+	cmd := exec.Command("git", "diff", "--staged", "--name-only")
 	cmd.Dir = repoPath
 
-	var stderr bytes.Buffer
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
 	if err != nil {
+		// Check if it's an exit error (command ran but returned non-zero exit code)
 		if exitError, ok := err.(*exec.ExitError); ok {
-			// Exit code 1 means there are staged changes
-			if exitError.ExitCode() == 1 {
-				return true, nil
-			} else {
-				return false, fmt.Errorf("git diff command failed with exit code %d: %w\nGit output: %s", exitError.ExitCode(), err, stderr.String())
-			}
+			return false, fmt.Errorf("git diff command failed with exit code %d: %w\nGit output: %s",
+				exitError.ExitCode(), err, stderr.String())
 		}
+		// Other errors (command couldn't be executed)
 		return false, fmt.Errorf("failed to check staged changes: %w\nGit output: %s", err, stderr.String())
 	}
 
-	// Exit code 0 means no staged changes
-	return false, nil
+	// If the command succeeded, check if there's any output
+	// Non-empty output means there are staged files
+	return len(strings.TrimSpace(stdout.String())) > 0, nil
 }
 
 // GetStagedFiles returns a list of files that are currently staged for commit in the git repository
