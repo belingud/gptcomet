@@ -1,5 +1,25 @@
 
 ---
+## [1.1.1](https://github.com/belingud/gptcomet/compare/v1.1.0..v1.1.1) - 2025-03-24
+
+### 🚜 Refactor
+
+- improve staged changes detection in GitVCS - ([e50103c](https://github.com/belingud/gptcomet/commit/e50103c7ddc301fd86a5c0cad987ecaed028dea7)) - belingud
+
+### 📚 Documentation
+
+- update CHANGELOG for v1.1.0 - ([0b049dc](https://github.com/belingud/gptcomet/commit/0b049dce21a77307f7183d6ede818cd5aa3143ea)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update go version and dependencies - ([af88d3b](https://github.com/belingud/gptcomet/commit/af88d3b5373aae92129bd4c5bd8502b6e2cb9c63)) - belingud
+
+### Build
+
+- **(deps)** bump golang.org/x/net from 0.33.0 to 0.36.0 - ([eff4c38](https://github.com/belingud/gptcomet/commit/eff4c38e701d37a61764d7b7fba823a60104da39)) - dependabot[bot]
+
+
+---
 ## [1.1.0](https://github.com/belingud/gptcomet/compare/v1.0.0..v1.1.0) - 2025-03-06
 
 ### ⛰️  Features
