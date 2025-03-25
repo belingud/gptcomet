@@ -24,7 +24,7 @@ type ManagerInterface interface {
 	Remove(key string, value string) error
 	Append(key string, value interface{}) error
 	Save() error
-	GetClientConfig() (*types.ClientConfig, error)
+	GetClientConfig(initProvider string) (*types.ClientConfig, error)
 	GetSupportedKeys() []string
 	UpdateProviderConfig(provider string, configs map[string]string) error
 	GetPrompt(isRich bool) string
@@ -101,10 +101,16 @@ func New(configPath string) (*Manager, error) {
 // - completion_path: the JSON path to the completion field in the response (defaults to an empty string)
 //
 // If any of the required configuration options are not set, an error is returned.
-func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
-	provider, ok := m.config["provider"].(string)
-	if !ok {
-		return nil, fmt.Errorf("provider not set")
+func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, error) {
+	var provider string
+	if initProvider == "" {
+		var _ok bool
+		provider, _ok = m.config["provider"].(string)
+		if !_ok {
+			return nil, fmt.Errorf("provider not set")
+		}
+	} else {
+		provider = initProvider
 	}
 	providerConfig, ok := m.config[provider].(map[string]interface{})
 	if !ok {
@@ -155,7 +161,6 @@ func (m *Manager) GetClientConfig() (*types.ClientConfig, error) {
 	if m, ok := providerConfig["frequency_penalty"].(float64); ok {
 		frequencyPenalty = m
 	}
-	fmt.Printf("Discovered provider: %s, model: %s\n", provider, model)
 
 	clientConfig := &types.ClientConfig{
 		APIBase:          apiBase,
@@ -580,6 +585,7 @@ func (m *Manager) GetSupportedKeys() []string {
 		"lang",
 		"rich_template",
 		"translate_title",
+		"review_lang",
 	}
 	for _, key := range outputKeys {
 		keys["output."+key] = true

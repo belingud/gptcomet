@@ -12,16 +12,29 @@ import (
 	"github.com/belingud/gptcomet/internal/git"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // CommitOptions contains the configuration settings for the commit operation.
 type CommitOptions struct {
-	RepoPath   string
-	Rich       bool
-	DryRun     bool
-	UseSVN     bool
-	AutoYes    bool
-	ConfigPath string
+	RepoPath         string
+	Rich             bool
+	DryRun           bool
+	UseSVN           bool
+	AutoYes          bool
+	ConfigPath       string
+	APIBase          string
+	APIKey           string
+	MaxTokens        int
+	Retries          int
+	Model            string
+	AnswerPath       string
+	CompletionPath   string
+	Proxy            string
+	FrequencyPenalty float64
+	Temperature      float64
+	TopP             float64
+	Provider         string
 }
 
 // CommitService handles the logic for committing changes to version control
@@ -58,10 +71,46 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 		return nil, err
 	}
 
-	clientConfig, err := cfgManager.GetClientConfig()
+	clientConfig, err := cfgManager.GetClientConfig(options.Provider)
 	if err != nil {
 		return nil, err
 	}
+
+	// Overwrite client config with command line flags
+	if options.APIBase != "" {
+		clientConfig.APIBase = options.APIBase
+	}
+	if options.APIKey != "" {
+		clientConfig.APIKey = options.APIKey
+	}
+	if options.MaxTokens > 0 {
+		clientConfig.MaxTokens = options.MaxTokens
+	}
+	if options.Retries > 0 {
+		clientConfig.Retries = options.Retries
+	}
+	if options.Model != "" {
+		clientConfig.Model = options.Model
+	}
+	if options.AnswerPath != "" {
+		clientConfig.AnswerPath = options.AnswerPath
+	}
+	if options.CompletionPath != "" {
+		clientConfig.CompletionPath = &options.CompletionPath
+	}
+	if options.Proxy != "" {
+		clientConfig.Proxy = options.Proxy
+	}
+	if options.FrequencyPenalty != 0 {
+		clientConfig.FrequencyPenalty = options.FrequencyPenalty
+	}
+	if options.Temperature != 0 {
+		clientConfig.Temperature = options.Temperature
+	}
+	if options.TopP != 0 {
+		clientConfig.TopP = options.TopP
+	}
+	fmt.Printf("Discovered provider: %s, model: %s\n", clientConfig.Provider, clientConfig.Model)
 
 	return &CommitService{
 		vcs:        vcs,
@@ -321,7 +370,8 @@ func NewCommitCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "commit",
-		Short: "Generate and create a commit with staged changes",
+		Short: "Generate and create a commit with staged changes.",
+		Long:  `Generate and create a commit with staged changes.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if options.RepoPath == "" {
 				var err error
@@ -331,7 +381,7 @@ func NewCommitCmd() *cobra.Command {
 				}
 			}
 
-			// 从根命令获取配置路径
+			// get config path from root command
 			configPath, err := cmd.Root().PersistentFlags().GetString("config")
 			if err != nil {
 				return fmt.Errorf("failed to get config path: %w", err)
@@ -347,11 +397,45 @@ func NewCommitCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&options.RepoPath, "config", "c", "", "Config path")
-	cmd.Flags().BoolVarP(&options.Rich, "rich", "r", false, "Generate rich commit message with details")
-	cmd.Flags().BoolVarP(&options.AutoYes, "yes", "y", false, "Automatically commit without asking")
-	cmd.Flags().BoolVar(&options.DryRun, "dry-run", false, "Print the generated commit message and exit without committing")
-	cmd.Flags().BoolVar(&options.UseSVN, "svn", false, "Use SVN instead of Git")
+	var generalFlags = pflag.NewFlagSet("General Flag", pflag.ExitOnError)
+	var advancedFlags = pflag.NewFlagSet("Overwrite Flag", pflag.ExitOnError)
 
+	generalFlags.StringVarP(&options.RepoPath, "config", "c", "", "Config path")
+	generalFlags.BoolVarP(&options.Rich, "rich", "r", false, "Generate rich commit message with details")
+	generalFlags.BoolVarP(&options.AutoYes, "yes", "y", false, "Automatically commit without asking")
+	generalFlags.BoolVar(&options.DryRun, "dry-run", false, "Print the generated commit message and exit without committing")
+	generalFlags.BoolVar(&options.UseSVN, "svn", false, "Use SVN instead of Git")
+
+	advancedFlags.StringVar(&options.APIBase, "api-base", "", "Override API base URL")
+	advancedFlags.StringVar(&options.APIKey, "api-key", "", "Override API key")
+	advancedFlags.IntVar(&options.MaxTokens, "max-tokens", 0, "Override maximum tokens")
+	advancedFlags.IntVar(&options.Retries, "retries", 0, "Override retry count")
+	advancedFlags.StringVar(&options.Model, "model", "", "Override model name")
+	advancedFlags.StringVar(&options.AnswerPath, "answer-path", "", "Override answer path")
+	advancedFlags.StringVar(&options.CompletionPath, "completion-path", "", "Override completion path")
+	advancedFlags.StringVar(&options.Proxy, "proxy", "", "Override proxy URL")
+	advancedFlags.Float64Var(&options.FrequencyPenalty, "frequency-penalty", 0, "Override frequency penalty")
+	advancedFlags.Float64Var(&options.Temperature, "temperature", 0, "Override temperature")
+	advancedFlags.Float64Var(&options.TopP, "top-p", 0, "Override top_p value")
+	advancedFlags.StringVar(&options.Provider, "provider", "", "Override AI provider (openai/deepseek)")
+
+	// Add flag groups to command
+	cmd.Flags().AddFlagSet(generalFlags)
+	cmd.Flags().AddFlagSet(advancedFlags)
+
+	// Organize flags in help output
+	cmd.Flags().SetInterspersed(false)
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		fmt.Println(cmd.Long)
+		fmt.Println("\nUsage:")
+		fmt.Printf("  %s\n", cmd.UseLine())
+		fmt.Println("\nGeneral Flags:")
+		generalFlags.PrintDefaults()
+		fmt.Println("\nOverwrite Flags:")
+		advancedFlags.PrintDefaults()
+		fmt.Println()
+		fmt.Println(`Global Flags:
+  -d, --debug           Enable debug mode`)
+	})
 	return cmd
 }
