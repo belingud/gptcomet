@@ -400,7 +400,7 @@ func NewCommitCmd() *cobra.Command {
 	var generalFlags = pflag.NewFlagSet("General Flag", pflag.ExitOnError)
 	var advancedFlags = pflag.NewFlagSet("Overwrite Flag", pflag.ExitOnError)
 
-	generalFlags.StringVarP(&options.RepoPath, "config", "c", "", "Config path")
+	generalFlags.StringVar(&options.RepoPath, "repo", "", "Repository path")
 	generalFlags.BoolVarP(&options.Rich, "rich", "r", false, "Generate rich commit message with details")
 	generalFlags.BoolVarP(&options.AutoYes, "yes", "y", false, "Automatically commit without asking")
 	generalFlags.BoolVar(&options.DryRun, "dry-run", false, "Print the generated commit message and exit without committing")
