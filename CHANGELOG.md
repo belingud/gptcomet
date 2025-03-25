@@ -2,6 +2,9 @@
 ---
 ## [2.0.0](https://github.com/belingud/gptcomet/compare/v1.1.1..v2.0.0) - 2025-03-25
 
+Add support for provider config override of command `commit` and `review`.
+Add support for streaming in `review` command.
+
 ### ⛰️  Features
 
 - add support for new repository path and rich commit message options - ([ec8397c](https://github.com/belingud/gptcomet/commit/ec8397c350a859ae237403b654bb00cbccc33054)) - belingud
