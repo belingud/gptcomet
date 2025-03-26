@@ -350,9 +350,36 @@ The following are the available commands for GPTComet:
     -   `--svn`: Generate commit message for svn.
     -   `--dry-run`: Dry run the command without actually generating the commit message.
     -   `-y/--yes`: Skip the confirmation prompt.
+    -   `--repo`: Path to the repository (default ".").
+    -   `--answer-path`: Override answer path
+    -   `--api-base`: Override API base URL
+    -   `--api-key`: Override API key
+    -   `--completion-path`: Override completion path
+    -   `--frequency-penalty`: Override frequency penalty
+    -   `--max-tokens`: Override maximum tokens
+    -   `--model`: Override model name
+    -   `--provider`: Override AI provider (openai/deepseek)
+    -   `--proxy`: Override proxy URL
+    -   `--retries`: Override retry count
+    -   `--temperature`: Override temperature
+    -   `--top-p`: Override top_p value
 -   `gmsg newprovider`: Add a new provider.
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
+    -   `--stream`: Stream output as it arrives from the LLM.
+    -   `--repo`: Path to the repository (default ".").
+    -   `--answer-path`: Override answer path
+    -   `--api-base`: Override API base URL
+    -   `--api-key`: Override API key
+    -   `--completion-path`: Override completion path
+    -   `--frequency-penalty`: Override frequency penalty
+    -   `--max-tokens`: Override maximum tokens
+    -   `--model`: Override model name
+    -   `--provider`: Override AI provider (openai/deepseek)
+    -   `--proxy`: Override proxy URL
+    -   `--retries`: Override retry count
+    -   `--temperature`: Override temperature
+    -   `--top-p`: Override top_p value
 
 Global flags:
 

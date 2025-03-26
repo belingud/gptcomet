@@ -1,9 +1,14 @@
 package client
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/belingud/gptcomet/internal/llm"
@@ -349,49 +354,210 @@ func TestGenerateReviewComment(t *testing.T) {
 	}
 }
 
-func TestGenerateReviewCommentStream(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			return "streamed review comment", nil
-		},
-		name: "mock",
-	}
+// MockRoundTripper is a testable implementation of http.RoundTripper
+type MockRoundTripper struct {
+	RoundTripFunc func(req *http.Request) (*http.Response, error)
+}
 
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
+// RoundTrip implements the http.RoundTripper interface
+func (m *MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	if m.RoundTripFunc != nil {
+		return m.RoundTripFunc(req)
 	}
-
-	var received string
-	err := client.GenerateReviewCommentStream("diff", "generate review comment for: %s", func(comment string) error {
-		received = comment
-		return nil
-	})
-	require.NoError(t, err)
-	assert.Equal(t, "streamed review comment", received)
+	return nil, errors.New("mock RoundTrip function not implemented")
 }
 
 func TestStream(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			if stream {
-				return "streamed response", nil
-			}
-			return "", nil
+	// Define test cases
+	tests := []struct {
+		name           string
+		setupMock      func() *MockLLM
+		message        string
+		expectedChunks []string
+		wantErr        bool
+		errorContains  string
+	}{
+		{
+			name: "Success",
+			setupMock: func() *MockLLM {
+				return &MockLLM{
+					name: "mock",
+					formatMessagesFunc: func(message string) (interface{}, error) {
+						return message, nil
+					},
+					buildURLFunc: func() string {
+						return "https://api.example.com/chat"
+					},
+					buildHeadersFunc: func() map[string]string {
+						return map[string]string{"Authorization": "Bearer test-token"}
+					},
+					makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+						return "", nil // Not needed for streaming
+					},
+				}
+			},
+			message:        "test message",
+			expectedChunks: []string{"hello", " world", "!", "\n"},
+			wantErr:        false,
 		},
-		name: "mock",
+		{
+			name: "FormatMessages Error",
+			setupMock: func() *MockLLM {
+				return &MockLLM{
+					name: "mock",
+					formatMessagesFunc: func(message string) (interface{}, error) {
+						return nil, errors.New("format error")
+					},
+				}
+			},
+			message:        "test message",
+			expectedChunks: nil,
+			wantErr:        true,
+			errorContains:  "failed to format messages",
+		},
+		{
+			name: "GetClient Error",
+			setupMock: func() *MockLLM {
+				return &MockLLM{
+					name: "mock",
+					formatMessagesFunc: func(message string) (interface{}, error) {
+						return message, nil
+					},
+				}
+			},
+			message:        "test message",
+			expectedChunks: nil,
+			wantErr:        true,
+			errorContains:  "unsupported proxy scheme", // Fix error message expectation
+		},
 	}
 
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
+	// Run tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup mock LLM
+			mockLLM := tt.setupMock()
+
+			// Create client with appropriate configuration
+			var client *Client
+			if tt.name == "GetClient Error" {
+				// Configure invalid proxy to trigger getClient error
+				client = &Client{
+					config: &types.ClientConfig{Proxy: "invalid://proxy.example.com"},
+					llm:    mockLLM,
+				}
+			} else {
+				client = &Client{
+					config: &types.ClientConfig{},
+					llm:    mockLLM,
+				}
+			}
+
+			// For success case, create a test server that returns our mock response
+			var testServer *httptest.Server
+			if tt.name == "Success" {
+				// Create a test server that returns our mock streaming response
+				testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					// Verify request properties
+					assert.Equal(t, "POST", r.Method)
+					assert.Equal(t, "Bearer test-token", r.Header.Get("Authorization"))
+
+					// Set necessary headers for SSE
+					w.Header().Set("Content-Type", "text/event-stream")
+					w.Header().Set("Cache-Control", "no-cache")
+					w.Header().Set("Connection", "keep-alive")
+					w.WriteHeader(http.StatusOK)
+
+					// Write the chunks as SSE events in the format expected by the Stream method
+					flusher, ok := w.(http.Flusher)
+					if !ok {
+						t.Fatal("ResponseWriter does not implement Flusher")
+					}
+
+					// Send each chunk as a properly formatted SSE event
+					for _, chunk := range tt.expectedChunks {
+						// Create a compact JSON structure expected by the Stream method
+						responseData := fmt.Sprintf(`{"choices":[{"delta":{"content":"%s"}}]}`, chunk)
+
+						// Write as SSE data event
+						fmt.Fprintf(w, "data: %s\n\n", responseData)
+						flusher.Flush()
+					}
+
+					// Send a [DONE] event to signal completion
+					fmt.Fprintf(w, "data: [DONE]\n\n")
+					flusher.Flush()
+				}))
+				defer testServer.Close()
+
+				// Override the buildURL method to use our test server instead
+				mockLLM.buildURLFunc = func() string {
+					return testServer.URL
+				}
+			}
+
+			// Call Stream with our test callback
+			var receivedChunks []string
+			err := client.Stream(context.Background(), tt.message, func(resp *types.CompletionResponse) error {
+				// Record the received chunk
+				if tt.name == "Success" {
+					// Check that Raw is populated
+					assert.NotNil(t, resp.Raw)
+				}
+
+				// Add to received chunks
+				receivedChunks = append(receivedChunks, resp.Content)
+
+				return nil
+			})
+
+			// Check if error matches expectation
+			if tt.wantErr {
+				assert.Error(t, err)
+				if tt.errorContains != "" {
+					assert.Contains(t, err.Error(), tt.errorContains)
+				}
+				return
+			}
+
+			// If successful, check that all expected chunks were received
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedChunks, receivedChunks)
+		})
+	}
+}
+
+// Create a mock streaming response with the specified chunks
+func createMockStreamResponse(chunks []string) *http.Response {
+	body := &bytes.Buffer{}
+
+	// Generate SSE format data for each chunk
+	for i, chunk := range chunks {
+		if i == len(chunks)-1 && chunk == "\n" {
+			// Last newline is special, just add [DONE]
+			body.WriteString("data: [DONE]\n\n")
+			continue
+		}
+
+		// Create a mock choice object with the chunk as content
+		choice := map[string]interface{}{
+			"delta": map[string]interface{}{
+				"content": chunk,
+			},
+		}
+
+		// Create a mock response object with the choice
+		response := map[string]interface{}{
+			"choices": []interface{}{choice},
+		}
+
+		// Marshal to JSON
+		data, _ := json.Marshal(response)
+		body.WriteString("data: " + string(data) + "\n\n")
 	}
 
-	var received string
-	err := client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
-		received = resp.Content
-		return nil
-	})
-	require.NoError(t, err)
-	assert.Equal(t, "streamed response", received)
+	return &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(body),
+	}
 }

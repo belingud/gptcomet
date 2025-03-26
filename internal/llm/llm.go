@@ -240,6 +240,31 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 	}
 	defer resp.Body.Close()
 
+	// If not streaming, read the entire response body
+	if !stream {
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("failed to read response: %s", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return "", fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(respBody))
+		}
+
+		usage, err := provider.GetUsage(respBody)
+		if err != nil {
+			return "", fmt.Errorf("failed to get usage: %w", err)
+		}
+		if usage != "" {
+			fmt.Printf("%s\n", usage)
+		}
+
+		return provider.ParseResponse(respBody)
+	}
+
+	// For streaming, we'll return the entire response body as a string
+	// In a real implementation, this would parse the SSE stream and call a callback
+	// But for now, we'll just read the entire response to maintain compatibility
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response: %s", err)
@@ -247,14 +272,6 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(respBody))
-	}
-
-	usage, err := provider.GetUsage(respBody)
-	if err != nil {
-		return "", fmt.Errorf("failed to get usage: %w", err)
-	}
-	if usage != "" {
-		fmt.Printf("%s\n", usage)
 	}
 
 	return provider.ParseResponse(respBody)

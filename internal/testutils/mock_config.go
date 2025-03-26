@@ -45,7 +45,7 @@ func (m *MockConfigManager) GetPath() string {
 	return args.String(0)
 }
 
-func (m *MockConfigManager) GetClientConfig() (*types.ClientConfig, error) {
+func (m *MockConfigManager) GetClientConfig(initProvider string) (*types.ClientConfig, error) {
 	args := m.Called()
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

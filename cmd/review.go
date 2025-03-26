@@ -11,18 +11,32 @@ import (
 	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/internal/git"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
+	"github.com/belingud/gptcomet/pkg/types"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/glamour/styles"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // ReviewOptions contains the configuration settings for the review operation.
 type ReviewOptions struct {
-	RepoPath   string
-	UseSVN     bool
-	ConfigPath string
-	Stream     bool // Currently not used, consider removing if no plans to implement
+	RepoPath         string
+	UseSVN           bool
+	ConfigPath       string
+	Stream           bool
+	APIBase          string
+	APIKey           string
+	MaxTokens        int
+	Retries          int
+	Model            string
+	AnswerPath       string
+	CompletionPath   string
+	Proxy            string
+	FrequencyPenalty float64
+	Temperature      float64
+	TopP             float64
+	Provider         string
 }
 
 // Validate checks if required fields are set and returns an error if not
@@ -57,6 +71,7 @@ type ReviewService struct {
 	options          ReviewOptions
 	editor           TextEditor
 	markdownRenderer MarkdownRenderer
+	clientConfig     *types.ClientConfig
 }
 
 const defaultReviewLanguage = "en"
@@ -74,9 +89,44 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 		return nil, err
 	}
 
-	clientConfig, err := cfgManager.GetClientConfig()
+	clientConfig, err := cfgManager.GetClientConfig(options.Provider)
 	if err != nil {
 		return nil, err
+	}
+
+	// Overwrite client config with command line flags
+	if options.APIBase != "" {
+		clientConfig.APIBase = options.APIBase
+	}
+	if options.APIKey != "" {
+		clientConfig.APIKey = options.APIKey
+	}
+	if options.MaxTokens > 0 {
+		clientConfig.MaxTokens = options.MaxTokens
+	}
+	if options.Retries > 0 {
+		clientConfig.Retries = options.Retries
+	}
+	if options.Model != "" {
+		clientConfig.Model = options.Model
+	}
+	if options.AnswerPath != "" {
+		clientConfig.AnswerPath = options.AnswerPath
+	}
+	if options.CompletionPath != "" {
+		clientConfig.CompletionPath = &options.CompletionPath
+	}
+	if options.Proxy != "" {
+		clientConfig.Proxy = options.Proxy
+	}
+	if options.FrequencyPenalty != 0 {
+		clientConfig.FrequencyPenalty = options.FrequencyPenalty
+	}
+	if options.Temperature != 0 {
+		clientConfig.Temperature = options.Temperature
+	}
+	if options.TopP != 0 {
+		clientConfig.TopP = options.TopP
 	}
 
 	return &ReviewService{
@@ -86,6 +136,7 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 		options:          options,
 		editor:           &TerminalEditor{},
 		markdownRenderer: &GlamourRenderer{}, // Inject the renderer
+		clientConfig:     clientConfig,
 	}, nil
 }
 
@@ -96,6 +147,15 @@ func (s *ReviewService) Execute() error {
 		return err
 	}
 
+	// Get provider and model from configuration
+	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
+
+	// Use streaming mode if the option is enabled
+	if s.options.Stream {
+		return s.ExecuteStream(diff)
+	}
+
+	// Otherwise use the standard non-streaming mode
 	reviewComment, err := s.generateReviewComment(diff)
 	if err != nil {
 		return err
@@ -107,6 +167,46 @@ func (s *ReviewService) Execute() error {
 	}
 
 	fmt.Println(formattedComment)
+	return nil
+}
+
+// ExecuteStream performs the review operation with streaming output
+func (s *ReviewService) ExecuteStream(diff string) error {
+	if diff == "" {
+		return fmt.Errorf("empty diff provided")
+	}
+
+	prompt := s.cfgManager.GetReviewPrompt()
+	if prompt == "" {
+		return fmt.Errorf("empty review prompt configured")
+	}
+
+	reviewLang, err := s.getConfiguredReviewLanguage()
+	if err != nil {
+		return fmt.Errorf("failed to get review language: %w", err)
+	}
+
+	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
+	debug.Printf("Generating streaming review comment for diff length: %d\n", len(diff))
+
+	fmt.Println(formatRemindMessage("Reviewing, streaming results as they arrive..."))
+
+	// Use a buffer to accumulate the response for formatting at the end
+	var responseBuffer strings.Builder
+
+	// Define the callback function that will be called with each chunk of the response
+	err = s.client.GenerateReviewCommentStream(diff, prompt, func(chunk string) error {
+		// Print the chunk directly to the console
+		fmt.Print(chunk)
+		// Also accumulate it for final formatting
+		responseBuffer.WriteString(chunk)
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to generate streaming review comment: %w", err)
+	}
+
 	return nil
 }
 
@@ -160,7 +260,7 @@ func (s *ReviewService) generateReviewComment(diff string) (string, error) {
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
 	debug.Printf("Generating review comment for diff length: %d\n", len(diff))
 
-	fmt.Println(formatRemindMessage("Reviwing, may take a few seconds..."))
+	fmt.Println(formatRemindMessage("Reviwing, may take a few seconds, you can set --stream/-s to stream the results..."))
 	comment, err := s.client.GenerateReviewComment(diff, prompt)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate review comment: %w", err)
@@ -257,8 +357,47 @@ func NewReviewCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&options.UseSVN, "svn", false, "Use SVN instead of Git")
-	// cmd.Flags().BoolVar(&options.Stream, "stream", false, "Stream output") // Currently not used
+	var generalFlags = pflag.NewFlagSet("General Flag", pflag.ExitOnError)
+	var advancedFlags = pflag.NewFlagSet("Overwrite Flag", pflag.ExitOnError)
+
+	// General Flags
+	generalFlags.StringVarP(&options.RepoPath, "repo", "r", ".", "Path to the repository")
+	generalFlags.BoolVarP(&options.UseSVN, "svn", "v", false, "Use SVN instead of Git")
+	generalFlags.BoolVarP(&options.Stream, "stream", "s", false, "Stream output as it arrives from the LLM")
+	generalFlags.StringVarP(&options.ConfigPath, "config", "c", "", "Path to the configuration file")
+
+	// Advanced Flags
+	advancedFlags.StringVar(&options.APIBase, "api-base", "", "Override API base URL")
+	advancedFlags.StringVar(&options.APIKey, "api-key", "", "Override API key")
+	advancedFlags.IntVar(&options.MaxTokens, "max-tokens", 0, "Override maximum tokens")
+	advancedFlags.IntVar(&options.Retries, "retries", 0, "Override retry count")
+	advancedFlags.StringVar(&options.Model, "model", "", "Override model name")
+	advancedFlags.StringVar(&options.AnswerPath, "answer-path", "", "Override answer path")
+	advancedFlags.StringVar(&options.CompletionPath, "completion-path", "", "Override completion path")
+	advancedFlags.StringVar(&options.Proxy, "proxy", "", "Override proxy URL")
+	advancedFlags.Float64Var(&options.FrequencyPenalty, "frequency-penalty", 0, "Override frequency penalty")
+	advancedFlags.Float64Var(&options.Temperature, "temperature", 0, "Override temperature")
+	advancedFlags.Float64Var(&options.TopP, "top-p", 0, "Override top_p value")
+	advancedFlags.StringVar(&options.Provider, "provider", "", "Override AI provider (openai/deepseek)")
+
+	// Add flag groups to command
+	cmd.Flags().AddFlagSet(generalFlags)
+	cmd.Flags().AddFlagSet(advancedFlags)
+
+	// Organize flags in help output
+	cmd.Flags().SetInterspersed(false)
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		fmt.Println(cmd.Long)
+		fmt.Println("\nUsage:")
+		fmt.Printf("  %s\n", cmd.UseLine())
+		fmt.Println("\nGeneral Flags:")
+		generalFlags.PrintDefaults()
+		fmt.Println("\nOverwrite Flags:")
+		advancedFlags.PrintDefaults()
+		fmt.Println()
+		fmt.Println(`Global Flags:
+  -d, --debug           Enable debug mode`)
+	})
 
 	return cmd
 }

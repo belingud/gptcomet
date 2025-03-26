@@ -1,10 +1,14 @@
 package client
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"math/rand"
 	"net"
@@ -292,7 +296,6 @@ func (c *Client) GenerateReviewCommentStream(diff string, prompt string, callbac
 // Parameters:
 //   - ctx: the context for the request, used for cancellation and timeouts
 //   - message: the message to send to the LLM provider
-//   - history: the message history to include in the request
 //   - callback: a function that processes the CompletionResponse received from the LLM provider
 //
 // Returns an error if the client cannot be obtained, the request fails, or the callback function
@@ -303,14 +306,120 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 		return fmt.Errorf("failed to get client: %w", err)
 	}
 
-	content, err := c.llm.MakeRequest(ctx, client, message, true)
+	// Format the message for the provider
+	payload, err := c.llm.FormatMessages(message)
 	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
+		return fmt.Errorf("failed to format messages: %w", err)
 	}
 
-	debug.Printf("✅ Request succeeded")
-	return callback(&types.CompletionResponse{
-		Content: content,
-		Raw:     make(map[string]interface{}),
-	})
+	// Set stream to true for streaming response
+	if payloadMap, ok := payload.(map[string]interface{}); ok {
+		payloadMap["stream"] = true
+	}
+
+	// Marshal the payload
+	reqBody, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Build the URL and headers
+	url := c.llm.BuildURL()
+	debug.Printf("🔗 URL: %s", url)
+	headers := c.llm.BuildHeaders()
+
+	// Create the request
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqBody))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set the headers
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	fmt.Printf("📤 Sending streaming request to %s...\n", c.llm.Name())
+
+	// Send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	debug.Printf("✅ Request succeeded, processing streaming response")
+
+	// Process the streaming response
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Skip empty lines and SSE comments
+		if line == "" || strings.HasPrefix(line, ":") {
+			continue
+		}
+
+		// Check for data prefix
+		if strings.HasPrefix(line, "data: ") {
+			// Extract the data
+			data := strings.TrimPrefix(line, "data: ")
+
+			// Check for [DONE] message
+			if data == "[DONE]" {
+				// Send a newline before breaking to avoid % prompt appearing right after output
+				callback(&types.CompletionResponse{
+					Content: "\n",
+					Raw:     make(map[string]interface{}),
+				})
+				break
+			}
+
+			// Parse the JSON data
+			var streamResp map[string]interface{}
+			if err := json.Unmarshal([]byte(data), &streamResp); err != nil {
+				debug.Printf("Error parsing SSE data: %v", err)
+				continue
+			}
+
+			// Extract the content using the provider's answer path
+			content := ""
+			if choices, ok := streamResp["choices"].([]interface{}); ok && len(choices) > 0 {
+				if choice, ok := choices[0].(map[string]interface{}); ok {
+					if delta, ok := choice["delta"].(map[string]interface{}); ok {
+						if c, ok := delta["content"].(string); ok {
+							content = c
+						}
+					}
+				}
+			}
+
+			// Skip empty content
+			if content == "" {
+				continue
+			}
+
+			// Call the callback with the content
+			err := callback(&types.CompletionResponse{
+				Content: content,
+				Raw:     streamResp,
+			})
+			if err != nil {
+				return fmt.Errorf("callback error: %w", err)
+			}
+		}
+	}
+
+	// Check for scanner errors
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading response: %w", err)
+	}
+
+	return nil
 }
