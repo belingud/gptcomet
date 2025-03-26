@@ -11,6 +11,7 @@ import (
 	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/internal/git"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
+	"github.com/belingud/gptcomet/pkg/types"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/glamour/styles"
@@ -70,6 +71,7 @@ type ReviewService struct {
 	options          ReviewOptions
 	editor           TextEditor
 	markdownRenderer MarkdownRenderer
+	clientConfig     *types.ClientConfig
 }
 
 const defaultReviewLanguage = "en"
@@ -126,8 +128,6 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 	if options.TopP != 0 {
 		clientConfig.TopP = options.TopP
 	}
-	fmt.Printf("Discovered provider: %s, model: %s\n", clientConfig.Provider, clientConfig.Model)
-
 
 	return &ReviewService{
 		vcs:              vcs,
@@ -136,6 +136,7 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 		options:          options,
 		editor:           &TerminalEditor{},
 		markdownRenderer: &GlamourRenderer{}, // Inject the renderer
+		clientConfig:     clientConfig,
 	}, nil
 }
 
@@ -145,6 +146,9 @@ func (s *ReviewService) Execute() error {
 	if err != nil {
 		return err
 	}
+
+	// Get provider and model from configuration
+	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
 
 	// Use streaming mode if the option is enabled
 	if s.options.Stream {

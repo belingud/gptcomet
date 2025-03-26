@@ -10,7 +10,7 @@ import (
 	"github.com/belingud/gptcomet/internal/config"
 	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/internal/git"
-
+	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -42,11 +42,12 @@ type CommitOptions struct {
 // It manages the interaction between the version control system,
 // API client, and configuration settings.
 type CommitService struct {
-	vcs        git.VCS
-	client     client.ClientInterface
-	cfgManager config.ManagerInterface
-	options    CommitOptions
-	editor     TextEditor
+	vcs          git.VCS
+	client       client.ClientInterface
+	cfgManager   config.ManagerInterface
+	options      CommitOptions
+	editor       TextEditor
+	clientConfig *types.ClientConfig
 }
 
 // NewCommitService creates a new CommitService instance with the provided options.
@@ -110,14 +111,14 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 	if options.TopP != 0 {
 		clientConfig.TopP = options.TopP
 	}
-	fmt.Printf("Discovered provider: %s, model: %s\n", clientConfig.Provider, clientConfig.Model)
 
 	return &CommitService{
-		vcs:        vcs,
-		client:     client.New(clientConfig),
-		cfgManager: cfgManager,
-		options:    options,
-		editor:     &TerminalEditor{},
+		vcs:          vcs,
+		client:       client.New(clientConfig),
+		cfgManager:   cfgManager,
+		options:      options,
+		editor:       &TerminalEditor{},
+		clientConfig: clientConfig,
 	}, nil
 }
 
@@ -236,6 +237,8 @@ func (s *CommitService) Execute() error {
 	if diff == "" {
 		return fmt.Errorf("no staged changes found after filtering")
 	}
+
+	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
 
 	// generate commit message
 	commitMsg, err := s.generateCommitMessage(diff)
