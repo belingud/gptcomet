@@ -407,7 +407,7 @@ func NewCommitCmd() *cobra.Command {
 	generalFlags.StringVar(&options.RepoPath, "repo", "", "Repository path")
 	generalFlags.BoolVarP(&options.Rich, "rich", "r", false, "Generate rich commit message with details")
 	generalFlags.BoolVarP(&options.AutoYes, "yes", "y", false, "Automatically commit without asking")
-	generalFlags.BoolVarP(&options.SkipHook, "no-verify", "n", false, "Skip git hooks verification")
+	generalFlags.BoolVar(&options.SkipHook, "no-verify", false, "Skip git hooks verification, akin to using 'git commit --no-verify'")
 	generalFlags.BoolVar(&options.DryRun, "dry-run", false, "Print the generated commit message and exit without committing")
 	generalFlags.BoolVar(&options.UseSVN, "svn", false, "Use SVN instead of Git")
 
