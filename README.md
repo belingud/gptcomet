@@ -351,6 +351,7 @@ The following are the available commands for GPTComet:
     -   `--svn`: Generate commit message for svn.
     -   `--dry-run`: Dry run the command without actually generating the commit message.
     -   `-y/--yes`: Skip the confirmation prompt.
+    -   `--no-verify`: Skip git hooks verification, akin to using `git commit --no-verify`
     -   `--repo`: Path to the repository (default ".").
     -   `--answer-path`: Override answer path
     -   `--api-base`: Override API base URL
