@@ -19,7 +19,7 @@ type VCS interface {
 	GetCurrentBranch(repoPath string) (string, error)
 	GetCommitInfo(repoPath, commitHash string) (string, error)
 	GetLastCommitHash(repoPath string) (string, error)
-	CreateCommit(repoPath, message string) error
+	CreateCommit(repoPath, message string, skipHook bool) error
 }
 
 // NewVCS creates a new VCS object based on the given type.

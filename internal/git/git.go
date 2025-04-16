@@ -283,8 +283,13 @@ func (g *GitVCS) GetLastCommitHash(repoPath string) (string, error) {
 //
 // Returns:
 //   - error: An error if the git command fails or if there are issues accessing the repository
-func (g *GitVCS) CreateCommit(repoPath string, message string) error {
-	cmd := exec.Command("git", "commit", "-m", message)
+func (g *GitVCS) CreateCommit(repoPath string, message string, skipHook bool) error {
+	args := []string{"commit", "-m", message}
+	if skipHook {
+		args = append(args, "--no-verify")
+	}
+	debug.Printf("Creating commit with args: %v", args)
+	cmd := exec.Command("git", args...)
 	_, err := g.runCommand(cmd, repoPath)
 	return err
 }

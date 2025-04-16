@@ -174,15 +174,10 @@ func (s *SVNVCS) GetLastCommitHash(repoPath string) (string, error) {
 	return s.runCommand(cmd, repoPath)
 }
 
-// CreateCommit creates a SVN commit with the given message
-//
-// Parameters:
-//   - repoPath: The file system path to the SVN repository
-//   - message: The commit message
-//
-// Returns:
-//   - error: An error if the SVN command fails or if there are issues accessing the repository
-func (s *SVNVCS) CreateCommit(repoPath, message string) error {
+// CreateCommit commits changes in the SVN repository with the given message.
+// It uses 'svn commit -m <message>' command.
+// The skipHook parameter is ignored for SVN.
+func (s *SVNVCS) CreateCommit(repoPath, message string, skipHook bool) error {
 	cmd := exec.Command("svn", "commit", "-m", message)
 	_, err := s.runCommand(cmd, repoPath)
 	return err
