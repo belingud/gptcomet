@@ -104,7 +104,7 @@ func TestVCSImplementations(t *testing.T) {
 
 			// Test commit creation
 			t.Run("CreateCommit", func(t *testing.T) {
-				err := vcs.CreateCommit(dir, "test commit")
+				err := vcs.CreateCommit(dir, "test commit", false)
 				require.NoError(t, err)
 
 				// Verify commit success
