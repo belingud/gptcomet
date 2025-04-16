@@ -176,8 +176,8 @@ func (s *SVNVCS) GetLastCommitHash(repoPath string) (string, error) {
 
 // CreateCommit commits changes in the SVN repository with the given message.
 // It uses 'svn commit -m <message>' command.
-// The skipHook parameter is ignored for SVN.
-func (s *SVNVCS) CreateCommit(repoPath, message string, skipHook bool) error {
+// The noVerify parameter is ignored for SVN.
+func (s *SVNVCS) CreateCommit(repoPath, message string, noVerify bool) error {
 	cmd := exec.Command("svn", "commit", "-m", message)
 	_, err := s.runCommand(cmd, repoPath)
 	return err

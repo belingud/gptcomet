@@ -280,12 +280,13 @@ func (g *GitVCS) GetLastCommitHash(repoPath string) (string, error) {
 // Parameters:
 //   - repoPath: The file system path to the git repository
 //   - message: The commit message
+//   - noVerify: Whether to skip git hooks verification
 //
 // Returns:
 //   - error: An error if the git command fails or if there are issues accessing the repository
-func (g *GitVCS) CreateCommit(repoPath string, message string, skipHook bool) error {
+func (g *GitVCS) CreateCommit(repoPath string, message string, noVerify bool) error {
 	args := []string{"commit", "-m", message}
-	if skipHook {
+	if noVerify {
 		args = append(args, "--no-verify")
 	}
 	debug.Printf("Creating commit with args: %v", args)
