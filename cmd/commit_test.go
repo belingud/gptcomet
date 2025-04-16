@@ -58,8 +58,9 @@ func (m *MockVCS) GetStagedDiff() (string, error) {
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockVCS) CreateCommit(message, diff string) error {
-	args := m.Called(message, diff)
+// Update the mock CreateCommit to accept the noverify parameter
+func (m *MockVCS) CreateCommit(repoPath, message string, noverify bool) error {
+	args := m.Called(repoPath, message, noverify)
 	return args.Error(0)
 }
 
@@ -211,25 +212,69 @@ func TestCommitService_Execute(t *testing.T) {
 			errContains: "no staged changes",
 		},
 		{
-			name: "success_auto_yes",
+			name: "success_auto_yes_no_skip_hook",
 			options: CommitOptions{
-				AutoYes: true,
+				AutoYes:  true,
+				NoVerify: false,
 			},
 			setupMocks: func(vcs *MockVCS, editor *MockTextEditor, client *MockClient) (string, string) {
-				diff := "test diff"
-				commitMsg := "feat: test commit"
+				diff := "test diff no skip"
+				commitMsg := "feat: test commit no skip"
 
 				vcs.On("HasStagedChanges", mock.Anything).Return(true, nil)
 				vcs.On("GetStagedDiffFiltered", mock.Anything, mock.Anything).Return(diff, nil)
-				vcs.On("CreateCommit", mock.Anything, commitMsg).Return(nil)
-				vcs.On("GetLastCommitHash", mock.Anything).Return("abc123", nil)
-				vcs.On("GetCommitInfo", mock.Anything, "abc123").Return("commit abc123\nAuthor: Test User\nDate: Thu Jan 1 00:00:00 1970 +0000\n\nfeat: test commit", nil)
+				vcs.On("CreateCommit", mock.Anything, commitMsg, false).Return(nil)
+				vcs.On("GetLastCommitHash", mock.Anything).Return("abc1234", nil)
+				vcs.On("GetCommitInfo", mock.Anything, "abc1234").Return("commit abc1234\nAuthor: Test User\nDate: Thu Jan 1 00:00:00 1970 +0000\n\nfeat: test commit no skip", nil)
 				client.On("GenerateCommitMessage", diff, mock.Anything).Return(commitMsg, nil)
 
 				return diff, commitMsg
 			},
 			wantErr: false,
 		},
+		{
+			name: "success_auto_yes_with_skip_hook",
+			options: CommitOptions{
+				AutoYes:  true,
+				NoVerify: true,
+			},
+			setupMocks: func(vcs *MockVCS, editor *MockTextEditor, client *MockClient) (string, string) {
+				diff := "test diff skip hook"
+				commitMsg := "feat: test commit skip hook"
+
+				vcs.On("HasStagedChanges", mock.Anything).Return(true, nil)
+				vcs.On("GetStagedDiffFiltered", mock.Anything, mock.Anything).Return(diff, nil)
+				vcs.On("CreateCommit", mock.Anything, commitMsg, true).Return(nil)
+				vcs.On("GetLastCommitHash", mock.Anything).Return("def4567", nil)
+				vcs.On("GetCommitInfo", mock.Anything, "def4567").Return("commit def4567\nAuthor: Test User\nDate: Fri Jan 2 00:00:00 1970 +0000\n\nfeat: test commit skip hook", nil)
+				client.On("GenerateCommitMessage", diff, mock.Anything).Return(commitMsg, nil)
+
+				return diff, commitMsg
+			},
+			wantErr: false,
+		},
+		/* // Skip interactive test case as it requires mocking stdin
+		{
+			name: "success_interactive_yes_no_skip_hook",
+			options: CommitOptions{
+				SkipHook: false,
+			},
+			setupMocks: func(vcs *MockVCS, editor *MockTextEditor, client *MockClient) (string, string) {
+				diff := "interactive diff no skip"
+				commitMsg := "feat: interactive commit no skip"
+
+				vcs.On("HasStagedChanges", mock.Anything).Return(true, nil)
+				vcs.On("GetStagedDiffFiltered", mock.Anything, mock.Anything).Return(diff, nil)
+				vcs.On("CreateCommit", mock.Anything, commitMsg, false).Return(nil)
+				vcs.On("GetLastCommitHash", mock.Anything).Return("ghi7890", nil)
+				vcs.On("GetCommitInfo", mock.Anything, "ghi7890").Return("commit ghi7890\nAuthor: Test User\nDate: Sat Jan 3 00:00:00 1970 +0000\n\nfeat: interactive commit no skip", nil)
+				client.On("GenerateCommitMessage", diff, mock.Anything).Return(commitMsg, nil)
+
+				return diff, commitMsg
+			},
+			wantErr: false,
+		},
+		*/
 		{
 			name: "error_getting_diff",
 			setupMocks: func(vcs *MockVCS, editor *MockTextEditor, client *MockClient) (string, string) {
@@ -261,11 +306,12 @@ func TestCommitService_Execute(t *testing.T) {
 			_, _ = tc.setupMocks(mockVCS, mockEditor, mockClient)
 
 			service := &CommitService{
-				vcs:        mockVCS,
-				client:     mockClient,
-				cfgManager: cfg,
-				options:    tc.options,
-				editor:     mockEditor,
+				vcs:          mockVCS,
+				client:       mockClient,
+				cfgManager:   cfg,
+				options:      tc.options,
+				editor:       mockEditor,
+				clientConfig: &types.ClientConfig{Provider: "test-provider", Model: "test-model"},
 			}
 
 			err = service.Execute()

@@ -95,7 +95,7 @@ func TestSVNVCS(t *testing.T) {
 		assert.Contains(t, files, "test.txt")
 
 		// Create commit
-		err = vcs.CreateCommit(dir, "test commit")
+		err = vcs.CreateCommit(dir, "test commit", false) // skipHook is ignored by SVN
 		require.NoError(t, err)
 
 		// Verify commit
@@ -155,7 +155,7 @@ func TestSVNVCSErrors(t *testing.T) {
 		{
 			name: "CreateCommit error",
 			fn: func() error {
-				return vcs.CreateCommit(invalidDir, "test commit")
+				return vcs.CreateCommit(invalidDir, "test commit", false) // skipHook is ignored by SVN
 			},
 		},
 		{

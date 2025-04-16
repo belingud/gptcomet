@@ -14,8 +14,9 @@ func (m *MockVCS) HasStagedChanges(repoPath string) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockVCS) CreateCommit(repoPath string, message string) error {
-	args := m.Called(repoPath, message)
+// CreateCommit simulates creating a commit, ignoring the skipHook parameter for the mock
+func (m *MockVCS) CreateCommit(repoPath string, message string, skipHook bool) error {
+	args := m.Called(repoPath, message, skipHook)
 	return args.Error(0)
 }
 

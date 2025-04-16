@@ -39,17 +39,6 @@ type ReviewOptions struct {
 	Provider         string
 }
 
-// Validate checks if required fields are set and returns an error if not
-func (o *ReviewOptions) Validate() error {
-	if o.RepoPath == "" {
-		return fmt.Errorf("repository path is required")
-	}
-	if o.ConfigPath == "" {
-		return fmt.Errorf("config path is required")
-	}
-	return nil
-}
-
 // MarkdownRenderer interface for mocking in tests
 type MarkdownRenderer interface {
 	Render(text string, style string) (string, error)

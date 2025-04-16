@@ -1,5 +1,34 @@
 
 ---
+## [2.1.0](https://github.com/belingud/gptcomet/compare/v2.0.0..v2.1.0) - 2025-04-16
+
+### ⛰️  Features
+
+- rename skipHook parameter to noVerify for consistency in CreateCommit method - ([025bab2](https://github.com/belingud/gptcomet/commit/025bab25f6985c9c0b54015a4f7cf729c91f7001)) - belingud
+- update skip-hook flag description for clarity - ([710cad6](https://github.com/belingud/gptcomet/commit/710cad6512b751f6bb9ea9f543bd3867077dd6d2)) - belingud
+- add skip-hook support for git commits and update flag shorthand - ([58c70b1](https://github.com/belingud/gptcomet/commit/58c70b1b345cba710f0bab72b4bb9f876f1cb673)) - belingud
+- add skip git hooks verification flag - ([1dd3261](https://github.com/belingud/gptcomet/commit/1dd32612af5ec403293275852c34bab6a7f4ad6d)) - belingud
+
+### 🐛 Bug Fixes
+
+- remove unused validation function in ReviewOptions - ([d107a50](https://github.com/belingud/gptcomet/commit/d107a5073c34a33d08e5577e272352d722bb142b)) - belingud
+
+### 🚜 Refactor
+
+- Store client config in services, move logging - ([70666df](https://github.com/belingud/gptcomet/commit/70666dfedb0df86052168ac24bc7b1e44a08b25b)) - belingud
+
+### 📚 Documentation
+
+- update README with enhanced project description and features - ([bf5e890](https://github.com/belingud/gptcomet/commit/bf5e8906da32e93451797183559daef396384448)) - belingud
+- update changelog for 2.0.0 release - ([b941a3a](https://github.com/belingud/gptcomet/commit/b941a3a532ae07750b9beb0a794987d971db3c96)) - belingud
+- update CHANGELOG for v2.0.0 release - ([ccc06bf](https://github.com/belingud/gptcomet/commit/ccc06bf3b92ec24872eaae6c9ba72835bc86bac1)) - belingud
+
+### 🧪 Testing
+
+- update CreateCommit noVerify parameter related tests - ([2fb057a](https://github.com/belingud/gptcomet/commit/2fb057a3ede116d9f80bf82d4e0d56cd11b06935)) - belingud
+
+
+---
 ## [2.0.0](https://github.com/belingud/gptcomet/compare/v1.1.1..v2.0.0) - 2025-03-25
 
 Add support for provider config override of command `commit` and `review`.

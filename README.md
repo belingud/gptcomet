@@ -48,10 +48,11 @@
 
 ## 💡 Overview
 
-GPTComet is a go library designed to automate the process of generating commit messages for Git repositories.
-It leverages the power of AI to create meaningful commit messages based on the changes made in the codebase.
+GPTComet is an AI-powered developer tool that streamlines your Git workflow and enhances code quality through automated commit message generation and intelligent code review.
 
 ## ✨ Features
+
+This project leverages the power of large language models to automate repetitive tasks and improve the overall development process. The core features include:
 
 -   **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
 -   **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
@@ -350,6 +351,7 @@ The following are the available commands for GPTComet:
     -   `--svn`: Generate commit message for svn.
     -   `--dry-run`: Dry run the command without actually generating the commit message.
     -   `-y/--yes`: Skip the confirmation prompt.
+    -   `--no-verify`: Skip git hooks verification, akin to using `git commit --no-verify`
     -   `--repo`: Path to the repository (default ".").
     -   `--answer-path`: Override answer path
     -   `--api-base`: Override API base URL

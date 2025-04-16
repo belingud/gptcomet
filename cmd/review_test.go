@@ -124,6 +124,7 @@ func TestReviewService_Execute(t *testing.T) {
 					RepoPath: "test-repo",
 				},
 				markdownRenderer: &GlamourRenderer{},
+				clientConfig:     &types.ClientConfig{Provider: "test-provider", Model: "test-model"},
 			}
 
 			err := service.Execute()
