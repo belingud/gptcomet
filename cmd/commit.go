@@ -35,6 +35,7 @@ type CommitOptions struct {
 	Temperature      float64
 	TopP             float64
 	Provider         string
+	SkipHook         bool
 }
 
 // CommitService handles the logic for committing changes to version control
@@ -334,7 +335,7 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 // Returns:
 //   - error: nil if successful, otherwise error details with context
 func (s *CommitService) createCommit(msg string) error {
-	err := s.vcs.CreateCommit(s.options.RepoPath, msg)
+	err := s.vcs.CreateCommit(s.options.RepoPath, msg, s.options.SkipHook)
 	if err != nil {
 		return fmt.Errorf("failed to create commit: %w", err)
 	}
@@ -406,6 +407,7 @@ func NewCommitCmd() *cobra.Command {
 	generalFlags.StringVar(&options.RepoPath, "repo", "", "Repository path")
 	generalFlags.BoolVarP(&options.Rich, "rich", "r", false, "Generate rich commit message with details")
 	generalFlags.BoolVarP(&options.AutoYes, "yes", "y", false, "Automatically commit without asking")
+	generalFlags.BoolVarP(&options.SkipHook, "no-verify", "nv", false, "Skip git hooks verification")
 	generalFlags.BoolVar(&options.DryRun, "dry-run", false, "Print the generated commit message and exit without committing")
 	generalFlags.BoolVar(&options.UseSVN, "svn", false, "Use SVN instead of Git")
 
