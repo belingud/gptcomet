@@ -143,7 +143,7 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	}
 
 	maxTokens := defaults.DefaultMaxTokens
-	if m, ok := providerConfig["max_tokens"].(float64); ok {
+	if m, ok := providerConfig["max_tokens"].(int); ok {
 		maxTokens = int(m)
 	}
 
