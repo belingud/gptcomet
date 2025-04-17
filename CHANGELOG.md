@@ -1,5 +1,17 @@
 
 ---
+## [2.1.1](https://github.com/belingud/gptcomet/compare/v2.1.0..v2.1.1) - 2025-04-17
+
+### 🚜 Refactor
+
+- add removeThinkTags function and update related code - ([3de5a7a](https://github.com/belingud/gptcomet/commit/3de5a7af56914d72448cfb7a7999fbea87af0f59)) - belingud
+
+### Build
+
+- **(deps)** bump golang.org/x/net from 0.36.0 to 0.38.0 - ([772fcc6](https://github.com/belingud/gptcomet/commit/772fcc648896ee3ce11bedbe94380a500f7bb349)) - dependabot[bot]
+
+
+---
 ## [2.1.0](https://github.com/belingud/gptcomet/compare/v2.0.0..v2.1.0) - 2025-04-16
 
 ### ⛰️  Features

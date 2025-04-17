@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/client"
@@ -205,6 +206,25 @@ func splitCommitMessage(message string) (prefix, content string) {
 	return prefix, content
 }
 
+// removeThinkTags removes all <think> tags and their content from the input string.
+//
+// Parameters:
+//   - input: The input string containing <think> tags
+//
+// Returns:
+//   - string: The input string with all <think> tags and their content removed
+func removeThinkTags(input string) (string, error) {
+	if !strings.HasPrefix(input, "<think>") {
+		return input, nil
+	}
+	if strings.Contains(input, "<think>") && !strings.Contains(input, "</think>") {
+		return input, fmt.Errorf("<think> tag is not closed! The value of max_token may be too small")
+	}
+	re := regexp.MustCompile(`(?is)<think>.*?</think>`)
+	cleaned := re.ReplaceAllString(input, "")
+	return strings.TrimSpace(cleaned), nil
+}
+
 // Execute performs the commit operation with the following steps:
 // 1. Checks for staged changes in the repository
 // 2. Gets the filtered diff of staged changes
@@ -245,6 +265,10 @@ func (s *CommitService) Execute() error {
 	commitMsg, err := s.generateCommitMessage(diff)
 	if err != nil {
 		return err
+	}
+	commitMsg, err = removeThinkTags(commitMsg)
+	if err != nil {
+		fmt.Printf("Error in generating: %v\n", err)
 	}
 
 	if s.options.DryRun {
@@ -307,6 +331,11 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 			}
 			commitMsg, err = s.generateCommitMessage(diff)
 			if err != nil {
+				return err
+			}
+			commitMsg, err = removeThinkTags(commitMsg)
+			if err != nil {
+				fmt.Printf("Error in generating: %v\n", err)
 				return err
 			}
 		case "e", "edit":

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/debug"
@@ -143,24 +144,16 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	}
 
 	maxTokens := defaults.DefaultMaxTokens
-	if m, ok := providerConfig["max_tokens"].(float64); ok {
-		maxTokens = int(m)
-	}
+	maxTokens = getIntValue(providerConfig, "max_tokens", maxTokens)
 
 	topP := defaults.DefaultTopP
-	if m, ok := providerConfig["top_p"].(float64); ok {
-		topP = m
-	}
+	topP = getFloatValue(providerConfig, "top_p", topP)
 
 	temperature := defaults.DefaultTemperature
-	if m, ok := providerConfig["temperature"].(float64); ok {
-		temperature = m
-	}
+	temperature = getFloatValue(providerConfig, "temperature", temperature)
 
 	frequencyPenalty := defaults.DefaultFrequencyPenalty
-	if m, ok := providerConfig["frequency_penalty"].(float64); ok {
-		frequencyPenalty = m
-	}
+	frequencyPenalty = getFloatValue(providerConfig, "frequency_penalty", frequencyPenalty)
 
 	clientConfig := &types.ClientConfig{
 		APIBase:          apiBase,
@@ -852,4 +845,46 @@ func (m *Manager) GetOutputTranslateTitle() bool {
 	}
 
 	return false
+}
+
+func getIntValue(config map[string]interface{}, key string, defaultValue int) int {
+	if val, ok := config[key]; ok {
+		switch v := val.(type) {
+		case int:
+			return v
+		case float64:
+			// 检查是否为整数值的浮点数
+			if v == float64(int(v)) {
+				return int(v)
+			}
+			fmt.Printf("Warning: %s value '%v' is not an integer, using default: %d\n", key, v, defaultValue)
+		case string:
+			if intVal, err := strconv.Atoi(v); err == nil {
+				return intVal
+			}
+			fmt.Printf("Warning: %s value '%s' is not a valid integer, using default: %d\n", key, v, defaultValue)
+		default:
+			fmt.Printf("Warning: %s has unexpected type %T, using default: %d\n", key, v, defaultValue)
+		}
+	}
+	return defaultValue
+}
+
+func getFloatValue(config map[string]interface{}, key string, defaultValue float64) float64 {
+	if val, ok := config[key]; ok {
+		switch v := val.(type) {
+		case float64:
+			return v
+		case int:
+			return float64(v)
+		case string:
+			if floatVal, err := strconv.ParseFloat(v, 64); err == nil {
+				return floatVal
+			}
+			fmt.Printf("Warning: %s value '%s' is not a valid float, using default: %f\n", key, v, defaultValue)
+		default:
+			fmt.Printf("Warning: %s has unexpected type %T, using default: %f\n", key, v, defaultValue)
+		}
+	}
+	return defaultValue
 }
