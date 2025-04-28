@@ -1,5 +1,22 @@
 
 ---
+## [2.1.2](https://github.com/belingud/gptcomet/compare/v2.1.1..v2.1.2) - 2025-04-28
+
+### ⛰️  Features
+
+- Add max_completion_tokens for Groq and OpenAI LLMs - ([3f039de](https://github.com/belingud/gptcomet/commit/3f039de85604af4d240e05b8b5b0627406df2bcb)) - belingud
+- add max_completion_tokens for OpenAI compatibility - ([25525b9](https://github.com/belingud/gptcomet/commit/25525b9805e4a8d197ae1fa132ba3760abbc1a56)) - belingud
+
+### 🚜 Refactor
+
+- enhance config value type handling - ([01f7e3d](https://github.com/belingud/gptcomet/commit/01f7e3deaed7064f4af7b598ea30fffdba58cb9d)) - belingud
+
+### 📚 Documentation
+
+- update changelog for v2.1.1 - ([4d85bf4](https://github.com/belingud/gptcomet/commit/4d85bf42e8fb36f576d01a86ae47dca24eb3fa7d)) - belingud
+
+
+---
 ## [2.1.1](https://github.com/belingud/gptcomet/compare/v2.1.0..v2.1.1) - 2025-04-17
 
 ### 🚜 Refactor
