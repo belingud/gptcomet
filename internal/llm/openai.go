@@ -64,9 +64,10 @@ func (o *OpenAILLM) FormatMessages(message string) (interface{}, error) {
 	})
 
 	payload := map[string]interface{}{
-		"model":      o.Config.Model,
-		"messages":   messages,
-		"max_tokens": o.Config.MaxTokens,
+		"model":    o.Config.Model,
+		"messages": messages,
+		// "max_tokens":            o.Config.MaxTokens, // OpenAI: This value is now deprecated in favor of max_completion_tokens
+		"max_completion_tokens": o.Config.MaxTokens,
 	}
 	if o.Config.Temperature != 0 {
 		payload["temperature"] = o.Config.Temperature

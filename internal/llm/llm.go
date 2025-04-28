@@ -108,9 +108,10 @@ func (b *BaseLLM) FormatMessages(message string) (interface{}, error) {
 	})
 
 	payload := map[string]interface{}{
-		"model":      b.Config.Model,
-		"messages":   messages,
-		"max_tokens": b.Config.MaxTokens,
+		"model":                 b.Config.Model,
+		"messages":              messages,
+		"max_tokens":            b.Config.MaxTokens, // OpenAI: This value is now deprecated in favor of max_completion_tokens
+		"max_completion_tokens": b.Config.MaxTokens,
 	}
 	if b.Config.Temperature != 0 {
 		payload["temperature"] = b.Config.Temperature

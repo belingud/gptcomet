@@ -81,9 +81,10 @@ func (g *GroqLLM) FormatMessages(message string) (interface{}, error) {
 	})
 
 	payload := map[string]interface{}{
-		"model":      g.Config.Model,
-		"messages":   messages,
-		"max_tokens": g.Config.MaxTokens,
+		"model":                 g.Config.Model,
+		"messages":              messages,
+		"max_tokens":            g.Config.MaxTokens, //Groq: Deprecated in favor of max_completion_tokens
+		"max_completion_tokens": g.Config.MaxTokens,
 	}
 	if g.Config.Temperature != 0 {
 		payload["temperature"] = g.Config.Temperature
