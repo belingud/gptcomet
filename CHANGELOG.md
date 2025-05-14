@@ -1,5 +1,18 @@
 
 ---
+## [2.1.3](https://github.com/belingud/gptcomet/compare/v2.1.2..v2.1.3) - 2025-05-14
+
+### ⛰️  Features
+
+- decrease default temperature to 0.3 - ([0f1ed64](https://github.com/belingud/gptcomet/commit/0f1ed64fc111e705fdee82be2449b532824eefc6)) - belingud
+
+### 📚 Documentation
+
+- add logo and update README - ([0cac022](https://github.com/belingud/gptcomet/commit/0cac022d034b7f12bbb9cb8d977c1c59708798ea)) - belingud
+- Update CHANGELOG.md for v2.1.2 - ([bf867e3](https://github.com/belingud/gptcomet/commit/bf867e3910b64bcec6469c4579c37a23ed028625)) - belingud
+
+
+---
 ## [2.1.2](https://github.com/belingud/gptcomet/compare/v2.1.1..v2.1.2) - 2025-04-28
 
 ### ⛰️  Features

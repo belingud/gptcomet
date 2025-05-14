@@ -1,5 +1,9 @@
 # GPTComet: AI-Powered Git Commit Message Generator And Reviewer
 
+<p align="center">
+  <img src="artwork/logo.png" width="150" height="150" alt="GPTComet Logo">
+</p>
+
 <a href="https://www.producthunt.com/posts/gptcomet?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-gptcomet" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=774818&theme=light&t=1736583021458" alt="GPTComet - GPTComet&#0058;&#0032;AI&#0045;Powered&#0032;Git&#0032;Commit&#0032;Message&#0032;Generator | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 [![PyPI version](https://img.shields.io/pypi/v/gptcomet?style=for-the-badge)](https://pypi.org/project/gptcomet/)
@@ -14,35 +18,35 @@
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator And Reviewer](#gptcomet-ai-powered-git-commit-message-generator-and-reviewer)
-    - [💡 Overview](#-overview)
-    - [✨ Features](#-features)
-    - [⬇️ Installation](#-installation)
-    - [📕 Usage](#-usage)
-    - [🔧 Setup](#-setup)
-        - [Configuration Methods](#configuration-methods)
-        - [Provider Setup Guide](#provider-setup-guide)
-            - [OpenAI](#openai)
-            - [Gemini](#gemini)
-            - [Claude/Anthropic](#claudeanthropic)
-            - [Vertex](#vertex)
-            - [Azure](#azure)
-            - [Ollama](#ollama)
-            - [Other Supported Providers](#other-supported-providers)
-        - [Manual Provider Setup](#manual-provider-setup)
-    - [⌨️ Commands](#-commands)
-    - [⚙ Configuration](#%E2%9A%99-configuration)
-        - [file_ignore](#file_ignore)
-        - [provider](#provider)
-        - [output](#output)
-        - [Markdown theme](#markdown-theme)
-        - [Supported languages](#supported-languages)
-        - [console](#console)
-    - [🔦 Supported Keys](#-supported-keys)
-    - [📃 Example](#-example)
-    - [💻 Development](#-development)
-    - [📩 Contact](#-contact)
-    - [☕️ Sponsor](#%EF%B8%8F-sponsor)
-    - [📜 License](#-license)
+  - [💡 Overview](#-overview)
+  - [✨ Features](#-features)
+  - [⬇️ Installation](#️-installation)
+  - [📕 Usage](#-usage)
+  - [🔧 Setup](#-setup)
+    - [Configuration Methods](#configuration-methods)
+    - [Provider Setup Guide](#provider-setup-guide)
+      - [OpenAI](#openai)
+      - [Gemini](#gemini)
+      - [Claude/Anthropic](#claudeanthropic)
+      - [Vertex](#vertex)
+      - [Azure](#azure)
+      - [Ollama](#ollama)
+      - [Other Supported Providers](#other-supported-providers)
+    - [Manual Provider Setup](#manual-provider-setup)
+  - [⌨️ Commands](#️-commands)
+  - [⚙ Configuration](#-configuration)
+    - [file\_ignore](#file_ignore)
+    - [provider](#provider)
+    - [output](#output)
+    - [Markdown theme](#markdown-theme)
+    - [Supported languages](#supported-languages)
+    - [console](#console)
+  - [🔦 Supported Keys](#-supported-keys)
+  - [📃 Example](#-example)
+  - [💻 Development](#-development)
+  - [📩 Contact](#-contact)
+  - [☕️ Sponsor](#️-sponsor)
+  - [📜 License](#-license)
 
 <!-- /TOC -->
 

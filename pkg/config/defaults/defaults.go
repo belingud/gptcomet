@@ -9,7 +9,7 @@ const (
 	DefaultModel            = "gpt-4o"
 	DefaultRetries          = 3
 	DefaultMaxTokens        = 1024
-	DefaultTemperature      = 0.7
+	DefaultTemperature      = 0.3
 	DefaultTopP             = 1.0
 	DefaultFrequencyPenalty = 0.0
 )
