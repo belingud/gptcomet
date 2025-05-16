@@ -4,7 +4,7 @@
   <img src="artwork/logo.png" width="150" height="150" alt="GPTComet Logo">
 </p>
 
-<a href="https://www.producthunt.com/posts/gptcomet?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-gptcomet" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=774818&theme=light&t=1736583021458" alt="GPTComet - GPTComet&#0058;&#0032;AI&#0045;Powered&#0032;Git&#0032;Commit&#0032;Message&#0032;Generator | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+<a href="https://www.producthunt.com/posts/gptcomet?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-gptcomet" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=774818&theme=neutral&t=1747386848397" alt="GPTComet - GPTComet&#0058;&#0032;AI&#0045;Powered&#0032;Git&#0032;Commit&#0032;Message&#0032;Generator | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 [![PyPI version](https://img.shields.io/pypi/v/gptcomet?style=for-the-badge)](https://pypi.org/project/gptcomet/)
 ![GitHub Release](https://img.shields.io/github/v/release/belingud/gptcomet?style=for-the-badge)
