@@ -624,6 +624,7 @@ func (m *Manager) GetSupportedKeys() []string {
 		"temperature",
 		"frequency_penalty",
 		"extra_headers",
+		"extra_body",
 		"completion_path",
 		"answer_path",
 	}

@@ -419,6 +419,7 @@ Here's a summary of the main configuration keys:
 | `<provider>.temperature`       | The temperature value for controlling randomness.          | `0.7`                             |
 | `<provider>.frequency_penalty` | The frequency penalty value.                               | `0`                               |
 | `<provider>.extra_headers`     | Extra headers to include in API requests (JSON string).    | `{}`                              |
+| `<provider>.extra_body`        | Extra body to include in API requests (JSON string).       | `{}`                              |
 | `<provider>.completion_path`   | The API path for completion requests.                      | (Provider-specific)               |
 | `<provider>.answer_path`       | The JSON path to extract the answer from the API response. | (Provider-specific)               |
 | `prompt.brief_commit_message`  | The prompt template for generating brief commit messages.  | (See `defaults/defaults.go`)      |
