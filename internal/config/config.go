@@ -853,7 +853,7 @@ func getIntValue(config map[string]interface{}, key string, defaultValue int) in
 		case int:
 			return v
 		case float64:
-			// 检查是否为整数值的浮点数
+			// check if it is an integer
 			if v == float64(int(v)) {
 				return int(v)
 			}

@@ -85,7 +85,6 @@ func TestProviderCmd_EmptyProvidersList(t *testing.T) {
 	assert.Contains(t, output, "Available providers:")
 }
 
-// TestProvider1 用于测试的LLM实现
 type TestProvider1 struct {
 	*testutils.MockLLM
 }
@@ -94,7 +93,6 @@ func (m *TestProvider1) Name() string {
 	return "test-provider1"
 }
 
-// TestProvider2 用于测试的LLM实现
 type TestProvider2 struct {
 	*testutils.MockLLM
 }

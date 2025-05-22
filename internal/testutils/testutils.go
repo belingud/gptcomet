@@ -91,7 +91,6 @@ func RunGitCommand(t *testing.T, dir string, args ...string) error {
 	cmd.Dir = dir
 	cmd.Env = env
 
-	// 捕获命令输出用于调试
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Logf("Git command failed: git %v\nOutput: %s", args, output)
@@ -108,7 +107,6 @@ func RunCommand(t *testing.T, dir string, name string, args ...string) error {
 	cmd.Dir = dir
 	cmd.Env = os.Environ()
 
-	// 捕获命令输出用于调试
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Logf("Command failed: %s %v\nOutput: %s", name, args, output)
@@ -122,13 +120,8 @@ func RunCommand(t *testing.T, dir string, name string, args ...string) error {
 func CreateTestConfig(t *testing.T, content string) string {
 	t.Helper()
 
-	// 创建临时目录
 	tempDir := t.TempDir()
-
-	// 创建配置文件路径
 	configPath := filepath.Join(tempDir, "config.yaml")
-
-	// 写入配置内容
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err, "failed to write test config file")
 

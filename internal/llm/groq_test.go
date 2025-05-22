@@ -62,7 +62,6 @@ func TestGroqLLMGetRequiredConfig(t *testing.T) {
 	assert.Equal(t, expected["model"], config["model"].DefaultValue)
 	assert.Equal(t, expected["max_tokens"], config["max_tokens"].DefaultValue)
 
-	// 验证必要的配置项都存在
 	requiredKeys := []string{"api_base", "api_key", "model", "max_tokens"}
 	for _, key := range requiredKeys {
 		_, exists := config[key]

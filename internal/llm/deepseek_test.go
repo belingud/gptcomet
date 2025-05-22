@@ -66,7 +66,6 @@ func TestDeepSeekLLM_GetRequiredConfig(t *testing.T) {
 	llm := NewDeepSeekLLM(&types.ClientConfig{})
 	got := llm.GetRequiredConfig()
 
-	// 检查必需的配置键
 	requiredKeys := []string{
 		"api_base",
 		"api_key",
@@ -80,7 +79,6 @@ func TestDeepSeekLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
 	if got["api_base"].DefaultValue != "https://api.deepseek.com/v1" {
 		t.Errorf("Unexpected default value for api_base: got %v, want %v",
 			got["api_base"].DefaultValue, "https://api.deepseek.com/v1")

@@ -97,7 +97,6 @@ func TestOllamaLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
 	if got["api_base"].DefaultValue != "http://localhost:11434/api" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
@@ -134,7 +133,6 @@ func TestOllamaLLM_FormatMessages(t *testing.T) {
 		return
 	}
 
-	// 验证基本字段
 	if payload["model"] != "llama2" {
 		t.Errorf("model = %v, want llama2", payload["model"])
 	}
@@ -142,7 +140,6 @@ func TestOllamaLLM_FormatMessages(t *testing.T) {
 		t.Errorf("prompt = %v, want %v", payload["prompt"], message)
 	}
 
-	// 验证 options
 	options, ok := payload["options"].(map[string]interface{})
 	if !ok {
 		t.Errorf("options wrong type")
@@ -159,10 +156,8 @@ func TestOllamaLLM_FormatMessages(t *testing.T) {
 		"presence_penalty":   0.5,
 		"seed":               42,
 		"num_gpu":            1,
-		// 移除 main_gpu，因为它是可选的且当值为 0 时可能不会被包含在选项中
 	}
 
-	// 修改比较逻辑，处理类型差异
 	for k, expected := range expectedOptions {
 		got := options[k]
 		if got == nil {

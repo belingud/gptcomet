@@ -79,7 +79,6 @@ func TestFatal(t *testing.T) {
 	}
 
 	defer func() {
-		// 恢复原始的 exitFunc
 		exitFunc = os.Exit
 	}()
 
@@ -100,7 +99,6 @@ func TestFatalf(t *testing.T) {
 	}
 
 	defer func() {
-		// 恢复原始的 exitFunc
 		exitFunc = os.Exit
 	}()
 

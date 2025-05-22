@@ -118,7 +118,6 @@ func TestVertexLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
 	if got["api_base"].DefaultValue != "https://us-central1-aiplatform.googleapis.com/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
@@ -151,14 +150,12 @@ func TestVertexLLM_FormatMessages(t *testing.T) {
 		return
 	}
 
-	// 验证消息格式
 	contents, ok := payload["contents"].([]map[string]interface{})
 	if !ok || len(contents) != 1 {
 		t.Errorf("FormatMessages() wrong contents format")
 		return
 	}
 
-	// 验证生成配置
 	genConfig, ok := payload["generation_config"].(map[string]interface{})
 	if !ok {
 		t.Errorf("FormatMessages() missing generation_config")
