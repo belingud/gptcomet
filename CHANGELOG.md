@@ -1,5 +1,22 @@
 
 ---
+## [2.1.5](https://github.com/belingud/gptcomet/compare/v2.1.4..v2.1.5) - 2025-05-22
+
+### ⛰️  Features
+
+- add support for extra headers and body in LLM requests - ([b1621cd](https://github.com/belingud/gptcomet/commit/b1621cd8fe4add54a9ec3c81c918ff207af8ab36)) - belingud
+
+### 📚 Documentation
+
+- add Hunyuan and ModelScope to supported providers list - ([df6463d](https://github.com/belingud/gptcomet/commit/df6463d0113487462be7d4b53c89ef8fc80b9ab4)) - belingud
+- update CHANGELOG.md for v2.1.4 release - ([f6f1354](https://github.com/belingud/gptcomet/commit/f6f1354db078732245639e2c866db2e36dcef311)) - belingud
+
+### 🧪 Testing
+
+- add comprehensive tests for client config and fix whitespace - ([51a9e3e](https://github.com/belingud/gptcomet/commit/51a9e3eb705cc6d2af61abfd8a24b16e083eb337)) - belingud
+
+
+---
 ## [2.1.4](https://github.com/belingud/gptcomet/compare/v2.1.3..v2.1.4) - 2025-05-22
 
 ### ⛰️  Features
