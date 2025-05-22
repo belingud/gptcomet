@@ -178,10 +178,10 @@ func TestGetResult(t *testing.T) {
 			defaultKey2:  "default2",
 			customKey1:   "custom1",
 			customKey2:   "custom2",
-			wantResult1:  "custom1", 
-			wantResult2:  "custom2", 
-			wantDefault1: "default1", 
-			wantDefault2: "default2", 
+			wantResult1:  "custom1",
+			wantResult2:  "custom2",
+			wantDefault1: "default1",
+			wantDefault2: "default2",
 		},
 	}
 
