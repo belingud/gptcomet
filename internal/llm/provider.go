@@ -192,4 +192,14 @@ func init() {
 	RegisterProvider("ai21", func(config *types.ClientConfig) LLM {
 		return &AI21LLM{}
 	})
+
+	// ModelScope
+	RegisterProvider("modelscope", func(config *types.ClientConfig) LLM {
+		return NewModelScopeLLM(config)
+	})
+
+	// Hunyuan
+	RegisterProvider("hunyuan", func(config *types.ClientConfig) LLM {
+		return NewHunyuanLLM(config)
+	})
 }
