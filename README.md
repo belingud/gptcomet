@@ -287,11 +287,12 @@ Provider ollama configured successfully!
 -   KIMI
 -   Cohere
 -   OpenRouter
+-   Hunyuan
+-   ModelScope
 
 Not supported:
 
 -   Baidu ERNIE
--   Tecent hunyuan
 
 ### Manual Provider Setup
 

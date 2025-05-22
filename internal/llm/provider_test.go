@@ -179,7 +179,7 @@ func TestNewProvider(t *testing.T) {
 		config      *types.ClientConfig
 		wantErr     bool
 		errContains string
-		wantDefault bool // 新增：是否期望返回默认 LLM
+		wantDefault bool
 	}{
 		{
 			name:     "Create valid provider",
@@ -217,7 +217,6 @@ func TestNewProvider(t *testing.T) {
 			assert.NotNil(t, provider)
 
 			if tt.wantDefault {
-				// 验证是否返回默认 LLM
 				_, isDefault := provider.(*DefaultLLM)
 				assert.True(t, isDefault, "Expected DefaultLLM for unknown provider")
 			} else {

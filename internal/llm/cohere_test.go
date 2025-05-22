@@ -79,7 +79,6 @@ func TestCohereLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
 	if got["api_base"].DefaultValue != "https://api.cohere.com/v2" {
 		t.Errorf("GetRequiredConfig() api_base default value = %v, want %v", got["api_base"].DefaultValue, "https://api.cohere.com/v2")
 	}

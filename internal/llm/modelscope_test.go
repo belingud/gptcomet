@@ -6,8 +6,9 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
-func TestNewXAILLM(t *testing.T) {
-	customPath := "custom/path"
+var msCustomPath = "custom/path"
+
+func TestNewModelScopeLLM(t *testing.T) {
 	tests := []struct {
 		name   string
 		config *types.ClientConfig
@@ -27,8 +28,8 @@ func TestNewXAILLM(t *testing.T) {
 				completionPath string
 				answerPath     string
 			}{
-				apiBase:        "https://api.x.ai/v1",
-				model:          "grok-beta",
+				apiBase:        "https://api-inference.modelscope.cn/v1",
+				model:          DEFAULT_MODELSCOPE_MODEL,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -38,7 +39,7 @@ func TestNewXAILLM(t *testing.T) {
 			config: &types.ClientConfig{
 				APIBase:        "https://custom.api.com",
 				Model:          "custom-model",
-				CompletionPath: &customPath,
+				CompletionPath: &msCustomPath,
 				AnswerPath:     "custom.path",
 			},
 			want: struct {
@@ -57,7 +58,7 @@ func TestNewXAILLM(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewXAILLM(tt.config)
+			got := NewModelScopeLLM(tt.config)
 			if got.Config.APIBase != tt.want.apiBase {
 				t.Errorf("APIBase = %s, want %s", got.Config.APIBase, tt.want.apiBase)
 			}
@@ -74,15 +75,15 @@ func TestNewXAILLM(t *testing.T) {
 	}
 }
 
-func TestXAILLM_Name(t *testing.T) {
-	llm := NewXAILLM(&types.ClientConfig{})
-	if got := llm.Name(); got != "xai" {
-		t.Errorf("Name() = %s, want %s", got, "xai")
+func TestModelScopeLLM_Name(t *testing.T) {
+	llm := NewModelScopeLLM(&types.ClientConfig{})
+	if got := llm.Name(); got != "modelscope" {
+		t.Errorf("Name() = %s, want %s", got, "modelscope")
 	}
 }
 
-func TestXAILLM_GetRequiredConfig(t *testing.T) {
-	llm := NewXAILLM(&types.ClientConfig{})
+func TestModelScopeLLM_GetRequiredConfig(t *testing.T) {
+	llm := NewModelScopeLLM(&types.ClientConfig{})
 	got := llm.GetRequiredConfig()
 
 	requiredKeys := []string{
@@ -98,56 +99,11 @@ func TestXAILLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	if got["api_base"].DefaultValue != "https://api.x.ai/v1" {
+	// Verify default values
+	if got["api_base"].DefaultValue != "https://api-inference.modelscope.cn/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "grok-beta" {
+	if got["model"].DefaultValue != DEFAULT_MODELSCOPE_MODEL {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
-	}
-}
-
-func TestXAILLM_BuildHeaders(t *testing.T) {
-	tests := []struct {
-		name   string
-		config *types.ClientConfig
-		want   map[string]string
-	}{
-		{
-			name: "standard headers",
-			config: &types.ClientConfig{
-				APIKey: "test-key",
-			},
-			want: map[string]string{
-				"Authorization": "Bearer test-key",
-				"Content-Type":  "application/json",
-			},
-		},
-		{
-			name: "headers with extra headers",
-			config: &types.ClientConfig{
-				APIKey: "test-key",
-				ExtraHeaders: map[string]string{
-					"X-Custom": "custom-value",
-				},
-			},
-			want: map[string]string{
-				"Authorization": "Bearer test-key",
-				"Content-Type":  "application/json",
-				"X-Custom":      "custom-value",
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			llm := NewXAILLM(tt.config)
-			got := llm.BuildHeaders()
-
-			for k, v := range tt.want {
-				if got[k] != v {
-					t.Errorf("BuildHeaders()[%s] = %s, want %s", k, got[k], v)
-				}
-			}
-		})
 	}
 }

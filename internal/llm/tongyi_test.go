@@ -98,7 +98,6 @@ func TestTongyiLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
 	if got["api_base"].DefaultValue != "https://dashscope.aliyuncs.com/compatible-mode/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}

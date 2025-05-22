@@ -1,5 +1,40 @@
 
 ---
+## [2.1.5](https://github.com/belingud/gptcomet/compare/v2.1.4..v2.1.5) - 2025-05-22
+
+### ⛰️  Features
+
+- add support for extra headers and body in LLM requests - ([b1621cd](https://github.com/belingud/gptcomet/commit/b1621cd8fe4add54a9ec3c81c918ff207af8ab36)) - belingud
+
+### 📚 Documentation
+
+- add Hunyuan and ModelScope to supported providers list - ([df6463d](https://github.com/belingud/gptcomet/commit/df6463d0113487462be7d4b53c89ef8fc80b9ab4)) - belingud
+- update CHANGELOG.md for v2.1.4 release - ([f6f1354](https://github.com/belingud/gptcomet/commit/f6f1354db078732245639e2c866db2e36dcef311)) - belingud
+
+### 🧪 Testing
+
+- add comprehensive tests for client config and fix whitespace - ([51a9e3e](https://github.com/belingud/gptcomet/commit/51a9e3eb705cc6d2af61abfd8a24b16e083eb337)) - belingud
+
+
+---
+## [2.1.4](https://github.com/belingud/gptcomet/compare/v2.1.3..v2.1.4) - 2025-05-22
+
+### ⛰️  Features
+
+- add Hunyuan LLM provider implementation - ([8908baa](https://github.com/belingud/gptcomet/commit/8908baa01adf2b873aaba99fc660389b7850f7d9)) - belingud
+- add ModelScope LLM implementation - ([ca94547](https://github.com/belingud/gptcomet/commit/ca94547fcec68ccf653cf58abcd35e2619a09619)) - belingud
+
+### 📚 Documentation
+
+- update product hunt badge theme to neutral - ([6d83084](https://github.com/belingud/gptcomet/commit/6d8308415ff6398374e8d2487c72073dcb36e40c)) - belingud
+- Update CHANGELOG.md for v2.1.3 - ([e44af9f](https://github.com/belingud/gptcomet/commit/e44af9f9a8e46378780a283f22657c71089fbb91)) - belingud
+
+### 🧪 Testing
+
+- add Hunyuan and ModelScope LLM tests and cleanup comments - ([6117131](https://github.com/belingud/gptcomet/commit/6117131308a0e52c883a01599fc79301886adb23)) - belingud
+
+
+---
 ## [2.1.3](https://github.com/belingud/gptcomet/compare/v2.1.2..v2.1.3) - 2025-05-14
 
 ### ⛰️  Features

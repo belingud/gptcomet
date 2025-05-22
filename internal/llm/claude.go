@@ -33,7 +33,7 @@ func NewClaudeLLM(config *types.ClientConfig) *ClaudeLLM {
 		config.AnswerPath = "content.0.text"
 	}
 	if config.AnthropicVersion == "" {
-		config.AnthropicVersion = "2024-01-01" // 使用最新的稳定版本
+		config.AnthropicVersion = "2024-01-01"
 	}
 
 	return &ClaudeLLM{

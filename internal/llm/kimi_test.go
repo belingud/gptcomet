@@ -79,7 +79,6 @@ func TestKimiLLM_GetRequiredConfig(t *testing.T) {
 		}
 	}
 
-	// 验证默认值
 	if got["api_base"].DefaultValue != "https://api.moonshot.cn/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
