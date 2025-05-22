@@ -1,5 +1,14 @@
 
 ---
+## [2.1.6](https://github.com/belingud/gptcomet/compare/v2.1.5..v2.1.6) - 2025-05-22
+
+### 📚 Documentation
+
+- add extra_body config option to provider settings - ([821ba7b](https://github.com/belingud/gptcomet/commit/821ba7b14a67ab4fc6653202a941a378ee5aaae6)) - belingud
+- update CHANGELOG.md for v2.1.5 release - ([6b54641](https://github.com/belingud/gptcomet/commit/6b54641c39b4b2479a359fb8eaaeff7e34ff57f9)) - belingud
+
+
+---
 ## [2.1.5](https://github.com/belingud/gptcomet/compare/v2.1.4..v2.1.5) - 2025-05-22
 
 ### ⛰️  Features
