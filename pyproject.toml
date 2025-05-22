@@ -1,6 +1,6 @@
 [project]
 name = "gptcomet"
-version = "2.1.3"
+version = "2.1.4"
 description = "GPTComet: AI-Powered Git Commit Message Generator."
 authors = [{ name = "belingud", email = "im.victor@qq.com" }]
 readme = "README.md"
