@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 
+	"maps"
+
 	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -137,9 +139,7 @@ func (b *BaseLLM) BuildHeaders() map[string]string {
 	if b.Config.APIKey != "" {
 		headers["Authorization"] = fmt.Sprintf("Bearer %s", b.Config.APIKey)
 	}
-	for k, v := range b.Config.ExtraHeaders {
-		headers[k] = v
-	}
+	maps.Copy(headers, b.Config.ExtraHeaders)
 	return headers
 }
 
@@ -217,6 +217,12 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 		if payloadMap, ok := payload.(map[string]interface{}); ok {
 			payloadMap["stream"] = true
 		}
+	}
+
+	// Merge extra body
+	if payloadMap, ok := payload.(map[string]interface{}); ok && len(b.Config.ExtraBody) > 0 {
+		maps.Copy(payloadMap, b.Config.ExtraBody)
+		payload = payloadMap
 	}
 
 	reqBody, err := json.Marshal(payload)

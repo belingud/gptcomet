@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -178,6 +179,25 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	if completionPath, ok := providerConfig["completion_path"].(string); ok {
 		clientConfig.CompletionPath = &completionPath
 	}
+
+	// Parse extra_headers (additional request headers)
+	if extraHeadersStr, ok := providerConfig["extra_headers"].(string); ok && extraHeadersStr != "" && extraHeadersStr != "{}" {
+		extraHeaders := make(map[string]string)
+		if err := json.Unmarshal([]byte(extraHeadersStr), &extraHeaders); err != nil {
+			return nil, fmt.Errorf("failed to parse extra_headers: %w", err)
+		}
+		clientConfig.ExtraHeaders = extraHeaders
+	}
+
+	// Parse extra_body (additional request body)
+	if extraBodyStr, ok := providerConfig["extra_body"].(string); ok && extraBodyStr != "" && extraBodyStr != "{}" {
+		extraBody := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(extraBodyStr), &extraBody); err != nil {
+			return nil, fmt.Errorf("failed to parse extra_body: %w", err)
+		}
+		clientConfig.ExtraBody = extraBody
+	}
+
 	return clientConfig, nil
 }
 
