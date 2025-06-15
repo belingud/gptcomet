@@ -1,5 +1,26 @@
 
 ---
+## [2.1.7](https://github.com/belingud/gptcomet/compare/v2.1.6..v2.1.7) - 2025-06-14
+
+### 🐛 Bug Fixes
+
+- handle type conversion for prompt config in Reset method - ([e9bbdf7](https://github.com/belingud/gptcomet/commit/e9bbdf76cf3b23f3c649ba90b8267f78e4265420)) - belingud
+
+### 📚 Documentation
+
+- update changelog for v2.1.6 release - ([7181d7a](https://github.com/belingud/gptcomet/commit/7181d7a005dbf7c0688e226b1d90a4208f98992f)) - belingud
+
+
+---
+## [2.1.6](https://github.com/belingud/gptcomet/compare/v2.1.5..v2.1.6) - 2025-05-22
+
+### 📚 Documentation
+
+- add extra_body config option to provider settings - ([821ba7b](https://github.com/belingud/gptcomet/commit/821ba7b14a67ab4fc6653202a941a378ee5aaae6)) - belingud
+- update CHANGELOG.md for v2.1.5 release - ([6b54641](https://github.com/belingud/gptcomet/commit/6b54641c39b4b2479a359fb8eaaeff7e34ff57f9)) - belingud
+
+
+---
 ## [2.1.5](https://github.com/belingud/gptcomet/compare/v2.1.4..v2.1.5) - 2025-05-22
 
 ### ⛰️  Features

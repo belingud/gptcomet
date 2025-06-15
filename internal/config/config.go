@@ -303,8 +303,19 @@ func (m *Manager) ListWithoutPrompt() map[string]interface{} {
 func (m *Manager) Reset(promptOnly bool) error {
 	if promptOnly {
 		// Get default prompt config
-		if promptConfig, ok := defaults.DefaultConfig["prompt"].(map[string]interface{}); ok {
-			m.config["prompt"] = promptConfig
+		if promptConfig, ok := defaults.DefaultConfig["prompt"]; ok {
+			// Handle type conversion
+			switch pc := promptConfig.(type) {
+			case map[string]interface{}:
+				m.config["prompt"] = pc
+			case map[string]string:
+				// Convert map[string]string to map[string]interface{}
+				interfaceMap := make(map[string]interface{})
+				for k, v := range pc {
+					interfaceMap[k] = v
+				}
+				m.config["prompt"] = interfaceMap
+			}
 		}
 	} else {
 		// Reset all config
@@ -624,6 +635,7 @@ func (m *Manager) GetSupportedKeys() []string {
 		"temperature",
 		"frequency_penalty",
 		"extra_headers",
+		"extra_body",
 		"completion_path",
 		"answer_path",
 	}
