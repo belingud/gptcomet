@@ -1,5 +1,13 @@
 
 ---
+## [2.1.8](https://github.com/belingud/gptcomet/compare/v2.1.7..v2.1.8) - 2025-06-22
+
+### 📚 Documentation
+
+- update changelog for v2.1.7 release - ([5719c60](https://github.com/belingud/gptcomet/commit/5719c600834c5da996fa8ba0a5f45597312c9914)) - belingud
+
+
+---
 ## [2.1.7](https://github.com/belingud/gptcomet/compare/v2.1.6..v2.1.7) - 2025-06-14
 
 ### 🐛 Bug Fixes
