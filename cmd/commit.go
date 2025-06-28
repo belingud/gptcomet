@@ -393,6 +393,19 @@ func (s *CommitService) createCommit(msg string) error {
 //   - --yes, -y: Skip confirmation prompt and commit automatically (bool)
 //   - --dry-run: Preview the generated commit message without actually committing (bool)
 //   - --svn: Use SVN instead of Git for version control operations (bool)
+//   - --no-verify: Skip git hooks verification, akin to using 'git commit --no-verify' (bool)
+//   - --api-base: Override API base URL (string)
+//   - --api-key: Override API key (string)
+//   - --max-tokens: Override maximum tokens (int)
+//   - --retries: Override retry count (int)
+//   - --model: Override model name (string)
+//   - --answer-path: Override answer path (string)
+//   - --completion-path: Override completion path (string)
+//   - --proxy: Override proxy URL (string)
+//   - --frequency-penalty: Override frequency penalty (float)
+//   - --temperature: Override temperature (float)
+//   - --top-p: Override top_p value (float)
+//   - --provider: Override AI provider (openai/deepseek)
 //
 // If no repository path is specified, it uses the current working directory.
 // The command integrates with the root command's persistent configuration path.
