@@ -78,6 +78,8 @@ func New(config *types.ClientConfig) *Client {
 		provider = llm.NewOpenRouterLLM(config)
 	case "ai21":
 		provider = llm.NewAI21LLM(config)
+	case "yi":
+		provider = llm.NewYiLLM(config)
 	default:
 		// Default to OpenAI if provider is not specified
 		provider = llm.NewDefaultLLM(config)

@@ -289,6 +289,7 @@ Provider ollama configured successfully!
 -   OpenRouter
 -   Hunyuan
 -   ModelScope
+-   Yi (lingyiwanwu)
 
 Not supported:
 

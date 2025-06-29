@@ -202,4 +202,9 @@ func init() {
 	RegisterProvider("hunyuan", func(config *types.ClientConfig) LLM {
 		return NewHunyuanLLM(config)
 	})
+
+	// Yi
+	RegisterProvider("yi", func(config *types.ClientConfig) LLM {
+		return NewYiLLM(config)
+	})
 }

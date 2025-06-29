@@ -1,5 +1,23 @@
 
 ---
+## [2.1.9](https://github.com/belingud/gptcomet/compare/v2.1.8..v2.1.9) - 2025-06-29
+
+### ⛰️  Features
+
+- add support for Yi LLM provider - ([b2024af](https://github.com/belingud/gptcomet/commit/b2024af93db6fe824d81d43900ec7598e4afa23c)) - belingud
+- add YiLLM implementation for LLM interface - ([27de102](https://github.com/belingud/gptcomet/commit/27de1028bf66c20ec6c88bb094b5c5363bc0daec)) - belingud
+
+### 📚 Documentation
+
+- add new commit options comment for AI configuration - ([9781b51](https://github.com/belingud/gptcomet/commit/9781b511e2968fea6b97b9f0dc9ecedec32b25a2)) - belingud
+- update changelog for v2.1.8 release - ([990063c](https://github.com/belingud/gptcomet/commit/990063cfb52f5d5dd0ab5188ffbba0d95ab6b625)) - belingud
+
+### 🧪 Testing
+
+- add tests for YiLLM functionality - ([a23a073](https://github.com/belingud/gptcomet/commit/a23a0737c978c8c064831bbf6fa1d24ec10e1593)) - belingud
+
+
+---
 ## [2.1.8](https://github.com/belingud/gptcomet/compare/v2.1.7..v2.1.8) - 2025-06-22
 
 ### 📚 Documentation
