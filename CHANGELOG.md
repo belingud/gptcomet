@@ -1,5 +1,18 @@
 
 ---
+## [2.1.10](https://github.com/belingud/gptcomet/compare/v2.1.9..v2.1.10) - 2025-07-08
+
+### ⛰️  Features
+
+- add minimax provider support - ([664c8cf](https://github.com/belingud/gptcomet/commit/664c8cff8f1d15c928859cd63830ef36ac81632d)) - belingud
+
+### 📚 Documentation
+
+- add Yi (lingyiwanwu) to supported providers list - ([a775e0b](https://github.com/belingud/gptcomet/commit/a775e0bd53d8769b5affaf39049628e2f05de3df)) - belingud
+- add Yi LLM provider and documentation - ([b01feeb](https://github.com/belingud/gptcomet/commit/b01feeb54892151f4a6b7cd16c7d534678040af9)) - belingud
+
+
+---
 ## [2.1.9](https://github.com/belingud/gptcomet/compare/v2.1.8..v2.1.9) - 2025-06-29
 
 ### ⛰️  Features

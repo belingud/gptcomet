@@ -86,6 +86,7 @@ release:
 
 # Update changelog
 changelog:
+    uv lock
     git cliff -l --prepend CHANGELOG.md
 
 # Generate coverage report
