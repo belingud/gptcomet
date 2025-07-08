@@ -42,42 +42,46 @@ type Client struct {
 func New(config *types.ClientConfig) *Client {
 	var provider llm.LLM
 	switch config.Provider {
-	case "openai":
-		provider = llm.NewOpenAILLM(config)
-	case "claude":
-		provider = llm.NewClaudeLLM(config)
-	case "gemini":
-		provider = llm.NewGeminiLLM(config)
-	case "mistral":
-		provider = llm.NewMistralLLM(config)
-	case "xai":
-		provider = llm.NewXAILLM(config)
-	case "cohere":
-		provider = llm.NewCohereLLM(config)
-	case "tongyi":
-		provider = llm.NewTongyiLLM(config)
-	case "deepseek":
-		provider = llm.NewDeepSeekLLM(config)
-	case "chatglm":
-		provider = llm.NewChatGLMLLM(config)
-	case "azure":
-		provider = llm.NewAzureLLM(config)
-	case "vertex":
-		provider = llm.NewVertexLLM(config)
-	case "kimi":
-		provider = llm.NewKimiLLM(config)
-	case "ollama":
-		provider = llm.NewOllamaLLM(config)
-	case "silicon":
-		provider = llm.NewSiliconLLM(config)
-	case "sambanova":
-		provider = llm.NewSambanovaLLM(config)
-	case "groq":
-		provider = llm.NewGroqLLM(config)
-	case "openrouter":
-		provider = llm.NewOpenRouterLLM(config)
 	case "ai21":
 		provider = llm.NewAI21LLM(config)
+	case "azure":
+		provider = llm.NewAzureLLM(config)
+	case "chatglm":
+		provider = llm.NewChatGLMLLM(config)
+	case "claude":
+		provider = llm.NewClaudeLLM(config)
+	case "cohere":
+		provider = llm.NewCohereLLM(config)
+	case "deepseek":
+		provider = llm.NewDeepSeekLLM(config)
+	case "gemini":
+		provider = llm.NewGeminiLLM(config)
+	case "groq":
+		provider = llm.NewGroqLLM(config)
+	case "hunyuan":
+		provider = llm.NewHunyuanLLM(config)
+	case "kimi":
+		provider = llm.NewKimiLLM(config)
+	case "minimax":
+		provider = llm.NewMinimaxLLM(config)
+	case "mistral":
+		provider = llm.NewMistralLLM(config)
+	case "ollama":
+		provider = llm.NewOllamaLLM(config)
+	case "openai":
+		provider = llm.NewOpenAILLM(config)
+	case "openrouter":
+		provider = llm.NewOpenRouterLLM(config)
+	case "sambanova":
+		provider = llm.NewSambanovaLLM(config)
+	case "silicon":
+		provider = llm.NewSiliconLLM(config)
+	case "tongyi":
+		provider = llm.NewTongyiLLM(config)
+	case "vertex":
+		provider = llm.NewVertexLLM(config)
+	case "xai":
+		provider = llm.NewXAILLM(config)
 	case "yi":
 		provider = llm.NewYiLLM(config)
 	default:

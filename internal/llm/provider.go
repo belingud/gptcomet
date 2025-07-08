@@ -82,6 +82,7 @@ func CreateProvider(config *types.ClientConfig) (LLM, error) {
 // This function is automatically called when the package is imported.
 //
 // It registers the following providers:
+// - AI21
 // - Azure
 // - ChatGLM
 // - Claude
@@ -90,6 +91,7 @@ func CreateProvider(config *types.ClientConfig) (LLM, error) {
 // - Gemini
 // - Kimi
 // - Mistral
+// - MiniMax
 // - Ollama
 // - OpenAI
 // - Vertex
@@ -103,6 +105,11 @@ func CreateProvider(config *types.ClientConfig) (LLM, error) {
 // Each provider is registered with a constructor function that creates a new instance
 // of the corresponding LLM implementation.
 func init() {
+	// AI21
+	RegisterProvider("ai21", func(config *types.ClientConfig) LLM {
+		return &AI21LLM{}
+	})
+
 	// Azure
 	RegisterProvider("azure", func(config *types.ClientConfig) LLM {
 		return &AzureLLM{}
@@ -133,14 +140,34 @@ func init() {
 		return &GeminiLLM{}
 	})
 
+	// Groq
+	RegisterProvider("groq", func(config *types.ClientConfig) LLM {
+		return &GroqLLM{}
+	})
+
+	// Hunyuan
+	RegisterProvider("hunyuan", func(config *types.ClientConfig) LLM {
+		return NewHunyuanLLM(config)
+	})
+
 	// Kimi
 	RegisterProvider("kimi", func(config *types.ClientConfig) LLM {
 		return &KimiLLM{}
 	})
 
+	// MiniMax
+	RegisterProvider("minimax", func(config *types.ClientConfig) LLM {
+		return NewMinimaxLLM(config)
+	})
+
 	// Mistral
 	RegisterProvider("mistral", func(config *types.ClientConfig) LLM {
 		return &MistralLLM{}
+	})
+
+	// ModelScope
+	RegisterProvider("modelscope", func(config *types.ClientConfig) LLM {
+		return NewModelScopeLLM(config)
 	})
 
 	// Ollama
@@ -151,6 +178,11 @@ func init() {
 	// OpenAI
 	RegisterProvider("openai", func(config *types.ClientConfig) LLM {
 		return &OpenAILLM{}
+	})
+
+	// OpenRouter
+	RegisterProvider("openrouter", func(config *types.ClientConfig) LLM {
+		return &OpenRouterLLM{}
 	})
 
 	// Sambanova
@@ -176,31 +208,6 @@ func init() {
 	// XAI
 	RegisterProvider("xai", func(config *types.ClientConfig) LLM {
 		return &XAILLM{}
-	})
-
-	// Groq
-	RegisterProvider("groq", func(config *types.ClientConfig) LLM {
-		return &GroqLLM{}
-	})
-
-	// OpenRouter
-	RegisterProvider("openrouter", func(config *types.ClientConfig) LLM {
-		return &OpenRouterLLM{}
-	})
-
-	// AI21
-	RegisterProvider("ai21", func(config *types.ClientConfig) LLM {
-		return &AI21LLM{}
-	})
-
-	// ModelScope
-	RegisterProvider("modelscope", func(config *types.ClientConfig) LLM {
-		return NewModelScopeLLM(config)
-	})
-
-	// Hunyuan
-	RegisterProvider("hunyuan", func(config *types.ClientConfig) LLM {
-		return NewHunyuanLLM(config)
 	})
 
 	// Yi
