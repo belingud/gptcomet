@@ -20,12 +20,12 @@ const (
 // including the error type, message, underlying cause, suggestions for fixing it,
 // and optional documentation URL.
 type GPTCometError struct {
-	Type         ErrorType
-	Title        string
-	Message      string
-	Cause        error
+	Type        ErrorType
+	Title       string
+	Message     string
+	Cause       error
 	Suggestions []string
-	DocsURL      string
+	DocsURL     string
 }
 
 // Error implements the error interface
@@ -65,60 +65,60 @@ func (e *GPTCometError) Unwrap() error {
 // NewConfigError creates a new configuration-related error
 func NewConfigError(title, message string, cause error, suggestions []string) *GPTCometError {
 	return &GPTCometError{
-		Type:         ErrTypeConfig,
-		Title:        title,
-		Message:      message,
-		Cause:        cause,
-		Suggestions:  suggestions,
-		DocsURL:      "https://github.com/belingud/gptcomet#configuration",
+		Type:        ErrTypeConfig,
+		Title:       title,
+		Message:     message,
+		Cause:       cause,
+		Suggestions: suggestions,
+		DocsURL:     "https://github.com/belingud/gptcomet#configuration",
 	}
 }
 
 // NewNetworkError creates a new network-related error
 func NewNetworkError(title, message string, cause error, suggestions []string) *GPTCometError {
 	return &GPTCometError{
-		Type:         ErrTypeNetwork,
-		Title:        title,
-		Message:      message,
-		Cause:        cause,
-		Suggestions:  suggestions,
-		DocsURL:      "https://github.com/belingud/gptcomet#network-configuration",
+		Type:        ErrTypeNetwork,
+		Title:       title,
+		Message:     message,
+		Cause:       cause,
+		Suggestions: suggestions,
+		DocsURL:     "https://github.com/belingud/gptcomet#network-configuration",
 	}
 }
 
 // NewGitError creates a new git-related error
 func NewGitError(title, message string, cause error, suggestions []string) *GPTCometError {
 	return &GPTCometError{
-		Type:         ErrTypeGit,
-		Title:        title,
-		Message:      message,
-		Cause:        cause,
-		Suggestions:  suggestions,
-		DocsURL:      "https://github.com/belingud/gptcomet#git-requirements",
+		Type:        ErrTypeGit,
+		Title:       title,
+		Message:     message,
+		Cause:       cause,
+		Suggestions: suggestions,
+		DocsURL:     "https://github.com/belingud/gptcomet#git-requirements",
 	}
 }
 
 // NewAPIError creates a new API-related error
 func NewAPIError(title, message string, cause error, suggestions []string) *GPTCometError {
 	return &GPTCometError{
-		Type:         ErrTypeAPI,
-		Title:        title,
-		Message:      message,
-		Cause:        cause,
-		Suggestions:  suggestions,
-		DocsURL:      "https://github.com/belingud/gptcomet#api-configuration",
+		Type:        ErrTypeAPI,
+		Title:       title,
+		Message:     message,
+		Cause:       cause,
+		Suggestions: suggestions,
+		DocsURL:     "https://github.com/belingud/gptcomet#api-configuration",
 	}
 }
 
 // NewValidationError creates a new validation-related error
 func NewValidationError(title, message string, cause error, suggestions []string) *GPTCometError {
 	return &GPTCometError{
-		Type:         ErrTypeValidation,
-		Title:        title,
-		Message:      message,
-		Cause:        cause,
-		Suggestions:  suggestions,
-		DocsURL:      "https://github.com/belingud/gptcomet#usage",
+		Type:        ErrTypeValidation,
+		Title:       title,
+		Message:     message,
+		Cause:       cause,
+		Suggestions: suggestions,
+		DocsURL:     "https://github.com/belingud/gptcomet#usage",
 	}
 }
 

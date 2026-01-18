@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/config"
 	"github.com/belingud/gptcomet/internal/debug"
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 )
 
 // GitVCS implements the VCS interface for Git

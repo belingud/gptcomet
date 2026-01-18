@@ -307,7 +307,6 @@ func (s *CommitService) Execute() error {
 		return err
 	}
 
-
 	commitMsg, err = removeThinkTags(commitMsg)
 	if err != nil {
 		if progress != nil {

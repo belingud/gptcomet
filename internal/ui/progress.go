@@ -115,17 +115,3 @@ func (p *Progress) render() {
 		}
 	}
 }
-
-// getStageIcon returns the appropriate icon for a stage status
-func (p *Progress) getStageIcon(status StageStatus) string {
-	switch status {
-	case StageStatusDone:
-		return iconDone
-	case StageStatusRunning:
-		return iconRunning
-	case StageStatusError:
-		return iconError
-	default:
-		return iconPending
-	}
-}
