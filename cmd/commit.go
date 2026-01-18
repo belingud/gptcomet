@@ -10,7 +10,9 @@ import (
 	"github.com/belingud/gptcomet/internal/client"
 	"github.com/belingud/gptcomet/internal/config"
 	"github.com/belingud/gptcomet/internal/debug"
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/git"
+	"github.com/belingud/gptcomet/internal/ui"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -240,35 +242,81 @@ func removeThinkTags(input string) (string, error) {
 // - Failed to generate commit message
 // - Failed to handle commit interaction
 func (s *CommitService) Execute() error {
+	// Get verbose setting
+	verbose := s.getVerboseSetting()
+
+	// Initialize progress tracking if verbose
+	var progress *ui.Progress
+	if verbose {
+		progress = ui.NewProgress(true)
+		progress.AddStages("Fetching git diff", "Generating message")
+	}
+
 	// check for staged changes
+	if progress != nil {
+		progress.Start("Fetching git diff")
+	}
 	hasStagedChanges, err := s.vcs.HasStagedChanges(s.options.RepoPath)
 	if err != nil {
-		return fmt.Errorf("failed to check staged changes: %w", err)
+		if progress != nil {
+			progress.Error("Fetching git diff", err)
+		}
+		return err
 	}
 	if !hasStagedChanges {
-		return fmt.Errorf("no staged changes found")
+		if progress != nil {
+			progress.Error("Fetching git diff", gptcometerrors.NoStagedChangesError())
+		}
+		return gptcometerrors.NoStagedChangesError()
 	}
 
 	// get diff of staged changes after filtering with file_ignore patterns
 	diff, err := s.vcs.GetStagedDiffFiltered(s.options.RepoPath, s.cfgManager)
 	debug.Printf("Got diff length: %d\n", len(diff))
 	if err != nil {
-		return fmt.Errorf("failed to get diff: %w", err)
+		if progress != nil {
+			progress.Error("Fetching git diff", err)
+		}
+		return err
 	}
 	if diff == "" {
-		return fmt.Errorf("no staged changes found after filtering")
+		if progress != nil {
+			progress.Error("Fetching git diff", gptcometerrors.NoStagedChangesError())
+		}
+		return gptcometerrors.NoStagedChangesError()
+	}
+
+	if progress != nil {
+		progress.Complete("Fetching git diff")
 	}
 
 	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
 
+	if progress != nil {
+		progress.StartWithNewLine("Generating message")
+	}
+
 	// generate commit message
 	commitMsg, err := s.generateCommitMessage(diff)
 	if err != nil {
+		if progress != nil {
+			progress.Error("Generating message", err)
+		}
 		return err
 	}
+
 	commitMsg, err = removeThinkTags(commitMsg)
 	if err != nil {
-		fmt.Printf("Error in generating: %v\n", err)
+		if progress != nil {
+			progress.Error("Generating message", err)
+		} else {
+			fmt.Printf("Error in generating: %v\n", err)
+		}
+		return err
+	}
+
+	if progress != nil {
+		progress.CompleteInNewLine("Generating message")
 	}
 
 	if s.options.DryRun {
@@ -277,6 +325,16 @@ func (s *CommitService) Execute() error {
 	}
 
 	return s.handleCommitInteraction(commitMsg)
+}
+
+// getVerboseSetting retrieves the console.verbose configuration
+func (s *CommitService) getVerboseSetting() bool {
+	if val, ok := s.cfgManager.GetNestedValue([]string{"console", "verbose"}); ok {
+		if verbose, ok := val.(bool); ok {
+			return verbose
+		}
+	}
+	return false
 }
 
 // handleCommitInteraction manages the interactive commit message workflow.

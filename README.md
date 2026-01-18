@@ -43,7 +43,19 @@
     - [console](#console)
   - [🔦 Supported Keys](#-supported-keys)
   - [📃 Example](#-example)
+    - [Basic Usage](#basic-usage)
+    - [Enhanced Error Messages](#enhanced-error-messages)
+    - [Progress Indicators](#progress-indicators)
   - [💻 Development](#-development)
+    - [Requirements](#requirements)
+    - [Setup](#setup)
+    - [Running Tests](#running-tests)
+      - [Go Tests](#go-tests)
+      - [Python Tests](#python-tests)
+    - [Code Quality](#code-quality)
+      - [Go](#go)
+      - [Python](#python)
+    - [Build](#build)
   - [📩 Contact](#-contact)
   - [☕️ Sponsor](#️-sponsor)
   - [📜 License](#-license)
@@ -59,6 +71,8 @@ GPTComet is an AI-powered developer tool that streamlines your Git workflow and 
 This project leverages the power of large language models to automate repetitive tasks and improve the overall development process. The core features include:
 
 -   **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
+-   **Intelligent Code Review**: Get AI-powered code reviews with actionable feedback and suggestions.
+-   **Progress Indicators**: Optional verbose mode shows real-time progress for long-running operations.
 -   **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
 -   **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs, such llm model and prompt.
 -   **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
@@ -410,7 +424,7 @@ Here's a summary of the main configuration keys:
 | `output.translate_title`       | Translate the title of the commit message.                 | `false`                           |
 | `output.review_lang`           | The language to generate the review message.               | `en`                              |
 | `output.markdown_theme`        | The theme to display markdown_theme content.               | `auto`                            |
-| `console.verbose`              | Enable verbose output.                                     | `true`                            |
+| `console.verbose`              | Enable verbose output with progress indicators and detailed error messages. | `true`                            |
 | `<provider>.api_base`          | The API base URL for the provider.                         | (Provider-specific)               |
 | `<provider>.api_key`           | The API key for the provider.                              |                                   |
 | `<provider>.model`             | The model name to use.                                     | (Provider-specific)               |
@@ -601,7 +615,26 @@ console:
     verbose: true
 ```
 
-When `verbose` is true, more information will be printed in the console.
+When `verbose` is enabled (`true`), GPTComet provides enhanced user experience:
+
+- **Progress Indicators**: Shows real-time progress for commit message generation and code review
+  ```
+  [1/2] Fetching git diff...
+  ✓ Fetching git diff (0.07s)
+  Discovered provider: mistral, model: codestral-latest
+  [2/2] Generating message...
+  ✓ Generating message (13.24s)
+  ```
+
+- **Detailed Operation Information**: Displays which provider and model are being used
+
+- **Enhanced Error Messages**: All errors include:
+  - Clear problem description
+  - Specific suggestions for resolution
+  - Relevant documentation links
+  - Appropriate emoji indicators for quick identification
+
+When `verbose` is disabled (`false`), GPTComet runs in silent mode with minimal output, suitable for scripting and automated workflows.
 
 ## 🔦 Supported Keys
 
@@ -610,6 +643,8 @@ You can use `gmsg config keys` to check supported keys.
 ## 📃 Example
 
 Here is an example of how to use GPTComet:
+
+### Basic Usage
 
 1.  When you first set your OpenAI KEY by `gmsg config set openai.api_key YOUR_API_KEY`, it will generate config file at `~/.local/gptcomet/gptcomet.yaml`, includes:
 
@@ -626,6 +661,48 @@ output:
 
 2.  Run the following command to generate a commit message: `gmsg commit`
 3.  GPTComet will generate a commit message based on the changes made in the code and display it in the console.
+
+### Enhanced Error Messages
+
+GPTComet provides helpful error messages with actionable suggestions:
+
+```bash
+$ gmsg commit
+
+❌ API Key Not Configured
+
+Provider 'openai' requires an API key, but none was found.
+
+What to do:
+  • Set API key: gmsg config set openai.api_key <your-key>
+  • Or set env var: export OPENAI_API_KEY=<your-key>
+  • Check provider: gmsg config get openai
+
+Docs: https://github.com/belingud/gptcomet#configuration
+```
+
+### Progress Indicators
+
+When `console.verbose` is enabled (default), you'll see real-time progress:
+
+```bash
+$ gmsg commit
+
+[1/2] Fetching git diff...(0.07s)
+Discovered provider: mistral, model: codestral-latest
+[2/2] Generating message...
+📤 Sending request to mistral...
+Token usage> prompt: 1341, completion: 10, total: 1,351
+✓ Generating message (13.24s)
+
+feat: add user authentication feature
+```
+
+To disable progress indicators and run in silent mode:
+
+```bash
+gmsg config set console.verbose false
+```
 
 Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
 

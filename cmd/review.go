@@ -10,6 +10,7 @@ import (
 	"github.com/belingud/gptcomet/internal/config"
 	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/internal/git"
+	"github.com/belingud/gptcomet/internal/ui"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
 
@@ -131,9 +132,31 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 
 // Execute performs the review operation
 func (s *ReviewService) Execute() error {
+	// Get verbose setting
+	verbose := s.getVerboseSetting()
+
+	// Initialize progress tracking if verbose
+	var progress *ui.Progress
+	if verbose {
+		progress = ui.NewProgress(true)
+		progress.AddStages("Fetching diff", "Generating review")
+	}
+
+	if progress != nil {
+		progress.Start("Fetching diff")
+	}
+
 	diff, err := s.getDiff()
 	if err != nil {
+		if progress != nil {
+			progress.Error("Fetching diff", err)
+		}
 		return err
+	}
+
+	if progress != nil {
+		progress.Complete("Fetching diff")
+		progress.StartWithNewLine("Generating review")
 	}
 
 	// Get provider and model from configuration
@@ -141,13 +164,24 @@ func (s *ReviewService) Execute() error {
 
 	// Use streaming mode if the option is enabled
 	if s.options.Stream {
+		if progress != nil {
+			// Complete current stage in new line, have a checkmark prefix
+			progress.CompleteInNewLine("Generating review")
+		}
 		return s.ExecuteStream(diff)
 	}
 
 	// Otherwise use the standard non-streaming mode
 	reviewComment, err := s.generateReviewComment(diff)
 	if err != nil {
+		if progress != nil {
+			progress.Error("Generating review", err)
+		}
 		return err
+	}
+
+	if progress != nil {
+		progress.CompleteInNewLine("Generating review")
 	}
 
 	formattedComment, err := s.formatReviewComment(reviewComment)
@@ -157,6 +191,16 @@ func (s *ReviewService) Execute() error {
 
 	fmt.Println(formattedComment)
 	return nil
+}
+
+// getVerboseSetting retrieves the console.verbose configuration
+func (s *ReviewService) getVerboseSetting() bool {
+	if val, ok := s.cfgManager.GetNestedValue([]string{"console", "verbose"}); ok {
+		if verbose, ok := val.(bool); ok {
+			return verbose
+		}
+	}
+	return false
 }
 
 // ExecuteStream performs the review operation with streaming output

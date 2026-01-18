@@ -9,6 +9,7 @@ import (
 
 	"github.com/belingud/gptcomet/internal/config"
 	"github.com/belingud/gptcomet/internal/debug"
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 )
 
 // GitVCS implements the VCS interface for Git
@@ -173,8 +174,7 @@ func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager config.Manage
 
 	// return if all staged files are ignored
 	if len(excludeFiles) == len(stagedFiles) {
-		fmt.Println("All staged files are ignored")
-		return "", nil
+		return "", gptcometerrors.NoStagedChangesError()
 	}
 
 	// if there are no ignored files, return the diff directly
