@@ -1,12 +1,9 @@
 package client
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -524,40 +521,5 @@ func TestStream(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tt.expectedChunks, receivedChunks)
 		})
-	}
-}
-
-// Create a mock streaming response with the specified chunks
-func createMockStreamResponse(chunks []string) *http.Response {
-	body := &bytes.Buffer{}
-
-	// Generate SSE format data for each chunk
-	for i, chunk := range chunks {
-		if i == len(chunks)-1 && chunk == "\n" {
-			// Last newline is special, just add [DONE]
-			body.WriteString("data: [DONE]\n\n")
-			continue
-		}
-
-		// Create a mock choice object with the chunk as content
-		choice := map[string]interface{}{
-			"delta": map[string]interface{}{
-				"content": chunk,
-			},
-		}
-
-		// Create a mock response object with the choice
-		response := map[string]interface{}{
-			"choices": []interface{}{choice},
-		}
-
-		// Marshal to JSON
-		data, _ := json.Marshal(response)
-		body.WriteString("data: " + string(data) + "\n\n")
-	}
-
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(body),
 	}
 }

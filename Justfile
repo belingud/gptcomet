@@ -12,11 +12,29 @@ check:
     go vet ./...
     staticcheck ./...
 
+# Run all quality checks (Go + Python)
+ci-check:
+    @echo "🚀 Running all CI quality checks"
+    @echo "\n=== Go Checks ==="
+    go vet ./...
+    staticcheck ./...
+    @echo "\n=== Python Checks ==="
+    uv run ruff check py/
+    @echo "\n=== All checks passed! ==="
+
 # Format Go code
-format:
+format-go:
     @echo "🚀 Formatting Go code"
     go fmt ./...
     goimports -w .
+
+# Format Python code
+format-py:
+    @echo "🚀 Formatting Python code"
+    uv run ruff format py/
+
+# Format all code (Go + Python)
+format: format-go format-py
 
 # Run Go tests
 test:

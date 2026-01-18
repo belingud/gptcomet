@@ -194,12 +194,12 @@ provider: openai
 
 func TestManager_GetClientConfig(t *testing.T) {
 	tests := []struct {
-		name          string
-		configData    string
-		initProvider  string
-		wantErr       bool
-		errContains   string
-		validateFunc  func(t *testing.T, cfg *types.ClientConfig)
+		name         string
+		configData   string
+		initProvider string
+		wantErr      bool
+		errContains  string
+		validateFunc func(t *testing.T, cfg *types.ClientConfig)
 	}{
 		{
 			name:         "Provider not set",
@@ -565,7 +565,7 @@ openai:
 
 			require.NoError(t, err)
 			require.NotNil(t, clientConfig)
-			
+
 			if tt.validateFunc != nil {
 				tt.validateFunc(t, clientConfig)
 			}

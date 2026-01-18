@@ -67,7 +67,7 @@ def main():
         )
         sys.exit(1)
     binary = find_gptcomet_binary()
-    args = [binary] + sys.argv[1:]
+    args = [binary, *sys.argv[1:]]
     if sys.platform == "win32":
         # no need shell=True for windows
         process = subprocess.run(args)  # noqa: S603
