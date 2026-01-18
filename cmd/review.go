@@ -139,7 +139,7 @@ func (s *ReviewService) Execute() error {
 	var progress *ui.Progress
 	if verbose {
 		progress = ui.NewProgress(true)
-		progress.AddStages("Fetching diff", "Calling LLM provider", "Generating review")
+		progress.AddStages("Fetching diff", "Generating review")
 	}
 
 	if progress != nil {
@@ -156,7 +156,7 @@ func (s *ReviewService) Execute() error {
 
 	if progress != nil {
 		progress.Complete("Fetching diff")
-		progress.Start("Calling LLM provider")
+		progress.StartWithNewLine("Generating review")
 	}
 
 	// Get provider and model from configuration
@@ -165,16 +165,13 @@ func (s *ReviewService) Execute() error {
 	// Use streaming mode if the option is enabled
 	if s.options.Stream {
 		if progress != nil {
-			progress.Complete("Calling LLM provider")
+			// Complete current stage in new line, have a checkmark prefix
+			progress.CompleteInNewLine("Generating review")
 		}
 		return s.ExecuteStream(diff)
 	}
 
 	// Otherwise use the standard non-streaming mode
-	if progress != nil {
-		progress.Start("Generating review")
-	}
-
 	reviewComment, err := s.generateReviewComment(diff)
 	if err != nil {
 		if progress != nil {
@@ -184,7 +181,7 @@ func (s *ReviewService) Execute() error {
 	}
 
 	if progress != nil {
-		progress.Complete("Generating review")
+		progress.CompleteInNewLine("Generating review")
 	}
 
 	formattedComment, err := s.formatReviewComment(reviewComment)

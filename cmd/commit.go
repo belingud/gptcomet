@@ -249,7 +249,7 @@ func (s *CommitService) Execute() error {
 	var progress *ui.Progress
 	if verbose {
 		progress = ui.NewProgress(true)
-		progress.AddStages("Fetching git diff", "Calling LLM provider", "Generating message")
+		progress.AddStages("Fetching git diff", "Generating message")
 	}
 
 	// check for staged changes
@@ -288,21 +288,19 @@ func (s *CommitService) Execute() error {
 
 	if progress != nil {
 		progress.Complete("Fetching git diff")
-		progress.Start("Calling LLM provider")
 	}
 
 	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
 
 	if progress != nil {
-		progress.Complete("Calling LLM provider")
-		progress.Start("Generating message")
+		progress.StartWithNewLine("Generating message")
 	}
 
 	// generate commit message
 	commitMsg, err := s.generateCommitMessage(diff)
 	if err != nil {
 		if progress != nil {
-			progress.Error("Calling LLM provider", err)
+			progress.Error("Generating message", err)
 		}
 		return err
 	}
@@ -318,7 +316,7 @@ func (s *CommitService) Execute() error {
 	}
 
 	if progress != nil {
-		progress.Complete("Generating message")
+		progress.CompleteInNewLine("Generating message")
 	}
 
 	if s.options.DryRun {

@@ -57,6 +57,17 @@ func (p *Progress) AddStages(names ...string) {
 }
 
 // Start starts a specific stage by name
+// This is used when we want to start a stage and show the stage number
+// Example: [1/2] Fetching diff...
+//
+// This function is used to start a specific stage by name. It takes the name of the
+// stage as a parameter and updates the status of the stage to "StageStatusRunning".
+// It also sets the start time of the stage.
+//
+// Parameters:
+// - name: The name of the stage to be started.
+//
+// Return: None.
 func (p *Progress) Start(name string) {
 	for i, stage := range p.stages {
 		if stage.Name == name {
@@ -64,14 +75,38 @@ func (p *Progress) Start(name string) {
 			stage.StartTime = time.Now()
 			p.current = i
 			if p.verbose {
-				p.render()
+				// Display start message
+				fmt.Printf("[%d/%d] %s...", i+1, len(p.stages), stage.Name)
 			}
 			return
 		}
 	}
 }
 
+// StartWithNewLine starts a specific stage by name and prints a new line
+// This is used when we want to start a stage and show the stage number in a new line
+// Example: [1/2] Fetching diff...\n
+//
+// Parameters:
+// - name: The name of the stage to be started.
+//
+// Return: None.
+func (p *Progress) StartWithNewLine(name string) {
+	p.Start(name)
+	fmt.Println() // Add newline after start
+}
+
 // Complete marks a stage as complete
+// Example: [1/2] Fetching diff... ✓ (0.07s)
+//
+// This function is used to mark a stage as complete. It takes the name of the
+// stage as a parameter and updates the status of the stage to "StageStatusDone".
+// It also calculates the duration of the stage and stores it.
+//
+// Parameters:
+// - name: The name of the stage to be marked as complete.
+//
+// Return: None.
 func (p *Progress) Complete(name string) {
 	for _, stage := range p.stages {
 		if stage.Name == name {
@@ -79,14 +114,71 @@ func (p *Progress) Complete(name string) {
 			stage.EndTime = time.Now()
 			stage.Duration = stage.EndTime.Sub(stage.StartTime)
 			if p.verbose {
-				p.render()
+				// Display completion info immediately
+				fmt.Printf("\r[%d/%d] %s... ✓ (%.2fs)\n",
+					stageNumber(p, stage.Name)+1,
+					len(p.stages),
+					stage.Name,
+					float64(stage.Duration.Milliseconds())/1000)
 			}
 			return
 		}
 	}
 }
 
+// CompleteInNewLine marks a stage as complete with simple format (no stage numbers)
+// This is used when we want to complete a stage but don't want to show the stage number
+// and we want to display it in a new line with a checkmark prefix
+// Example: ✓ Generating review (0.00s)
+//
+// Parameters:
+// - name: The name of the stage to be marked as complete.
+//
+// Return: None.
+func (p *Progress) CompleteInNewLine(name string) {
+	for _, stage := range p.stages {
+		if stage.Name == name {
+			stage.Status = StageStatusDone
+			stage.EndTime = time.Now()
+			stage.Duration = stage.EndTime.Sub(stage.StartTime)
+			if p.verbose {
+				// Display simple completion format
+				fmt.Printf("✓ %s (%.2fs)\n",
+					stage.Name,
+					float64(stage.Duration.Milliseconds())/1000)
+			}
+			return
+		}
+	}
+}
+
+// Helper function to find stage number by name
+// Returns the index of the stage with the given name
+// Returns 0 if the stage is not found
+//
+// Parameters:
+// - p: The progress object.
+// - name: The name of the stage.
+//
+// Returns:
+// - The index of the stage with the given name.
+// - 0 if the stage is not found.
+func stageNumber(p *Progress, name string) int {
+	for i, stage := range p.stages {
+		if stage.Name == name {
+			return i
+		}
+	}
+	return 0
+}
+
 // Error marks a stage as failed with an error
+// This is used when we want to mark a stage as failed and show the stage number
+// Example: [1/2] Fetching diff... ✗ (0.07s)
+//
+// Parameters:
+// - name: The name of the stage.
+// - err: The error that occurred.
 func (p *Progress) Error(name string, err error) {
 	for _, stage := range p.stages {
 		if stage.Name == name {
@@ -102,6 +194,9 @@ func (p *Progress) Error(name string, err error) {
 }
 
 // render renders the progress display (only in verbose mode)
+//
+// This function is used to render the progress display when in verbose mode.
+// It only renders the current running stage.
 func (p *Progress) render() {
 	if !p.verbose {
 		return
