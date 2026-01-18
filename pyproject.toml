@@ -141,8 +141,13 @@ python_files = ["test*.py"]
 markers = ["skipif: conditionally skip tests"]
 # Ignore gitpython USE_SHELL=True deprecation warning, caused by pytest, not truely used in project
 filterwarnings = ["ignore::DeprecationWarning"]
+# Don't add command line arguments to the test run
+# Use empty args to prevent pytest from passing args to the main program
+args = []
 
 [dependency-groups]
 dev = [
     "bump2version>=1.0.1",
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
 ]

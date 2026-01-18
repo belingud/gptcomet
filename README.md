@@ -631,6 +631,14 @@ Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
 
 ## 💻 Development
 
+### Requirements
+- Go 1.25+
+- Python 3.9+
+- just command runner
+- pytest (for Python tests)
+
+### Setup
+
 If you'd like to contribute to GPTComet, feel free to fork this project and submit a pull request.
 
 First, fork the project and clone your repo.
@@ -639,12 +647,84 @@ First, fork the project and clone your repo.
 git clone https://github.com/<yourname>/gptcomet
 ```
 
-Second, make sure you have `_`, you can install by `pip`, `brew` or other way in their [installation](https://docs.astral.sh/uv/getting-started/installation/) docs
+Second, make sure you have `uv`, you can install by `pip`, `brew` or other way in their [installation](https://docs.astral.sh/uv/getting-started/installation/) docs
 
-Use `just` command install dependence, `just` is a handy way to save and run project-specific commands, `just` docs [https://github.com/casey/just](https://github.com/casey/just)
+Use `just` command to install dependencies:
 
 ```shell
 just install
+```
+
+### Running Tests
+
+#### Go Tests
+
+```bash
+# Run all Go tests
+go test ./...
+
+# Run specific package tests
+go test ./internal/llm/
+
+# Run with coverage
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+
+# Using just
+just test              # Run tests with coverage
+just test-coverage     # Generate coverage report
+just test-cover-func   # Show coverage by function
+```
+
+#### Python Tests
+
+```bash
+# Run Python wrapper tests
+just test-py
+
+# Run with coverage
+just test-py-cov
+
+# Or manually with uv
+uv run pytest tests/py_tests/ -v
+uv run pytest tests/py_tests/ --cov=py/gptcomet --cov-report=html
+```
+
+### Code Quality
+
+#### Go
+
+```bash
+# Static analysis
+go vet ./...
+staticcheck ./...
+
+# Using just
+just check             # Run go vet and staticcheck
+just format            # Format Go code
+```
+
+#### Python
+
+```bash
+# Code linting
+ruff check py/
+
+# Formatting
+ruff format py/
+```
+
+### Build
+
+```bash
+# Build Go binary
+just build
+
+# Build all platforms
+just build-all
+
+# Build Python wheel
+just build-py
 ```
 
 ## 📩 Contact
