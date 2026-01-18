@@ -3,7 +3,9 @@
     "allow": [
       "Bash(ruff check:*)",
       "Bash(ruff format:*)",
-      "Bash(staticcheck:*)"
+      "Bash(staticcheck:*)",
+      "Bash(go build:*)",
+      "Bash(go test:*)"
     ]
   }
 }
