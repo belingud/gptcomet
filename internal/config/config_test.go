@@ -220,7 +220,7 @@ func TestManager_GetClientConfig(t *testing.T) {
 			configData:   `{"provider": "openai", "openai": {}}`,
 			initProvider: "",
 			wantErr:      true,
-			errContains:  "api_key not found",
+			errContains:  "API Key Not Configured",
 		},
 		{
 			name: "Basic config with default values",

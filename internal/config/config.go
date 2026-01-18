@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -124,7 +125,7 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	} else {
 		apiKeyValue, ok := providerConfig["api_key"].(string)
 		if !ok || apiKeyValue == "" {
-			return nil, fmt.Errorf("api_key not found for provider: %s", provider)
+			return nil, gptcometerrors.APIKeyNotSetError(provider)
 		}
 		apiKey = apiKeyValue
 	}
