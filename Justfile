@@ -18,11 +18,24 @@ format:
     go fmt ./...
     goimports -w .
 
-# Run Go tests with coverage
+# Run Go tests
 test:
     @echo "🚀 Running Go tests"
+    go test ./...
+
+# Generate coverage report
+test-coverage:
+    @echo "🚀 Generating coverage report"
     go test -coverprofile=coverage.out ./...
     go tool cover -html=coverage.out -o coverage.html
+    @echo "Coverage report generated: coverage.html"
+    @go tool cover -func=coverage.out | grep total
+
+# Show coverage by function
+test-cover-func:
+    @echo "🚀 Coverage by function"
+    go test -coverprofile=coverage.out ./...
+    go tool cover -func=coverage.out
 
 # Build Go binaries
 build:
@@ -58,7 +71,12 @@ install:
 # Run Python tests
 test-py:
     @echo "🚀 Running Python tests"
-    uv run pytest --cov --cov-config=pyproject.toml --cov-report=xml tests
+    uv run pytest tests/py_tests/ -v
+
+# Run Python tests with coverage
+test-py-cov:
+    @echo "🚀 Running Python tests with coverage"
+    uv run pytest tests/py_tests/ -v --cov=py/gptcomet --cov-report=html --cov-report=term-missing
 
 # Build Python wheel
 build-py:
