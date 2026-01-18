@@ -3,6 +3,7 @@ name: Quality Checks
 on:
   push:
     branches: [ master, develop ]
+    tags-ignore: ['**']
   pull_request:
     branches: [ master, develop ]
 
