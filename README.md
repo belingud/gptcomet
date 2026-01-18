@@ -632,7 +632,7 @@ Note: Replace `YOUR_API_KEY` with your actual API key for the provider.
 ## 💻 Development
 
 ### Requirements
-- Go 1.23+
+- Go 1.25+
 - Python 3.9+
 - just command runner
 - pytest (for Python tests)
