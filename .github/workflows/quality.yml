@@ -53,7 +53,7 @@ jobs:
 
       - name: Run staticcheck
         run: |
-          go install honnef.co/go/tools/cmd/staticcheck@2024.1
+          go install honnef.co/go/tools/cmd/staticcheck@latest
           staticcheck ./...
 
   python-test:
