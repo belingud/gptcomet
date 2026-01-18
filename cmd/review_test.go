@@ -92,6 +92,7 @@ func TestReviewService_Execute(t *testing.T) {
 				cfg.On("GetReviewPrompt").Return("test-prompt")
 				cfg.On("Get", REVIEW_LANG_KEY).Return("en", true)
 				cfg.On("GetWithDefault", "output.markdown_theme", mock.Anything).Return("auto")
+				cfg.On("GetNestedValue", []string{"console", "verbose"}).Return(false, true)
 				client.On("GenerateReviewComment", "test-diff", "test-prompt").Return("test-comment", nil)
 				vcs.On("GetStagedDiffFiltered", mock.Anything, mock.Anything).Return("staged-diff", nil)
 			},
@@ -102,6 +103,7 @@ func TestReviewService_Execute(t *testing.T) {
 			name: "no_staged_changes",
 			setupMocks: func(vcs *MockVCS, cfg *testutils.MockConfigManager, client *MockClient) {
 				vcs.On("HasStagedChanges", mock.Anything).Return(false, nil)
+				cfg.On("GetNestedValue", []string{"console", "verbose"}).Return(false, true)
 			},
 			wantErr:     true,
 			errContains: "no staged changes found",
