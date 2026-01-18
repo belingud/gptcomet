@@ -58,10 +58,10 @@ jobs:
                 include:
                     - os: windows-latest
                       arch: amd64
-                    - os: macos-14-intel
+                    - os: macos-15-intel
                       platform: macos
                       arch: amd64
-                    - os: macos-14
+                    - os: macos-15
                       platform: macos
                       arch: arm64
                     - os: ubuntu-22.04
@@ -70,7 +70,7 @@ jobs:
                     # - os: ubuntu-22.04-arm64
                     #   platform: linux
                     #   arch: arm64
-                os: [windows-latest, macos-13, macos-14, ubuntu-22.04]
+                os: [windows-latest, macos-15-intel, macos-15, ubuntu-22.04]
 
         steps:
             - uses: actions/checkout@v3
