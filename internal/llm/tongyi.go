@@ -8,6 +8,11 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const (
+	DefaultTongyiModel   = "qwen-turbo"
+	DefaultTongyiAPIBase = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+
 // TongyiLLM implements the LLM interface for Tongyi (DashScope)
 type TongyiLLM struct {
 	*OpenAILLM
@@ -15,19 +20,7 @@ type TongyiLLM struct {
 
 // NewTongyiLLM creates a new TongyiLLM
 func NewTongyiLLM(config *types.ClientConfig) *TongyiLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-	}
-	if config.CompletionPath == nil {
-		completionPath := "chat/completions"
-		config.CompletionPath = &completionPath
-	}
-	if config.AnswerPath == "" {
-		config.AnswerPath = "choices.0.message.content"
-	}
-	if config.Model == "" {
-		config.Model = "qwen-turbo"
-	}
+	BuildStandardConfigSimple(config, DefaultTongyiAPIBase, DefaultTongyiModel)
 
 	return &TongyiLLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -42,7 +35,7 @@ func (t *TongyiLLM) Name() string {
 func (t *TongyiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://dashscope.aliyuncs.com/compatible-mode/v1",
+			DefaultValue:  DefaultTongyiAPIBase,
 			PromptMessage: "Enter Tongyi API base",
 		},
 		"api_key": {
@@ -50,7 +43,7 @@ func (t *TongyiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "qwen-turbo",
+			DefaultValue:  DefaultTongyiModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

@@ -8,6 +8,11 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const (
+	DefaultSiliconAPIBase = "https://api.siliconflow.cn/v1"
+	DefaultSiliconModel   = "Qwen/Qwen2.5-7B-Instruct"
+)
+
 // SiliconLLM implements the LLM interface for Silicon
 type SiliconLLM struct {
 	*BaseLLM
@@ -15,12 +20,7 @@ type SiliconLLM struct {
 
 // NewSiliconLLM creates a new SiliconLLM
 func NewSiliconLLM(config *types.ClientConfig) *SiliconLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.siliconflow.cn/v1"
-	}
-	if config.Model == "" {
-		config.Model = "Qwen/Qwen2.5-7B-Instruct"
-	}
+	BuildStandardConfigSimple(config, DefaultSiliconAPIBase, DefaultSiliconModel)
 
 	return &SiliconLLM{
 		BaseLLM: NewBaseLLM(config),
@@ -35,7 +35,7 @@ func (s *SiliconLLM) Name() string {
 func (s *SiliconLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.siliconflow.cn/v1",
+			DefaultValue:  DefaultSiliconAPIBase,
 			PromptMessage: "Enter Silicon API base",
 		},
 		"api_key": {
@@ -43,7 +43,7 @@ func (s *SiliconLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "Qwen/Qwen2.5-7B-Instruct",
+			DefaultValue:  DefaultSiliconModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

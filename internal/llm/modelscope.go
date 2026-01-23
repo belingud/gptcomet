@@ -8,7 +8,10 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
-const DEFAULT_MODELSCOPE_MODEL = "deepseek-ai/DeepSeek-V3-0324"
+const (
+	DefaultModelScopeAPIBase = "https://api-inference.modelscope.cn/v1"
+	DefaultModelScopeModel   = "deepseek-ai/DeepSeek-V3-0324"
+)
 
 // ModelScopeLLM implements the LLM interface for ModelScope
 // It extends OpenAILLM since ModelScope API is compatible with OpenAI
@@ -18,12 +21,8 @@ type ModelScopeLLM struct {
 
 // NewModelScopeLLM creates a new ModelScopeLLM
 func NewModelScopeLLM(config *types.ClientConfig) *ModelScopeLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api-inference.modelscope.cn/v1"
-	}
-	if config.Model == "" {
-		config.Model = DEFAULT_MODELSCOPE_MODEL
-	}
+	BuildStandardConfigSimple(config, DefaultModelScopeAPIBase, DefaultModelScopeModel)
+
 	return &ModelScopeLLM{
 		OpenAILLM: NewOpenAILLM(config),
 	}
@@ -38,12 +37,12 @@ func (m *ModelScopeLLM) GetRequiredConfig() map[string]config.ConfigRequirement 
 	requirements := m.OpenAILLM.GetRequiredConfig()
 	// update API base
 	requirements["api_base"] = config.ConfigRequirement{
-		DefaultValue:  "https://api-inference.modelscope.cn/v1",
+		DefaultValue:  DefaultModelScopeAPIBase,
 		PromptMessage: "Enter ModelScope API base URL",
 	}
 	// update model
 	requirements["model"] = config.ConfigRequirement{
-		DefaultValue:  DEFAULT_MODELSCOPE_MODEL,
+		DefaultValue:  DefaultModelScopeModel,
 		PromptMessage: "Enter model name",
 	}
 	return requirements

@@ -10,6 +10,11 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const (
+	DefaultCohereAPIBase = "https://api.cohere.com/v2"
+	DefaultCohereModel   = "command-r-plus"
+)
+
 // CohereLLM implements the LLM interface for Cohere
 type CohereLLM struct {
 	*OpenAILLM
@@ -17,13 +22,7 @@ type CohereLLM struct {
 
 // NewCohereLLM creates a new CohereLLM
 func NewCohereLLM(config *types.ClientConfig) *CohereLLM {
-
-	if config.APIBase == "" {
-		config.APIBase = "https://api.cohere.com/v2"
-	}
-	if config.Model == "" {
-		config.Model = "command-r-plus"
-	}
+	BuildStandardConfigSimple(config, DefaultCohereAPIBase, DefaultCohereModel)
 
 	return &CohereLLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -38,7 +37,7 @@ func (c *CohereLLM) Name() string {
 func (c *CohereLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.cohere.com/v2",
+			DefaultValue:  DefaultCohereAPIBase,
 			PromptMessage: "Enter Cohere API base",
 		},
 		"api_key": {
@@ -46,7 +45,7 @@ func (c *CohereLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "command-r-plus",
+			DefaultValue:  DefaultCohereModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

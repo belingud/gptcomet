@@ -192,7 +192,7 @@ func TestNewProvider(t *testing.T) {
 			provider:    "mock",
 			config:      nil,
 			wantErr:     true,
-			errContains: "config cannot be nil",
+			errContains: "Invalid Configuration",
 		},
 		{
 			name:        "Create unknown provider returns default",
@@ -257,6 +257,12 @@ func TestCreateProvider(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	// Register a default provider for fallback
+	err = RegisterProvider("openai", func(config *types.ClientConfig) LLM {
+		return &MockProvider{name: "openai"}
+	})
+	require.NoError(t, err)
+
 	tests := []struct {
 		name        string
 		config      *types.ClientConfig
@@ -271,18 +277,17 @@ func TestCreateProvider(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Unknown provider",
+			name: "Unknown provider returns default",
 			config: &types.ClientConfig{
 				Provider: "unknown",
 			},
-			wantErr:     true,
-			errContains: "unknown provider",
+			wantErr: false, // Unknown providers return the default (openai)
 		},
 		{
 			name:        "Nil config",
 			config:      nil,
 			wantErr:     true,
-			errContains: "config cannot be nil",
+			errContains: "Invalid Configuration",
 		},
 	}
 
@@ -297,7 +302,12 @@ func TestCreateProvider(t *testing.T) {
 			}
 			require.NoError(t, err)
 			assert.NotNil(t, provider)
-			assert.Equal(t, tt.config.Provider, provider.Name())
+			// For unknown provider, it returns the default "openai"
+			if tt.config.Provider == "unknown" {
+				assert.Equal(t, "openai", provider.Name())
+			} else {
+				assert.Equal(t, tt.config.Provider, provider.Name())
+			}
 		})
 	}
 }

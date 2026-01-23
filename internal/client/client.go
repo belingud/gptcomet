@@ -20,6 +20,7 @@ import (
 	"golang.org/x/net/proxy"
 
 	"github.com/belingud/gptcomet/internal/debug"
+	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/llm"
 	"github.com/belingud/gptcomet/pkg/types"
 )
@@ -39,60 +40,25 @@ type Client struct {
 }
 
 // New creates a new client with the given config
-func New(config *types.ClientConfig) *Client {
-	var provider llm.LLM
-	switch config.Provider {
-	case "ai21":
-		provider = llm.NewAI21LLM(config)
-	case "azure":
-		provider = llm.NewAzureLLM(config)
-	case "chatglm":
-		provider = llm.NewChatGLMLLM(config)
-	case "claude":
-		provider = llm.NewClaudeLLM(config)
-	case "cohere":
-		provider = llm.NewCohereLLM(config)
-	case "deepseek":
-		provider = llm.NewDeepSeekLLM(config)
-	case "gemini":
-		provider = llm.NewGeminiLLM(config)
-	case "groq":
-		provider = llm.NewGroqLLM(config)
-	case "hunyuan":
-		provider = llm.NewHunyuanLLM(config)
-	case "kimi":
-		provider = llm.NewKimiLLM(config)
-	case "minimax":
-		provider = llm.NewMinimaxLLM(config)
-	case "mistral":
-		provider = llm.NewMistralLLM(config)
-	case "ollama":
-		provider = llm.NewOllamaLLM(config)
-	case "openai":
-		provider = llm.NewOpenAILLM(config)
-	case "openrouter":
-		provider = llm.NewOpenRouterLLM(config)
-	case "sambanova":
-		provider = llm.NewSambanovaLLM(config)
-	case "silicon":
-		provider = llm.NewSiliconLLM(config)
-	case "tongyi":
-		provider = llm.NewTongyiLLM(config)
-	case "vertex":
-		provider = llm.NewVertexLLM(config)
-	case "xai":
-		provider = llm.NewXAILLM(config)
-	case "yi":
-		provider = llm.NewYiLLM(config)
-	default:
-		// Default to OpenAI if provider is not specified
-		provider = llm.NewDefaultLLM(config)
+func New(config *types.ClientConfig) (*Client, error) {
+	if config == nil {
+		return nil, gptErrors.NewValidationError(
+			"Invalid Configuration",
+			"Client configuration is nil",
+			nil,
+			[]string{"Ensure valid client configuration is provided"},
+		)
+	}
+
+	provider, err := llm.CreateProvider(config)
+	if err != nil {
+		return nil, gptErrors.ProviderCreationError(config.Provider, err)
 	}
 
 	return &Client{
 		config: config,
 		llm:    provider,
-	}
+	}, nil
 }
 
 // Chat sends a chat message to the LLM provider with retry logic
@@ -100,7 +66,7 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 	client, err := c.getClient()
 	if err != nil {
 		debug.Printf("❌ Get client failed: %v", err)
-		return nil, fmt.Errorf("failed to get client: %w", err)
+		return nil, err
 	}
 
 	debug.Printf("🔌 Using proxy: %s", c.config.Proxy)
@@ -138,7 +104,7 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 		}
 	}
 
-	return nil, fmt.Errorf("after %d attempts, last error: %w", maxRetries, lastErr)
+	return nil, gptErrors.RequestRetryError(maxRetries, lastErr)
 }
 
 // createProxyTransport creates an http.Transport with proxy settings based on the configuration
@@ -164,7 +130,7 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 
 	proxyURL, err := url.Parse(c.config.Proxy)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse proxy URL: %w", err)
+		return nil, gptErrors.ProxyURLParseError(err)
 	}
 
 	switch proxyURL.Scheme {
@@ -210,7 +176,7 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 		// Create SOCKS5 dialer
 		dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, auth, proxy.Direct)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create SOCKS5 dialer: %w", err)
+			return nil, gptErrors.ProxyConfigurationError(err)
 		}
 
 		return &http.Transport{
@@ -224,7 +190,7 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 		}, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported proxy scheme: %s", proxyURL.Scheme)
+		return nil, gptErrors.UnsupportedProxySchemeError(proxyURL.Scheme)
 	}
 }
 
@@ -234,7 +200,7 @@ func (c *Client) getClient() (*http.Client, error) {
 	transport, err := c.createProxyTransport()
 	if err != nil {
 		debug.Printf("❌ Create proxy transport failed: %v", err)
-		return nil, fmt.Errorf("failed to create proxy transport: %w", err)
+		return nil, err
 	}
 
 	// Create a client with the configured transport and timeout
@@ -309,13 +275,13 @@ func (c *Client) GenerateReviewCommentStream(diff string, prompt string, callbac
 func (c *Client) Stream(ctx context.Context, message string, callback func(*types.CompletionResponse) error) error {
 	client, err := c.getClient()
 	if err != nil {
-		return fmt.Errorf("failed to get client: %w", err)
+		return err
 	}
 
 	// Format the message for the provider
 	payload, err := c.llm.FormatMessages(message)
 	if err != nil {
-		return fmt.Errorf("failed to format messages: %w", err)
+		return gptErrors.MessageFormattingError(err)
 	}
 
 	// Set stream to true for streaming response
@@ -326,7 +292,7 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 	// Marshal the payload
 	reqBody, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
+		return gptErrors.RequestMarshalingError(err)
 	}
 
 	// Build the URL and headers
@@ -337,7 +303,7 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 	// Create the request
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqBody))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return gptErrors.RequestCreationError(err)
 	}
 
 	// Set the headers
@@ -350,14 +316,14 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 	// Send the request
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
+		return gptErrors.RequestExecutionError(err)
 	}
 	defer resp.Body.Close()
 
 	// Check the response status
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(respBody))
+		return gptErrors.APIStatusError(resp.StatusCode, string(respBody), nil)
 	}
 
 	debug.Printf("✅ Request succeeded, processing streaming response")
@@ -417,14 +383,14 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 				Raw:     streamResp,
 			})
 			if err != nil {
-				return fmt.Errorf("callback error: %w", err)
+				return gptErrors.CallbackError(err)
 			}
 		}
 	}
 
 	// Check for scanner errors
 	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("error reading response: %w", err)
+		return gptErrors.WrapError(err, "Response Reading Failed", "Error occurred while reading streaming response")
 	}
 
 	return nil

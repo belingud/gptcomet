@@ -8,6 +8,11 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const (
+	DefaultSambanovaAPIBase = "https://api.sambanova.ai/v1"
+	DefaultSambanovaModel   = "Meta-Llama-3.3-70B-Instruct"
+)
+
 // SambanovaLLM implements the LLM interface for SambaNova
 type SambanovaLLM struct {
 	*OpenAILLM
@@ -15,12 +20,7 @@ type SambanovaLLM struct {
 
 // NewSambanovaLLM creates a new SambanovaLLM
 func NewSambanovaLLM(config *types.ClientConfig) *SambanovaLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.sambanova.ai/v1"
-	}
-	if config.Model == "" {
-		config.Model = "Meta-Llama-3.3-70B-Instruct"
-	}
+	BuildStandardConfigSimple(config, DefaultSambanovaAPIBase, DefaultSambanovaModel)
 
 	return &SambanovaLLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -35,7 +35,7 @@ func (s *SambanovaLLM) Name() string {
 func (s *SambanovaLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.sambanova.ai/v1",
+			DefaultValue:  DefaultSambanovaAPIBase,
 			PromptMessage: "Enter SambaNova API base",
 		},
 		"api_key": {
@@ -43,7 +43,7 @@ func (s *SambanovaLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "Meta-Llama-3.3-70B-Instruct",
+			DefaultValue:  DefaultSambanovaModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

@@ -5,6 +5,11 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const (
+	DefaultXAIAPIBase = "https://api.x.ai/v1"
+	DefaultXAIModel   = "grok-beta"
+)
+
 // XAILLM implements the LLM interface for XAI
 type XAILLM struct {
 	*OpenAILLM
@@ -12,13 +17,7 @@ type XAILLM struct {
 
 // NewXAILLM creates a new XAILLM
 func NewXAILLM(config *types.ClientConfig) *XAILLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.x.ai/v1"
-	}
-
-	if config.Model == "" {
-		config.Model = "grok-beta"
-	}
+	BuildStandardConfigSimple(config, DefaultXAIAPIBase, DefaultXAIModel)
 
 	return &XAILLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -33,7 +32,7 @@ func (x *XAILLM) Name() string {
 func (x *XAILLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.x.ai/v1",
+			DefaultValue:  DefaultXAIAPIBase,
 			PromptMessage: "Enter XAI API base",
 		},
 		"api_key": {
@@ -41,7 +40,7 @@ func (x *XAILLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "grok-beta",
+			DefaultValue:  DefaultXAIModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

@@ -8,6 +8,11 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const (
+	DefaultKimiAPIBase = "https://api.moonshot.cn/v1"
+	DefaultKimiModel   = "moonshot-v1-8k"
+)
+
 // KimiLLM implements the LLM interface for Kimi
 type KimiLLM struct {
 	*OpenAILLM
@@ -15,12 +20,7 @@ type KimiLLM struct {
 
 // NewKimiLLM creates a new KimiLLM
 func NewKimiLLM(config *types.ClientConfig) *KimiLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.moonshot.cn/v1"
-	}
-	if config.Model == "" {
-		config.Model = "moonshot-v1-8k"
-	}
+	BuildStandardConfigSimple(config, DefaultKimiAPIBase, DefaultKimiModel)
 
 	return &KimiLLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -35,7 +35,7 @@ func (k *KimiLLM) Name() string {
 func (k *KimiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.moonshot.cn/v1",
+			DefaultValue:  DefaultKimiAPIBase,
 			PromptMessage: "Enter Kimi API base",
 		},
 		"api_key": {
@@ -43,7 +43,7 @@ func (k *KimiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "moonshot-v1-8k",
+			DefaultValue:  DefaultKimiModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {
