@@ -5,7 +5,11 @@
       "Bash(ruff format:*)",
       "Bash(staticcheck:*)",
       "Bash(go build:*)",
-      "Bash(go test:*)"
+      "Bash(go test:*)",
+      "Bash(find:*)",
+      "Bash(ls -la:*)",
+      "Bash(ls -l:*)",
+      "Bash(wc:*)"
     ]
   }
 }
