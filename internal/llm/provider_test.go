@@ -149,7 +149,7 @@ func TestRegisterProvider(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Reset providers before each test
-			providers = make(map[string]ProviderConstructor)
+			ResetRegistry()
 
 			err := RegisterProvider(tt.provider, tt.constructor)
 			if tt.wantErr {
@@ -165,7 +165,7 @@ func TestRegisterProvider(t *testing.T) {
 
 func TestNewProvider(t *testing.T) {
 	// Reset providers before test
-	providers = make(map[string]ProviderConstructor)
+	ResetRegistry()
 
 	// Register a mock provider
 	err := RegisterProvider("mock", func(config *types.ClientConfig) LLM {
@@ -228,7 +228,7 @@ func TestNewProvider(t *testing.T) {
 
 func TestListProviders(t *testing.T) {
 	// Clear providers
-	providers = make(map[string]ProviderConstructor)
+	ResetRegistry()
 
 	// Register test providers
 	testProviders := []string{"mock1", "mock2", "mock3"}
@@ -249,7 +249,7 @@ func TestListProviders(t *testing.T) {
 
 func TestCreateProvider(t *testing.T) {
 	// Reset providers before test
-	providers = make(map[string]ProviderConstructor)
+	ResetRegistry()
 
 	// Register a mock provider
 	err := RegisterProvider("mock", func(config *types.ClientConfig) LLM {

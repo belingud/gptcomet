@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -39,6 +40,10 @@ func NewVertexLLM(config *types.ClientConfig) *VertexLLM {
 	}
 	if config.AnswerPath == "" {
 		config.AnswerPath = "candidates.0.content.parts.0.text"
+	}
+	// Vertex AI streaming format is the same as non-streaming
+	if config.StreamAnswerPath == "" {
+		config.StreamAnswerPath = "candidates.0.content.parts.0.text"
 	}
 
 	return &VertexLLM{
@@ -83,6 +88,14 @@ func (v *VertexLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 // BuildURL builds the API URL for Vertex AI
 func (v *VertexLLM) BuildURL() string {
 	return fmt.Sprintf("%s/%s", v.Config.APIBase, fmt.Sprintf(*v.Config.CompletionPath, v.Config.Model))
+}
+
+// BuildStreamURL builds the streaming API URL for Vertex AI
+func (v *VertexLLM) BuildStreamURL() string {
+	// Replace :generateContent with :streamGenerateContent for streaming
+	path := fmt.Sprintf(*v.Config.CompletionPath, v.Config.Model)
+	streamPath := strings.ReplaceAll(path, ":generateContent", ":streamGenerateContent")
+	return fmt.Sprintf("%s/%s?alt=sse", v.Config.APIBase, streamPath)
 }
 
 // FormatMessages formats messages for Vertex AI

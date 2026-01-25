@@ -39,6 +39,10 @@ func NewGeminiLLM(config *types.ClientConfig) *GeminiLLM {
 	if config.AnswerPath == "" {
 		config.AnswerPath = "candidates.0.content.parts.0.text"
 	}
+	// Gemini streaming format is the same as non-streaming
+	if config.StreamAnswerPath == "" {
+		config.StreamAnswerPath = "candidates.0.content.parts.0.text"
+	}
 
 	return &GeminiLLM{
 		BaseLLM: NewBaseLLM(config),
@@ -109,9 +113,9 @@ func (g *GeminiLLM) BuildURL() string {
 	return fmt.Sprintf("%s/%s:generateContent?key=%s", strings.TrimSuffix(g.Config.APIBase, "/"), g.Config.Model, g.Config.APIKey)
 }
 
-// BuildURL builds the API URL
+// BuildStreamURL builds the streaming API URL with SSE format
 func (g *GeminiLLM) BuildStreamURL() string {
-	return fmt.Sprintf("%s/%s:streamGenerateContent?key=%s", strings.TrimSuffix(g.Config.APIBase, "/"), g.Config.Model, g.Config.APIKey)
+	return fmt.Sprintf("%s/%s:streamGenerateContent?alt=sse&key=%s", strings.TrimSuffix(g.Config.APIBase, "/"), g.Config.Model, g.Config.APIKey)
 }
 
 // BuildHeaders builds request headers

@@ -31,6 +31,10 @@ func NewOllamaLLM(config *types.ClientConfig) *OllamaLLM {
 	if config.Model == "" {
 		config.Model = "llama2"
 	}
+	// Ollama uses NDJSON format, not SSE. Stream response format: {"response":"text","done":false}
+	if config.StreamAnswerPath == "" {
+		config.StreamAnswerPath = "response"
+	}
 
 	return &OllamaLLM{
 		BaseLLM: NewBaseLLM(config),

@@ -24,6 +24,11 @@ type CohereLLM struct {
 func NewCohereLLM(config *types.ClientConfig) *CohereLLM {
 	BuildStandardConfigSimple(config, DefaultCohereAPIBase, DefaultCohereModel)
 
+	// Cohere streaming format: delta.message.content.text
+	if config.StreamAnswerPath == "" {
+		config.StreamAnswerPath = "delta.message.content.text"
+	}
+
 	return &CohereLLM{
 		OpenAILLM: NewOpenAILLM(config),
 	}

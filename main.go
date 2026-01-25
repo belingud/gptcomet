@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/belingud/gptcomet/cmd"
-	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -39,10 +39,14 @@ func main() {
 		Version:      version,
 		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			debug.Enable(debugEnabled)
-			debug.Printf("Debug mode enabled")
+			if debugEnabled {
+				logger.SetLevel(logger.DebugLevel)
+				logger.Debug("Debug mode enabled")
+			} else {
+				logger.SetLevel(logger.InfoLevel)
+			}
 			if configPath != "" {
-				debug.Printf("Using config file: %s", configPath)
+				logger.Debug("Using config file: %s", configPath)
 			}
 		},
 	}

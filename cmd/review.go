@@ -8,9 +8,9 @@ import (
 
 	"github.com/belingud/gptcomet/internal/client"
 	"github.com/belingud/gptcomet/internal/config"
-	"github.com/belingud/gptcomet/internal/debug"
 	"github.com/belingud/gptcomet/internal/factory"
 	"github.com/belingud/gptcomet/internal/git"
+	"github.com/belingud/gptcomet/internal/logger"
 	"github.com/belingud/gptcomet/internal/ui"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -181,7 +181,7 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 	}
 
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
-	debug.Printf("Generating streaming review comment for diff length: %d\n", len(diff))
+	logger.Debug("Generating streaming review comment for diff length: %d", len(diff))
 
 	fmt.Println(formatRemindMessage("Reviewing, streaming results as they arrive..."))
 
@@ -223,7 +223,7 @@ func (s *ReviewService) getStagedDiff() (string, error) {
 	}
 
 	diff, err := s.vcs.GetStagedDiffFiltered(s.options.RepoPath, s.cfgManager)
-	debug.Printf("Got staged diff length: %d\n", len(diff))
+	logger.Debug("Got staged diff length: %d", len(diff))
 	if err != nil {
 		return "", fmt.Errorf("failed to get diff: %w", err)
 	}
@@ -252,7 +252,7 @@ func (s *ReviewService) generateReviewComment(diff string) (string, error) {
 	}
 
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
-	debug.Printf("Generating review comment for diff length: %d\n", len(diff))
+	logger.Debug("Generating review comment for diff length: %d", len(diff))
 
 	fmt.Println(formatRemindMessage("Reviwing, may take a few seconds, you can set --stream/-s to stream the results..."))
 	comment, err := s.client.GenerateReviewComment(diff, prompt)
@@ -280,12 +280,12 @@ func (s *ReviewService) getConfiguredMarkdownTheme() string {
 
 	markdownTheme, ok := markdownThemeValue.(string)
 	if !ok {
-		debug.Printf("Invalid markdown theme type %T, using default", markdownThemeValue)
+		logger.Debug("Invalid markdown theme type %T, using default", markdownThemeValue)
 		return styles.AutoStyle
 	}
 
 	if markdownTheme == "" {
-		debug.Printf("Empty markdown theme configured, using default")
+		logger.Debug("Empty markdown theme configured, using default")
 		return styles.AutoStyle
 	}
 
@@ -296,7 +296,7 @@ func (s *ReviewService) getConfiguredMarkdownTheme() string {
 func (s *ReviewService) getConfiguredReviewLanguage() (string, error) {
 	reviewLangValue, ok := s.cfgManager.Get(REVIEW_LANG_KEY)
 	if !ok {
-		debug.Printf("No review language configured, using default '%s'", defaultReviewLanguage)
+		logger.Debug("No review language configured, using default '%s'", defaultReviewLanguage)
 		return config.OutputLanguageMap[defaultReviewLanguage], nil
 	}
 
@@ -306,7 +306,7 @@ func (s *ReviewService) getConfiguredReviewLanguage() (string, error) {
 	}
 
 	if reviewLang == "" {
-		debug.Printf("Empty review language configured, using default '%s'", defaultReviewLanguage)
+		logger.Debug("Empty review language configured, using default '%s'", defaultReviewLanguage)
 		return config.OutputLanguageMap[defaultReviewLanguage], nil
 	}
 

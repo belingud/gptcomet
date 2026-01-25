@@ -1,43 +1,9 @@
 package llm
 
 import (
-	"fmt"
-	"sort"
-
 	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/pkg/types"
 )
-
-// ProviderConstructor is a function that creates a new LLM instance
-type ProviderConstructor func(config *types.ClientConfig) LLM
-
-var (
-	// providers Stores all registered LLM providers
-	providers = make(map[string]ProviderConstructor)
-)
-
-// RegisterProvider registers a new LLM provider constructor
-func RegisterProvider(name string, constructor ProviderConstructor) error {
-	if name == "" {
-		return fmt.Errorf("provider name cannot be empty")
-	}
-	if constructor == nil {
-		return fmt.Errorf("constructor cannot be nil")
-	}
-
-	providers[name] = constructor
-	return nil
-}
-
-// GetProviders returns a list of all registered providers
-func GetProviders() []string {
-	names := make([]string, 0, len(providers))
-	for name := range providers {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
-}
 
 // NewProvider creates a new LLM provider instance based on the given provider name and configuration.
 // It returns an LLM interface and an error if any occurs during the creation process.
@@ -62,7 +28,7 @@ func NewProvider(providerName string, config *types.ClientConfig) (LLM, error) {
 		)
 	}
 
-	constructor, ok := providers[providerName]
+	constructor, ok := GetProviderConstructor(providerName)
 	if !ok {
 		return &DefaultLLM{}, nil
 	}
@@ -85,9 +51,9 @@ func CreateProvider(config *types.ClientConfig) (LLM, error) {
 	if providerName == "" {
 		providerName = "openai"
 	}
-	constructor, ok := providers[providerName]
+	constructor, ok := GetProviderConstructor(providerName)
 	if !ok {
-		constructor = providers["openai"]
+		constructor, _ = GetProviderConstructor("openai")
 	}
 
 	return constructor(config), nil

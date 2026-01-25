@@ -130,6 +130,15 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	apiBase := defaults.DefaultAPIBase
 	if base, ok := providerConfig["api_base"].(string); ok {
 		apiBase = base
+	} else if provider == "ollama" {
+		// Ollama uses local default
+		apiBase = "http://localhost:11434/api"
+	} else if provider == "gemini" {
+		// Gemini API endpoint
+		apiBase = "https://generativelanguage.googleapis.com/v1beta/models"
+	} else if provider == "vertex" {
+		// Vertex AI uses project-specific endpoint, but we'll use a default
+		apiBase = "https://us-central1-aiplatform.googleapis.com/v1"
 	}
 
 	model := defaults.DefaultModel

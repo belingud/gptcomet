@@ -14,16 +14,40 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 
 	"golang.org/x/net/proxy"
 
-	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/constants"
 	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/llm"
+	"github.com/belingud/gptcomet/internal/logger"
 	"github.com/belingud/gptcomet/pkg/types"
+	"github.com/tidwall/gjson"
 )
+
+// sanitizeURLForLogging returns a sanitized version of the URL for logging purposes.
+// For gemini/vertex providers, it strips query parameters to avoid logging sensitive data like API keys.
+// For other providers, it returns the URL as-is.
+func sanitizeURLForLogging(provider string, rawURL string) string {
+	if provider != "gemini" && provider != "vertex" {
+		return rawURL
+	}
+
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		// If parsing fails, return the original URL as a fallback
+		return rawURL
+	}
+
+	// Remove query parameters and fragment
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+
+	return parsed.String()
+}
 
 type ClientInterface interface {
 	Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error)
@@ -65,20 +89,19 @@ func New(config *types.ClientConfig) (*Client, error) {
 func (c *Client) Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error) {
 	client, err := c.getClient()
 	if err != nil {
-		debug.Printf("❌ Get client failed: %v", err)
+		logger.Error("Get client failed: %v", err)
 		return nil, err
 	}
 
-	debug.Printf("🔌 Using proxy: %s", c.config.Proxy)
+	logger.Debug("Using proxy: %s", c.config.Proxy)
 
 	var lastErr error
-	baseDelay := 500 * time.Millisecond
 	maxRetries := c.config.Retries
 
 	for i := 0; i < maxRetries; i++ {
 		content, err := c.llm.MakeRequest(ctx, client, message, false)
 		if err == nil {
-			debug.Printf("✅ Request succeeded after %d retries", i)
+			logger.Debug("Request succeeded after %d retries", i)
 			return &types.CompletionResponse{
 				Content: content,
 				Raw:     make(map[string]interface{}),
@@ -86,7 +109,7 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 		}
 
 		lastErr = err
-		fmt.Printf("⚠️ Request failed (attempt %d/%d): %v\n", i+1, maxRetries, err)
+		logger.Warn("Request failed (attempt %d/%d): %v", i+1, maxRetries, err)
 
 		// Don't retry on context cancellation or deadline exceeded
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
@@ -95,11 +118,11 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 
 		// Exponential backoff with jitter
 		if i < maxRetries {
-			delay := time.Duration(float64(baseDelay) * math.Pow(2, float64(i)))
-			jitter := time.Duration(rand.Int63n(int64(delay / 2))) // Add up to 50% jitter
+			delay := time.Duration(float64(constants.BaseRetryDelay) * math.Pow(2, float64(i)))
+			jitter := time.Duration(rand.Int63n(int64(float64(delay) * constants.MaxJitterPercent)))
 			sleepDuration := delay + jitter
 
-			fmt.Printf("⏳ Retrying in %v...\n", sleepDuration)
+			logger.Info("Retrying in %v...", sleepDuration)
 			time.Sleep(sleepDuration)
 		}
 	}
@@ -109,24 +132,19 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 
 // createProxyTransport creates an http.Transport with proxy settings based on the configuration
 func (c *Client) createProxyTransport() (*http.Transport, error) {
-	debug.Printf("Starting proxy configuration with URL: %s", c.config.Proxy)
-	var (
-		MaxIdleConns       = 100
-		IdleConnTimeout    = 90 * time.Second
-		DisableCompression = true
-	)
+	logger.Debug("Starting proxy configuration with URL: %s", c.config.Proxy)
 
 	// Return default transport if no proxy configured
 	if c.config.Proxy == "" {
-		debug.Printf("No proxy configured, using direct connection")
+		logger.Debug("No proxy configured, using direct connection")
 		return &http.Transport{
-			MaxIdleConns:       MaxIdleConns,
-			IdleConnTimeout:    IdleConnTimeout,
-			DisableCompression: DisableCompression,
+			MaxIdleConns:       constants.MaxIdleConns,
+			IdleConnTimeout:    constants.IdleConnTimeout,
+			DisableCompression: constants.DisableCompression,
 		}, nil
 	}
 
-	fmt.Printf("Using proxy: %s\n", c.config.Proxy)
+	logger.Info("Using proxy: %s", c.config.Proxy)
 
 	proxyURL, err := url.Parse(c.config.Proxy)
 	if err != nil {
@@ -134,13 +152,13 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 	}
 
 	switch proxyURL.Scheme {
-	case "http", "https":
-		debug.Printf("Configuring HTTP/HTTPS proxy: %s", proxyURL.String())
+	case constants.ProxySchemeHTTP, constants.ProxySchemeHTTPS:
+		logger.Debug("Configuring HTTP/HTTPS proxy: %s", proxyURL.String())
 		transport := &http.Transport{
 			Proxy:              http.ProxyURL(proxyURL),
-			MaxIdleConns:       MaxIdleConns,
-			IdleConnTimeout:    IdleConnTimeout,
-			DisableCompression: DisableCompression,
+			MaxIdleConns:       constants.MaxIdleConns,
+			IdleConnTimeout:    constants.IdleConnTimeout,
+			DisableCompression: constants.DisableCompression,
 		}
 
 		// Add proxy authentication if provided
@@ -150,17 +168,17 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 
 			if hasPassword {
 				auth := username + ":" + password
-				basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+				basicAuth := constants.BasicPrefix + base64.StdEncoding.EncodeToString([]byte(auth))
 				transport.ProxyConnectHeader = http.Header{
-					"Proxy-Authorization": []string{basicAuth},
+					constants.HeaderProxyAuthorization: []string{basicAuth},
 				}
-				debug.Printf("Added proxy authentication for user: %s", username)
+				logger.Debug("Added proxy authentication for user: %s", username)
 			}
 		}
 		return transport, nil
 
-	case "socks5":
-		debug.Printf("Configuring SOCKS5 proxy: %s", proxyURL.String())
+	case constants.ProxySchemeSocks5:
+		logger.Debug("Configuring SOCKS5 proxy: %s", proxyURL.String())
 
 		// Configure SOCKS5 authentication
 		var auth *proxy.Auth
@@ -181,12 +199,12 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 
 		return &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				debug.Printf("Attempting SOCKS5 connection to: %s", addr)
+				logger.Debug("Attempting SOCKS5 connection to: %s", addr)
 				return dialer.Dial(network, addr)
 			},
-			MaxIdleConns:       MaxIdleConns,
-			IdleConnTimeout:    IdleConnTimeout,
-			DisableCompression: DisableCompression,
+			MaxIdleConns:       constants.MaxIdleConns,
+			IdleConnTimeout:    constants.IdleConnTimeout,
+			DisableCompression: constants.DisableCompression,
 		}, nil
 
 	default:
@@ -199,7 +217,7 @@ func (c *Client) getClient() (*http.Client, error) {
 	// Create a transport with proxy if configured
 	transport, err := c.createProxyTransport()
 	if err != nil {
-		debug.Printf("❌ Create proxy transport failed: %v", err)
+		logger.Error("Create proxy transport failed: %v", err)
 		return nil, err
 	}
 
@@ -284,9 +302,22 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 		return gptErrors.MessageFormattingError(err)
 	}
 
-	// Set stream to true for streaming response
-	if payloadMap, ok := payload.(map[string]interface{}); ok {
-		payloadMap["stream"] = true
+	// Check if provider has a custom streaming URL method (e.g., Gemini)
+	// If it does, use that URL instead of adding "stream" to the payload
+	url := ""
+	if buildStreamURLMethod := reflect.ValueOf(c.llm).MethodByName("BuildStreamURL"); buildStreamURLMethod.IsValid() {
+		// Provider has custom streaming URL (e.g., Gemini uses :streamGenerateContent)
+		results := buildStreamURLMethod.Call(nil)
+		if len(results) > 0 && results[0].Kind() == reflect.String {
+			url = results[0].String()
+			logger.Debug("Using provider's custom streaming URL")
+		}
+	} else {
+		// Provider doesn't have custom streaming URL, use standard URL and add "stream" param
+		url = c.llm.BuildURL()
+		if payloadMap, ok := payload.(map[string]interface{}); ok {
+			payloadMap["stream"] = true
+		}
 	}
 
 	// Marshal the payload
@@ -295,9 +326,7 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 		return gptErrors.RequestMarshalingError(err)
 	}
 
-	// Build the URL and headers
-	url := c.llm.BuildURL()
-	debug.Printf("🔗 URL: %s", url)
+	logger.Debug("Request URL: %s", sanitizeURLForLogging(c.config.Provider, url))
 	headers := c.llm.BuildHeaders()
 
 	// Create the request
@@ -311,7 +340,7 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 		req.Header.Set(k, v)
 	}
 
-	fmt.Printf("📤 Sending streaming request to %s...\n", c.llm.Name())
+	logger.Info("Sending streaming request to %s...", c.llm.Name())
 
 	// Send the request
 	resp, err := client.Do(req)
@@ -321,12 +350,12 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 	defer resp.Body.Close()
 
 	// Check the response status
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != constants.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
 		return gptErrors.APIStatusError(resp.StatusCode, string(respBody), nil)
 	}
 
-	debug.Printf("✅ Request succeeded, processing streaming response")
+	logger.Debug("Request succeeded, processing streaming response")
 
 	// Process the streaming response
 	scanner := bufio.NewScanner(resp.Body)
@@ -338,53 +367,82 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 			continue
 		}
 
-		// Check for data prefix
-		if strings.HasPrefix(line, "data: ") {
-			// Extract the data
-			data := strings.TrimPrefix(line, "data: ")
+		// Check for data prefix - handle both "data: " and "data:" formats (SSE)
+		// If line doesn't start with "data:", treat it as NDJSON (Ollama format)
+		var data string
+		if strings.HasPrefix(line, constants.SSEDataPrefix) {
+			// "data: " format (with space)
+			data = strings.TrimPrefix(line, constants.SSEDataPrefix)
+		} else if strings.HasPrefix(line, "data:") {
+			// "data:" format (without space) - also valid per SSE spec
+			data = strings.TrimPrefix(line, "data:")
+		} else {
+			// Not SSE format, treat as direct JSON (NDJSON format like Ollama)
+			data = line
+		}
 
-			// Check for [DONE] message
-			if data == "[DONE]" {
-				// Send a newline before breaking to avoid % prompt appearing right after output
-				callback(&types.CompletionResponse{
-					Content: "\n",
-					Raw:     make(map[string]interface{}),
-				})
-				break
-			}
-
-			// Parse the JSON data
-			var streamResp map[string]interface{}
-			if err := json.Unmarshal([]byte(data), &streamResp); err != nil {
-				debug.Printf("Error parsing SSE data: %v", err)
-				continue
-			}
-
-			// Extract the content using the provider's answer path
-			content := ""
-			if choices, ok := streamResp["choices"].([]interface{}); ok && len(choices) > 0 {
-				if choice, ok := choices[0].(map[string]interface{}); ok {
-					if delta, ok := choice["delta"].(map[string]interface{}); ok {
-						if c, ok := delta["content"].(string); ok {
-							content = c
-						}
-					}
-				}
-			}
-
-			// Skip empty content
-			if content == "" {
-				continue
-			}
-
-			// Call the callback with the content
-			err := callback(&types.CompletionResponse{
-				Content: content,
-				Raw:     streamResp,
+		// Check for [DONE] message
+		if data == constants.SSEDone {
+			// Send a newline before breaking to avoid % prompt appearing right after output
+			callback(&types.CompletionResponse{
+				Content: "\n",
+				Raw:     make(map[string]interface{}),
 			})
-			if err != nil {
-				return gptErrors.CallbackError(err)
+			break
+		}
+
+		// Parse the JSON data
+		var streamResp map[string]interface{}
+		if err := json.Unmarshal([]byte(data), &streamResp); err != nil {
+			continue
+		}
+
+		// Check for Ollama-specific "done" flag (NDJSON format)
+		if done, ok := streamResp["done"].(bool); ok && done {
+			logger.Debug("Ollama stream finished (done: true)")
+			// Send a newline before breaking to avoid % prompt appearing right after output
+			callback(&types.CompletionResponse{
+				Content: "\n",
+				Raw:     make(map[string]interface{}),
+			})
+			break
+		}
+
+		// Extract the content using the provider's configured stream answer path
+		streamAnswerPath := c.config.StreamAnswerPath
+		if streamAnswerPath == "" {
+			// Fallback: try to convert non-streaming path to streaming path
+			// For OpenAI-compatible: "choices.0.message.content" -> "choices.0.delta.content"
+			streamAnswerPath = c.config.AnswerPath
+			if strings.Contains(streamAnswerPath, "message") {
+				streamAnswerPath = strings.Replace(streamAnswerPath, "message", "delta", 1)
+			} else {
+				// If conversion fails, use OpenAI default
+				streamAnswerPath = "choices.0.delta.content"
 			}
+		}
+
+		// Use gjson to extract the content
+		content := gjson.GetBytes([]byte(data), streamAnswerPath).String()
+
+		// For Ollama: if response is empty, try thinking field (some models output thinking process)
+		if content == "" && c.config.Provider == "ollama" {
+			content = gjson.GetBytes([]byte(data), "thinking").String()
+		}
+
+		// Skip empty content
+		if content == "" {
+			logger.Debug("Empty content from stream chunk")
+			continue
+		}
+
+		// Call the callback with the content
+		err := callback(&types.CompletionResponse{
+			Content: content,
+			Raw:     streamResp,
+		})
+		if err != nil {
+			return gptErrors.CallbackError(err)
 		}
 	}
 
