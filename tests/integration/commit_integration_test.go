@@ -32,7 +32,7 @@ func TestGitRepositoryInitialization(t *testing.T) {
 
 	// Verify we can get diff (indicates valid repo)
 	// Git doesn't have IsRepo method, we verify by attempting operations
-	_, err = vcs.GetDiff(repoPath)
+	_, _ = vcs.GetDiff(repoPath)
 	// Empty repo may return empty diff without error
 }
 
