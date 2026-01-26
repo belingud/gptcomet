@@ -160,7 +160,7 @@ func TestNewCommitService(t *testing.T) {
 				ConfigPath: "/nonexistent/config.yaml",
 			},
 			wantErr:     true,
-			errContains: "failed to create config manager",
+			errContains: "Dependency Creation Failed",
 		},
 	}
 

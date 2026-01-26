@@ -39,7 +39,7 @@ openai:
   api_key: [invalid
 `,
 			wantErr:     true,
-			errContains: "failed to parse config file",
+			errContains: "Failed to load config",
 		},
 	}
 
@@ -206,14 +206,14 @@ func TestManager_GetClientConfig(t *testing.T) {
 			configData:   `{}`,
 			initProvider: "",
 			wantErr:      true,
-			errContains:  "provider not set",
+			errContains:  "Provider not set",
 		},
 		{
 			name:         "Provider config not found",
 			configData:   `{"provider": "openai"}`,
 			initProvider: "",
 			wantErr:      true,
-			errContains:  "provider config not found",
+			errContains:  "Provider config not found",
 		},
 		{
 			name:         "API key not found",
@@ -457,7 +457,7 @@ openai:
 `,
 			initProvider: "",
 			wantErr:      true,
-			errContains:  "failed to parse extra_headers",
+			errContains:  "Failed to parse extra_headers",
 		},
 		{
 			name: "Extra body - valid JSON",
@@ -501,7 +501,7 @@ openai:
 `,
 			initProvider: "",
 			wantErr:      true,
-			errContains:  "failed to parse extra_body",
+			errContains:  "Failed to parse extra_body",
 		},
 		{
 			name: "All configuration options",

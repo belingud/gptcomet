@@ -8,7 +8,10 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
-var DefaultOpenrouterModel = "meta-llama/llama-3.1-70b-instruct:free"
+const (
+	DefaultOpenRouterAPIBase = "https://openrouter.ai/api/v1"
+	DefaultOpenRouterModel   = "meta-llama/llama-3.1-70b-instruct:free"
+)
 
 // OpenRouterLLM implements the LLM interface for OpenRouter
 type OpenRouterLLM struct {
@@ -17,20 +20,7 @@ type OpenRouterLLM struct {
 
 // NewOpenRouterLLM creates a new OpenRouterLLM
 func NewOpenRouterLLM(config *types.ClientConfig) *OpenRouterLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://openrouter.ai/api/v1"
-	}
-	if config.Model == "" {
-		config.Model = DefaultOpenrouterModel
-	}
-
-	if config.CompletionPath == nil {
-		completionPath := "chat/completions"
-		config.CompletionPath = &completionPath
-	}
-	if config.AnswerPath == "" {
-		config.AnswerPath = "choices.0.message.content"
-	}
+	BuildStandardConfigSimple(config, DefaultOpenRouterAPIBase, DefaultOpenRouterModel)
 
 	return &OpenRouterLLM{
 		BaseLLM: NewBaseLLM(config),
@@ -45,7 +35,7 @@ func (o *OpenRouterLLM) Name() string {
 func (o *OpenRouterLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://openrouter.ai/api/v1",
+			DefaultValue:  DefaultOpenRouterAPIBase,
 			PromptMessage: "Enter OpenRouter API base",
 		},
 		"api_key": {
@@ -53,7 +43,7 @@ func (o *OpenRouterLLM) GetRequiredConfig() map[string]config.ConfigRequirement 
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  DefaultOpenrouterModel,
+			DefaultValue:  DefaultOpenRouterModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

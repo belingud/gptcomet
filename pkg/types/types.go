@@ -42,6 +42,7 @@ type ClientConfig struct {
 	Model             string                 `json:"model"`
 	CompletionPath    *string                `json:"completion_path,omitempty"`
 	AnswerPath        string                 `json:"answer_path,omitempty"`
+	StreamAnswerPath  string                 `json:"stream_answer_path,omitempty"` // Path for streaming responses
 	MaxTokens         int                    `json:"max_tokens"`
 	Temperature       float64                `json:"temperature"`
 	TopP              float64                `json:"top_p"`

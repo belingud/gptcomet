@@ -8,6 +8,11 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const (
+	DefaultMinimaxAPIBase = "https://api.minimaxi.com/v1"
+	DefaultMinimaxModel   = "MiniMax-M1"
+)
+
 // MinimaxLLM implements the LLM interface for Minimax
 type MinimaxLLM struct {
 	*BaseLLM
@@ -15,22 +20,10 @@ type MinimaxLLM struct {
 
 // NewMinimaxLLM creates a new MinimaxLLM
 func NewMinimaxLLM(config *types.ClientConfig) *MinimaxLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.minimaxi.com/v1"
-	}
-	if config.Model == "" {
-		config.Model = "MiniMax-M1"
-	}
+	BuildStandardConfigSimple(config, DefaultMinimaxAPIBase, DefaultMinimaxModel)
+
 	if config.MaxTokens == 0 {
 		config.MaxTokens = 1024
-	}
-
-	if config.CompletionPath == nil {
-		defaultPath := "chat/completions"
-		config.CompletionPath = &defaultPath
-	}
-	if config.AnswerPath == "" {
-		config.AnswerPath = "choices.0.message.content"
 	}
 
 	return &MinimaxLLM{
@@ -46,7 +39,7 @@ func (d *MinimaxLLM) Name() string {
 func (d *MinimaxLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.minimaxi.com/v1",
+			DefaultValue:  DefaultMinimaxAPIBase,
 			PromptMessage: "Enter Minimax API base",
 		},
 		"api_key": {
@@ -54,7 +47,7 @@ func (d *MinimaxLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "MiniMax-M1",
+			DefaultValue:  DefaultMinimaxModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

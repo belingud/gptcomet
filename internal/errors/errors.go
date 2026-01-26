@@ -14,6 +14,7 @@ const (
 	ErrTypeGit        ErrorType = "git"
 	ErrTypeAPI        ErrorType = "api"
 	ErrTypeValidation ErrorType = "validation"
+	ErrTypeUnknown    ErrorType = "unknown"
 )
 
 // GPTCometError is a structured error type that provides detailed error information
@@ -58,6 +59,19 @@ func (e *GPTCometError) Error() string {
 // Unwrap returns the underlying cause
 func (e *GPTCometError) Unwrap() error {
 	return e.Cause
+}
+
+// WrapError creates a new GPTCometError wrapping an existing error
+func WrapError(err error, title, message string) *GPTCometError {
+	if err == nil {
+		return nil
+	}
+	return &GPTCometError{
+		Type:    ErrTypeUnknown,
+		Title:   title,
+		Message: message,
+		Cause:   err,
+	}
 }
 
 // Helper functions to create specific error types
@@ -135,6 +149,8 @@ func getErrorIcon(errorType ErrorType) string {
 		return "🔑"
 	case ErrTypeValidation:
 		return "⚠️"
+	case ErrTypeUnknown:
+		return "❓"
 	default:
 		return "❌"
 	}

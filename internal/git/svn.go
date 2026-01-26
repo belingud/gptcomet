@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/config"
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 )
 
 // SVNVCS implements the VCS interface for SVN
@@ -203,7 +204,8 @@ func (s *SVNVCS) runCommand(cmd *exec.Cmd, repoPath string) (string, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("command failed: %w\nOutput: %s", err, stderr.String())
+		cmdStr := fmt.Sprintf("svn %v", cmd.Args[1:])
+		return "", gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
 	}
 
 	return stdout.String(), nil

@@ -8,6 +8,11 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const (
+	DefaultMistralAPIBase = "https://api.mistral.ai/v1"
+	DefaultMistralModel   = "mistral-large-latest"
+)
+
 // MistralLLM implements the LLM interface for Mistral
 type MistralLLM struct {
 	*BaseLLM
@@ -15,12 +20,8 @@ type MistralLLM struct {
 
 // NewMistralLLM creates a new MistralLLM
 func NewMistralLLM(config *types.ClientConfig) *MistralLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.mistral.ai/v1"
-	}
-	if config.Model == "" {
-		config.Model = "mistral-large-latest"
-	}
+	BuildStandardConfigSimple(config, DefaultMistralAPIBase, DefaultMistralModel)
+
 	return &MistralLLM{
 		BaseLLM: NewBaseLLM(config),
 	}
@@ -34,11 +35,11 @@ func (m *MistralLLM) Name() string {
 func (m *MistralLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.mistral.ai/v1",
+			DefaultValue:  DefaultMistralAPIBase,
 			PromptMessage: "Enter Mistral API base",
 		},
 		"model": {
-			DefaultValue:  "mistral-large-latest",
+			DefaultValue:  DefaultMistralModel,
 			PromptMessage: "Enter model name",
 		},
 		"api_key": {

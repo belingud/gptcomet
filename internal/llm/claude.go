@@ -32,6 +32,10 @@ func NewClaudeLLM(config *types.ClientConfig) *ClaudeLLM {
 	if config.AnswerPath == "" {
 		config.AnswerPath = "content.0.text"
 	}
+	if config.StreamAnswerPath == "" {
+		// Claude streaming format: {"type":"content_block_delta","delta":{"type":"text_delta","text":"..."}}
+		config.StreamAnswerPath = "delta.text"
+	}
 	if config.AnthropicVersion == "" {
 		config.AnthropicVersion = "2024-01-01"
 	}

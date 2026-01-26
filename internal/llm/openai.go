@@ -11,6 +11,11 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const (
+	DefaultOpenAIAPIBase = "https://api.openai.com/v1"
+	DefaultOpenAIModel   = "gpt-4o"
+)
+
 // OpenAILLM implements the LLM interface for OpenAI
 type OpenAILLM struct {
 	*BaseLLM
@@ -18,12 +23,8 @@ type OpenAILLM struct {
 
 // NewOpenAILLM creates a new OpenAILLM
 func NewOpenAILLM(config *types.ClientConfig) *OpenAILLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.openai.com/v1"
-	}
-	if config.Model == "" {
-		config.Model = "gpt-4o"
-	}
+	BuildStandardConfigSimple(config, DefaultOpenAIAPIBase, DefaultOpenAIModel)
+
 	return &OpenAILLM{
 		BaseLLM: NewBaseLLM(config),
 	}
@@ -37,11 +38,11 @@ func (o *OpenAILLM) Name() string {
 func (o *OpenAILLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.openai.com/v1",
+			DefaultValue:  DefaultOpenAIAPIBase,
 			PromptMessage: "Enter OpenAI API base URL",
 		},
 		"model": {
-			DefaultValue:  "gpt-4o",
+			DefaultValue:  DefaultOpenAIModel,
 			PromptMessage: "Enter model name",
 		},
 		"api_key": {

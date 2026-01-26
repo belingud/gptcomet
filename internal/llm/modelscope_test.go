@@ -29,7 +29,7 @@ func TestNewModelScopeLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://api-inference.modelscope.cn/v1",
-				model:          DEFAULT_MODELSCOPE_MODEL,
+				model:          DefaultModelScopeModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -103,7 +103,7 @@ func TestModelScopeLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api-inference.modelscope.cn/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != DEFAULT_MODELSCOPE_MODEL {
+	if got["model"].DefaultValue != DefaultModelScopeModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

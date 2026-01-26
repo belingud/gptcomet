@@ -33,7 +33,7 @@ func TestNewReviewService(t *testing.T) {
 			name:        "invalid_config_path",
 			setupMocks:  func(vcs *MockVCS, cfg *testutils.MockConfigManager) {},
 			wantErr:     true,
-			errContains: "does not exist",
+			errContains: "Dependency Creation Failed",
 		},
 	}
 

@@ -8,8 +8,9 @@ import (
 
 	"github.com/belingud/gptcomet/internal/client"
 	"github.com/belingud/gptcomet/internal/config"
-	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/factory"
 	"github.com/belingud/gptcomet/internal/git"
+	"github.com/belingud/gptcomet/internal/logger"
 	"github.com/belingud/gptcomet/internal/ui"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -22,22 +23,11 @@ import (
 
 // ReviewOptions contains the configuration settings for the review operation.
 type ReviewOptions struct {
-	RepoPath         string
-	UseSVN           bool
-	ConfigPath       string
-	Stream           bool
-	APIBase          string
-	APIKey           string
-	MaxTokens        int
-	Retries          int
-	Model            string
-	AnswerPath       string
-	CompletionPath   string
-	Proxy            string
-	FrequencyPenalty float64
-	Temperature      float64
-	TopP             float64
-	Provider         string
+	CommonOptions
+	RepoPath   string
+	UseSVN     bool
+	ConfigPath string
+	Stream     bool
 }
 
 // MarkdownRenderer interface for mocking in tests
@@ -68,12 +58,10 @@ const defaultReviewLanguage = "en"
 
 // NewReviewService creates a new ReviewService instance with the provided options.
 func NewReviewService(options ReviewOptions) (*ReviewService, error) {
-	vcs, cfgManager, err := createServiceDependencies(struct {
-		UseSVN     bool
-		ConfigPath string
-	}{
+	vcs, cfgManager, err := factory.NewServiceDependencies(factory.ServiceOptions{
 		UseSVN:     options.UseSVN,
 		ConfigPath: options.ConfigPath,
+		Provider:   options.Provider,
 	})
 	if err != nil {
 		return nil, err
@@ -85,43 +73,16 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 	}
 
 	// Overwrite client config with command line flags
-	if options.APIBase != "" {
-		clientConfig.APIBase = options.APIBase
-	}
-	if options.APIKey != "" {
-		clientConfig.APIKey = options.APIKey
-	}
-	if options.MaxTokens > 0 {
-		clientConfig.MaxTokens = options.MaxTokens
-	}
-	if options.Retries > 0 {
-		clientConfig.Retries = options.Retries
-	}
-	if options.Model != "" {
-		clientConfig.Model = options.Model
-	}
-	if options.AnswerPath != "" {
-		clientConfig.AnswerPath = options.AnswerPath
-	}
-	if options.CompletionPath != "" {
-		clientConfig.CompletionPath = &options.CompletionPath
-	}
-	if options.Proxy != "" {
-		clientConfig.Proxy = options.Proxy
-	}
-	if options.FrequencyPenalty != 0 {
-		clientConfig.FrequencyPenalty = options.FrequencyPenalty
-	}
-	if options.Temperature != 0 {
-		clientConfig.Temperature = options.Temperature
-	}
-	if options.TopP != 0 {
-		clientConfig.TopP = options.TopP
+	ApplyCommonOptions(&options.CommonOptions, clientConfig)
+
+	apiClient, err := client.New(clientConfig)
+	if err != nil {
+		return nil, err
 	}
 
 	return &ReviewService{
 		vcs:              vcs,
-		client:           client.New(clientConfig),
+		client:           apiClient,
 		cfgManager:       cfgManager,
 		options:          options,
 		editor:           &TerminalEditor{},
@@ -220,7 +181,7 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 	}
 
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
-	debug.Printf("Generating streaming review comment for diff length: %d\n", len(diff))
+	logger.Debug("Generating streaming review comment for diff length: %d", len(diff))
 
 	fmt.Println(formatRemindMessage("Reviewing, streaming results as they arrive..."))
 
@@ -262,7 +223,7 @@ func (s *ReviewService) getStagedDiff() (string, error) {
 	}
 
 	diff, err := s.vcs.GetStagedDiffFiltered(s.options.RepoPath, s.cfgManager)
-	debug.Printf("Got staged diff length: %d\n", len(diff))
+	logger.Debug("Got staged diff length: %d", len(diff))
 	if err != nil {
 		return "", fmt.Errorf("failed to get diff: %w", err)
 	}
@@ -291,7 +252,7 @@ func (s *ReviewService) generateReviewComment(diff string) (string, error) {
 	}
 
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
-	debug.Printf("Generating review comment for diff length: %d\n", len(diff))
+	logger.Debug("Generating review comment for diff length: %d", len(diff))
 
 	fmt.Println(formatRemindMessage("Reviwing, may take a few seconds, you can set --stream/-s to stream the results..."))
 	comment, err := s.client.GenerateReviewComment(diff, prompt)
@@ -319,12 +280,12 @@ func (s *ReviewService) getConfiguredMarkdownTheme() string {
 
 	markdownTheme, ok := markdownThemeValue.(string)
 	if !ok {
-		debug.Printf("Invalid markdown theme type %T, using default", markdownThemeValue)
+		logger.Debug("Invalid markdown theme type %T, using default", markdownThemeValue)
 		return styles.AutoStyle
 	}
 
 	if markdownTheme == "" {
-		debug.Printf("Empty markdown theme configured, using default")
+		logger.Debug("Empty markdown theme configured, using default")
 		return styles.AutoStyle
 	}
 
@@ -335,7 +296,7 @@ func (s *ReviewService) getConfiguredMarkdownTheme() string {
 func (s *ReviewService) getConfiguredReviewLanguage() (string, error) {
 	reviewLangValue, ok := s.cfgManager.Get(REVIEW_LANG_KEY)
 	if !ok {
-		debug.Printf("No review language configured, using default '%s'", defaultReviewLanguage)
+		logger.Debug("No review language configured, using default '%s'", defaultReviewLanguage)
 		return config.OutputLanguageMap[defaultReviewLanguage], nil
 	}
 
@@ -345,7 +306,7 @@ func (s *ReviewService) getConfiguredReviewLanguage() (string, error) {
 	}
 
 	if reviewLang == "" {
-		debug.Printf("Empty review language configured, using default '%s'", defaultReviewLanguage)
+		logger.Debug("Empty review language configured, using default '%s'", defaultReviewLanguage)
 		return config.OutputLanguageMap[defaultReviewLanguage], nil
 	}
 
@@ -394,24 +355,11 @@ func NewReviewCmd() *cobra.Command {
 	var advancedFlags = pflag.NewFlagSet("Overwrite Flag", pflag.ExitOnError)
 
 	// General Flags
-	generalFlags.StringVarP(&options.RepoPath, "repo", "r", ".", "Path to the repository")
-	generalFlags.BoolVarP(&options.UseSVN, "svn", "v", false, "Use SVN instead of Git")
+	AddGeneralFlags(generalFlags, &options.RepoPath, &options.UseSVN)
 	generalFlags.BoolVarP(&options.Stream, "stream", "s", false, "Stream output as it arrives from the LLM")
-	generalFlags.StringVarP(&options.ConfigPath, "config", "c", "", "Path to the configuration file")
 
-	// Advanced Flags
-	advancedFlags.StringVar(&options.APIBase, "api-base", "", "Override API base URL")
-	advancedFlags.StringVar(&options.APIKey, "api-key", "", "Override API key")
-	advancedFlags.IntVar(&options.MaxTokens, "max-tokens", 0, "Override maximum tokens")
-	advancedFlags.IntVar(&options.Retries, "retries", 0, "Override retry count")
-	advancedFlags.StringVar(&options.Model, "model", "", "Override model name")
-	advancedFlags.StringVar(&options.AnswerPath, "answer-path", "", "Override answer path")
-	advancedFlags.StringVar(&options.CompletionPath, "completion-path", "", "Override completion path")
-	advancedFlags.StringVar(&options.Proxy, "proxy", "", "Override proxy URL")
-	advancedFlags.Float64Var(&options.FrequencyPenalty, "frequency-penalty", 0, "Override frequency penalty")
-	advancedFlags.Float64Var(&options.Temperature, "temperature", 0, "Override temperature")
-	advancedFlags.Float64Var(&options.TopP, "top-p", 0, "Override top_p value")
-	advancedFlags.StringVar(&options.Provider, "provider", "", "Override AI provider (openai/deepseek)")
+	// Advanced API Flags (shared with other commands)
+	AddAdvancedAPIFlags(advancedFlags, &options.CommonOptions)
 
 	// Add flag groups to command
 	cmd.Flags().AddFlagSet(generalFlags)
@@ -419,18 +367,7 @@ func NewReviewCmd() *cobra.Command {
 
 	// Organize flags in help output
 	cmd.Flags().SetInterspersed(false)
-	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		fmt.Println(cmd.Long)
-		fmt.Println("\nUsage:")
-		fmt.Printf("  %s\n", cmd.UseLine())
-		fmt.Println("\nGeneral Flags:")
-		generalFlags.PrintDefaults()
-		fmt.Println("\nOverwrite Flags:")
-		advancedFlags.PrintDefaults()
-		fmt.Println()
-		fmt.Println(`Global Flags:
-  -d, --debug           Enable debug mode`)
-	})
+	SetAdvancedHelpFunc(cmd, generalFlags, advancedFlags)
 
 	return cmd
 }

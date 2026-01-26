@@ -13,18 +13,18 @@ func ConfigFileNotFoundError(configPath string) *GPTCometError {
 	homeDir, _ := os.UserHomeDir()
 	defaultConfigPath := filepath.Join(homeDir, ".config", "gptcomet", "gptcomet.yaml")
 
-	message := fmt.Sprintf("Cannot find configuration file at: %s", configPath)
+	message := fmt.Sprintf(ErrMsgConfigNotFound, configPath)
 	if configPath == "" {
-		message = fmt.Sprintf("Cannot find configuration file at: %s", defaultConfigPath)
+		message = fmt.Sprintf(ErrMsgConfigNotFound, defaultConfigPath)
 	}
 
 	return NewConfigError(
-		"Configuration File Not Found",
+		ErrTitleConfigNotFound,
 		message,
 		nil,
 		[]string{
-			"Run 'gptcomet config init' to create a default configuration",
-			"Run 'gptcomet config path' to see expected config location",
+			SuggInitConfig,
+			SuggCheckConfigPath,
 		},
 	)
 }
@@ -34,13 +34,13 @@ func APIKeyNotSetError(provider string) *GPTCometError {
 	envVar := getAPIKeyEnvVar(provider)
 
 	return NewConfigError(
-		"API Key Not Configured",
-		fmt.Sprintf("Provider '%s' requires an API key, but none was found.", provider),
+		ErrTitleAPIKeyNotSet,
+		fmt.Sprintf(ErrMsgAPIKeyNotSet, provider),
 		nil,
 		[]string{
-			fmt.Sprintf("Set API key: gptcomet config set %s.api_key <your-key>", provider),
-			fmt.Sprintf("Or set env var: export %s=<your-key>", envVar),
-			fmt.Sprintf("Check provider: gptcomet config get %s", provider),
+			fmt.Sprintf(SuggSetAPIKey, provider),
+			fmt.Sprintf(SuggSetEnvVar, envVar),
+			fmt.Sprintf(SuggCheckProvider, provider),
 		},
 	)
 }
@@ -48,13 +48,13 @@ func APIKeyNotSetError(provider string) *GPTCometError {
 // NoStagedChangesError is returned when there are no staged changes to commit
 func NoStagedChangesError() *GPTCometError {
 	return NewGitError(
-		"No Staged Changes Found",
-		"There are no staged changes to generate a commit message for.",
+		ErrTitleNoStagedChanges,
+		ErrMsgNoStagedChanges,
 		nil,
 		[]string{
-			"Stage files: git add <files>",
-			"Check status: git status",
-			"Stage all: git add -A",
+			SuggStageFiles,
+			SuggCheckStatus,
+			SuggStageAll,
 		},
 	)
 }
@@ -62,14 +62,14 @@ func NoStagedChangesError() *GPTCometError {
 // NetworkConnectionError is returned when network connection fails
 func NetworkConnectionError(endpoint string, cause error) *GPTCometError {
 	return NewNetworkError(
-		"Network Connection Failed",
-		fmt.Sprintf("Cannot connect to API endpoint '%s'", endpoint),
+		ErrTitleNetworkConnection,
+		fmt.Sprintf(ErrMsgNetworkConnection, endpoint),
 		cause,
 		[]string{
-			"Check internet connection",
-			fmt.Sprintf("Try: curl -I %s", endpoint),
-			"Check proxy settings: gptcomet config get proxy",
-			"Use --proxy flag to set proxy if needed",
+			SuggCheckInternet,
+			fmt.Sprintf(SuggTryCurl, endpoint),
+			SuggCheckProxy,
+			SuggUseProxyFlag,
 		},
 	)
 }
@@ -77,14 +77,14 @@ func NetworkConnectionError(endpoint string, cause error) *GPTCometError {
 // APIRateLimitError is returned when API rate limit is exceeded
 func APIRateLimitError(statusCode int, cause error) *GPTCometError {
 	return NewAPIError(
-		"API Request Failed",
-		fmt.Sprintf("The API returned an error: %d Rate limit exceeded. Please try again later.", statusCode),
+		ErrTitleAPIRequest,
+		fmt.Sprintf(ErrMsgAPIRateLimit, statusCode),
 		cause,
 		[]string{
-			"Wait a few minutes and retry",
-			"Check your API quota and usage",
-			"Consider upgrading your API plan",
-			"Or use a different provider",
+			SuggWaitRetry,
+			SuggCheckQuota,
+			SuggUpgradePlan,
+			SuggUseDifferentProvider,
 		},
 	)
 }
@@ -92,14 +92,14 @@ func APIRateLimitError(statusCode int, cause error) *GPTCometError {
 // APIAuthenticationError is returned when API authentication fails
 func APIAuthenticationError(provider string, cause error) *GPTCometError {
 	return NewAPIError(
-		"API Authentication Failed",
-		fmt.Sprintf("Authentication with provider '%s' failed. Please check your API key.", provider),
+		ErrTitleAPIAuth,
+		fmt.Sprintf(ErrMsgAPIAuth, provider),
 		cause,
 		[]string{
-			fmt.Sprintf("Verify API key: gptcomet config get %s.api_key", provider),
-			fmt.Sprintf("Set new API key: gptcomet config set %s.api_key <your-key>", provider),
-			"Check if the API key is valid and not expired",
-			"Ensure the API key has the required permissions",
+			fmt.Sprintf(SuggVerifyAPIKey, provider),
+			fmt.Sprintf(SuggSetNewAPIKey, provider),
+			SuggCheckKeyValid,
+			SuggEnsurePermissions,
 		},
 	)
 }
@@ -107,13 +107,13 @@ func APIAuthenticationError(provider string, cause error) *GPTCometError {
 // InvalidConfigValueError is returned when a configuration value is invalid
 func InvalidConfigValueError(key, value, reason string) *GPTCometError {
 	return NewConfigError(
-		"Invalid Configuration Value",
-		fmt.Sprintf("Configuration key '%s' has an invalid value: %s", key, value),
+		ErrTitleInvalidConfig,
+		fmt.Sprintf(ErrMsgInvalidConfig, key, value),
 		nil,
 		[]string{
 			fmt.Sprintf("Reason: %s", reason),
-			fmt.Sprintf("Check current value: gptcomet config get %s", key),
-			fmt.Sprintf("Set a valid value: gptcomet config set %s <valid-value>", key),
+			fmt.Sprintf(SuggCheckCurrentValue, key),
+			fmt.Sprintf(SuggSetValidValue, key),
 		},
 	)
 }
@@ -121,12 +121,12 @@ func InvalidConfigValueError(key, value, reason string) *GPTCometError {
 // GitRepositoryNotFoundError is returned when not in a git repository
 func GitRepositoryNotFoundError() *GPTCometError {
 	return NewGitError(
-		"Not a Git Repository",
-		"The current directory is not a git repository.",
+		ErrTitleNotGitRepo,
+		ErrMsgNotGitRepo,
 		nil,
 		[]string{
-			"Initialize a git repository: git init",
-			"Or navigate to a git repository",
+			SuggInitGit,
+			SuggNavigateGit,
 		},
 	)
 }
@@ -134,13 +134,13 @@ func GitRepositoryNotFoundError() *GPTCometError {
 // GitCommandFailedError is returned when a git command fails
 func GitCommandFailedError(command string, cause error) *GPTCometError {
 	return NewGitError(
-		"Git Command Failed",
-		fmt.Sprintf("Git command '%s' failed.", command),
+		ErrTitleGitCommand,
+		fmt.Sprintf(ErrMsgGitCommand, command),
 		cause,
 		[]string{
-			"Check if git is installed: git --version",
-			"Ensure you're in a git repository",
-			"Check the git command output for more details",
+			SuggCheckGitInstalled,
+			SuggEnsureInGit,
+			SuggCheckGitOutput,
 		},
 	)
 }
@@ -148,13 +148,241 @@ func GitCommandFailedError(command string, cause error) *GPTCometError {
 // ModelNotFoundError is returned when the specified model is not found
 func ModelNotFoundError(provider, model string) *GPTCometError {
 	return NewConfigError(
-		"Model Not Found",
-		fmt.Sprintf("Model '%s' is not available for provider '%s'.", model, provider),
+		ErrTitleModelNotFound,
+		fmt.Sprintf(ErrMsgModelNotFound, model, provider),
 		nil,
 		[]string{
-			fmt.Sprintf("Check available models for %s", provider),
-			fmt.Sprintf("Set a valid model: gptcomet config set %s.model <valid-model>", provider),
-			"Visit provider documentation for model list",
+			fmt.Sprintf(SuggCheckAvailableModels, provider),
+			fmt.Sprintf(SuggSetValidModel, provider),
+			SuggVisitDocs,
+		},
+	)
+}
+
+// ProviderCreationError is returned when provider initialization fails
+func ProviderCreationError(provider string, cause error) *GPTCometError {
+	return NewValidationError(
+		ErrTitleProviderCreation,
+		fmt.Sprintf(ErrMsgProviderCreation, provider),
+		cause,
+		[]string{
+			SuggCheckProviderConfig,
+			fmt.Sprintf(SuggCheckProvider, provider),
+			SuggReportIssue,
+		},
+	)
+}
+
+// VCSCreationError is returned when VCS client creation fails
+func VCSCreationError(vcsType string, cause error) *GPTCometError {
+	return NewGitError(
+		ErrTitleVCSCreation,
+		fmt.Sprintf(ErrMsgVCSCreation, vcsType),
+		cause,
+		[]string{
+			SuggCheckVCSType,
+			SuggCheckGitInstalled,
+			SuggReportIssue,
+		},
+	)
+}
+
+// ProxyConfigurationError is returned when proxy configuration fails
+func ProxyConfigurationError(cause error) *GPTCometError {
+	return NewNetworkError(
+		ErrTitleProxyConfiguration,
+		ErrMsgProxyConfiguration,
+		cause,
+		[]string{
+			SuggCheckProxyFormat,
+			SuggCheckProxy,
+			SuggUseProxyFlag,
+		},
+	)
+}
+
+// RequestCreationError is returned when HTTP request creation fails
+func RequestCreationError(cause error) *GPTCometError {
+	return NewAPIError(
+		ErrTitleRequestCreation,
+		ErrMsgRequestCreation,
+		cause,
+		[]string{
+			SuggCheckAPIEndpoint,
+			SuggReportIssue,
+		},
+	)
+}
+
+// RequestExecutionError is returned when HTTP request execution fails
+func RequestExecutionError(cause error) *GPTCometError {
+	return NewNetworkError(
+		ErrTitleRequestExecution,
+		ErrMsgRequestExecution,
+		cause,
+		[]string{
+			SuggCheckInternet,
+			SuggCheckProxy,
+			SuggWaitRetry,
+		},
+	)
+}
+
+// ResponseParsingError is returned when API response parsing fails
+func ResponseParsingError(cause error) *GPTCometError {
+	return NewAPIError(
+		ErrTitleResponseParsing,
+		ErrMsgResponseParsing,
+		cause,
+		[]string{
+			SuggCheckResponseFormat,
+			SuggReportIssue,
+		},
+	)
+}
+
+// DependencyCreationError is returned when dependency creation fails
+func DependencyCreationError(dependency string, cause error) *GPTCometError {
+	return NewValidationError(
+		ErrTitleDependencyCreation,
+		ErrMsgDependencyCreation,
+		cause,
+		[]string{
+			fmt.Sprintf("Failed to create: %s", dependency),
+			SuggReportIssue,
+		},
+	)
+}
+
+// InternalError is returned for unexpected internal errors
+func InternalError(message string, cause error) *GPTCometError {
+	return &GPTCometError{
+		Type:    ErrTypeUnknown,
+		Title:   ErrTitleInternalError,
+		Message: fmt.Sprintf(ErrMsgInternalError, message),
+		Cause:   cause,
+		Suggestions: []string{
+			SuggReportIssue,
+		},
+	}
+}
+
+// RequestRetryError is returned when a request fails after multiple retry attempts
+func RequestRetryError(attempts int, cause error) *GPTCometError {
+	return NewAPIError(
+		ErrTitleRequestRetry,
+		fmt.Sprintf(ErrMsgRequestRetry, attempts),
+		cause,
+		[]string{
+			SuggCheckInternet,
+			SuggCheckProviderStatus,
+			SuggWaitRetry,
+			SuggCheckErrorDetails,
+		},
+	)
+}
+
+// MessageFormattingError is returned when message formatting fails
+func MessageFormattingError(cause error) *GPTCometError {
+	return NewValidationError(
+		ErrTitleMessageFormatting,
+		ErrMsgMessageFormatting,
+		cause,
+		[]string{
+			SuggVerifyRequestPayload,
+			SuggReportIssue,
+		},
+	)
+}
+
+// RequestMarshalingError is returned when request marshaling fails
+func RequestMarshalingError(cause error) *GPTCometError {
+	return NewAPIError(
+		ErrTitleRequestMarshaling,
+		ErrMsgRequestMarshaling,
+		cause,
+		[]string{
+			SuggVerifyRequestPayload,
+			SuggReportIssue,
+		},
+	)
+}
+
+// APIStatusError is returned when API returns non-OK status code
+func APIStatusError(statusCode int, responseBody string, cause error) *GPTCometError {
+	message := fmt.Sprintf(ErrMsgAPIStatusError, statusCode)
+	if responseBody != "" {
+		message += fmt.Sprintf("\nResponse: %s", responseBody)
+	}
+
+	// Determine suggestions based on status code
+	suggestions := []string{
+		SuggCheckProviderStatus,
+		SuggCheckErrorDetails,
+	}
+
+	// Add specific suggestions based on status code
+	switch {
+	case statusCode == 401 || statusCode == 403:
+		suggestions = append([]string{
+			"Verify your API key is valid and has required permissions",
+			SuggCheckKeyValid,
+		}, suggestions...)
+	case statusCode == 429:
+		suggestions = append([]string{
+			SuggWaitRetry,
+			SuggCheckQuota,
+		}, suggestions...)
+	case statusCode >= 500:
+		suggestions = append([]string{
+			"Provider service may be experiencing issues",
+			SuggWaitRetry,
+		}, suggestions...)
+	}
+
+	return NewAPIError(
+		ErrTitleAPIStatusError,
+		message,
+		cause,
+		suggestions,
+	)
+}
+
+// CallbackError is returned when a callback function fails
+func CallbackError(cause error) *GPTCometError {
+	return NewValidationError(
+		ErrTitleCallbackError,
+		ErrMsgCallbackError,
+		cause,
+		[]string{
+			SuggCheckErrorDetails,
+			SuggReportIssue,
+		},
+	)
+}
+
+// UnsupportedProxySchemeError is returned when an unsupported proxy scheme is used
+func UnsupportedProxySchemeError(scheme string) *GPTCometError {
+	return NewNetworkError(
+		ErrTitleUnsupportedProxy,
+		fmt.Sprintf(ErrMsgUnsupportedProxy, scheme),
+		nil,
+		[]string{
+			SuggSupportedProxySchemes,
+			SuggCheckProxyFormat,
+		},
+	)
+}
+
+// ProxyURLParseError is returned when proxy URL parsing fails
+func ProxyURLParseError(cause error) *GPTCometError {
+	return NewNetworkError(
+		ErrTitleProxyConfiguration,
+		"Failed to parse proxy URL.",
+		cause,
+		[]string{
+			SuggCheckProxyFormat,
+			SuggCheckProxy,
 		},
 	)
 }

@@ -85,13 +85,14 @@ func TestNewClient(t *testing.T) {
 	}{
 		{"OpenAI", "openai", &llm.OpenAILLM{}},
 		{"Claude", "claude", &llm.ClaudeLLM{}},
-		{"Default", "", &llm.DefaultLLM{}},
+		{"Default (empty provider)", "", &llm.OpenAILLM{}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := &types.ClientConfig{Provider: tt.provider}
-			client := New(config)
+			client, err := New(config)
+			require.NoError(t, err)
 			assert.IsType(t, tt.wantType, client.llm)
 		})
 	}
@@ -410,7 +411,7 @@ func TestStream(t *testing.T) {
 			message:        "test message",
 			expectedChunks: nil,
 			wantErr:        true,
-			errorContains:  "failed to format messages",
+			errorContains:  "Message Formatting Failed",
 		},
 		{
 			name: "GetClient Error",
@@ -425,7 +426,7 @@ func TestStream(t *testing.T) {
 			message:        "test message",
 			expectedChunks: nil,
 			wantErr:        true,
-			errorContains:  "unsupported proxy scheme", // Fix error message expectation
+			errorContains:  "Unsupported Proxy Scheme", // Fix error message expectation
 		},
 	}
 

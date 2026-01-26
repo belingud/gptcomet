@@ -29,7 +29,7 @@ func TestNewHunyuanLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://api.hunyuan.cloud.tencent.com/v1",
-				model:          DEFAULT_HUNYUAN_MODEL,
+				model:          DefaultHunyuanModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -103,7 +103,7 @@ func TestHunyuanLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.hunyuan.cloud.tencent.com/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != DEFAULT_HUNYUAN_MODEL {
+	if got["model"].DefaultValue != DefaultHunyuanModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

@@ -64,6 +64,10 @@ func NewBaseLLM(config *types.ClientConfig) *BaseLLM {
 	if config.AnswerPath == "" {
 		config.AnswerPath = "choices.0.message.content"
 	}
+	if config.StreamAnswerPath == "" {
+		// Default to OpenAI-compatible streaming format
+		config.StreamAnswerPath = "choices.0.delta.content"
+	}
 	return &BaseLLM{
 		Config: config,
 	}

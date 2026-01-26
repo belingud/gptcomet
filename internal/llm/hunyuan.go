@@ -8,7 +8,10 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
-const DEFAULT_HUNYUAN_MODEL = "hunyuan-lite"
+const (
+	DefaultHunyuanAPIBase = "https://api.hunyuan.cloud.tencent.com/v1"
+	DefaultHunyuanModel   = "hunyuan-lite"
+)
 
 // HunyuanLLM implements the LLM interface for Tencent Hunyuan
 // It extends OpenAILLM since Hunyuan API is compatible with OpenAI
@@ -18,12 +21,8 @@ type HunyuanLLM struct {
 
 // NewHunyuanLLM creates a new HunyuanLLM
 func NewHunyuanLLM(config *types.ClientConfig) *HunyuanLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.hunyuan.cloud.tencent.com/v1"
-	}
-	if config.Model == "" {
-		config.Model = DEFAULT_HUNYUAN_MODEL
-	}
+	BuildStandardConfigSimple(config, DefaultHunyuanAPIBase, DefaultHunyuanModel)
+
 	return &HunyuanLLM{
 		OpenAILLM: NewOpenAILLM(config),
 	}
@@ -38,12 +37,12 @@ func (h *HunyuanLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	requirements := h.OpenAILLM.GetRequiredConfig()
 	// update API base
 	requirements["api_base"] = config.ConfigRequirement{
-		DefaultValue:  "https://api.hunyuan.cloud.tencent.com/v1",
+		DefaultValue:  DefaultHunyuanAPIBase,
 		PromptMessage: "Enter Hunyuan API base URL",
 	}
 	// update model
 	requirements["model"] = config.ConfigRequirement{
-		DefaultValue:  DEFAULT_HUNYUAN_MODEL,
+		DefaultValue:  DefaultHunyuanModel,
 		PromptMessage: "Enter model name",
 	}
 	return requirements

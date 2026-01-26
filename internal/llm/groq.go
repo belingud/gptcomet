@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	DefaultGroqModel = "llama-3.3-70b-versatile"
+	DefaultGroqAPIBase = "https://api.groq.com/openai/v1"
+	DefaultGroqModel   = "llama-3.3-70b-versatile"
 )
 
 // GroqLLM implements the LLM interface for Groq
@@ -26,12 +27,7 @@ type GroqLLM struct {
 
 // NewGroqLLM creates a new GroqLLM
 func NewGroqLLM(config *types.ClientConfig) *GroqLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.groq.com/openai/v1"
-	}
-	if config.Model == "" {
-		config.Model = DefaultGroqModel
-	}
+	BuildStandardConfigSimple(config, DefaultGroqAPIBase, DefaultGroqModel)
 
 	return &GroqLLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -46,7 +42,7 @@ func (g *GroqLLM) Name() string {
 func (g *GroqLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.groq.com/openai/v1",
+			DefaultValue:  DefaultGroqAPIBase,
 			PromptMessage: "Enter Groq API base URL",
 		},
 		"api_key": {

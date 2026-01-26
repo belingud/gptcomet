@@ -5,8 +5,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/belingud/gptcomet/internal/config"
-	"github.com/belingud/gptcomet/internal/git"
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -73,28 +71,6 @@ const (
 	REVIEW_LANG_KEY = "output.review_lang"
 	MARKDOWN_THEME  = "output.markdown_theme"
 )
-
-func createServiceDependencies(options struct {
-	UseSVN     bool
-	ConfigPath string
-}) (git.VCS, config.ManagerInterface, error) {
-	vcsType := git.Git
-	if options.UseSVN {
-		vcsType = git.SVN
-	}
-
-	vcs, err := git.NewVCS(vcsType)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create VCS (%s): %w", vcsType, err)
-	}
-
-	cfgManager, err := config.New(options.ConfigPath)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create config manager: %w", err)
-	}
-
-	return vcs, cfgManager, nil
-}
 
 type textEditor struct {
 	textarea textarea.Model

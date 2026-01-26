@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	DefaultModel = "yi-lightning"
+	DefaultYiAPIBase = "https://api.lingyiwanwu.com/v1"
+	DefaultYiModel   = "yi-lightning"
 )
 
 // YiLLM implements the LLM interface for Yi
@@ -19,12 +20,7 @@ type YiLLM struct {
 
 // NewYiLLM creates a new YiLLM
 func NewYiLLM(config *types.ClientConfig) *YiLLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.lingyiwanwu.com/v1"
-	}
-	if config.Model == "" {
-		config.Model = DefaultModel
-	}
+	BuildStandardConfigSimple(config, DefaultYiAPIBase, DefaultYiModel)
 
 	return &YiLLM{
 		BaseLLM: NewBaseLLM(config),
@@ -39,7 +35,7 @@ func (y *YiLLM) Name() string {
 func (y *YiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.lingyiwanwu.com/v1",
+			DefaultValue:  DefaultYiAPIBase,
 			PromptMessage: "Enter Yi API base",
 		},
 		"api_key": {
@@ -47,7 +43,7 @@ func (y *YiLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  DefaultModel,
+			DefaultValue:  DefaultYiModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

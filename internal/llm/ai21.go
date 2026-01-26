@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	DefaultAI21Model = "jamba-1.5-large"
+	DefaultAI21Model   = "jamba-1.5-large"
+	DefaultAI21APIBase = "https://api.ai21.com/studio/v1"
 )
 
 // AI21LLM implements the LLM interface for Groq
@@ -20,12 +21,7 @@ type AI21LLM struct {
 
 // NewAI21LLM creates a new AI21LLM
 func NewAI21LLM(config *types.ClientConfig) *AI21LLM {
-	if config.APIBase == "" {
-		config.APIBase = "https://api.ai21.com/studio/v1"
-	}
-	if config.Model == "" {
-		config.Model = DefaultAI21Model
-	}
+	BuildStandardConfigSimple(config, DefaultAI21APIBase, DefaultAI21Model)
 
 	return &AI21LLM{
 		OpenAILLM: NewOpenAILLM(config),
@@ -40,7 +36,7 @@ func (a *AI21LLM) Name() string {
 func (a *AI21LLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 	return map[string]config.ConfigRequirement{
 		"api_base": {
-			DefaultValue:  "https://api.ai21.com/studio/v1",
+			DefaultValue:  DefaultAI21APIBase,
 			PromptMessage: "Enter AI21 API base URL",
 		},
 		"api_key": {

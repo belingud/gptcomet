@@ -63,11 +63,11 @@ func (g *GitVCS) HasStagedChanges(repoPath string) (bool, error) {
 	if err != nil {
 		// Check if it's an exit error (command ran but returned non-zero exit code)
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return false, fmt.Errorf("git diff command failed with exit code %d: %w\nGit output: %s",
-				exitError.ExitCode(), err, stderr.String())
+			cmdStr := fmt.Sprintf("git diff --staged --name-only (exit code %d)", exitError.ExitCode())
+			return false, gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
 		}
 		// Other errors (command couldn't be executed)
-		return false, fmt.Errorf("failed to check staged changes: %w\nGit output: %s", err, stderr.String())
+		return false, gptcometerrors.GitCommandFailedError("git diff --staged --name-only", fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
 	}
 
 	// If the command succeeded, check if there's any output
@@ -98,9 +98,10 @@ func (g *GitVCS) GetStagedFiles(repoPath string) ([]string, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return nil, fmt.Errorf("git diff command failed with exit code %d: %w\nGit output: %s", exitError.ExitCode(), err, stderr.String())
+			cmdStr := fmt.Sprintf("git diff --staged --name-only (exit code %d)", exitError.ExitCode())
+			return nil, gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
 		}
-		return nil, fmt.Errorf("failed to get staged files: %w\nGit output: %s", err, stderr.String())
+		return nil, gptcometerrors.GitCommandFailedError("git diff --staged --name-only", fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
 	}
 
 	files := strings.Split(strings.TrimSpace(string(output)), "\n")
@@ -316,7 +317,8 @@ func (g *GitVCS) runCommand(cmd *exec.Cmd, repoPath string) (string, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("command failed: %w\nOutput: %s", err, stderr.String())
+		cmdStr := fmt.Sprintf("git %v", cmd.Args[1:])
+		return "", gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
 	}
 
 	return stdout.String(), nil
