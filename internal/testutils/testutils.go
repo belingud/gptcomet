@@ -63,7 +63,15 @@ func TestGitRepo(t *testing.T) (string, func()) {
 	repoPath, cleanup := CreateTestRepo(t)
 	if err := RunGitCommand(t, repoPath, "init"); err != nil {
 		cleanup()
-		t.Fatal(err)
+		require.NoError(t, err)
+	}
+	if err := RunGitCommand(t, repoPath, "config", "user.email", "test@example.com"); err != nil {
+		cleanup()
+		require.NoError(t, err)
+	}
+	if err := RunGitCommand(t, repoPath, "config", "user.name", "Test User"); err != nil {
+		cleanup()
+		require.NoError(t, err)
 	}
 	return repoPath, cleanup
 }
