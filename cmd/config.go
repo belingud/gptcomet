@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/config"
-	"github.com/belingud/gptcomet/internal/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -79,7 +78,6 @@ func newGetConfigCmd() *cobra.Command {
 		Short: "Get config value",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting get config value")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -123,7 +121,6 @@ func newListConfigCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List config content",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting list config content")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -155,7 +152,6 @@ func newResetConfigCmd() *cobra.Command {
 		Use:   "reset",
 		Short: "Reset config",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting reset config")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -200,7 +196,6 @@ func newSetConfigCmd() *cobra.Command {
 		Short: "Set config value",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting set config value")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -231,7 +226,6 @@ func newPathConfigCmd() *cobra.Command {
 		Use:   "path",
 		Short: "Get config file path",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting get config file path")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -261,7 +255,6 @@ func newRemoveConfigCmd() *cobra.Command {
 		Short: "Remove config value or a value from a list",
 		Args:  cobra.RangeArgs(1, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting remove config value")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -312,7 +305,6 @@ func newAppendConfigCmd() *cobra.Command {
 		Short: "Append value to a list config",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting append config value")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
@@ -362,7 +354,6 @@ func newKeysConfigCmd() *cobra.Command {
 		Use:   "keys",
 		Short: "List all supported configuration keys",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logger.Debug("Starting list supported config keys")
 
 			cfgManager, err := getConfigManager(cmd)
 			if err != nil {
