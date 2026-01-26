@@ -264,7 +264,7 @@ wheels = [
 
 [[package]]
 name = "gptcomet"
-version = "2.2.2"
+version = "2.3.0"
 source = { editable = "." }
 
 [package.dev-dependencies]

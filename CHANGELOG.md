@@ -1,5 +1,30 @@
 
 ---
+## [2.3.0](https://github.com/belingud/gptcomet/compare/v2.2.3..v2.3.0) - 2026-01-26
+
+### 🚜 Refactor
+
+- migrate from debug package to structured logger and centralize constants - ([865eed5](https://github.com/belingud/gptcomet/commit/865eed53e11eee460a1945b95806709441776cc3)) - belingud
+- modularize codebase by splitting large files into focused modules - ([9e9e615](https://github.com/belingud/gptcomet/commit/9e9e61501b9b689b596df2800b1429313a179dbe)) - belingud
+
+### 📚 Documentation
+
+- update project documentation with completed refactoring and logging improvements - ([0a1c397](https://github.com/belingud/gptcomet/commit/0a1c39724da6d401a0d552d193ce677b2c11d9f4)) - belingud
+- add comprehensive refactoring plan for GPTComet - ([b2cebc6](https://github.com/belingud/gptcomet/commit/b2cebc66e1cb3a2e1b716681dcccf29cb21cf7b0)) - belingud
+- add CLAUDE.md with project overview, architecture, and development guide - ([4ea7948](https://github.com/belingud/gptcomet/commit/4ea794828622173b3eb434028fdbf7d1dd080e3b)) - belingud
+
+### 🧪 Testing
+
+- fix logger test format string usage and update go versin for CI - ([16a8f5b](https://github.com/belingud/gptcomet/commit/16a8f5bb90b1a848c28cc06e495d3d3775990213)) - belingud
+- ignore error from GetDiff in integration test - ([6073949](https://github.com/belingud/gptcomet/commit/60739499ca04223680a541af9eba1d770aabb1dd)) - belingud
+- add comprehensive integration tests for config, provider, and commit workflows - ([eaf2ab2](https://github.com/belingud/gptcomet/commit/eaf2ab223581a8c678e720e16a21691e26e644e8)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- add additional Bash commands to .claude settings - ([1b775be](https://github.com/belingud/gptcomet/commit/1b775be927b55fe4bf5ca00b1d949c13ebac3a30)) - belingud
+
+
+---
 ## [2.1.10](https://github.com/belingud/gptcomet/compare/v2.1.9..v2.1.10) - 2025-07-08
 
 ### ⛰️  Features
