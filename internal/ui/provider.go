@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	internal_cfg "github.com/belingud/gptcomet/internal/config"
@@ -232,12 +233,15 @@ func NewConfigInput(configs map[string]config.ConfigRequirement) *ConfigInput {
 		}
 	}
 
-	// collect keys without sorting
+	// collect remaining keys and sort them for stable ordering
+	var remainingKeys []string
 	for k := range configs {
 		if !processed[k] {
-			configKeys = append(configKeys, k)
+			remainingKeys = append(remainingKeys, k)
 		}
 	}
+	sort.Strings(remainingKeys)
+	configKeys = append(configKeys, remainingKeys...)
 
 	// create input for each config
 	for _, key := range configKeys {
