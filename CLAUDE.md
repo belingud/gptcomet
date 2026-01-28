@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-GPTComet generates Git commit messages and reviews code using LLMs. Supports 20+ providers (OpenAI, Claude, Gemini, etc.) and both Git/SVN.
+GPTComet generates Git commit messages and reviews code using LLMs. Supports 23+ providers (OpenAI, Claude, Gemini, etc.) and both Git/SVN.
 
 **Core Commands**:
 
@@ -22,7 +22,7 @@ internal/
 ├── config/    → YAML config manager (~/.config/gptcomet/gptcomet.yaml)
 ├── factory/   → Dependency injection (VCS, config, client creation)
 ├── git/       → VCS abstraction (git, svn)
-├── llm/       → Provider interface + 22 implementations
+├── llm/       → Provider interface + 23 implementations
 ├── ui/        → Terminal UI (progress, markdown rendering)
 ├── errors/    → Structured error handling (typed errors with suggestions)
 ├── debug/     → Debug logging
@@ -52,7 +52,7 @@ type LLM interface {
 
 **Adding a provider**: Register in [internal/llm/provider.go](internal/llm/provider.go) init()
 
-**Supported providers**: ai21, azure, chatglm, claude, cohere, deepseek, gemini, groq, hunyuan, kimi, minimax, mistral, modelscope, ollama, openai, openrouter, sambanova, silicon, tongyi, vertex, xai, yi
+**Supported providers**: ai21, azure, chatglm, claude, cohere, deepseek, gemini, groq, hunyuan, kimi, longcat, minimax, mistral, modelscope, ollama, openai, openrouter, sambanova, silicon, tongyi, vertex, xai, yi
 
 ## Development
 
@@ -119,3 +119,4 @@ default: provider = llm.NewDefaultLLM(config)
 - Each provider has `*_test.go` with unit tests
 - Error messages use templates from `internal/errors/templates.go`
 - Streaming uses SSE (Server-Sent Events) parsing
+- Complex tasks or plans should be handled using sequential thinking if available.
