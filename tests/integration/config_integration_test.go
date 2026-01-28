@@ -21,9 +21,9 @@ func TestConfigLoadingWithVariousInputs(t *testing.T) {
 		validateFunc func(t *testing.T, cfg *config.Manager)
 	}{
 		{
-			name: "Empty config file",
+			name:       "Empty config file",
 			configData: ``,
-			wantErr: false,
+			wantErr:    false,
 			validateFunc: func(t *testing.T, cfg *config.Manager) {
 				assert.NotNil(t, cfg)
 				// Should load with default values
@@ -160,7 +160,7 @@ provider: openai
 openai:
   api_key: [invalid
 `,
-			wantErr: true,
+			wantErr:     true,
 			errContains: "Failed to load config",
 		},
 		{

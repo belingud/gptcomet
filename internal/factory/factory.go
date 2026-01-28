@@ -12,10 +12,10 @@ import (
 // It provides VCS for version control operations, ConfigManager for configuration
 // access, and APIConfig for LLM client initialization.
 type ServiceDependencies struct {
-	VCS         git.VCS
-	CfgManager  config.ManagerInterface
-	APIConfig   *types.ClientConfig
-	APIClient   client.ClientInterface
+	VCS        git.VCS
+	CfgManager config.ManagerInterface
+	APIConfig  *types.ClientConfig
+	APIClient  client.ClientInterface
 }
 
 // ServiceOptions contains configuration options for service creation.
@@ -84,7 +84,7 @@ func NewServiceDependenciesWithClient(options ServiceOptions) (*ServiceDependenc
 	}
 
 	return &ServiceDependencies{
-		VCS:       vcs,
+		VCS:        vcs,
 		CfgManager: cfgManager,
 		APIConfig:  clientConfig,
 		APIClient:  apiClient,
