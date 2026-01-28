@@ -1,5 +1,26 @@
 
 ---
+## [2.4.0](https://github.com/belingud/gptcomet/compare/v2.3.1..v2.4.0) - 2026-01-28
+
+### ⛰️  Features
+
+- add LongCat LLM provider support - ([3608d9a](https://github.com/belingud/gptcomet/commit/3608d9a91fac69c4180ca43fd8e3dce08f5c5a52)) - belingud
+
+### 🐛 Bug Fixes
+
+- test random failed - ([2bc4f2a](https://github.com/belingud/gptcomet/commit/2bc4f2a64cf54bff8abc323b47bba6e8a5ee7c31)) - belingud
+
+### 📚 Documentation
+
+- add LongCat provider - ([1ce5c97](https://github.com/belingud/gptcomet/commit/1ce5c9743d9698e34974851356afc84ff37d2a7c)) - belingud
+- add LongCat provider implementation plan - ([be760c4](https://github.com/belingud/gptcomet/commit/be760c46ef4baff819f9a2174477f7983695d693)) - belingud
+
+### 🎨 Styling
+
+- fix whitespace and formatting in test files - ([fdc2cad](https://github.com/belingud/gptcomet/commit/fdc2cada8706ef9e5e28d95c314e647ed5098e71)) - belingud
+
+
+---
 ## [2.3.0](https://github.com/belingud/gptcomet/compare/v2.2.3..v2.3.0) - 2026-01-26
 
 ### 🚜 Refactor
