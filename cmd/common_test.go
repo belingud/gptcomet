@@ -250,20 +250,20 @@ func TestCommandErrorFormatting(t *testing.T) {
 			Message: "Invalid input",
 			Err:     underlyingErr,
 		}
-		
+
 		errStr := cmdErr.Error()
 		assert.Contains(t, errStr, "ValidationError", "Error should contain type")
 		assert.Contains(t, errStr, "Invalid input", "Error should contain message")
 		assert.Contains(t, errStr, "assert.AnError", "Error should contain underlying error")
 	})
-	
+
 	t.Run("Error format without underlying error", func(t *testing.T) {
 		cmdErr := &CommandError{
 			Type:    "NetworkError",
 			Message: "Connection failed",
 			Err:     nil,
 		}
-		
+
 		errStr := cmdErr.Error()
 		assert.Contains(t, errStr, "NetworkError", "Error should contain type")
 		assert.Contains(t, errStr, "Connection failed", "Error should contain message")

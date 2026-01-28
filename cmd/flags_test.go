@@ -12,12 +12,12 @@ import (
 
 func TestAddAdvancedAPIFlags(t *testing.T) {
 	tests := []struct {
-		name         string
-		setupOpts    *CommonOptions
-		flagName     string
-		flagValue    string
-		wantSet      bool
-		description  string
+		name        string
+		setupOpts   *CommonOptions
+		flagName    string
+		flagValue   string
+		wantSet     bool
+		description string
 	}{
 		{
 			name:        "AddFlagsToEmptyOptions",
@@ -161,11 +161,11 @@ func TestApplyCommonOptions(t *testing.T) {
 				// All other fields are zero values
 			},
 			initialCfg: types.ClientConfig{
-				APIBase:    "https://default.api.com",
-				APIKey:     "default-key",
-				MaxTokens:  1024,
-				Retries:    3,
-				Model:      "default-model",
+				APIBase:     "https://default.api.com",
+				APIKey:      "default-key",
+				MaxTokens:   1024,
+				Retries:     3,
+				Model:       "default-model",
 				Temperature: 0.7,
 			},
 			wantModified: true,
