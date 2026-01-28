@@ -158,9 +158,9 @@ func TestManager_GetNestedValue(t *testing.T) {
 openai:
   api_key: test-key
 `,
-			keys:       []string{"openai", "api_key"},
-			wantValue:  "test-key",
-			wantOK:     true,
+			keys:      []string{"openai", "api_key"},
+			wantValue: "test-key",
+			wantOK:    true,
 		},
 		{
 			name:       "Key not found",
@@ -177,9 +177,9 @@ level1:
     level3:
       value: deep
 `,
-			keys:       []string{"level1", "level2", "level3", "value"},
-			wantValue:  "deep",
-			wantOK:     true,
+			keys:      []string{"level1", "level2", "level3", "value"},
+			wantValue: "deep",
+			wantOK:    true,
 		},
 		{
 			name: "Partial path exists",
@@ -257,7 +257,7 @@ output:
 			wantValue:  true,
 		},
 		{
-			name: "Set list value",
+			name:       "Set list value",
 			configData: `{}`,
 			keys:       []string{"file_ignore"},
 			value:      []interface{}{"*.log", "*.tmp"},
@@ -353,21 +353,21 @@ anthropic:
 
 func TestManager_GetPrompt(t *testing.T) {
 	tests := []struct {
-		name       string
-		configData string
-		isRich     bool
+		name        string
+		configData  string
+		isRich      bool
 		wantDefault bool
 	}{
 		{
-			name:       "No prompt config - returns brief default",
-			configData: `{}`,
-			isRich:     false,
+			name:        "No prompt config - returns brief default",
+			configData:  `{}`,
+			isRich:      false,
 			wantDefault: true,
 		},
 		{
-			name:       "No prompt config - returns rich default",
-			configData: `{}`,
-			isRich:     true,
+			name:        "No prompt config - returns rich default",
+			configData:  `{}`,
+			isRich:      true,
 			wantDefault: true,
 		},
 		{
@@ -377,7 +377,7 @@ prompt:
   brief_commit_message: "Custom brief prompt"
   rich_commit_message: "Custom rich prompt"
 `,
-			isRich:     false,
+			isRich:      false,
 			wantDefault: false,
 		},
 		{
@@ -387,7 +387,7 @@ prompt:
   brief_commit_message: "Custom brief prompt"
   rich_commit_message: "Custom rich prompt"
 `,
-			isRich:     true,
+			isRich:      true,
 			wantDefault: false,
 		},
 	}
@@ -420,13 +420,13 @@ prompt:
 
 func TestManager_GetReviewPrompt(t *testing.T) {
 	tests := []struct {
-		name       string
-		configData string
+		name        string
+		configData  string
 		wantDefault bool
 	}{
 		{
-			name:       "No prompt config - returns default",
-			configData: `{}`,
+			name:        "No prompt config - returns default",
+			configData:  `{}`,
 			wantDefault: true,
 		},
 		{
@@ -471,13 +471,13 @@ prompt:
 
 func TestManager_GetTranslationPrompt(t *testing.T) {
 	tests := []struct {
-		name       string
-		configData string
+		name        string
+		configData  string
 		wantDefault bool
 	}{
 		{
-			name:       "No prompt config - returns default",
-			configData: `{}`,
+			name:        "No prompt config - returns default",
+			configData:  `{}`,
 			wantDefault: true,
 		},
 		{
@@ -522,10 +522,10 @@ prompt:
 
 func TestManager_GetFileIgnore(t *testing.T) {
 	tests := []struct {
-		name       string
-		configData string
-		wantNil    bool
-		wantLen    int
+		name         string
+		configData   string
+		wantNil      bool
+		wantLen      int
 		wantContains []string
 	}{
 		{
@@ -549,8 +549,8 @@ file_ignore:
   - "*.tmp"
   - "dist/"
 `,
-			wantNil: false,
-			wantLen: 3,
+			wantNil:      false,
+			wantLen:      3,
 			wantContains: []string{"*.log", "*.tmp", "dist/"},
 		},
 		{
@@ -561,8 +561,8 @@ file_ignore:
   - 123
   - "dist/"
 `,
-			wantNil: false,
-			wantLen: 2,
+			wantNil:      false,
+			wantLen:      2,
 			wantContains: []string{"*.log", "dist/"},
 		},
 	}

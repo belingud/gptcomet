@@ -81,7 +81,6 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 	}, nil
 }
 
-
 // NewCommitCmd creates and returns a new cobra.Command for the 'commit' subcommand.
 // This command generates and creates a commit with staged changes in a Git or SVN repository.
 //

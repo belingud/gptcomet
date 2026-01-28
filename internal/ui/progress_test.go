@@ -326,9 +326,9 @@ func TestStageNumber(t *testing.T) {
 	p.AddStages("Stage 1", "Stage 2", "Stage 3")
 
 	tests := []struct {
-		name     string
-		stage    string
-		want     int
+		name  string
+		stage string
+		want  int
 	}{
 		{"first stage", "Stage 1", 0},
 		{"second stage", "Stage 2", 1},

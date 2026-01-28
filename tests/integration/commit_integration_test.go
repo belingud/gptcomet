@@ -279,11 +279,11 @@ file_ignore:
 
 	// Create files (including ones that should be ignored)
 	files := map[string]string{
-		"main.go":    "package main\n",
-		"test.log":   "log content\n",
-		"data.tmp":   "temp data\n",
-		".env":       "SECRET=key\n",
-		"readme.md":  "# Project\n",
+		"main.go":   "package main\n",
+		"test.log":  "log content\n",
+		"data.tmp":  "temp data\n",
+		".env":      "SECRET=key\n",
+		"readme.md": "# Project\n",
 	}
 
 	for filename, content := range files {

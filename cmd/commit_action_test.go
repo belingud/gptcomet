@@ -8,11 +8,11 @@ import (
 
 func TestSplitCommitMessage(t *testing.T) {
 	tests := []struct {
-		name              string
-		message           string
-		wantPrefix        string
-		wantContent       string
-		description       string
+		name        string
+		message     string
+		wantPrefix  string
+		wantContent string
+		description string
 	}{
 		{
 			name:        "Standard conventional commit",

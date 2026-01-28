@@ -136,6 +136,11 @@ func init() {
 		return NewKimiLLM(config)
 	})
 
+	// LongCat
+	RegisterProvider("longcat", func(config *types.ClientConfig) LLM {
+		return NewLongCatLLM(config)
+	})
+
 	// MiniMax
 	RegisterProvider("minimax", func(config *types.ClientConfig) LLM {
 		return NewMinimaxLLM(config)
