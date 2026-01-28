@@ -299,6 +299,7 @@ Provider ollama configured successfully!
 -   Deepseek
 -   ChatGLM
 -   KIMI
+-   LongCat
 -   Cohere
 -   OpenRouter
 -   Hunyuan
