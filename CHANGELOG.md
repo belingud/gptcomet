@@ -1,5 +1,14 @@
 
 ---
+## [2.4.1](https://github.com/belingud/gptcomet/compare/v2.4.0..v2.4.1) - 2026-02-01
+
+### ⚙️ Miscellaneous Tasks
+
+- add UPX compression and improve release workflow - ([98d9c77](https://github.com/belingud/gptcomet/commit/98d9c77e1b13ff755a5a0aed8db54fd33ec9ee9c)) - belingud
+- update changelog for v2.4.0 - ([88d53c7](https://github.com/belingud/gptcomet/commit/88d53c739ff1493b789524e8b7e1ba95cbb07e15)) - belingud
+
+
+---
 ## [2.4.0](https://github.com/belingud/gptcomet/compare/v2.3.1..v2.4.0) - 2026-01-28
 
 ### ⛰️  Features
