@@ -95,6 +95,106 @@ func (m *MockFileCopier) Copy(src, dst string) error {
 	return args.Error(0)
 }
 
+type trackingHTTPClient struct {
+	called   bool
+	response *http.Response
+	err      error
+}
+
+func (c *trackingHTTPClient) Get(url string) (*http.Response, error) {
+	c.called = true
+	return c.response, c.err
+}
+
+func resetUpdateGlobals(t *testing.T) {
+	t.Helper()
+
+	oldInstallationSource := InstallationSource
+	oldExecutablePath := executablePath
+	oldEvalSymlinks := evalSymlinks
+	oldDefaultHTTPClient := DefaultHTTPClient
+
+	t.Cleanup(func() {
+		InstallationSource = oldInstallationSource
+		executablePath = oldExecutablePath
+		evalSymlinks = oldEvalSymlinks
+		DefaultHTTPClient = oldDefaultHTTPClient
+	})
+}
+
+func TestHomebrewInstallationDetectionBySource(t *testing.T) {
+	resetUpdateGlobals(t)
+
+	InstallationSource = installSourceHomebrew
+	executablePath = func() (string, error) {
+		return "/home/user/.local/bin/gmsg", nil
+	}
+	evalSymlinks = func(path string) (string, error) {
+		return path, nil
+	}
+
+	assert.True(t, isHomebrewInstallation())
+}
+
+func TestHomebrewInstallationDetectionByResolvedPath(t *testing.T) {
+	resetUpdateGlobals(t)
+
+	InstallationSource = installSourceStandalone
+	executablePath = func() (string, error) {
+		return "/opt/homebrew/bin/gmsg", nil
+	}
+	evalSymlinks = func(path string) (string, error) {
+		return "/opt/homebrew/Cellar/gptcomet/2.4.1/bin/gmsg", nil
+	}
+
+	assert.True(t, isHomebrewInstallation())
+}
+
+func TestHomebrewCellarPathRequiresProjectSegment(t *testing.T) {
+	assert.True(t, isHomebrewCellarPath("/usr/local/Cellar/gptcomet/2.4.1/bin/gptcomet"))
+	assert.False(t, isHomebrewCellarPath("/usr/local/Cellar/other/2.4.1/bin/gptcomet"))
+}
+
+func TestNewUpdateCmdRejectsHomebrewBeforeReleaseCheck(t *testing.T) {
+	resetUpdateGlobals(t)
+
+	InstallationSource = installSourceHomebrew
+	client := &trackingHTTPClient{}
+	DefaultHTTPClient = client
+
+	err := NewUpdateCmd("1.0.0").Execute()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "brew upgrade gptcomet")
+	assert.False(t, client.called)
+}
+
+func TestNewUpdateCmdAllowsStandaloneUpdateFlow(t *testing.T) {
+	resetUpdateGlobals(t)
+
+	InstallationSource = installSourceStandalone
+	executablePath = func() (string, error) {
+		return "/home/user/.local/bin/gmsg", nil
+	}
+	evalSymlinks = func(path string) (string, error) {
+		return path, nil
+	}
+
+	responseBody, _ := json.Marshal(&GithubRelease{TagName: "v1.0.0"})
+	client := &trackingHTTPClient{
+		response: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewReader(responseBody)),
+		},
+	}
+	DefaultHTTPClient = client
+
+	err := NewUpdateCmd("1.0.0").Execute()
+
+	assert.NoError(t, err)
+	assert.True(t, client.called)
+}
+
 // TestCheckUpdate tests the checkUpdate function
 func TestCheckUpdate(t *testing.T) {
 	tests := []struct {

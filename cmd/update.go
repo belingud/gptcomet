@@ -108,7 +108,15 @@ func (c *defaultFileCopier) Copy(src, dst string) error {
 	return copyFile(src, dst)
 }
 
+const (
+	installSourceStandalone = "standalone"
+	installSourceHomebrew   = "homebrew"
+)
+
 var (
+	// InstallationSource identifies how the binary was installed.
+	// Homebrew can override it with: -X github.com/belingud/gptcomet/cmd.InstallationSource=homebrew
+	InstallationSource = installSourceStandalone
 	// DefaultHTTPClient is the default HTTP client used for making requests
 	DefaultHTTPClient HTTPClient = &http.Client{}
 	// DefaultFS is the default file system implementation
@@ -119,7 +127,39 @@ var (
 	DefaultExtractor Extractor = &defaultExtractor{}
 	// DefaultFileCopier is the default file copier implementation
 	DefaultFileCopier FileCopier = &defaultFileCopier{}
+	executablePath               = os.Executable
+	evalSymlinks                 = filepath.EvalSymlinks
 )
+
+func ensureBuiltInUpdateAllowed() error {
+	if isHomebrewInstallation() {
+		return fmt.Errorf("homebrew-installed GPTComet cannot be updated with gmsg update; run brew upgrade gptcomet instead")
+	}
+	return nil
+}
+
+func isHomebrewInstallation() bool {
+	if strings.EqualFold(strings.TrimSpace(InstallationSource), installSourceHomebrew) {
+		return true
+	}
+
+	exePath, err := executablePath()
+	if err != nil || exePath == "" {
+		return false
+	}
+
+	resolvedPath, err := evalSymlinks(exePath)
+	if err == nil && resolvedPath != "" {
+		exePath = resolvedPath
+	}
+
+	return isHomebrewCellarPath(exePath)
+}
+
+func isHomebrewCellarPath(path string) bool {
+	normalizedPath := filepath.ToSlash(filepath.Clean(path))
+	return strings.Contains(normalizedPath, "/Cellar/gptcomet/")
+}
 
 // NewUpdateCmd creates a new cobra command for handling version updates
 // It automatically downloads and installs the latest version if available
@@ -131,6 +171,9 @@ func NewUpdateCmd(version string) *cobra.Command {
 For Unix-like systems, it installs to ~/.local/bin/
 For Windows, it installs to %USERPROFILE%\.gptcomet\`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := ensureBuiltInUpdateAllowed(); err != nil {
+				return err
+			}
 			return checkUpdate(version)
 		},
 	}
