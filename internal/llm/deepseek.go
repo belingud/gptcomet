@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultDeepSeekAPIBase = "https://api.deepseek.com/v1"
-	DefaultDeepSeekModel   = "deepseek-chat"
+	DefaultDeepSeekModel   = "deepseek-v4-flash"
 )
 
 // DeepSeekLLM implements the LLM interface for DeepSeek

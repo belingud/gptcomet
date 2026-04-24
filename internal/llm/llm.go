@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"maps"
 
 	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/logger"
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/tidwall/gjson"
@@ -270,7 +272,12 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 			fmt.Printf("%s\n", usage)
 		}
 
-		return provider.ParseResponse(respBody)
+		content, err := provider.ParseResponse(respBody)
+		if err != nil {
+			return "", err
+		}
+		b.warnIfDeepSeekEmptyResponse(provider, url, resp.StatusCode, respBody, content)
+		return content, nil
 	}
 
 	// For streaming, we'll return the entire response body as a string
@@ -286,6 +293,36 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 	}
 
 	return provider.ParseResponse(respBody)
+}
+
+func (b *BaseLLM) warnIfDeepSeekEmptyResponse(provider LLM, requestURL string, statusCode int, respBody []byte, content string) {
+	if provider.Name() != "deepseek" || content != "" {
+		return
+	}
+	if !gjson.GetBytes(respBody, b.Config.AnswerPath).Exists() {
+		return
+	}
+
+	logger.Warn(
+		"DeepSeek returned empty content: provider=%s model=%s status=%d url=%s answer_path=%s raw_response=%s",
+		provider.Name(),
+		b.Config.Model,
+		statusCode,
+		sanitizeRequestURLForLogging(requestURL),
+		b.Config.AnswerPath,
+		string(respBody),
+	)
+}
+
+func sanitizeRequestURLForLogging(rawURL string) string {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return "<invalid-url>"
+	}
+	parsed.User = nil
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+	return parsed.String()
 }
 
 // DefaultLLM provides default implementation of LLM interface
