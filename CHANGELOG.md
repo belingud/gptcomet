@@ -1,5 +1,18 @@
 
 ---
+## [2.5.0](https://github.com/belingud/gptcomet/compare/v2.4.1..v2.5.0) - 2026-04-23
+
+### ⛰️  Features
+
+- Add OpenSpec skills and configuration for experimental workflow - ([33a4ab4](https://github.com/belingud/gptcomet/commit/33a4ab4096a8af5c8435b51cae45d0945a74822f)) - belingud
+- prevent built-in updates for Homebrew installations - ([069e1e6](https://github.com/belingud/gptcomet/commit/069e1e6ea6346c0dc5877f18182f510564c81fc7)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- update changelog for v2.4.1 release - ([c070bdf](https://github.com/belingud/gptcomet/commit/c070bdff47bf5e32a7a02b2c2c27f7a65673f584)) - belingud
+
+
+---
 ## [2.4.1](https://github.com/belingud/gptcomet/compare/v2.4.0..v2.4.1) - 2026-02-01
 
 ### ⚙️ Miscellaneous Tasks

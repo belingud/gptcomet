@@ -15,6 +15,8 @@
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/gptcomet?style=for-the-badge&logo=python)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/belingud/gptcomet/total?style=for-the-badge&label=Release%20Download)
 
+[简体中文](README.zh.md)
+
 <!-- TOC -->
 
 - [GPTComet: AI-Powered Git Commit Message Generator And Reviewer](#gptcomet-ai-powered-git-commit-message-generator-and-reviewer)
@@ -81,7 +83,19 @@ This project leverages the power of large language models to automate repetitive
 
 ## ⬇️ Installation
 
-To use GPTComet, you can download from [Github release](https://github.com/belingud/gptcomet/releases/latest), or by install scripts:
+To use GPTComet, you can install it with Homebrew:
+
+```bash
+brew install belingud/tap/gptcomet
+```
+
+To upgrade a Homebrew-managed installation, use:
+
+```bash
+brew upgrade gptcomet
+```
+
+You can also download from [Github release](https://github.com/belingud/gptcomet/releases/latest), or by install scripts:
 
 ```bash
 curl -sSL https://cdn.jsdelivr.net/gh/belingud/gptcomet@master/install.sh | bash
