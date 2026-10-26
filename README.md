@@ -160,6 +160,13 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
 2. **Interactive Setup**
     - Use the `gmsg newprovider` command for guided setup.
 
+3. **Environment Variables**
+    - If `api_key` is not set in the configuration file, GPTComet falls back to
+      the provider's conventional environment variable, such as
+      `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `AZURE_API_KEY`,
+      or `<PROVIDER>_API_KEY` for other providers.
+    - The configuration file takes precedence when both are set.
+
 ### Provider Setup Guide
 
 ![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)
@@ -383,6 +390,7 @@ The following are the available commands for GPTComet:
     -   `remove <key> [value]`: Remove a configuration key or a value from a list. (List value only, like `fileignore`)
     -   `append <key> <value>`: Append a value to a list configuration.(List value only, like `fileignore`)
     -   `keys`: List all supported configuration keys.
+    -   `validate`: Validate the current configuration and report issues.
 -   `gmsg commit`: Generate commit message by changes/diff.
     -   `--svn`: Generate commit message for svn.
     -   `--dry-run`: Dry run the command without actually generating the commit message.
@@ -456,6 +464,7 @@ Here's a summary of the main configuration keys:
 | `prompt.brief_commit_message`  | The prompt template for generating brief commit messages.  | (See `defaults/defaults.go`)      |
 | `prompt.rich_commit_message`   | The prompt template for generating rich commit messages.   | (See `defaults/defaults.go`)      |
 | `prompt.translation`           | The prompt template for translating commit messages.       | (See `defaults/defaults.go`)      |
+| `prompt.review`                | The prompt template for reviewing code changes.            | (See `defaults/defaults.go`)      |
 
 **Note:** `<provider>` should be replaced with the actual provider name (e.g., `openai`, `gemini`, `claude`).
 

@@ -116,3 +116,8 @@ func (m *MockConfigManager) Save() error {
 	args := m.Called()
 	return args.Error(0)
 }
+
+func (m *MockConfigManager) Validate() []string {
+	args := m.Called()
+	return args.Get(0).([]string)
+}

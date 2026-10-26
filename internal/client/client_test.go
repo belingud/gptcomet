@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 
+	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/llm"
 	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -222,21 +225,72 @@ func TestChatContextCancellation(t *testing.T) {
 }
 
 func TestTranslateMessage(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			return "translated message", nil
-		},
-		name: "mock",
-	}
+	t.Run("default template placeholders", func(t *testing.T) {
+		var captured string
+		mockLLM := &MockLLM{
+			makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+				captured = message
+				return "translated message", nil
+			},
+			name: "mock",
+		}
 
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
-	}
+		client := &Client{
+			config: &types.ClientConfig{Timeout: 10, Retries: 1},
+			llm:    mockLLM,
+		}
 
-	_, err := client.TranslateMessage("translate to %s: %s", "hello", "fr")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "after 0 attempts")
+		got, err := client.TranslateMessage(defaults.PromptDefaults["translation"], "feat: add", "Simplified Chinese")
+		require.NoError(t, err)
+		assert.Equal(t, "translated message", got)
+		assert.Contains(t, captured, "feat: add")
+		assert.Contains(t, captured, "Simplified Chinese")
+		assert.NotContains(t, captured, "{{ placeholder }}")
+		assert.NotContains(t, captured, "{{ output.lang }}")
+		assert.NotContains(t, captured, "%!(EXTRA")
+	})
+
+	t.Run("template without placeholders still includes message", func(t *testing.T) {
+		var captured string
+		mockLLM := &MockLLM{
+			makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+				captured = message
+				return "translated message", nil
+			},
+			name: "mock",
+		}
+
+		client := &Client{
+			config: &types.ClientConfig{Timeout: 10, Retries: 1},
+			llm:    mockLLM,
+		}
+
+		_, err := client.TranslateMessage("translate this", "hello", "fr")
+		require.NoError(t, err)
+		assert.Contains(t, captured, "translate this")
+		assert.Contains(t, captured, "Target language: fr")
+		assert.Contains(t, captured, "hello")
+	})
+
+	t.Run("legacy percent template", func(t *testing.T) {
+		var captured string
+		mockLLM := &MockLLM{
+			makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+				captured = message
+				return "translated message", nil
+			},
+			name: "mock",
+		}
+
+		client := &Client{
+			config: &types.ClientConfig{Timeout: 10, Retries: 1},
+			llm:    mockLLM,
+		}
+
+		_, err := client.TranslateMessage("translate to %s: %s", "hello", "fr")
+		require.NoError(t, err)
+		assert.Equal(t, "translate to hello: fr", captured)
+	})
 }
 
 func TestGenerateCommitMessage(t *testing.T) {
@@ -523,4 +577,198 @@ func TestStream(t *testing.T) {
 			assert.Equal(t, tt.expectedChunks, receivedChunks)
 		})
 	}
+}
+
+func TestStreamRetriesBeforeFirstChunk(t *testing.T) {
+	var attempts int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if atomic.AddInt32(&attempts, 1) == 1 {
+			hijacker, ok := w.(http.Hijacker)
+			if !ok {
+				t.Error("response writer does not support hijacking")
+				return
+			}
+			conn, _, err := hijacker.Hijack()
+			if err == nil {
+				conn.Close()
+			}
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n")
+		fmt.Fprint(w, "data: [DONE]\n\n")
+	}))
+	defer server.Close()
+
+	mockLLM := &MockLLM{
+		name: "mock",
+		buildURLFunc: func() string {
+			return server.URL
+		},
+		formatMessagesFunc: func(message string) (interface{}, error) {
+			return map[string]interface{}{"model": "test"}, nil
+		},
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{
+			Retries:          3,
+			StreamAnswerPath: "choices.0.delta.content",
+		},
+		llm: mockLLM,
+	}
+
+	var chunks []string
+	err := client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
+		chunks = append(chunks, resp.Content)
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"hello", "\n"}, chunks)
+	assert.Equal(t, int32(2), atomic.LoadInt32(&attempts))
+}
+
+func TestStreamDoesNotRetryAfterPartialOutput(t *testing.T) {
+	var attempts int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&attempts, 1)
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"partial\"}}]}\n\n")
+		if flusher, ok := w.(http.Flusher); ok {
+			flusher.Flush()
+		}
+		if hijacker, ok := w.(http.Hijacker); ok {
+			conn, _, err := hijacker.Hijack()
+			if err == nil {
+				conn.Close()
+			}
+		}
+	}))
+	defer server.Close()
+
+	mockLLM := &MockLLM{
+		name: "mock",
+		buildURLFunc: func() string {
+			return server.URL
+		},
+		formatMessagesFunc: func(message string) (interface{}, error) {
+			return map[string]interface{}{"model": "test"}, nil
+		},
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{
+			Retries:          3,
+			StreamAnswerPath: "choices.0.delta.content",
+		},
+		llm: mockLLM,
+	}
+
+	var chunks []string
+	err := client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
+		chunks = append(chunks, resp.Content)
+		return nil
+	})
+	require.Error(t, err)
+	assert.Equal(t, int32(1), atomic.LoadInt32(&attempts))
+	assert.LessOrEqual(t, len(chunks), 1)
+}
+
+func TestIsRetryableStreamError(t *testing.T) {
+	assert.True(t, isRetryableStreamError(gptErrors.RequestExecutionError(errors.New("connection reset"))))
+	assert.False(t, isRetryableStreamError(gptErrors.APIStatusError(http.StatusInternalServerError, "", nil)))
+	assert.False(t, isRetryableStreamError(errors.New("plain error")))
+}
+
+func TestStreamRetriesAfterEmpty200(t *testing.T) {
+	var attempts int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if atomic.AddInt32(&attempts, 1) == 1 {
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Content-Length", "100")
+			w.WriteHeader(http.StatusOK)
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
+			}
+			if hijacker, ok := w.(http.Hijacker); ok {
+				conn, _, err := hijacker.Hijack()
+				if err == nil {
+					conn.Close()
+				}
+			}
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n")
+		fmt.Fprint(w, "data: [DONE]\n\n")
+	}))
+	defer server.Close()
+
+	mockLLM := &MockLLM{
+		name: "mock",
+		buildURLFunc: func() string {
+			return server.URL
+		},
+		formatMessagesFunc: func(message string) (interface{}, error) {
+			return map[string]interface{}{"model": "test"}, nil
+		},
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{
+			Retries:          3,
+			StreamAnswerPath: "choices.0.delta.content",
+		},
+		llm: mockLLM,
+	}
+
+	var chunks []string
+	err := client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
+		chunks = append(chunks, resp.Content)
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"hello", "\n"}, chunks)
+	assert.Equal(t, int32(2), atomic.LoadInt32(&attempts))
+}
+
+func TestStreamNoExtraNewlineWhenContentEndsWithNewline(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"hello\\n\"}}]}\n\n")
+		fmt.Fprint(w, "data: [DONE]\n\n")
+	}))
+	defer server.Close()
+
+	mockLLM := &MockLLM{
+		name: "mock",
+		buildURLFunc: func() string {
+			return server.URL
+		},
+		formatMessagesFunc: func(message string) (interface{}, error) {
+			return map[string]interface{}{"model": "test"}, nil
+		},
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{
+			Retries:          1,
+			StreamAnswerPath: "choices.0.delta.content",
+		},
+		llm: mockLLM,
+	}
+
+	var chunks []string
+	err := client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
+		chunks = append(chunks, resp.Content)
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"hello\n"}, chunks)
 }

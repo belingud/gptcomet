@@ -123,6 +123,22 @@ func ShouldIgnoreFile(file string, ignorePatterns []string) bool {
 	return false
 }
 
+// FilterIgnoredFiles returns files that do not match any of the ignore
+// patterns. The input order is preserved.
+func FilterIgnoredFiles(files []string, ignorePatterns []string) []string {
+	if len(ignorePatterns) == 0 {
+		return files
+	}
+
+	filtered := make([]string, 0, len(files))
+	for _, file := range files {
+		if !ShouldIgnoreFile(file, ignorePatterns) {
+			filtered = append(filtered, file)
+		}
+	}
+	return filtered
+}
+
 // GetStagedDiffFiltered returns the git diff for staged changes, excluding files that match the patterns
 // specified in the config manager under the "file_ignore" key.
 //
@@ -144,17 +160,9 @@ func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager config.Manage
 	}
 	debug.Printf("Staged files: %v", stagedFiles)
 
-	// get ignore patterns
-	var ignorePatterns []string
-	if patterns, ok := cfgManager.Get("file_ignore"); ok {
-		if patternList, ok := patterns.([]interface{}); ok {
-			for _, p := range patternList {
-				if str, ok := p.(string); ok {
-					ignorePatterns = append(ignorePatterns, str)
-				}
-			}
-		}
-	}
+	// get ignore patterns through the shared accessor so both []string
+	// (in-memory defaults) and []interface{} (YAML-loaded configs) work.
+	ignorePatterns := cfgManager.GetFileIgnore()
 	debug.Printf("Ignore patterns: %v", ignorePatterns)
 
 	// if no ignore patterns, return the diff as is

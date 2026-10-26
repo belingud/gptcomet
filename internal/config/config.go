@@ -120,8 +120,13 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	if provider == "ollama" {
 		apiKey = ""
 	} else {
-		apiKeyValue, ok := providerConfig["api_key"].(string)
-		if !ok || apiKeyValue == "" {
+		apiKeyValue, _ := providerConfig["api_key"].(string)
+		if apiKeyValue == "" {
+			// Configuration file wins; environment variables are a fallback
+			// so the guidance in APIKeyNotSetError actually works.
+			apiKeyValue = os.Getenv(gptcometerrors.GetAPIKeyEnvVar(provider))
+		}
+		if apiKeyValue == "" {
 			return nil, gptcometerrors.APIKeyNotSetError(provider)
 		}
 		apiKey = apiKeyValue
@@ -175,9 +180,12 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 		Temperature:      temperature,
 		FrequencyPenalty: frequencyPenalty,
 	}
-	if m, ok := providerConfig["retries"].(float64); ok {
-		clientConfig.Retries = int(m)
-	}
+	clientConfig.Retries = getIntValue(providerConfig, "retries", defaults.DefaultRetries)
+	clientConfig.APIVersion = getStringValue(providerConfig, "api_version", "")
+	clientConfig.DeploymentName = getStringValue(providerConfig, "deployment_name", "")
+	clientConfig.ProjectID = getStringValue(providerConfig, "project_id", "")
+	clientConfig.Location = getStringValue(providerConfig, "location", "")
+	clientConfig.AnthropicVersion = getStringValue(providerConfig, "anthropic_version", "")
 
 	if answerPath, ok := providerConfig["answer_path"].(string); ok {
 		clientConfig.AnswerPath = answerPath
@@ -255,6 +263,11 @@ func (m *Manager) Set(key string, value interface{}) error {
 	case "output.translate_title":
 		if _, ok := value.(bool); !ok {
 			return gptcometerrors.InvalidConfigValueError(key, fmt.Sprintf("%v", value), "translate_title must be a boolean value")
+		}
+	case "output.markdown_theme":
+		theme, ok := value.(string)
+		if !ok || !IsValidMarkdownTheme(theme) {
+			return gptcometerrors.InvalidConfigValueError(key, fmt.Sprintf("%v", value), "markdown theme must be one of: auto, ascii, dark, dracula, light, tokyo-night, notty, pink")
 		}
 	}
 

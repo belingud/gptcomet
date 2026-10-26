@@ -286,12 +286,12 @@ func TestGetAPIKeyEnvVar(t *testing.T) {
 		{"claude", "ANTHROPIC_API_KEY"},
 		{"gemini", "GEMINI_API_KEY"},
 		{"cohere", "COHERE_API_KEY"},
-		{"unknown", "unknown_API_KEY"},
+		{"unknown", "UNKNOWN_API_KEY"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.provider, func(t *testing.T) {
-			if got := getAPIKeyEnvVar(tt.provider); got != tt.want {
+			if got := GetAPIKeyEnvVar(tt.provider); got != tt.want {
 				t.Errorf("getAPIKeyEnvVar(%q) = %q, want %q", tt.provider, got, tt.want)
 			}
 		})

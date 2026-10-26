@@ -87,14 +87,13 @@ func (v *VertexLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 
 // BuildURL builds the API URL for Vertex AI
 func (v *VertexLLM) BuildURL() string {
-	return fmt.Sprintf("%s/%s", v.Config.APIBase, fmt.Sprintf(*v.Config.CompletionPath, v.Config.Model))
+	return fmt.Sprintf("%s/%s", v.Config.APIBase, *v.Config.CompletionPath)
 }
 
 // BuildStreamURL builds the streaming API URL for Vertex AI
 func (v *VertexLLM) BuildStreamURL() string {
 	// Replace :generateContent with :streamGenerateContent for streaming
-	path := fmt.Sprintf(*v.Config.CompletionPath, v.Config.Model)
-	streamPath := strings.ReplaceAll(path, ":generateContent", ":streamGenerateContent")
+	streamPath := strings.ReplaceAll(*v.Config.CompletionPath, ":generateContent", ":streamGenerateContent")
 	return fmt.Sprintf("%s/%s?alt=sse", v.Config.APIBase, streamPath)
 }
 

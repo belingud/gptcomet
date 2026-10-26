@@ -110,6 +110,21 @@ openai:
 			value:   "gpt-4",
 			wantErr: false,
 		},
+		{
+			name:       "Set valid markdown theme",
+			configData: "",
+			key:        "output.markdown_theme",
+			value:      "dark",
+			wantErr:    false,
+		},
+		{
+			name:        "Set invalid markdown theme",
+			configData:  "",
+			key:         "output.markdown_theme",
+			value:       "neon",
+			wantErr:     true,
+			errContains: "markdown theme",
+		},
 	}
 
 	for _, tt := range tests {
@@ -193,6 +208,7 @@ provider: openai
 }
 
 func TestManager_GetClientConfig(t *testing.T) {
+	t.Setenv("OPENAI_API_KEY", "")
 	tests := []struct {
 		name         string
 		configData   string
@@ -385,7 +401,55 @@ openai:
 			initProvider: "",
 			wantErr:      false,
 			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
-				assert.Equal(t, 3, cfg.Retries)
+				assert.Equal(t, 5, cfg.Retries)
+			},
+		},
+		{
+			name: "Azure provider fields",
+			configData: `
+provider: azure
+azure:
+  api_key: test-key
+  api_base: https://test.openai.azure.com
+  deployment_name: test-deployment
+  api_version: 2024-06-01
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "test-deployment", cfg.DeploymentName)
+				assert.Equal(t, "2024-06-01", cfg.APIVersion)
+			},
+		},
+		{
+			name: "Vertex provider fields",
+			configData: `
+provider: vertex
+vertex:
+  api_key: test-key
+  api_base: https://vertex.example.com/v1
+  project_id: test-project
+  location: europe-west1
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "test-project", cfg.ProjectID)
+				assert.Equal(t, "europe-west1", cfg.Location)
+			},
+		},
+		{
+			name: "Claude provider fields",
+			configData: `
+provider: claude
+claude:
+  api_key: test-key
+  anthropic_version: 2024-06-01
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "2024-06-01", cfg.AnthropicVersion)
 			},
 		},
 		{
@@ -533,7 +597,7 @@ openai:
 				assert.Equal(t, 0.95, cfg.TopP)
 				assert.Equal(t, 0.8, cfg.Temperature)
 				assert.Equal(t, 0.2, cfg.FrequencyPenalty)
-				assert.Equal(t, 3, cfg.Retries)
+				assert.Equal(t, 4, cfg.Retries)
 				assert.Equal(t, "http://proxy.example.com:8080", cfg.Proxy)
 				assert.Equal(t, "choices.0.message.content", cfg.AnswerPath)
 				assert.NotNil(t, cfg.CompletionPath)
@@ -571,4 +635,74 @@ openai:
 			}
 		})
 	}
+}
+
+func TestManager_GetClientConfig_APIKeyFromEnv(t *testing.T) {
+	t.Run("env fallback", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: openai
+openai:
+  api_base: https://api.openai.com/v1
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("OPENAI_API_KEY", "env-key")
+		clientConfig, err := cfg.GetClientConfig("")
+		require.NoError(t, err)
+		assert.Equal(t, "env-key", clientConfig.APIKey)
+	})
+
+	t.Run("config wins over env", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: openai
+openai:
+  api_key: config-key
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("OPENAI_API_KEY", "env-key")
+		clientConfig, err := cfg.GetClientConfig("")
+		require.NoError(t, err)
+		assert.Equal(t, "config-key", clientConfig.APIKey)
+	})
+
+	t.Run("generic provider env var", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: deepseek
+deepseek:
+  api_base: https://api.deepseek.com/v1
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("DEEPSEEK_API_KEY", "deepseek-env-key")
+		clientConfig, err := cfg.GetClientConfig("")
+		require.NoError(t, err)
+		assert.Equal(t, "deepseek-env-key", clientConfig.APIKey)
+	})
+
+	t.Run("missing key still errors", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: openai
+openai:
+  api_base: https://api.openai.com/v1
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("OPENAI_API_KEY", "")
+		_, err = cfg.GetClientConfig("")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "API Key Not Configured")
+	})
 }

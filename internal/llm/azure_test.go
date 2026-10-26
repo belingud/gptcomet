@@ -182,3 +182,25 @@ func TestAzureLLM_BuildHeaders(t *testing.T) {
 		})
 	}
 }
+
+func TestNewAzureLLM_DefaultDeploymentAndAPIVersion(t *testing.T) {
+	llm := NewAzureLLM(&types.ClientConfig{
+		APIBase: "https://test.openai.azure.com",
+		Model:   "custom-model",
+	})
+
+	if llm.Config.DeploymentName != "custom-model" {
+		t.Errorf("DeploymentName = %q, want %q", llm.Config.DeploymentName, "custom-model")
+	}
+	if llm.Config.APIVersion != defaultAzureAPIVersion {
+		t.Errorf("APIVersion = %q, want %q", llm.Config.APIVersion, defaultAzureAPIVersion)
+	}
+	wantPath := "deployments/custom-model/chat/completions"
+	if llm.Config.CompletionPath == nil || *llm.Config.CompletionPath != wantPath {
+		t.Errorf("CompletionPath = %v, want %q", llm.Config.CompletionPath, wantPath)
+	}
+	wantURL := "https://test.openai.azure.com/deployments/custom-model/chat/completions?api-version=" + defaultAzureAPIVersion
+	if got := llm.BuildURL(); got != wantURL {
+		t.Errorf("BuildURL() = %q, want %q", got, wantURL)
+	}
+}

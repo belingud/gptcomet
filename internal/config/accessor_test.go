@@ -297,10 +297,12 @@ func TestManager_GetSupportedKeys(t *testing.T) {
 				"provider",
 				"file_ignore",
 				"output.lang",
+				"output.markdown_theme",
 				"output.translate_title",
 				"<provider>.api_key",
 				"<provider>.model",
 				"prompt.brief_commit_message",
+				"prompt.review",
 				"console.verbose",
 			},
 		},
@@ -588,4 +590,12 @@ file_ignore:
 			}
 		})
 	}
+}
+
+func TestManager_GetFileIgnore_InMemoryStringSlice(t *testing.T) {
+	cfg := &Manager{config: map[string]interface{}{
+		"file_ignore": []string{"*.lock", "go.sum"},
+	}}
+
+	assert.Equal(t, []string{"*.lock", "go.sum"}, cfg.GetFileIgnore())
 }

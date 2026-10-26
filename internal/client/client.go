@@ -24,6 +24,7 @@ import (
 	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/llm"
 	"github.com/belingud/gptcomet/internal/logger"
+	promptpkg "github.com/belingud/gptcomet/internal/prompt"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/tidwall/gjson"
 )
@@ -232,8 +233,21 @@ func (c *Client) getClient() (*http.Client, error) {
 
 // TranslateMessage translates the given message to the specified language
 func (c *Client) TranslateMessage(prompt string, message string, lang string) (string, error) {
-	// Format the prompt
-	formattedPrompt := fmt.Sprintf(prompt, message, lang)
+	// Default translation prompts use {{ output.lang }} / {{ placeholder }}.
+	// Keep supporting legacy custom prompts that use fmt-style %s verbs.
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{
+		"placeholder": message,
+		"output.lang": lang,
+	})
+	if !promptpkg.HasPlaceholder(prompt) {
+		if strings.Contains(prompt, "%s") {
+			formattedPrompt = fmt.Sprintf(prompt, message, lang)
+		} else {
+			// A custom prompt without any placeholder would otherwise drop
+			// the message and target language entirely.
+			formattedPrompt = strings.TrimSpace(prompt) + "\n\nTarget language: " + lang + "\n\n" + message
+		}
+	}
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -246,7 +260,7 @@ func (c *Client) TranslateMessage(prompt string, message string, lang string) (s
 
 // GenerateCommitMessage generates a commit message for the given diff
 func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, error) {
-	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{"placeholder": diff})
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -259,7 +273,7 @@ func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, erro
 
 // GenerateReviewComment generates a review comment for the given diff
 func (c *Client) GenerateReviewComment(diff string, prompt string) (string, error) {
-	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{"placeholder": diff})
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -272,7 +286,7 @@ func (c *Client) GenerateReviewComment(diff string, prompt string) (string, erro
 
 // GenerateReviewCommentStream generates a review comment for the given diff
 func (c *Client) GenerateReviewCommentStream(diff string, prompt string, callback func(string) error) error {
-	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{"placeholder": diff})
 
 	// Send the request
 	return c.Stream(context.Background(), formattedPrompt, func(resp *types.CompletionResponse) error {
@@ -320,7 +334,8 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 		}
 	}
 
-	// Marshal the payload
+	// Marshal the payload once. Each retry re-creates only the request body,
+	// so provider-specific formatting is not repeated.
 	reqBody, err := json.Marshal(payload)
 	if err != nil {
 		return gptErrors.RequestMarshalingError(err)
@@ -329,35 +344,84 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 	logger.Debug("Request URL: %s", sanitizeURLForLogging(c.config.Provider, url))
 	headers := c.llm.BuildHeaders()
 
-	// Create the request
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqBody))
-	if err != nil {
-		return gptErrors.RequestCreationError(err)
+	maxRetries := c.config.Retries
+	if maxRetries < 1 {
+		maxRetries = 1
 	}
 
-	// Set the headers
+	var lastErr error
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		logger.Info("Sending streaming request to %s...", c.llm.Name())
+
+		emitted, err := c.streamOnce(ctx, client, url, reqBody, headers, func(content string, raw map[string]interface{}) error {
+			return callback(&types.CompletionResponse{
+				Content: content,
+				Raw:     raw,
+			})
+		})
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+
+		// Never retry after a chunk has been emitted: replaying would print
+		// duplicate or interleaved content. Only recover from connection
+		// failures that happen before the user sees anything.
+		if emitted || attempt == maxRetries-1 || !isRetryableStreamError(err) ||
+			errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			break
+		}
+
+		delay := time.Duration(float64(constants.BaseRetryDelay) * math.Pow(2, float64(attempt)))
+		jitter := time.Duration(rand.Int63n(int64(float64(delay) * constants.MaxJitterPercent)))
+		sleepDuration := delay + jitter
+
+		logger.Info("Retrying streaming request in %v...", sleepDuration)
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(sleepDuration):
+		}
+	}
+
+	return lastErr
+}
+
+// streamOnce performs a single streaming request. It reports whether any
+// non-empty content was emitted so the caller can decide whether a retry is
+// safe.
+func (c *Client) streamOnce(
+	ctx context.Context,
+	client *http.Client,
+	url string,
+	reqBody []byte,
+	headers map[string]string,
+	onChunk func(content string, raw map[string]interface{}) error,
+) (bool, error) {
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqBody))
+	if err != nil {
+		return false, gptErrors.RequestCreationError(err)
+	}
+
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
 
-	logger.Info("Sending streaming request to %s...", c.llm.Name())
-
-	// Send the request
 	resp, err := client.Do(req)
 	if err != nil {
-		return gptErrors.RequestExecutionError(err)
+		return false, gptErrors.RequestExecutionError(err)
 	}
 	defer resp.Body.Close()
 
-	// Check the response status
 	if resp.StatusCode != constants.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
-		return gptErrors.APIStatusError(resp.StatusCode, string(respBody), nil)
+		return false, gptErrors.APIStatusError(resp.StatusCode, string(respBody), nil)
 	}
 
 	logger.Debug("Request succeeded, processing streaming response")
 
-	// Process the streaming response
+	emitted := false
+	lastContentEndedWithNewline := true
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -383,11 +447,12 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 
 		// Check for [DONE] message
 		if data == constants.SSEDone {
-			// Send a newline before breaking to avoid % prompt appearing right after output
-			callback(&types.CompletionResponse{
-				Content: "\n",
-				Raw:     make(map[string]interface{}),
-			})
+			emitted = true
+			if !lastContentEndedWithNewline {
+				if err := onChunk("\n", map[string]interface{}{}); err != nil {
+					return emitted, gptErrors.CallbackError(err)
+				}
+			}
 			break
 		}
 
@@ -400,11 +465,12 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 		// Check for Ollama-specific "done" flag (NDJSON format)
 		if done, ok := streamResp["done"].(bool); ok && done {
 			logger.Debug("Ollama stream finished (done: true)")
-			// Send a newline before breaking to avoid % prompt appearing right after output
-			callback(&types.CompletionResponse{
-				Content: "\n",
-				Raw:     make(map[string]interface{}),
-			})
+			emitted = true
+			if !lastContentEndedWithNewline {
+				if err := onChunk("\n", map[string]interface{}{}); err != nil {
+					return emitted, gptErrors.CallbackError(err)
+				}
+			}
 			break
 		}
 
@@ -436,20 +502,28 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 			continue
 		}
 
-		// Call the callback with the content
-		err := callback(&types.CompletionResponse{
-			Content: content,
-			Raw:     streamResp,
-		})
-		if err != nil {
-			return gptErrors.CallbackError(err)
+		emitted = true
+		lastContentEndedWithNewline = strings.HasSuffix(content, "\n")
+		if err := onChunk(content, streamResp); err != nil {
+			return emitted, gptErrors.CallbackError(err)
 		}
 	}
 
-	// Check for scanner errors
 	if err := scanner.Err(); err != nil {
-		return gptErrors.WrapError(err, "Response Reading Failed", "Error occurred while reading streaming response")
+		// A read failure is a connection failure. If content was already
+		// emitted, Stream sees emitted=true and will not replay it.
+		return emitted, gptErrors.RequestExecutionError(err)
 	}
 
-	return nil
+	return emitted, nil
+}
+
+// isRetryableStreamError reports whether a streaming failure can be safely
+// retried before any content has been emitted.
+func isRetryableStreamError(err error) bool {
+	var gptErr *gptErrors.GPTCometError
+	if errors.As(err, &gptErr) {
+		return gptErr.Type == gptErrors.ErrTypeNetwork
+	}
+	return false
 }

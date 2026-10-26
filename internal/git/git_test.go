@@ -162,3 +162,67 @@ func TestNewVCS(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterIgnoredFiles(t *testing.T) {
+	tests := []struct {
+		name     string
+		files    []string
+		patterns []string
+		want     []string
+	}{
+		{
+			name:     "no patterns keeps all files",
+			files:    []string{"a.go", "b.lock"},
+			patterns: nil,
+			want:     []string{"a.go", "b.lock"},
+		},
+		{
+			name:     "exact match",
+			files:    []string{"a.go", "go.sum"},
+			patterns: []string{"go.sum"},
+			want:     []string{"a.go"},
+		},
+		{
+			name:     "wildcard match",
+			files:    []string{"a.go", "b.lock", "c.tmp"},
+			patterns: []string{"*.lock", "*.tmp"},
+			want:     []string{"a.go"},
+		},
+		{
+			name:     "all files ignored",
+			files:    []string{"a.lock", "b.lock"},
+			patterns: []string{"*.lock"},
+			want:     []string{},
+		},
+		{
+			name:     "empty input",
+			files:    nil,
+			patterns: []string{"*.lock"},
+			want:     []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, FilterIgnoredFiles(tt.files, tt.patterns))
+		})
+	}
+}
+
+func TestGitVCS_GetStagedDiffFiltered_UsesStringSlicePatterns(t *testing.T) {
+	vcs, dir, cleanup := setupVCSTest(t, Git)
+	defer cleanup()
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "keep.go"), []byte("package main\n"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "skip.lock"), []byte("lock\n"), 0644))
+	require.NoError(t, testutils.RunGitCommand(t, dir, "add", "."))
+
+	cfg := new(testutils.MockConfigManager)
+	cfg.On("GetFileIgnore").Return([]string{"*.lock"})
+
+	diff, err := vcs.GetStagedDiffFiltered(dir, cfg)
+	require.NoError(t, err)
+	assert.Contains(t, diff, "keep.go")
+	assert.NotContains(t, diff, "skip.lock")
+	cfg.AssertExpectations(t)
+}

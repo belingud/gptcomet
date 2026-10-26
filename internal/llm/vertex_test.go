@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/belingud/gptcomet/pkg/types"
@@ -217,5 +218,32 @@ func TestVertexLLM_GetUsage(t *testing.T) {
 				t.Errorf("GetUsage() = %s, want %s", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestVertexLLM_BuildURL(t *testing.T) {
+	llm := NewVertexLLM(&types.ClientConfig{
+		APIBase: "https://us-central1-aiplatform.googleapis.com/v1",
+		Model:   "gemini-1.5-flash",
+	})
+
+	want := "https://us-central1-aiplatform.googleapis.com/v1/projects/default-project/locations/us-central1/publishers/google/models/gemini-1.5-flash:generateContent"
+	if got := llm.BuildURL(); got != want {
+		t.Errorf("BuildURL() = %q, want %q", got, want)
+	}
+	if strings.Contains(llm.BuildURL(), "%!") {
+		t.Errorf("BuildURL() contains formatting artifact: %q", llm.BuildURL())
+	}
+}
+
+func TestVertexLLM_BuildStreamURL(t *testing.T) {
+	llm := NewVertexLLM(&types.ClientConfig{
+		APIBase: "https://us-central1-aiplatform.googleapis.com/v1",
+		Model:   "gemini-1.5-flash",
+	})
+
+	want := "https://us-central1-aiplatform.googleapis.com/v1/projects/default-project/locations/us-central1/publishers/google/models/gemini-1.5-flash:streamGenerateContent?alt=sse"
+	if got := llm.BuildStreamURL(); got != want {
+		t.Errorf("BuildStreamURL() = %q, want %q", got, want)
 	}
 }

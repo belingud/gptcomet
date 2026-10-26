@@ -160,6 +160,12 @@ Installed 2 executables: gmsg, gptcomet
 2. **交互式设置**
     - 使用 `gmsg newprovider` 命令完成引导式设置。
 
+3. **环境变量**
+    - 如果配置文件中没有设置 `api_key`，GPTComet 会回退到提供商对应的环境变量，
+      例如 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`GEMINI_API_KEY`、
+      `AZURE_API_KEY`，其他提供商使用 `<PROVIDER>_API_KEY`。
+    - 同时存在时，配置文件优先。
+
 ### 提供商设置指南
 
 ![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)
@@ -383,6 +389,7 @@ GPTComet 提供以下命令：
     -   `remove <key> [value]`：删除配置键，或者从列表中删除某个值。仅用于列表值，例如 `fileignore`。
     -   `append <key> <value>`：向列表配置追加值。仅用于列表值，例如 `fileignore`。
     -   `keys`：列出所有支持的配置键。
+    -   `validate`：校验当前配置并报告问题。
 -   `gmsg commit`：根据变更或 diff 生成提交信息。
     -   `--svn`：为 SVN 生成提交信息。
     -   `--dry-run`：试运行，不真正生成提交信息。
@@ -456,6 +463,7 @@ GPTComet 提供以下命令：
 | `prompt.brief_commit_message`  | 生成简短提交信息的 prompt 模板。                          | 参考 `defaults/defaults.go`       |
 | `prompt.rich_commit_message`   | 生成富文本提交信息的 prompt 模板。                        | 参考 `defaults/defaults.go`       |
 | `prompt.translation`           | 翻译提交信息的 prompt 模板。                              | 参考 `defaults/defaults.go`       |
+| `prompt.review`                | 代码审查使用的 prompt 模板。                              | 参考 `defaults/defaults.go`       |
 
 **注意：**`<provider>` 应替换为实际提供商名称，例如 `openai`、`gemini`、`claude`。
 

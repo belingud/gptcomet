@@ -8,7 +8,7 @@ GPTComet generates Git commit messages and reviews code using LLMs. Supports 23+
 
 - `gmsg commit` - Generate commit message from diff
 - `gmsg review` - AI code review (supports streaming with `--stream`)
-- `gmsg config` - Manage configuration (get/set/list/reset/path/keys/append/remove)
+- `gmsg config` - Manage configuration (get/set/list/reset/path/keys/append/remove/validate)
 - `gmsg newprovider` - Interactive provider setup
 
 ## Architecture
