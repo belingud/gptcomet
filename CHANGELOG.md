@@ -1,5 +1,13 @@
 
 ---
+## [2.6.1](https://github.com/belingud/gptcomet/compare/v2.6.0..v2.6.1) - 2026-10-26
+
+### 🐛 Bug Fixes
+
+- **(ci)** set valid wheel platform tags - ([f7e26fb](https://github.com/belingud/gptcomet/commit/f7e26fb4a54fd2bcbc4f01dda8bd8fe8ec65de14)) - belingud
+
+
+---
 ## [2.6.0](https://github.com/belingud/gptcomet/compare/v2.5.1..v2.6.0) - 2026-10-26
 
 ### ⛰️  Features
