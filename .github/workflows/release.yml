@@ -60,7 +60,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+                python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
                 include:
                     - os: windows-latest
                       arch: amd64
@@ -96,6 +96,19 @@ jobs:
               run: |
                   echo "MATRIX_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
                   echo "MATRIX_OS=${{ matrix.os }}" >> $GITHUB_ENV
+
+            - name: Set wheel platform tag
+              shell: bash
+              run: |
+                  case "${{ matrix.os }}" in
+                    windows-latest) tag=win_amd64 ;;
+                    macos-15-intel) tag=macosx_10_9_x86_64 ;;
+                    macos-15) tag=macosx_11_0_arm64 ;;
+                    ubuntu-22.04) tag=manylinux2014_x86_64 ;;
+                    *) echo "Unsupported runner: ${{ matrix.os }}"; exit 1 ;;
+                  esac
+                  echo "WHEEL_PLATFORM=$tag" >> "$GITHUB_ENV"
+                  echo "WHEEL_PLATFORM=$tag"
 
             - name: Set version and download binary
               shell: nu {0}
@@ -143,17 +156,6 @@ jobs:
                     mv gptcomet $"py/gptcomet/bin/gptcomet_($arch)_linux"
                   }
 
-                  # Set platform tag for wheel
-                  let platform = if $os.name == 'windows' {
-                    'win_amd64'
-                  } else if $os.name == 'darwin' {
-                    'macos'
-                  } else {
-                    'linux'
-                  }
-                  $env.PLATFORM = $platform
-                  print $'Set PLATFORM=$platform'
-
             - name: Install dependencies
               run: |
                   echo "Installing dependencies"
@@ -164,7 +166,7 @@ jobs:
             - name: Build package
               run: |
                   echo "Building package on ${{ matrix.os }} with arch ${{ matrix.arch }}"
-                  uv build --wheel
+                  uv build --wheel --python "${{ matrix.python-version }}" --config-setting=--plat-name="$WHEEL_PLATFORM"
                   ls dist/
 
             - name: Upload wheel artifact
