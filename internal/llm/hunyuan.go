@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultHunyuanAPIBase = "https://api.hunyuan.cloud.tencent.com/v1"
-	DefaultHunyuanModel   = "hunyuan-lite"
+	DefaultHunyuanModel   = "hunyuan-a13b"
 )
 
 // HunyuanLLM implements the LLM interface for Tencent Hunyuan

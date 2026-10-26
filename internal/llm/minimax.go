@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultMinimaxAPIBase = "https://api.minimaxi.com/v1"
-	DefaultMinimaxModel   = "MiniMax-M1"
+	DefaultMinimaxModel   = "MiniMax-M3.1-Flash"
 )
 
 // MinimaxLLM implements the LLM interface for Minimax

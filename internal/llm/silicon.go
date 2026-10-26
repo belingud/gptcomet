@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultSiliconAPIBase = "https://api.siliconflow.cn/v1"
-	DefaultSiliconModel   = "Qwen/Qwen2.5-7B-Instruct"
+	DefaultSiliconModel   = "Qwen/Qwen3.8-2.4T-A95B"
 )
 
 // SiliconLLM implements the LLM interface for Silicon

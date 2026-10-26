@@ -20,7 +20,7 @@ func TestNewChatGLMLLM(t *testing.T) {
 				BaseLLM: &BaseLLM{
 					Config: &types.ClientConfig{
 						APIBase:        "https://open.bigmodel.cn/api/paas/v4",
-						Model:          "glm-4-flash",
+						Model:          DefaultChatGLMModel,
 						CompletionPath: &defaultPath,
 						AnswerPath:     "choices.0.message.content",
 					},
@@ -89,7 +89,7 @@ func TestChatGLMLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://open.bigmodel.cn/api/paas/v4" {
 		t.Errorf("Unexpected default value for api_base")
 	}
-	if got["model"].DefaultValue != "glm-4-flash" {
+	if got["model"].DefaultValue != DefaultChatGLMModel {
 		t.Errorf("Unexpected default value for model")
 	}
 }

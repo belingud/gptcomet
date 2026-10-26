@@ -72,7 +72,7 @@ func TestCommitWorkflow(t *testing.T) {
 provider: openai
 openai:
   api_key: test-key
-  model: gpt-4o
+  model: gpt-6.1-sol
 output:
   lang: en
 `
@@ -121,7 +121,7 @@ func TestFactoryServiceCreation(t *testing.T) {
 provider: openai
 openai:
   api_key: test-key
-  model: gpt-4o
+  model: gpt-6.1-sol
 `
 	configFile, cleanup := testutils.TestConfig(t, configData)
 	defer cleanup()
@@ -260,7 +260,7 @@ func TestConfigWithGitWorkflow(t *testing.T) {
 provider: openai
 openai:
   api_key: test-key
-  model: gpt-4o
+  model: gpt-6.1-sol
 file_ignore:
   - "*.log"
   - "*.tmp"
@@ -369,7 +369,7 @@ func TestConcurrentConfigAccess(t *testing.T) {
 provider: openai
 openai:
   api_key: test-key
-  model: gpt-4o
+  model: gpt-6.1-sol
 `
 	configFile, cleanup := testutils.TestConfig(t, configData)
 	defer cleanup()
@@ -415,7 +415,7 @@ func TestEndToEndWorkflow(t *testing.T) {
 provider: openai
 openai:
   api_key: test-api-key
-  model: gpt-4o
+  model: gpt-6.1-sol
   max_tokens: 1024
   temperature: 0.7
 output:
@@ -461,7 +461,7 @@ func NewFeature() string {
 	// Step 7: Verify all components are properly configured
 	assert.Equal(t, "openai", deps.APIConfig.Provider)
 	assert.Equal(t, "test-api-key", deps.APIConfig.APIKey)
-	assert.Equal(t, "gpt-4o", deps.APIConfig.Model)
+	assert.Equal(t, "gpt-6.1-sol", deps.APIConfig.Model)
 	assert.Equal(t, 1024, deps.APIConfig.MaxTokens)
 	assert.Equal(t, 0.7, deps.APIConfig.Temperature)
 

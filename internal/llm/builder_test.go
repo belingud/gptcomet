@@ -187,12 +187,12 @@ func TestBuildStandardConfig(t *testing.T) {
 			name:           "empty completion and answer paths use OpenAI defaults",
 			config:         &types.ClientConfig{},
 			apiBase:        "https://api.openai.com/v1",
-			model:          "gpt-4o",
+			model:          DefaultOpenAIModel,
 			completionPath: "",
 			answerPath:     "",
 			expected: types.ClientConfig{
 				APIBase:        "https://api.openai.com/v1",
-				Model:          "gpt-4o",
+				Model:          DefaultOpenAIModel,
 				CompletionPath: func() *string { s := "chat/completions"; return &s }(),
 				AnswerPath:     "choices.0.message.content",
 			},
@@ -262,10 +262,10 @@ func TestBuildStandardConfigSimple(t *testing.T) {
 			name:    "simple config with OpenAI defaults",
 			config:  &types.ClientConfig{},
 			apiBase: "https://api.openai.com/v1",
-			model:   "gpt-4o",
+			model:   DefaultOpenAIModel,
 			expected: types.ClientConfig{
 				APIBase:        "https://api.openai.com/v1",
-				Model:          "gpt-4o",
+				Model:          DefaultOpenAIModel,
 				CompletionPath: func() *string { s := "chat/completions"; return &s }(),
 				AnswerPath:     "choices.0.message.content",
 			},
@@ -338,8 +338,8 @@ func TestBuilderIntegration(t *testing.T) {
 		config1 := &types.ClientConfig{}
 		config2 := &types.ClientConfig{}
 
-		BuildStandardConfigSimple(config1, "https://api.openai.com/v1", "gpt-4o")
-		BuildStandardConfig(config2, "https://api.openai.com/v1", "gpt-4o", "", "")
+		BuildStandardConfigSimple(config1, "https://api.openai.com/v1", DefaultOpenAIModel)
+		BuildStandardConfig(config2, "https://api.openai.com/v1", DefaultOpenAIModel, "", "")
 
 		assert.Equal(t, config1.APIBase, config2.APIBase)
 		assert.Equal(t, config1.Model, config2.Model)

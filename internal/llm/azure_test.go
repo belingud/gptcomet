@@ -25,7 +25,7 @@ func TestNewAzureLLM(t *testing.T) {
 						Config: &types.ClientConfig{
 							APIBase:        "https://test.openai.azure.com",
 							DeploymentName: "test-deployment",
-							Model:          "gpt-4o",
+							Model:          DefaultAzureModel,
 							CompletionPath: &completionPath,
 						},
 					},

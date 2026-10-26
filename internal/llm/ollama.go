@@ -11,6 +11,8 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const DefaultOllamaModel = "qwen3.8:27b"
+
 // OllamaLLM is the Ollama LLM provider implementation
 type OllamaLLM struct {
 	*BaseLLM
@@ -29,7 +31,7 @@ func NewOllamaLLM(config *types.ClientConfig) *OllamaLLM {
 		config.AnswerPath = "response"
 	}
 	if config.Model == "" {
-		config.Model = "llama2"
+		config.Model = DefaultOllamaModel
 	}
 	// Ollama uses NDJSON format, not SSE. Stream response format: {"response":"text","done":false}
 	if config.StreamAnswerPath == "" {
@@ -53,7 +55,7 @@ func (o *OllamaLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter Ollama API Base URL",
 		},
 		"model": {
-			DefaultValue:  "llama2",
+			DefaultValue:  DefaultOllamaModel,
 			PromptMessage: "Enter model name",
 		},
 		"max_tokens": {

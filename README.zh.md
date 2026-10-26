@@ -143,7 +143,7 @@ Installed 2 executables: gmsg, gptcomet
 -   `provider`：语言模型提供商，默认值为 `openai`。
 -   `api_base`：API 基础地址，默认值为 `https://api.openai.com/v1`。
 -   `api_key`：提供商的 API 密钥。
--   `model`：用于生成提交信息的模型，默认值为 `gpt-4o`。
+-   `model`：用于生成提交信息的模型，默认值为 `gpt-6.1-sol`。
 
 3.  **运行 GPTComet**：执行 `gmsg commit`。
 
@@ -212,8 +212,8 @@ Previous inputs:
   Enter API key: sk-abc*********************************************
   Enter max tokens: 1024
 
-Enter Enter model name (default: gpt-4o):
-> gpt-4o
+Enter Enter model name (default: gpt-6.1-sol):
+> gpt-6.1-sol
 
 
 Provider openai configured successfully!
@@ -233,8 +233,8 @@ Previous inputs:
   Enter API key: AIz************************************
   Enter max tokens: 1024
 
-Enter Enter model name (default: gemini-1.5-flash):
-> gemini-2.0-flash-exp
+Enter Enter model name (default: gemini-3.8-flash):
+> gemini-3.8-flash
 
 Provider gemini already has a configuration. Do you want to overwrite it? (y/N): y
 
@@ -259,7 +259,7 @@ Previous inputs:
   Enter API key: sk-awz*********************************************
   Enter location (e.g., us-central1): us-central1
   Enter max tokens: 1024
-  Enter model name: gemini-1.5-pro
+  Enter model name: gemini-3.8-flash
 
 Enter Enter Google Cloud project ID:
 > test-project
@@ -280,11 +280,11 @@ Previous inputs:
   Enter Azure OpenAI endpoint: https://gptcomet.openai.azure.com
   Enter API key: ********************************
   Enter API version: 2024-02-15-preview
-  Enter Azure OpenAI deployment name: gpt4o
+  Enter Azure OpenAI deployment name: gpt-6.1-sol
   Enter max tokens: 1024
 
-Enter Enter deployment name (default: gpt-4o):
-> gpt-4o
+Enter Enter deployment name (default: gpt-6.1-sol):
+> gpt-6.1-sol
 
 
 Provider azure configured successfully!
@@ -301,8 +301,8 @@ Previous inputs:
   Enter Ollama API Base URL: http://localhost:11434/api
   Enter max tokens: 1024
 
-Enter Enter model name (default: llama2):
-> llama2
+Enter Enter model name (default: qwen3.8:27b):
+> qwen3.8:27b
 
 
 Provider ollama configured successfully!
@@ -327,6 +327,9 @@ Provider ollama configured successfully!
 -   MiniMax
 -   Yi (lingyiwanwu)
 
+默认模型会定期更新，当前列表和最后核验日期见
+[docs/provider-models.md](docs/provider-models.md)。
+
 暂不支持：
 
 -   Baidu ERNIE
@@ -344,7 +347,7 @@ You can either select one from the list or enter a custom provider name.
 
 Enter provider name: test
 Enter OpenAI API Base URL [https://api.openai.com/v1]:
-Enter model name [gpt-4o]:
+Enter model name [gpt-6.1-sol]:
 Enter API key: ************************************
 Enter max tokens [1024]:
 [GPTComet] Provider test configured successfully.
@@ -516,7 +519,7 @@ provider: openai
 openai:
     api_base: https://api.openai.com/v1
     api_key: YOUR_API_KEY
-    model: gpt-4o
+    model: gpt-6.1-sol
     retries: 2
     max_tokens: 1024
     temperature: 0.7
@@ -531,12 +534,12 @@ openai:
 
 使用 OpenAI 兼容接口的提供商时，可以把 provider 设置为 `openai`，然后设置自定义 `api_base`、`api_key` 和 `model`。
 
-例如 OpenRouter 的 API 接口兼容 OpenAI，可以把 provider 设置为 `openai`，把 `api_base` 设置为 `https://openrouter.ai/api/v1`，把 `api_key` 设置为 [keys 页面](https://openrouter.ai/settings/keys)获取到的密钥，并把 `model` 设置为 `meta-llama/llama-3.1-8b-instruct:free` 或其他需要的模型。
+例如 OpenRouter 的 API 接口兼容 OpenAI，可以把 provider 设置为 `openai`，把 `api_base` 设置为 `https://openrouter.ai/api/v1`，把 `api_key` 设置为 [keys 页面](https://openrouter.ai/settings/keys)获取到的密钥，并把 `model` 设置为 `openai/gpt-6.1-sol` 或其他需要的模型。
 
 ```shell
 gmsg config set openai.api_base https://openrouter.ai/api/v1
 gmsg config set openai.api_key YOUR_API_KEY
-gmsg config set openai.model meta-llama/llama-3.1-8b-instruct:free
+gmsg config set openai.model openai/gpt-6.1-sol
 gmsg config set openai.max_tokens 1024
 ```
 
@@ -668,7 +671,7 @@ provider: "openai"
 openai:
   api_base: "https://api.openai.com/v1"
   api_key: "YOUR_API_KEY"
-  model: "gpt-4o"
+  model: "gpt-6.1-sol"
   retries: 2
 output:
   lang: "en"

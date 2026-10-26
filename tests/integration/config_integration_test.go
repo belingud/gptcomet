@@ -50,13 +50,13 @@ openai:
 provider: openai
 openai:
   api_key: openai-key
-  model: gpt-4
+  model: gpt-6.1-sol
 anthropic:
   api_key: anthropic-key
-  model: claude-3-opus
+  model: claude-sonnet-5-5
 gemini:
   api_key: gemini-key
-  model: gemini-pro
+  model: gemini-3.8-flash
 `,
 			wantErr: false,
 			validateFunc: func(t *testing.T, cfg *config.Manager) {
@@ -80,7 +80,7 @@ provider: openai
 openai:
   api_key: test-key
   api_base: https://custom-api.example.com/v1
-  model: gpt-4-turbo
+  model: gpt-6.1-sol
   max_tokens: 4096
   top_p: 0.95
   temperature: 0.8
@@ -102,7 +102,7 @@ file_ignore:
 				assert.Equal(t, "openai", clientCfg.Provider)
 				assert.Equal(t, "test-key", clientCfg.APIKey)
 				assert.Equal(t, "https://custom-api.example.com/v1", clientCfg.APIBase)
-				assert.Equal(t, "gpt-4-turbo", clientCfg.Model)
+				assert.Equal(t, "gpt-6.1-sol", clientCfg.Model)
 				assert.Equal(t, 4096, clientCfg.MaxTokens)
 				assert.Equal(t, 0.95, clientCfg.TopP)
 				assert.Equal(t, 0.8, clientCfg.Temperature)
@@ -142,7 +142,7 @@ prompt:
 provider: ollama
 ollama:
   api_base: http://localhost:11434
-  model: llama2
+  model: qwen3.8:27b
 `,
 			wantErr: false,
 			validateFunc: func(t *testing.T, cfg *config.Manager) {
@@ -150,7 +150,7 @@ ollama:
 				require.NoError(t, err)
 				assert.Equal(t, "ollama", clientCfg.Provider)
 				assert.Equal(t, "", clientCfg.APIKey)
-				assert.Equal(t, "llama2", clientCfg.Model)
+				assert.Equal(t, "qwen3.8:27b", clientCfg.Model)
 			},
 		},
 		{
@@ -217,7 +217,7 @@ func TestConfigModificationFlow(t *testing.T) {
 provider: openai
 openai:
   api_key: initial-key
-  model: gpt-4
+  model: gpt-6.1-sol
 `
 	configFile, cleanup := testutils.TestConfig(t, initialConfig)
 	defer cleanup()
@@ -227,7 +227,7 @@ openai:
 	require.NoError(t, err)
 
 	// Modify values
-	err = cfg.Set("openai.model", "gpt-4-turbo")
+	err = cfg.Set("openai.model", "gpt-6.1-sol")
 	require.NoError(t, err)
 
 	err = cfg.Set("openai.temperature", 0.7)
@@ -236,7 +236,7 @@ openai:
 	// Verify changes are in memory
 	model, ok := cfg.Get("openai.model")
 	require.True(t, ok)
-	assert.Equal(t, "gpt-4-turbo", model)
+	assert.Equal(t, "gpt-6.1-sol", model)
 
 	temp, ok := cfg.Get("openai.temperature")
 	require.True(t, ok)
@@ -252,7 +252,7 @@ openai:
 
 	model2, ok := cfg2.Get("openai.model")
 	require.True(t, ok)
-	assert.Equal(t, "gpt-4-turbo", model2)
+	assert.Equal(t, "gpt-6.1-sol", model2)
 
 	temp2, ok := cfg2.Get("openai.temperature")
 	require.True(t, ok)
@@ -273,7 +273,7 @@ openai:
 	require.NoError(t, err)
 
 	// Modify and save
-	err = cfg.Set("openai.model", "gpt-4")
+	err = cfg.Set("openai.model", "gpt-6.1-sol")
 	require.NoError(t, err)
 
 	err = cfg.Save()
@@ -318,7 +318,7 @@ func TestConfigResetFlow(t *testing.T) {
 provider: openai
 openai:
   api_key: test-key
-  model: gpt-4
+  model: gpt-6.1-sol
   temperature: 0.8
 output:
   lang: en

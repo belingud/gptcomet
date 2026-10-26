@@ -23,7 +23,7 @@ func TestNewCohereLLM(t *testing.T) {
 				model   string
 			}{
 				apiBase: "https://api.cohere.com/v2",
-				model:   "command-r-plus",
+				model:   DefaultCohereModel,
 			},
 		},
 		{
@@ -82,7 +82,7 @@ func TestCohereLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.cohere.com/v2" {
 		t.Errorf("GetRequiredConfig() api_base default value = %v, want %v", got["api_base"].DefaultValue, "https://api.cohere.com/v2")
 	}
-	if got["model"].DefaultValue != "command-r-plus" {
-		t.Errorf("GetRequiredConfig() model default value = %v, want %v", got["model"].DefaultValue, "command-r-plus")
+	if got["model"].DefaultValue != DefaultCohereModel {
+		t.Errorf("GetRequiredConfig() model default value = %v, want %v", got["model"].DefaultValue, DefaultCohereModel)
 	}
 }

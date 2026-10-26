@@ -29,7 +29,7 @@ func TestProviderInitializationAllProviders(t *testing.T) {
 provider: openai
 openai:
   api_key: test-key
-  model: gpt-4o
+  model: gpt-6.1-sol
 `,
 		},
 		{
@@ -40,7 +40,7 @@ openai:
 provider: anthropic
 anthropic:
   api_key: test-key
-  model: claude-3-opus
+  model: claude-sonnet-5-5
 `,
 		},
 		{
@@ -51,7 +51,7 @@ anthropic:
 provider: gemini
 gemini:
   api_key: test-key
-  model: gemini-pro
+  model: gemini-3.8-flash
 `,
 		},
 		{
@@ -62,7 +62,7 @@ gemini:
 provider: ollama
 ollama:
   api_base: http://localhost:11434
-  model: llama2
+  model: qwen3.8:27b
 `,
 		},
 		{
@@ -73,7 +73,7 @@ ollama:
 provider: deepseek
 deepseek:
   api_key: test-key
-  model: deepseek-chat
+  model: deepseek-v4.1-flash
 `,
 		},
 		{
@@ -84,7 +84,7 @@ deepseek:
 provider: groq
 groq:
   api_key: test-key
-  model: llama2-70b-4096
+  model: openai/gpt-oss-120b
 `,
 		},
 		{
@@ -95,7 +95,7 @@ groq:
 provider: mistral
 mistral:
   api_key: test-key
-  model: mistral-medium
+  model: mistral-large-latest
 `,
 		},
 		{
@@ -106,7 +106,7 @@ mistral:
 provider: cohere
 cohere:
   api_key: test-key
-  model: command
+  model: command-a-plus
 `,
 		},
 		{
@@ -117,7 +117,7 @@ cohere:
 provider: ai21
 ai21:
   api_key: test-key
-  model: j2-ultra
+  model: jamba-1.5-large
 `,
 		},
 		{
@@ -128,7 +128,7 @@ ai21:
 provider: xai
 xai:
   api_key: test-key
-  model: grok-beta
+  model: grok-4.7
 `,
 		},
 	}
@@ -253,13 +253,13 @@ func TestProviderSwitching(t *testing.T) {
 provider: openai
 openai:
   api_key: openai-key
-  model: gpt-4
+  model: gpt-6.1-sol
 anthropic:
   api_key: anthropic-key
-  model: claude-3-opus
+  model: claude-sonnet-5-5
 gemini:
   api_key: gemini-key
-  model: gemini-pro
+  model: gemini-3.8-flash
 `
 	configFile, cleanup := testutils.TestConfig(t, configData)
 	defer cleanup()
@@ -328,7 +328,7 @@ openai:
 			config: `
 provider: ollama
 ollama:
-  model: llama2
+  model: qwen3.8:27b
   api_base: http://localhost:11434
 `,
 			provider:    "ollama",

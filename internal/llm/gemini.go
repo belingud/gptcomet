@@ -17,7 +17,7 @@ import (
 )
 
 // Default gemini model
-const DefaultGeminiModel = "gemini-2.0-flash"
+const DefaultGeminiModel = "gemini-3.8-flash"
 
 // GeminiLLM implements the LLM interface for Gemini
 type GeminiLLM struct {

@@ -23,7 +23,7 @@ func TestNewLongCatLLM(t *testing.T) {
 				model   string
 			}{
 				apiBase: "https://api.longcat.chat/openai",
-				model:   "LongCat-Flash-Chat",
+				model:   DefaultLongCatModel,
 			},
 		},
 		{
@@ -83,9 +83,9 @@ func TestLongCatLLM_GetRequiredConfig(t *testing.T) {
 		t.Errorf("Unexpected default value for api_base: got %v, want %v",
 			got["api_base"].DefaultValue, "https://api.longcat.chat/openai")
 	}
-	if got["model"].DefaultValue != "LongCat-Flash-Chat" {
+	if got["model"].DefaultValue != DefaultLongCatModel {
 		t.Errorf("Unexpected default value for model: got %v, want %v",
-			got["model"].DefaultValue, "LongCat-Flash-Chat")
+			got["model"].DefaultValue, DefaultLongCatModel)
 	}
 }
 

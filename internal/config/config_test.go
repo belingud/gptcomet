@@ -252,7 +252,7 @@ openai:
 				assert.Equal(t, "test-key", cfg.APIKey)
 				// Check defaults
 				assert.Equal(t, "https://api.openai.com/v1", cfg.APIBase)
-				assert.Equal(t, "gpt-4o", cfg.Model)
+				assert.Equal(t, "gpt-6.1-sol", cfg.Model)
 				assert.Equal(t, 1024, cfg.MaxTokens)
 				assert.Equal(t, 1.0, cfg.TopP)
 				assert.Equal(t, 0.3, cfg.Temperature)
@@ -282,14 +282,14 @@ anthropic:
 			configData: `
 provider: ollama
 ollama:
-  model: llama2
+  model: qwen3.8:27b
 `,
 			initProvider: "",
 			wantErr:      false,
 			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
 				assert.Equal(t, "ollama", cfg.Provider)
 				assert.Equal(t, "", cfg.APIKey)
-				assert.Equal(t, "llama2", cfg.Model)
+				assert.Equal(t, "qwen3.8:27b", cfg.Model)
 			},
 		},
 		{

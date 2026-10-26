@@ -28,7 +28,7 @@ func TestNewTongyiLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://dashscope.aliyuncs.com/compatible-mode/v1",
-				model:          "qwen-turbo",
+				model:          DefaultTongyiModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -101,7 +101,7 @@ func TestTongyiLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://dashscope.aliyuncs.com/compatible-mode/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "qwen-turbo" {
+	if got["model"].DefaultValue != DefaultTongyiModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

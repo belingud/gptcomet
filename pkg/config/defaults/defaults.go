@@ -6,7 +6,7 @@ import (
 
 const (
 	DefaultAPIBase          = "https://api.openai.com/v1"
-	DefaultModel            = "gpt-4o"
+	DefaultModel            = "gpt-6.1-sol"
 	DefaultRetries          = 3
 	DefaultMaxTokens        = 1024
 	DefaultTemperature      = 0.3
@@ -20,6 +20,7 @@ const (
 // The configuration map contains the default values for the provider, file
 // ignore, output, console, openai, and claude configuration options.
 //
+// Model defaults were last verified on 2026-10-26.
 // The default values are as follows:
 //
 //   - provider: "openai"
@@ -49,7 +50,7 @@ const (
 //   - claude:
 //   - api_base: "https://api.anthropic.com"
 //   - api_key: an empty string (must be set by the user)
-//   - model: "claude-3.5-sonnet"
+//   - model: "claude-sonnet-5-5"
 //   - retries: 2
 //   - proxy: an empty string (must be set by the user)
 //   - max_tokens: 1024
@@ -106,7 +107,7 @@ func defaultConfig() map[string]interface{} {
 		"claude": map[string]interface{}{
 			"api_base":          "https://api.anthropic.com",
 			"api_key":           "",
-			"model":             "claude-3.5-sonnet",
+			"model":             "claude-sonnet-5-5",
 			"retries":           2,
 			"proxy":             "",
 			"max_tokens":        1024,
