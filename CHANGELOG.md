@@ -1,5 +1,13 @@
 
 ---
+## [2.6.3](https://github.com/belingud/gptcomet/compare/v2.6.2..v2.6.3) - 2026-10-26
+
+### ⚙️ Miscellaneous Tasks
+
+- use macOS 15 ARM runner image - ([07c5d88](https://github.com/belingud/gptcomet/commit/07c5d88b2e8e426a5f2142f131a69100127aebb5)) - belingud
+
+
+---
 ## [2.6.2](https://github.com/belingud/gptcomet/compare/v2.6.1..v2.6.2) - 2026-10-26
 
 ### 🐛 Bug Fixes
