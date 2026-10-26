@@ -208,3 +208,21 @@ func TestFilterIgnoredFiles(t *testing.T) {
 		})
 	}
 }
+
+func TestGitVCS_GetStagedDiffFiltered_UsesStringSlicePatterns(t *testing.T) {
+	vcs, dir, cleanup := setupVCSTest(t, Git)
+	defer cleanup()
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "keep.go"), []byte("package main\n"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "skip.lock"), []byte("lock\n"), 0644))
+	require.NoError(t, testutils.RunGitCommand(t, dir, "add", "."))
+
+	cfg := new(testutils.MockConfigManager)
+	cfg.On("GetFileIgnore").Return([]string{"*.lock"})
+
+	diff, err := vcs.GetStagedDiffFiltered(dir, cfg)
+	require.NoError(t, err)
+	assert.Contains(t, diff, "keep.go")
+	assert.NotContains(t, diff, "skip.lock")
+	cfg.AssertExpectations(t)
+}

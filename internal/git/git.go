@@ -160,17 +160,9 @@ func (g *GitVCS) GetStagedDiffFiltered(repoPath string, cfgManager config.Manage
 	}
 	debug.Printf("Staged files: %v", stagedFiles)
 
-	// get ignore patterns
-	var ignorePatterns []string
-	if patterns, ok := cfgManager.Get("file_ignore"); ok {
-		if patternList, ok := patterns.([]interface{}); ok {
-			for _, p := range patternList {
-				if str, ok := p.(string); ok {
-					ignorePatterns = append(ignorePatterns, str)
-				}
-			}
-		}
-	}
+	// get ignore patterns through the shared accessor so both []string
+	// (in-memory defaults) and []interface{} (YAML-loaded configs) work.
+	ignorePatterns := cfgManager.GetFileIgnore()
 	debug.Printf("Ignore patterns: %v", ignorePatterns)
 
 	// if no ignore patterns, return the diff as is

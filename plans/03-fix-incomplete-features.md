@@ -2,7 +2,7 @@
 
 > 分支：`fix/incomplete-features`
 > 基线：`master` @ `bb5578c`（v2.5.1）
-> 状态：已完成，待独立复核（实现提交见第 9 节）
+> 状态：已完成，独立复核通过（实现提交见第 9 节）
 > 范围：仅修复代码审查中确认的、代码层可见的未完成/半成品问题。不包含 VSCode 扩展、Git hooks、JetBrains/Vim/Emacs、团队/SaaS、覆盖率门禁、ARM64 发布矩阵等路线图或工程化大项。
 
 ## 1. 背景
@@ -219,7 +219,7 @@
 1. 在 `internal/git` 中提取纯函数：
    - `FilterIgnoredFiles(files []string, patterns []string) []string`
    - 复用现有 `ShouldIgnoreFile`。
-2. SVN 的 `GetStagedDiffFiltered` 使用该函数；Git 保留现有过滤逻辑，避免无关重构。
+2. Git 与 SVN 都通过 `GetFileIgnore` 读取模式；Git 保留现有 diff 参数构造，SVN 使用 `FilterIgnoredFiles`。
 3. SVN：
    - 先 `GetStagedFiles`。
    - 过滤后为空则返回 `""`（上层按无变更处理）。
@@ -329,7 +329,6 @@
 
 - 合法配置：返回空列表，命令成功。
 - 缺 provider / 缺 api_key / 非法 lang / 非法 markdown theme / 负 retries / 非数组 file_ignore：分别报告对应问题。
-- Azure/Vertex 缺必填字段：报告。
 - `config set output.markdown_theme invalid`：返回错误；合法值成功。
 - mock manager 的 validate 命令行为符合预期。
 
@@ -425,7 +424,7 @@ go test ./internal/client -run TestTranslateMessage -v
 | 环境变量优先级争议 | 低 | 明确“配置文件优先，环境变量兜底”；在 README 写清楚 |
 | SVN diff 参数变化 | 中 | 纯函数测试 + 现有 SVN 测试（有 svn 时）；保留原有文件列表解析 |
 | 流式重试导致重复输出 | 中 | 仅在尚未输出任何内容时重试；已有内容后立即返回错误；增加“部分输出后断开”测试 |
-| config validate 误报 | 中 | 第一版只校验明确规则；provider 专属缺失用 warning/error 分级；未知 key 不拒绝 |
+| config validate 误报 | 中 | 第一版只校验明确规则；provider 专属字段使用运行时默认值，不单独报错；未知 key 不拒绝 |
 
 回滚策略：每个工作项独立 commit，出现问题可单独 revert；不涉及配置迁移、数据写入或发布流程。
 
@@ -449,8 +448,9 @@ go test ./internal/client -run TestTranslateMessage -v
 6. `385192e` fix(review): clean up streaming output and retry before first chunk
 7. `5d3ccfc` feat(config): add validate command
 8. `a89304e` fix(config): refine validation and streaming error output
+9. `e6fe16e` fix: address independent review findings
 
-独立验收后的补强（本次提交）：
+独立验收后的补强（含上述 `e6fe16e` 及后续小修）：
 
 - HTTP 200 后、首个 chunk 前发生读取错误时，按网络错误处理并允许安全重试；只有尚未输出内容时才重试。
 - `TranslateMessage` 对既无 `{{...}}` 也无 `%s` 的自定义模板增加兜底，确保 message 和 target language 进入 prompt。
@@ -459,6 +459,8 @@ go test ./internal/client -run TestTranslateMessage -v
 - 修复 Vertex `BuildURL`/`BuildStreamURL` 对已格式化 `CompletionPath` 二次 `Sprintf` 产生的 `%!(EXTRA ...)` 畸形 URL。
 - 移除 `config validate` 对 Azure/Vertex 运行时默认值的 provider-specific 报错，避免误报；`api_key` 仍按 provider 检查。
 - 补充“200 后空闲断开重试”“全部文件被忽略”“流式换行”等回归测试。
+- `GetFileIgnore` 的 `[]string` 支持同时覆盖 Git 首次运行路径，新增 Git 回归测试。
+- 修复后独立复核结论：通过（未发现阻断/高危问题，仅剩低优先级边界风险）。
 
 验证结果：
 
