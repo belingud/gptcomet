@@ -162,3 +162,49 @@ func TestNewVCS(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterIgnoredFiles(t *testing.T) {
+	tests := []struct {
+		name     string
+		files    []string
+		patterns []string
+		want     []string
+	}{
+		{
+			name:     "no patterns keeps all files",
+			files:    []string{"a.go", "b.lock"},
+			patterns: nil,
+			want:     []string{"a.go", "b.lock"},
+		},
+		{
+			name:     "exact match",
+			files:    []string{"a.go", "go.sum"},
+			patterns: []string{"go.sum"},
+			want:     []string{"a.go"},
+		},
+		{
+			name:     "wildcard match",
+			files:    []string{"a.go", "b.lock", "c.tmp"},
+			patterns: []string{"*.lock", "*.tmp"},
+			want:     []string{"a.go"},
+		},
+		{
+			name:     "all files ignored",
+			files:    []string{"a.lock", "b.lock"},
+			patterns: []string{"*.lock"},
+			want:     []string{},
+		},
+		{
+			name:     "empty input",
+			files:    nil,
+			patterns: []string{"*.lock"},
+			want:     []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, FilterIgnoredFiles(tt.files, tt.patterns))
+		})
+	}
+}

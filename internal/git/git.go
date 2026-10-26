@@ -123,6 +123,22 @@ func ShouldIgnoreFile(file string, ignorePatterns []string) bool {
 	return false
 }
 
+// FilterIgnoredFiles returns files that do not match any of the ignore
+// patterns. The input order is preserved.
+func FilterIgnoredFiles(files []string, ignorePatterns []string) []string {
+	if len(ignorePatterns) == 0 {
+		return files
+	}
+
+	filtered := make([]string, 0, len(files))
+	for _, file := range files {
+		if !ShouldIgnoreFile(file, ignorePatterns) {
+			filtered = append(filtered, file)
+		}
+	}
+	return filtered
+}
+
 // GetStagedDiffFiltered returns the git diff for staged changes, excluding files that match the patterns
 // specified in the config manager under the "file_ignore" key.
 //

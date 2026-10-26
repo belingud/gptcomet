@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -187,4 +188,31 @@ func TestSVNVCSErrors(t *testing.T) {
 			assert.Error(t, err)
 		})
 	}
+}
+
+func TestSVNVCS_GetStagedDiffFiltered_HonorsFileIgnore(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake svn shell script is not portable to Windows")
+	}
+
+	binDir := t.TempDir()
+	script := filepath.Join(binDir, "svn")
+	content := `#!/bin/sh
+if [ "$1" = "status" ]; then
+  printf 'A       keep.go\nA       skip.lock\n'
+  exit 0
+fi
+printf 'DIFF:%s\n' "$*"
+`
+	require.NoError(t, os.WriteFile(script, []byte(content), 0755))
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	cfg := new(testutils.MockConfigManager)
+	cfg.On("GetFileIgnore").Return([]string{"*.lock"})
+
+	diff, err := (&SVNVCS{}).GetStagedDiffFiltered(t.TempDir(), cfg)
+	require.NoError(t, err)
+	assert.Contains(t, diff, "keep.go")
+	assert.NotContains(t, diff, "skip.lock")
+	assert.Contains(t, diff, "DIFF:diff -- keep.go")
 }

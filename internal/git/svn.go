@@ -93,7 +93,13 @@ func (s *SVNVCS) GetStagedDiffFiltered(repoPath string, cfgManager config.Manage
 		return "", nil
 	}
 
-	cmd := exec.Command("svn", append([]string{"diff"}, files...)...)
+	files = FilterIgnoredFiles(files, cfgManager.GetFileIgnore())
+	if len(files) == 0 {
+		return "", nil
+	}
+
+	args := append([]string{"diff", "--"}, files...)
+	cmd := exec.Command("svn", args...)
 	return s.runCommand(cmd, repoPath)
 }
 
