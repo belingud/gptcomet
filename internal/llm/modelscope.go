@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultModelScopeAPIBase = "https://api-inference.modelscope.cn/v1"
-	DefaultModelScopeModel   = "deepseek-ai/DeepSeek-V3-0324"
+	DefaultModelScopeModel   = "deepseek-ai/DeepSeek-V4.1-Flash"
 )
 
 // ModelScopeLLM implements the LLM interface for ModelScope

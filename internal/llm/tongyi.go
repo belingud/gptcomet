@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DefaultTongyiModel   = "qwen-turbo"
+	DefaultTongyiModel   = "qwen3.8-max"
 	DefaultTongyiAPIBase = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
 

@@ -8,6 +8,8 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const DefaultAzureModel = "gpt-6.1-sol"
+
 // AzureLLM implements the LLM interface for Azure OpenAI
 type AzureLLM struct {
 	*OpenAILLM
@@ -16,7 +18,7 @@ type AzureLLM struct {
 // NewAzureLLM creates a new AzureLLM
 func NewAzureLLM(config *types.ClientConfig) *AzureLLM {
 	if config.Model == "" {
-		config.Model = "gpt-4o"
+		config.Model = DefaultAzureModel
 	}
 	completionPath := fmt.Sprintf("deployments/%s/chat/completions", config.DeploymentName)
 	config.CompletionPath = &completionPath
@@ -46,7 +48,7 @@ func (a *AzureLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"model": {
-			DefaultValue:  "gpt-4o",
+			DefaultValue:  DefaultAzureModel,
 			PromptMessage: "Enter deployment name",
 		},
 		"max_tokens": {

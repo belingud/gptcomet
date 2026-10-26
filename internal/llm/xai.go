@@ -7,7 +7,7 @@ import (
 
 const (
 	DefaultXAIAPIBase = "https://api.x.ai/v1"
-	DefaultXAIModel   = "grok-beta"
+	DefaultXAIModel   = "grok-4.7"
 )
 
 // XAILLM implements the LLM interface for XAI

@@ -12,7 +12,7 @@ import (
 
 const (
 	DefaultCohereAPIBase = "https://api.cohere.com/v2"
-	DefaultCohereModel   = "command-r-plus"
+	DefaultCohereModel   = "command-a-plus"
 )
 
 // CohereLLM implements the LLM interface for Cohere

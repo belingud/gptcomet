@@ -28,7 +28,7 @@ func TestNewSiliconLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://api.siliconflow.cn/v1",
-				model:          "Qwen/Qwen2.5-7B-Instruct",
+				model:          DefaultSiliconModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -102,7 +102,7 @@ func TestSiliconLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.siliconflow.cn/v1" {
 		t.Errorf("Unexpected default value for api_base, wanted https://api.siliconflow.cn/v1, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "Qwen/Qwen2.5-7B-Instruct" {
+	if got["model"].DefaultValue != DefaultSiliconModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultOpenRouterAPIBase = "https://openrouter.ai/api/v1"
-	DefaultOpenRouterModel   = "meta-llama/llama-3.1-70b-instruct:free"
+	DefaultOpenRouterModel   = "openai/gpt-6.1-sol"
 )
 
 // OpenRouterLLM implements the LLM interface for OpenRouter

@@ -23,7 +23,7 @@ func TestNewKimiLLM(t *testing.T) {
 				model   string
 			}{
 				apiBase: "https://api.moonshot.cn/v1",
-				model:   "moonshot-v1-8k",
+				model:   DefaultKimiModel,
 			},
 		},
 		{
@@ -82,7 +82,7 @@ func TestKimiLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.moonshot.cn/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "moonshot-v1-8k" {
+	if got["model"].DefaultValue != DefaultKimiModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

@@ -13,7 +13,7 @@ import (
 
 const (
 	DefaultOpenAIAPIBase = "https://api.openai.com/v1"
-	DefaultOpenAIModel   = "gpt-4o"
+	DefaultOpenAIModel   = "gpt-6.1-sol"
 )
 
 // OpenAILLM implements the LLM interface for OpenAI

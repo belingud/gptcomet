@@ -30,7 +30,7 @@ func TestNewClaudeLLM(t *testing.T) {
 				anthropicVersion string
 			}{
 				apiBase:          "https://api.anthropic.com/v1",
-				model:            "claude-3-sonnet",
+				model:            DefaultClaudeModel,
 				completionPath:   "messages",
 				answerPath:       "content.0.text",
 				anthropicVersion: "2024-01-01",
@@ -112,7 +112,7 @@ func TestClaudeLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.anthropic.com/v1" {
 		t.Errorf("Unexpected default value for api_base")
 	}
-	if got["model"].DefaultValue != "claude-3-sonnet" {
+	if got["model"].DefaultValue != DefaultClaudeModel {
 		t.Errorf("Unexpected default value for model")
 	}
 	if got["anthropic_version"].DefaultValue != "2024-01-01" {

@@ -12,6 +12,8 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
+const DefaultClaudeModel = "claude-sonnet-5-5"
+
 // ClaudeLLM is the Claude LLM provider implementation
 type ClaudeLLM struct {
 	*BaseLLM
@@ -23,7 +25,7 @@ func NewClaudeLLM(config *types.ClientConfig) *ClaudeLLM {
 		config.APIBase = "https://api.anthropic.com/v1"
 	}
 	if config.Model == "" {
-		config.Model = "claude-3-sonnet"
+		config.Model = DefaultClaudeModel
 	}
 	if config.CompletionPath == nil {
 		defaultPath := "messages"
@@ -57,7 +59,7 @@ func (c *ClaudeLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter Claude API base",
 		},
 		"model": {
-			DefaultValue:  "claude-3-sonnet",
+			DefaultValue:  DefaultClaudeModel,
 			PromptMessage: "Enter model name",
 		},
 		"api_key": {

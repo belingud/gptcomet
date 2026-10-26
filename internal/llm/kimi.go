@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultKimiAPIBase = "https://api.moonshot.cn/v1"
-	DefaultKimiModel   = "moonshot-v1-8k"
+	DefaultKimiModel   = "kimi-k3-1-pro"
 )
 
 // KimiLLM implements the LLM interface for Kimi

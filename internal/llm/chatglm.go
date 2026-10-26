@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultChatGLMAPIBase = "https://open.bigmodel.cn/api/paas/v4"
-	DefaultChatGLMModel   = "glm-4-flash"
+	DefaultChatGLMModel   = "glm-5.3-flash"
 )
 
 // ChatGLMLLM implements the LLM interface for ChatGLM

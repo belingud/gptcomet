@@ -78,7 +78,7 @@ type LLM interface {
 **Default values**: [pkg/config/defaults/defaults.go](pkg/config/defaults/defaults.go)
 
 - Default provider: `openai`
-- Default model: `gpt-4o`
+- Default model: `gpt-6.1-sol`
 - Default API base: `https://api.openai.com/v1`
 - Prompts: `brief_commit_message`, `rich_commit_message`, `translation`, `review`
 
@@ -111,6 +111,7 @@ default: provider = llm.NewDefaultLLM(config)
 ## Documentation
 
 - [README.md](README.md) - User guide, installation, configuration
+- [docs/provider-models.md](docs/provider-models.md) - Default models per provider and refresh checklist
 - [pyproject.toml](pyproject.toml) - Python project config, tool settings
 
 ## Notes

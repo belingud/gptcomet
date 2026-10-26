@@ -23,7 +23,7 @@ func TestNewSambanovaLLM(t *testing.T) {
 				model   string
 			}{
 				apiBase: "https://api.sambanova.ai/v1",
-				model:   "Meta-Llama-3.3-70B-Instruct",
+				model:   DefaultSambanovaModel,
 			},
 		},
 		{
@@ -82,7 +82,7 @@ func TestSambanovaLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.sambanova.ai/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "Meta-Llama-3.3-70B-Instruct" {
+	if got["model"].DefaultValue != DefaultSambanovaModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

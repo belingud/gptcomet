@@ -19,7 +19,7 @@ func TestNewGroqLLM(t *testing.T) {
 			expected: &GroqLLM{
 				OpenAILLM: NewOpenAILLM(&types.ClientConfig{
 					APIBase: "https://api.groq.com/openai/v1",
-					Model:   "llama-3.3-70b-versatile",
+					Model:   DefaultGroqModel,
 				}),
 			},
 		},
@@ -54,7 +54,7 @@ func TestGroqLLMGetRequiredConfig(t *testing.T) {
 
 	expected := map[string]string{
 		"api_base":   "https://api.groq.com/openai/v1",
-		"model":      "llama-3.3-70b-versatile",
+		"model":      DefaultGroqModel,
 		"max_tokens": "1024",
 	}
 

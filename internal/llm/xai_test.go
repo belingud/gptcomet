@@ -28,7 +28,7 @@ func TestNewXAILLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://api.x.ai/v1",
-				model:          "grok-beta",
+				model:          DefaultXAIModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -101,7 +101,7 @@ func TestXAILLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.x.ai/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "grok-beta" {
+	if got["model"].DefaultValue != DefaultXAIModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

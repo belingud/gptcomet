@@ -32,10 +32,10 @@ func TestNewVertexLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://us-central1-aiplatform.googleapis.com/v1",
-				model:          "gemini-1.5-flash",
+				model:          DefaultVertexModel,
 				projectID:      "default-project",
 				location:       "us-central1",
-				completionPath: "projects/default-project/locations/us-central1/publishers/google/models/gemini-1.5-flash:generateContent",
+				completionPath: "projects/default-project/locations/us-central1/publishers/google/models/" + DefaultVertexModel + ":generateContent",
 				answerPath:     "candidates.0.content.parts.0.text",
 			},
 		},
@@ -124,7 +124,7 @@ func TestVertexLLM_GetRequiredConfig(t *testing.T) {
 	if got["location"].DefaultValue != "us-central1" {
 		t.Errorf("Unexpected default value for location, got %s", got["location"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "gemini-pro" {
+	if got["model"].DefaultValue != DefaultVertexModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }

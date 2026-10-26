@@ -28,7 +28,7 @@ func TestNewMinimaxLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://api.minimaxi.com/v1",
-				model:          "MiniMax-M1",
+				model:          DefaultMinimaxModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -101,7 +101,7 @@ func TestMinimaxLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.minimaxi.com/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "MiniMax-M1" {
+	if got["model"].DefaultValue != DefaultMinimaxModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 	if got["max_tokens"].DefaultValue != "1024" {

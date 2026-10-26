@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultSambanovaAPIBase = "https://api.sambanova.ai/v1"
-	DefaultSambanovaModel   = "Meta-Llama-3.3-70B-Instruct"
+	DefaultSambanovaModel   = "Meta-Llama-4-Maverick-17B-128E-Instruct"
 )
 
 // SambanovaLLM implements the LLM interface for SambaNova

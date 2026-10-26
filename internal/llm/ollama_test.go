@@ -28,7 +28,7 @@ func TestNewOllamaLLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "http://localhost:11434/api",
-				model:          "llama2",
+				model:          DefaultOllamaModel,
 				completionPath: "generate",
 				answerPath:     "response",
 			},
@@ -100,14 +100,14 @@ func TestOllamaLLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "http://localhost:11434/api" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "llama2" {
+	if got["model"].DefaultValue != DefaultOllamaModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }
 
 func TestOllamaLLM_FormatMessages(t *testing.T) {
 	llm := NewOllamaLLM(&types.ClientConfig{
-		Model:             "llama2",
+		Model:             DefaultOllamaModel,
 		MaxTokens:         1024,
 		Temperature:       0.7,
 		TopP:              0.9,
@@ -133,8 +133,8 @@ func TestOllamaLLM_FormatMessages(t *testing.T) {
 		return
 	}
 
-	if payload["model"] != "llama2" {
-		t.Errorf("model = %v, want llama2", payload["model"])
+	if payload["model"] != DefaultOllamaModel {
+		t.Errorf("model = %v, want %v", payload["model"], DefaultOllamaModel)
 	}
 	if payload["prompt"] != message {
 		t.Errorf("prompt = %v, want %v", payload["prompt"], message)

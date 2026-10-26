@@ -19,7 +19,7 @@ func TestNewOpenRouterLLM(t *testing.T) {
 			expected: &OpenRouterLLM{
 				BaseLLM: NewBaseLLM(&types.ClientConfig{
 					APIBase: "https://openrouter.ai/api/v1",
-					Model:   "meta-llama/llama-3.1-70b-instruct:free",
+					Model:   DefaultOpenRouterModel,
 				}),
 			},
 		},
@@ -60,7 +60,7 @@ func TestOpenRouterLLM_GetRequiredConfig(t *testing.T) {
 	config := llm.GetRequiredConfig()
 
 	assert.Equal(t, "https://openrouter.ai/api/v1", config["api_base"].DefaultValue)
-	assert.Equal(t, "meta-llama/llama-3.1-70b-instruct:free", config["model"].DefaultValue)
+	assert.Equal(t, DefaultOpenRouterModel, config["model"].DefaultValue)
 	assert.Equal(t, "1024", config["max_tokens"].DefaultValue)
 	assert.Empty(t, config["api_key"].DefaultValue)
 }

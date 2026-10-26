@@ -11,6 +11,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const DefaultVertexModel = "gemini-3.8-flash"
+
 // VertexLLM implements the LLM interface for Google Cloud Vertex AI
 type VertexLLM struct {
 	*BaseLLM
@@ -22,7 +24,7 @@ func NewVertexLLM(config *types.ClientConfig) *VertexLLM {
 		config.APIBase = "https://us-central1-aiplatform.googleapis.com/v1"
 	}
 	if config.Model == "" {
-		config.Model = "gemini-1.5-flash"
+		config.Model = DefaultVertexModel
 	}
 
 	if config.ProjectID == "" {
@@ -71,7 +73,7 @@ func (v *VertexLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter location (e.g., us-central1)",
 		},
 		"model": {
-			DefaultValue:  "gemini-pro",
+			DefaultValue:  DefaultVertexModel,
 			PromptMessage: "Enter model name",
 		},
 		"api_key": {

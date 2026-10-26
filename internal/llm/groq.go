@@ -17,7 +17,7 @@ import (
 
 const (
 	DefaultGroqAPIBase = "https://api.groq.com/openai/v1"
-	DefaultGroqModel   = "llama-3.3-70b-versatile"
+	DefaultGroqModel   = "openai/gpt-oss-120b"
 )
 
 // GroqLLM implements the LLM interface for Groq

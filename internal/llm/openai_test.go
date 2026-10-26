@@ -30,7 +30,7 @@ func TestNewOpenAILLM(t *testing.T) {
 				answerPath     string
 			}{
 				apiBase:        "https://api.openai.com/v1",
-				model:          "gpt-4o",
+				model:          DefaultOpenAIModel,
 				completionPath: "chat/completions",
 				answerPath:     "choices.0.message.content",
 			},
@@ -103,7 +103,7 @@ func TestOpenAILLM_GetRequiredConfig(t *testing.T) {
 	if got["api_base"].DefaultValue != "https://api.openai.com/v1" {
 		t.Errorf("Unexpected default value for api_base, got %s", got["api_base"].DefaultValue)
 	}
-	if got["model"].DefaultValue != "gpt-4o" {
+	if got["model"].DefaultValue != DefaultOpenAIModel {
 		t.Errorf("Unexpected default value for model, got %s", got["model"].DefaultValue)
 	}
 }
