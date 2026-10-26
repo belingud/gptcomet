@@ -329,7 +329,7 @@ Provider ollama configured successfully!
 -   Yi (lingyiwanwu)
 
 Default models are refreshed periodically; see
-[docs/provider-models.md](docs/provider-models.md) for the current defaults and
+[docs/provider-models.md](https://github.com/belingud/gptcomet/blob/master/docs/provider-models.md) for the current defaults and
 the last verification date.
 
 Not supported:

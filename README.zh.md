@@ -328,7 +328,7 @@ Provider ollama configured successfully!
 -   Yi (lingyiwanwu)
 
 默认模型会定期更新，当前列表和最后核验日期见
-[docs/provider-models.md](docs/provider-models.md)。
+[docs/provider-models.md](https://github.com/belingud/gptcomet/blob/master/docs/provider-models.md)。
 
 暂不支持：
 

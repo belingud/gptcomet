@@ -33,7 +33,7 @@ func TestNewClaudeLLM(t *testing.T) {
 				model:            DefaultClaudeModel,
 				completionPath:   "messages",
 				answerPath:       "content.0.text",
-				anthropicVersion: "2024-01-01",
+				anthropicVersion: DefaultClaudeAPIVersion,
 			},
 		},
 		{
@@ -115,7 +115,7 @@ func TestClaudeLLM_GetRequiredConfig(t *testing.T) {
 	if got["model"].DefaultValue != DefaultClaudeModel {
 		t.Errorf("Unexpected default value for model")
 	}
-	if got["anthropic_version"].DefaultValue != "2024-01-01" {
+	if got["anthropic_version"].DefaultValue != DefaultClaudeAPIVersion {
 		t.Errorf("Unexpected default value for anthropic_version")
 	}
 }
@@ -165,11 +165,11 @@ func TestClaudeLLM_BuildHeaders(t *testing.T) {
 			name: "standard headers",
 			config: &types.ClientConfig{
 				APIKey:           "test-key",
-				AnthropicVersion: "2024-01-01",
+				AnthropicVersion: DefaultClaudeAPIVersion,
 			},
 			want: map[string]string{
 				"Content-Type":      "application/json",
-				"anthropic-version": "2024-01-01",
+				"anthropic-version": DefaultClaudeAPIVersion,
 				"x-api-key":         "test-key",
 			},
 		},
@@ -177,14 +177,14 @@ func TestClaudeLLM_BuildHeaders(t *testing.T) {
 			name: "headers with extra headers",
 			config: &types.ClientConfig{
 				APIKey:           "test-key",
-				AnthropicVersion: "2024-01-01",
+				AnthropicVersion: DefaultClaudeAPIVersion,
 				ExtraHeaders: map[string]string{
 					"X-Custom": "custom-value",
 				},
 			},
 			want: map[string]string{
 				"Content-Type":      "application/json",
-				"anthropic-version": "2024-01-01",
+				"anthropic-version": DefaultClaudeAPIVersion,
 				"x-api-key":         "test-key",
 				"X-Custom":          "custom-value",
 			},

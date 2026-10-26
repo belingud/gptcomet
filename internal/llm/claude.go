@@ -12,7 +12,10 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 )
 
-const DefaultClaudeModel = "claude-sonnet-5-5"
+const (
+	DefaultClaudeModel      = "claude-sonnet-5-5"
+	DefaultClaudeAPIVersion = "2026-10-21"
+)
 
 // ClaudeLLM is the Claude LLM provider implementation
 type ClaudeLLM struct {
@@ -39,7 +42,7 @@ func NewClaudeLLM(config *types.ClientConfig) *ClaudeLLM {
 		config.StreamAnswerPath = "delta.text"
 	}
 	if config.AnthropicVersion == "" {
-		config.AnthropicVersion = "2024-01-01"
+		config.AnthropicVersion = DefaultClaudeAPIVersion
 	}
 
 	return &ClaudeLLM{
@@ -67,7 +70,7 @@ func (c *ClaudeLLM) GetRequiredConfig() map[string]config.ConfigRequirement {
 			PromptMessage: "Enter API key",
 		},
 		"anthropic_version": {
-			DefaultValue:  "2024-01-01",
+			DefaultValue:  DefaultClaudeAPIVersion,
 			PromptMessage: "Enter Anthropic API version",
 		},
 		"max_tokens": {
