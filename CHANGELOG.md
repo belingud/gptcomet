@@ -1,5 +1,13 @@
 
 ---
+## [2.6.2](https://github.com/belingud/gptcomet/compare/v2.6.1..v2.6.2) - 2026-10-26
+
+### 🐛 Bug Fixes
+
+- **(ci)** use macOS 26 ARM runner image - ([030dfd9](https://github.com/belingud/gptcomet/commit/030dfd97279ac5e48759732a83780f86a4a56540)) - belingud
+
+
+---
 ## [2.6.1](https://github.com/belingud/gptcomet/compare/v2.6.0..v2.6.1) - 2026-10-26
 
 ### 🐛 Bug Fixes
