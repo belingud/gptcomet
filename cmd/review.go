@@ -185,20 +185,26 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 
 	fmt.Println(formatRemindMessage("Reviewing, streaming results as they arrive..."))
 
-	// Use a buffer to accumulate the response for formatting at the end
-	var responseBuffer strings.Builder
+	// Streaming mode is intentionally printed as-is. Track whether the last
+	// chunk already ended with a newline so the final output is not glued to
+	// the shell prompt (and no extra blank line is added).
+	lastChunkEndedWithNewline := true
 
 	// Define the callback function that will be called with each chunk of the response
 	err = s.client.GenerateReviewCommentStream(diff, prompt, func(chunk string) error {
-		// Print the chunk directly to the console
 		fmt.Print(chunk)
-		// Also accumulate it for final formatting
-		responseBuffer.WriteString(chunk)
+		if chunk != "" {
+			lastChunkEndedWithNewline = strings.HasSuffix(chunk, "\n")
+		}
 		return nil
 	})
 
 	if err != nil {
 		return fmt.Errorf("failed to generate streaming review comment: %w", err)
+	}
+
+	if !lastChunkEndedWithNewline {
+		fmt.Println()
 	}
 
 	return nil

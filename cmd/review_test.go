@@ -11,6 +11,7 @@ import (
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewReviewService(t *testing.T) {
@@ -338,4 +339,33 @@ func TestReviewService_formatReviewComment(t *testing.T) {
 			assert.Contains(t, formatted, tt.wantFormatted)
 		})
 	}
+}
+
+func TestReviewService_ExecuteStream(t *testing.T) {
+	mockCfg := new(testutils.MockConfigManager)
+	mockCfg.On("GetReviewPrompt").Return("review in {{ output.review_lang }}: {{ placeholder }}")
+	mockCfg.On("Get", REVIEW_LANG_KEY).Return("zh-cn", true)
+
+	mockClient := new(MockClient)
+	var chunks []string
+	mockClient.On("GenerateReviewCommentStream", "test-diff", "review in Simplified Chinese: {{ placeholder }}", mock.Anything).
+		Run(func(args mock.Arguments) {
+			callback := args.Get(2).(func(string) error)
+			for _, chunk := range []string{"hello", " world", "\n"} {
+				chunks = append(chunks, chunk)
+				assert.NoError(t, callback(chunk))
+			}
+		}).
+		Return(nil)
+
+	service := &ReviewService{
+		client:     mockClient,
+		cfgManager: mockCfg,
+	}
+
+	err := service.ExecuteStream("test-diff")
+	require.NoError(t, err)
+	assert.Equal(t, []string{"hello", " world", "\n"}, chunks)
+	mockClient.AssertExpectations(t)
+	mockCfg.AssertExpectations(t)
 }
