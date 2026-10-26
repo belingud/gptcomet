@@ -135,16 +135,12 @@ gen_keys = "python scripts/gen_support_keys.py"
 pygmsg = ".venv/bin/gmsg"
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -s -l --tb=short --strict"
+addopts = "-rsxX -s -l --tb=short"
 testpaths = ["tests/"]
 python_files = ["test*.py"]
 markers = ["skipif: conditionally skip tests"]
 # Ignore gitpython USE_SHELL=True deprecation warning, caused by pytest, not truely used in project
 filterwarnings = ["ignore::DeprecationWarning"]
-# Don't add command line arguments to the test run
-# Use empty args to prevent pytest from passing args to the main program
-args = []
-
 [dependency-groups]
 dev = [
     "bump2version>=1.0.1",

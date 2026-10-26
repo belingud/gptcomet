@@ -3,6 +3,12 @@ import tempfile
 import os
 import sys
 
+# Make the source-tree wrapper importable without requiring an install.
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "py")),
+)
+
 
 @pytest.fixture
 def mock_binary_path():

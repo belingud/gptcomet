@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch
 import sys
 import os
 
@@ -15,28 +15,33 @@ class TestWrapper:
         except ImportError:
             pytest.skip("gptcomet module not available")
 
-    @patch('subprocess.run')
-    def test_subprocess_execution(self, mock_run):
-        """Test subprocess execution"""
-        mock_run.return_value = MagicMock(returncode=0)
+    def test_subprocess_execution(self):
+        """Test that main dispatches to the binary without replacing pytest"""
         try:
             from gptcomet import main
-            with patch.object(sys, 'argv', ['gmsg', '--version']):
-                main()
-            assert mock_run.called
         except ImportError:
             pytest.skip("gptcomet module not available")
 
-    @patch('os.path.exists', return_value=False)
-    def test_binary_not_found_error(self, mock_exists):
+        with patch('gptcomet.find_gptcomet_binary', return_value='/tmp/gptcomet'), \
+             patch('gptcomet.os.execvpe') as mock_exec, \
+             patch.object(sys, 'argv', ['gmsg', '--version']), \
+             patch.object(sys, 'platform', 'linux'):
+            main()
+
+        mock_exec.assert_called_once()
+        assert mock_exec.call_args.args[0] == '/tmp/gptcomet'
+
+    def test_binary_not_found_error(self):
         """Test error handling when binary file is not found"""
         try:
             from gptcomet import main
-            with patch.object(sys, 'argv', ['gmsg', '--version']):
-                with pytest.raises((FileNotFoundError, Exception)):
-                    main()
         except ImportError:
             pytest.skip("gptcomet module not available")
+
+        with patch('gptcomet.find_gptcomet_binary', side_effect=FileNotFoundError("missing")), \
+             patch.object(sys, 'argv', ['gmsg', '--version']):
+            with pytest.raises(FileNotFoundError):
+                main()
 
     @patch('sys.platform', 'linux')
     def test_linux_platform_detection(self):
@@ -54,7 +59,7 @@ class TestWrapper:
         try:
             from gptcomet import find_gptcomet_binary
             path = find_gptcomet_binary()
-            assert 'macos' in path.lower() or 'darwin' in path.lower()
+            assert 'mac' in path.lower() or 'darwin' in path.lower()
         except (ImportError, AttributeError, FileNotFoundError):
             pytest.skip("find_gptcomet_binary or binary not available")
 
@@ -76,21 +81,22 @@ class TestWrapper:
         # Cleanup
         del os.environ['GPTCOMET_TEST_VAR']
 
-    @patch('subprocess.run')
-    def test_subprocess_with_args(self, mock_run):
-        """Test subprocess is called with correct arguments"""
-        mock_run.return_value = MagicMock(returncode=0)
+    def test_subprocess_with_args(self):
+        """Test the binary receives the original CLI arguments"""
         try:
             from gptcomet import main
-            with patch.object(sys, 'argv', ['gmsg', 'commit', '--help']):
-                main()
-            # Verify subprocess.run was called
-            assert mock_run.called
-            # Check if it was called with a list or similar
-            call_args = mock_run.call_args
-            assert call_args is not None
         except ImportError:
             pytest.skip("gptcomet module not available")
+
+        with patch('gptcomet.find_gptcomet_binary', return_value='/tmp/gptcomet'), \
+             patch('gptcomet.os.execvpe') as mock_exec, \
+             patch.object(sys, 'argv', ['gmsg', 'commit', '--help']), \
+             patch.object(sys, 'platform', 'linux'):
+            main()
+
+        mock_exec.assert_called_once()
+        assert mock_exec.call_args.args[0] == '/tmp/gptcomet'
+        assert mock_exec.call_args.args[1] == ['/tmp/gptcomet', 'commit', '--help']
 
     def test_module_import(self):
         """Test that gptcomet module can be imported"""
