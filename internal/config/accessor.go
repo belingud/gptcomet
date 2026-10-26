@@ -286,7 +286,13 @@ func (m *Manager) GetFileIgnore() []string {
 		return nil
 	}
 
-	if patterns, ok := value.([]interface{}); ok {
+	switch patterns := value.(type) {
+	case []string:
+		// In-memory defaults use []string; YAML-loaded configs use
+		// []interface{}. Support both so file_ignore also works on a fresh
+		// run before the config has been saved and reloaded.
+		return patterns
+	case []interface{}:
 		result := make([]string, 0, len(patterns))
 		for _, pattern := range patterns {
 			if str, ok := pattern.(string); ok {
@@ -294,7 +300,7 @@ func (m *Manager) GetFileIgnore() []string {
 			}
 		}
 		return result
+	default:
+		return nil
 	}
-
-	return nil
 }

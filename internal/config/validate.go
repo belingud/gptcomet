@@ -48,7 +48,6 @@ func (m *Manager) Validate() []string {
 	}
 	if providerOK {
 		issues = append(issues, validateAPIKey(provider, providerConfig)...)
-		issues = append(issues, validateProviderSpecific(provider, providerConfig)...)
 		issues = append(issues, validateProviderNumbers(providerConfig)...)
 	}
 
@@ -87,26 +86,6 @@ func validateAPIKey(provider string, providerConfig map[string]interface{}) []st
 	}
 
 	return []string{fmt.Sprintf("provider %q api_key is not set (set it in the config file or export %s)", provider, envVar)}
-}
-
-func validateProviderSpecific(provider string, providerConfig map[string]interface{}) []string {
-	switch provider {
-	case "azure":
-		if strings.TrimSpace(getStringValue(providerConfig, "deployment_name", "")) == "" &&
-			strings.TrimSpace(getStringValue(providerConfig, "model", "")) == "" {
-			return []string{"provider \"azure\" requires deployment_name (or model to use as deployment)"}
-		}
-	case "vertex":
-		var issues []string
-		if strings.TrimSpace(getStringValue(providerConfig, "project_id", "")) == "" {
-			issues = append(issues, "provider \"vertex\" requires project_id")
-		}
-		if strings.TrimSpace(getStringValue(providerConfig, "location", "")) == "" {
-			issues = append(issues, "provider \"vertex\" requires location")
-		}
-		return issues
-	}
-	return nil
 }
 
 func validateProviderNumbers(providerConfig map[string]interface{}) []string {

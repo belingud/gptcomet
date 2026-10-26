@@ -141,25 +141,6 @@ azure:
 `,
 			wantValid: true,
 		},
-		{
-			name: "azure missing deployment",
-			configData: `
-provider: azure
-azure:
-  api_key: test-key
-  api_version: 2024-02-15-preview
-`,
-			wantIssues: []string{`provider "azure" requires deployment_name`},
-		},
-		{
-			name: "vertex missing project and location",
-			configData: `
-provider: vertex
-vertex:
-  api_key: test-key
-`,
-			wantIssues: []string{`provider "vertex" requires project_id`, `provider "vertex" requires location`},
-		},
 	}
 
 	for _, tt := range tests {

@@ -369,3 +369,40 @@ func TestReviewService_ExecuteStream(t *testing.T) {
 	mockClient.AssertExpectations(t)
 	mockCfg.AssertExpectations(t)
 }
+
+func TestReviewService_ExecuteStream_AddsTrailingNewline(t *testing.T) {
+	mockCfg := new(testutils.MockConfigManager)
+	mockCfg.On("GetReviewPrompt").Return("review: {{ placeholder }}")
+	mockCfg.On("Get", REVIEW_LANG_KEY).Return("en", true)
+
+	mockClient := new(MockClient)
+	mockClient.On("GenerateReviewCommentStream", "test-diff", "review: {{ placeholder }}", mock.Anything).
+		Run(func(args mock.Arguments) {
+			callback := args.Get(2).(func(string) error)
+			assert.NoError(t, callback("hello"))
+		}).
+		Return(nil)
+
+	service := &ReviewService{
+		client:     mockClient,
+		cfgManager: mockCfg,
+	}
+
+	oldStdout := os.Stdout
+	reader, writer, err := os.Pipe()
+	require.NoError(t, err)
+	os.Stdout = writer
+	defer func() { os.Stdout = oldStdout }()
+
+	err = service.ExecuteStream("test-diff")
+	require.NoError(t, err)
+	require.NoError(t, writer.Close())
+	os.Stdout = oldStdout
+
+	out, err := io.ReadAll(reader)
+	require.NoError(t, err)
+	assert.True(t, strings.HasSuffix(string(out), "hello\n"), "output = %q", string(out))
+	assert.False(t, strings.HasSuffix(string(out), "hello\n\n"), "output = %q", string(out))
+	mockClient.AssertExpectations(t)
+	mockCfg.AssertExpectations(t)
+}

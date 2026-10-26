@@ -591,3 +591,11 @@ file_ignore:
 		})
 	}
 }
+
+func TestManager_GetFileIgnore_InMemoryStringSlice(t *testing.T) {
+	cfg := &Manager{config: map[string]interface{}{
+		"file_ignore": []string{"*.lock", "go.sum"},
+	}}
+
+	assert.Equal(t, []string{"*.lock", "go.sum"}, cfg.GetFileIgnore())
+}

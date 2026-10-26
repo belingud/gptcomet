@@ -2,7 +2,7 @@
 
 > 分支：`fix/incomplete-features`
 > 基线：`master` @ `bb5578c`（v2.5.1）
-> 状态：已确认，实施中（计划提交只新增本文件；后续按工作项独立提交）
+> 状态：已完成，待独立复核（实现提交见第 9 节）
 > 范围：仅修复代码审查中确认的、代码层可见的未完成/半成品问题。不包含 VSCode 扩展、Git hooks、JetBrains/Vim/Emacs、团队/SaaS、覆盖率门禁、ARM64 发布矩阵等路线图或工程化大项。
 
 ## 1. 背景
@@ -219,7 +219,7 @@
 1. 在 `internal/git` 中提取纯函数：
    - `FilterIgnoredFiles(files []string, patterns []string) []string`
    - 复用现有 `ShouldIgnoreFile`。
-2. Git 与 SVN 的 `GetStagedDiffFiltered` 共用该函数；Git 现有行为不变。
+2. SVN 的 `GetStagedDiffFiltered` 使用该函数；Git 保留现有过滤逻辑，避免无关重构。
 3. SVN：
    - 先 `GetStagedFiles`。
    - 过滤后为空则返回 `""`（上层按无变更处理）。
@@ -309,7 +309,7 @@
    - `max_tokens`、`retries` 必须是正整数；`top_p` 在 `[0,1]`；`temperature` 在 `[0,2]`；`frequency_penalty` 在 `[-2,2]`。
    - `file_ignore` 必须是字符串数组。
    - `prompt.brief_commit_message`、`prompt.rich_commit_message`、`prompt.translation`、`prompt.review` 如存在必须是非空字符串。
-   - provider 专属：Azure 检查 `deployment_name`（允许用 `model` 作为 deployment 回退）；`api_version` 缺失不报错（构造函数有默认值）；Vertex 要求 `project_id` 和 `location`；Claude 不强制 `anthropic_version`（构造函数有默认值）。
+   - provider 专属字段不单独报错：Azure/Vertex/Claude 的构造函数有运行时默认值，避免把可用配置误判为无效；`api_key` 仍按 provider 检查（Ollama 豁免）。
 3. `gmsg config validate`：
    - 读取当前配置，打印每个问题。
    - 有问题时返回错误（进程退出码非 0），无问题时打印通过信息。
@@ -322,8 +322,8 @@
 
 **涉及文件**
 
-- 修改：`internal/config/config.go`、`internal/config/validator.go`、`cmd/config.go`、`cmd/config_test.go`、`internal/testutils/mock_config.go`、`README.md`、`CLAUDE.md`
-- 测试：`internal/config/validator_test.go`、`internal/config/config_test.go`、`cmd/config_test.go`
+- 修改：`internal/config/config.go`、`internal/config/validate.go`、`cmd/config.go`、`cmd/config_test.go`、`internal/testutils/mock_config.go`、`README.md`、`CLAUDE.md`
+- 测试：`internal/config/validate_test.go`、`internal/config/config_test.go`、`cmd/config_test.go`
 
 **测试**
 
@@ -404,17 +404,17 @@ go test ./internal/client -run TestTranslateMessage -v
 
 ### 总体验收
 
-- [ ] 所有 P0/P1/P2 工作项完成。
-- [ ] `go test ./...` 全绿，新增回归测试覆盖每个修复。
-- [ ] `go vet ./...` 无新增问题。
-- [ ] `gofmt` 无变更。
-- [ ] `gmsg config validate` 可用；提供 API key 后通过，空配置明确报错。
-- [ ] `gmsg config keys` 包含 `output.markdown_theme`、`prompt.review`。
-- [ ] 默认翻译 prompt 不再出现 `%!(EXTRA ...)`。
-- [ ] Azure/Vertex/Claude 的专属字段能从 YAML 进入 `ClientConfig`。
-- [ ] SVN 的 `file_ignore` 生效。
-- [ ] 流式 review 不重复输出，且“首块前”网络错误可重试。
-- [ ] README / CLAUDE.md 与行为一致。
+- [x] 所有 P0/P1/P2 工作项完成。
+- [x] `go test ./...` 全绿，新增回归测试覆盖每个修复。
+- [x] `go vet ./...` 无新增问题。
+- [x] `gofmt` 无变更。
+- [x] `gmsg config validate` 可用；提供 API key 后通过，空配置明确报错。
+- [x] `gmsg config keys` 包含 `output.markdown_theme`、`prompt.review`。
+- [x] 默认翻译 prompt 不再出现 `%!(EXTRA ...)`。
+- [x] Azure/Vertex/Claude 的专属字段能从 YAML 进入 `ClientConfig`。
+- [x] SVN 的 `file_ignore` 生效。
+- [x] 流式 review 不重复输出，且“首块前”网络错误可重试。
+- [x] README / CLAUDE.md 与行为一致。
 
 ## 7. 风险与回滚
 
@@ -436,3 +436,36 @@ go test ./internal/client -run TestTranslateMessage -v
 - 不引入新的 lint/vet 警告。
 - PR 描述中列出每个问题的“根因 / 修复 / 验证方式”。
 - 不包含非范围项（VSCode、hooks、覆盖率门禁、ARM 发布矩阵）。
+
+## 9. 实施记录（2026-10-26）
+
+实现提交：
+
+1. `bcedc84` fix(prompt): render translation and rich template placeholders
+2. `cfcdd5b` fix(config): load provider-specific fields and retries
+3. `07473ca` fix(config): list markdown theme and review prompt keys
+4. `98fb3a6` feat(config): support API keys from environment variables
+5. `ba527a9` fix(svn): honor file_ignore when building diffs
+6. `385192e` fix(review): clean up streaming output and retry before first chunk
+7. `5d3ccfc` feat(config): add validate command
+8. `a89304e` fix(config): refine validation and streaming error output
+
+独立验收后的补强（本次提交）：
+
+- HTTP 200 后、首个 chunk 前发生读取错误时，按网络错误处理并允许安全重试；只有尚未输出内容时才重试。
+- `TranslateMessage` 对既无 `{{...}}` 也无 `%s` 的自定义模板增加兜底，确保 message 和 target language 进入 prompt。
+- `GetFileIgnore` 同时支持内存默认值 `[]string` 与 YAML 的 `[]interface{}`。
+- 流式 `[DONE]`/Ollama done 时不再无条件追加换行，避免最后一块已以换行结尾时多出空行。
+- 修复 Vertex `BuildURL`/`BuildStreamURL` 对已格式化 `CompletionPath` 二次 `Sprintf` 产生的 `%!(EXTRA ...)` 畸形 URL。
+- 移除 `config validate` 对 Azure/Vertex 运行时默认值的 provider-specific 报错，避免误报；`api_key` 仍按 provider 检查。
+- 补充“200 后空闲断开重试”“全部文件被忽略”“流式换行”等回归测试。
+
+验证结果：
+
+- `go test ./...`：通过。
+- `go test -race ./internal/client ./internal/config ./internal/git ./internal/llm ./cmd`：通过。
+- `go vet ./...`：通过。
+- `gofmt -l .`：无输出。
+- 手动 CLI：`config keys` 含新增 key；`config validate` 缺 key 时失败、有 env key 时通过；非法 `markdown_theme` 被拒绝。
+- 本机未安装 `svn`，SVN 端到端仍以 fake `svn` + 纯函数测试覆盖。
+- `staticcheck` 与当前 Go 1.27 的 export data 版本不兼容，未作为门禁。

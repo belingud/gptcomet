@@ -239,8 +239,14 @@ func (c *Client) TranslateMessage(prompt string, message string, lang string) (s
 		"placeholder": message,
 		"output.lang": lang,
 	})
-	if !promptpkg.HasPlaceholder(prompt) && strings.Contains(prompt, "%s") {
-		formattedPrompt = fmt.Sprintf(prompt, message, lang)
+	if !promptpkg.HasPlaceholder(prompt) {
+		if strings.Contains(prompt, "%s") {
+			formattedPrompt = fmt.Sprintf(prompt, message, lang)
+		} else {
+			// A custom prompt without any placeholder would otherwise drop
+			// the message and target language entirely.
+			formattedPrompt = strings.TrimSpace(prompt) + "\n\nTarget language: " + lang + "\n\n" + message
+		}
 	}
 
 	// Send the request
@@ -415,6 +421,7 @@ func (c *Client) streamOnce(
 	logger.Debug("Request succeeded, processing streaming response")
 
 	emitted := false
+	lastContentEndedWithNewline := true
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -441,8 +448,10 @@ func (c *Client) streamOnce(
 		// Check for [DONE] message
 		if data == constants.SSEDone {
 			emitted = true
-			if err := onChunk("\n", map[string]interface{}{}); err != nil {
-				return emitted, gptErrors.CallbackError(err)
+			if !lastContentEndedWithNewline {
+				if err := onChunk("\n", map[string]interface{}{}); err != nil {
+					return emitted, gptErrors.CallbackError(err)
+				}
 			}
 			break
 		}
@@ -457,8 +466,10 @@ func (c *Client) streamOnce(
 		if done, ok := streamResp["done"].(bool); ok && done {
 			logger.Debug("Ollama stream finished (done: true)")
 			emitted = true
-			if err := onChunk("\n", map[string]interface{}{}); err != nil {
-				return emitted, gptErrors.CallbackError(err)
+			if !lastContentEndedWithNewline {
+				if err := onChunk("\n", map[string]interface{}{}); err != nil {
+					return emitted, gptErrors.CallbackError(err)
+				}
 			}
 			break
 		}
@@ -492,13 +503,16 @@ func (c *Client) streamOnce(
 		}
 
 		emitted = true
+		lastContentEndedWithNewline = strings.HasSuffix(content, "\n")
 		if err := onChunk(content, streamResp); err != nil {
 			return emitted, gptErrors.CallbackError(err)
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		return emitted, gptErrors.WrapError(err, "Response Reading Failed", "Error occurred while reading streaming response")
+		// A read failure is a connection failure. If content was already
+		// emitted, Stream sees emitted=true and will not replay it.
+		return emitted, gptErrors.RequestExecutionError(err)
 	}
 
 	return emitted, nil
