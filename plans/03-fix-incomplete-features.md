@@ -449,8 +449,9 @@ go test ./internal/client -run TestTranslateMessage -v
 7. `5d3ccfc` feat(config): add validate command
 8. `a89304e` fix(config): refine validation and streaming error output
 9. `e6fe16e` fix: address independent review findings
+10. `af9b777` fix(git): honor in-memory file_ignore defaults
 
-独立验收后的补强（含上述 `e6fe16e` 及后续小修）：
+独立验收后的补强（含上述 `e6fe16e`、`af9b777`）：
 
 - HTTP 200 后、首个 chunk 前发生读取错误时，按网络错误处理并允许安全重试；只有尚未输出内容时才重试。
 - `TranslateMessage` 对既无 `{{...}}` 也无 `%s` 的自定义模板增加兜底，确保 message 和 target language 进入 prompt。
