@@ -12,6 +12,7 @@ const (
 	DefaultTemperature      = 0.3
 	DefaultTopP             = 1.0
 	DefaultFrequencyPenalty = 0.0
+	DefaultRichTemplate     = "<title>:<summary>\n\n<detail>"
 )
 
 // defaultConfig returns a default configuration map for gptcomet.
@@ -79,7 +80,7 @@ func defaultConfig() map[string]interface{} {
 		},
 		"output": map[string]interface{}{
 			"lang":            "en",
-			"rich_template":   "<title>:<summary>\n\n<detail>",
+			"rich_template":   DefaultRichTemplate,
 			"translate_title": false,
 			"review_lang":     "en",
 			"markdown_theme":  styles.AutoStyle,

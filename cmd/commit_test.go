@@ -401,3 +401,28 @@ func TestCommitService_generateCommitMessage(t *testing.T) {
 		})
 	}
 }
+
+func TestCommitService_generateCommitMessage_RendersRichTemplate(t *testing.T) {
+	configPath, cleanupConfig := setupTempConfig(t)
+	defer cleanupConfig()
+
+	cfg, err := config.New(configPath)
+	require.NoError(t, err)
+
+	require.NoError(t, cfg.Set("prompt.rich_commit_message", "template={{ output.rich_template }} diff={{ placeholder }}"))
+	require.NoError(t, cfg.Set("output.rich_template", "CUSTOM-RICH-TEMPLATE"))
+
+	mockClient := new(MockClient)
+	mockClient.On("GenerateCommitMessage", "test diff", "template=CUSTOM-RICH-TEMPLATE diff={{ placeholder }}").Return("feat: test", nil)
+
+	service := &CommitService{
+		client:     mockClient,
+		cfgManager: cfg,
+		options:    CommitOptions{Rich: true},
+	}
+
+	message, err := service.generateCommitMessage("test diff")
+	require.NoError(t, err)
+	assert.Equal(t, "feat: test", message)
+	mockClient.AssertExpectations(t)
+}

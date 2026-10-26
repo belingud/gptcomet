@@ -24,6 +24,7 @@ import (
 	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/llm"
 	"github.com/belingud/gptcomet/internal/logger"
+	promptpkg "github.com/belingud/gptcomet/internal/prompt"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/tidwall/gjson"
 )
@@ -232,8 +233,15 @@ func (c *Client) getClient() (*http.Client, error) {
 
 // TranslateMessage translates the given message to the specified language
 func (c *Client) TranslateMessage(prompt string, message string, lang string) (string, error) {
-	// Format the prompt
-	formattedPrompt := fmt.Sprintf(prompt, message, lang)
+	// Default translation prompts use {{ output.lang }} / {{ placeholder }}.
+	// Keep supporting legacy custom prompts that use fmt-style %s verbs.
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{
+		"placeholder": message,
+		"output.lang": lang,
+	})
+	if !promptpkg.HasPlaceholder(prompt) && strings.Contains(prompt, "%s") {
+		formattedPrompt = fmt.Sprintf(prompt, message, lang)
+	}
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -246,7 +254,7 @@ func (c *Client) TranslateMessage(prompt string, message string, lang string) (s
 
 // GenerateCommitMessage generates a commit message for the given diff
 func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, error) {
-	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{"placeholder": diff})
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -259,7 +267,7 @@ func (c *Client) GenerateCommitMessage(diff string, prompt string) (string, erro
 
 // GenerateReviewComment generates a review comment for the given diff
 func (c *Client) GenerateReviewComment(diff string, prompt string) (string, error) {
-	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{"placeholder": diff})
 
 	// Send the request
 	resp, err := c.Chat(context.Background(), formattedPrompt, nil)
@@ -272,7 +280,7 @@ func (c *Client) GenerateReviewComment(diff string, prompt string) (string, erro
 
 // GenerateReviewCommentStream generates a review comment for the given diff
 func (c *Client) GenerateReviewCommentStream(diff string, prompt string, callback func(string) error) error {
-	formattedPrompt := strings.Replace(prompt, "{{ placeholder }}", diff, 1)
+	formattedPrompt := promptpkg.Render(prompt, map[string]string{"placeholder": diff})
 
 	// Send the request
 	return c.Stream(context.Background(), formattedPrompt, func(resp *types.CompletionResponse) error {

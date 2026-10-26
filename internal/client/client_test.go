@@ -10,6 +10,7 @@ import (
 
 	"github.com/belingud/gptcomet/internal/llm"
 	"github.com/belingud/gptcomet/pkg/config"
+	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -222,21 +223,50 @@ func TestChatContextCancellation(t *testing.T) {
 }
 
 func TestTranslateMessage(t *testing.T) {
-	mockLLM := &MockLLM{
-		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
-			return "translated message", nil
-		},
-		name: "mock",
-	}
+	t.Run("default template placeholders", func(t *testing.T) {
+		var captured string
+		mockLLM := &MockLLM{
+			makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+				captured = message
+				return "translated message", nil
+			},
+			name: "mock",
+		}
 
-	client := &Client{
-		config: &types.ClientConfig{Timeout: 10},
-		llm:    mockLLM,
-	}
+		client := &Client{
+			config: &types.ClientConfig{Timeout: 10, Retries: 1},
+			llm:    mockLLM,
+		}
 
-	_, err := client.TranslateMessage("translate to %s: %s", "hello", "fr")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "after 0 attempts")
+		got, err := client.TranslateMessage(defaults.PromptDefaults["translation"], "feat: add", "Simplified Chinese")
+		require.NoError(t, err)
+		assert.Equal(t, "translated message", got)
+		assert.Contains(t, captured, "feat: add")
+		assert.Contains(t, captured, "Simplified Chinese")
+		assert.NotContains(t, captured, "{{ placeholder }}")
+		assert.NotContains(t, captured, "{{ output.lang }}")
+		assert.NotContains(t, captured, "%!(EXTRA")
+	})
+
+	t.Run("legacy percent template", func(t *testing.T) {
+		var captured string
+		mockLLM := &MockLLM{
+			makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+				captured = message
+				return "translated message", nil
+			},
+			name: "mock",
+		}
+
+		client := &Client{
+			config: &types.ClientConfig{Timeout: 10, Retries: 1},
+			llm:    mockLLM,
+		}
+
+		_, err := client.TranslateMessage("translate to %s: %s", "hello", "fr")
+		require.NoError(t, err)
+		assert.Equal(t, "translate to hello: fr", captured)
+	})
 }
 
 func TestGenerateCommitMessage(t *testing.T) {

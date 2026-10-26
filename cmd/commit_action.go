@@ -9,7 +9,9 @@ import (
 
 	"github.com/belingud/gptcomet/internal/debug"
 	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
+	promptpkg "github.com/belingud/gptcomet/internal/prompt"
 	"github.com/belingud/gptcomet/internal/ui"
+	"github.com/belingud/gptcomet/pkg/config/defaults"
 )
 
 // generateCommitMessage generates a commit message based on the provided git diff.
@@ -25,6 +27,13 @@ import (
 //   - error: An error if message generation or translation fails, or if config is invalid
 func (s *CommitService) generateCommitMessage(diff string) (string, error) {
 	prompt := s.cfgManager.GetPrompt(s.options.Rich)
+
+	richTemplate := defaults.DefaultRichTemplate
+	if value, ok := s.cfgManager.GetWithDefault("output.rich_template", richTemplate).(string); ok && strings.TrimSpace(value) != "" {
+		richTemplate = value
+	}
+	prompt = promptpkg.Render(prompt, map[string]string{"output.rich_template": richTemplate})
+
 	msg, err := s.client.GenerateCommitMessage(diff, prompt)
 	if err != nil {
 		return "", err
