@@ -200,6 +200,9 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 	})
 
 	if err != nil {
+		if !lastChunkEndedWithNewline {
+			fmt.Println()
+		}
 		return fmt.Errorf("failed to generate streaming review comment: %w", err)
 	}
 

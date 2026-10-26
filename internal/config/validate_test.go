@@ -132,6 +132,16 @@ prompt:
 			wantIssues: []string{"prompt.review must be a non-empty string"},
 		},
 		{
+			name: "azure model can be used as deployment",
+			configData: `
+provider: azure
+azure:
+  api_key: test-key
+  model: gpt-4o
+`,
+			wantValid: true,
+		},
+		{
 			name: "azure missing deployment",
 			configData: `
 provider: azure

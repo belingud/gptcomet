@@ -92,8 +92,9 @@ func validateAPIKey(provider string, providerConfig map[string]interface{}) []st
 func validateProviderSpecific(provider string, providerConfig map[string]interface{}) []string {
 	switch provider {
 	case "azure":
-		if strings.TrimSpace(getStringValue(providerConfig, "deployment_name", "")) == "" {
-			return []string{"provider \"azure\" requires deployment_name"}
+		if strings.TrimSpace(getStringValue(providerConfig, "deployment_name", "")) == "" &&
+			strings.TrimSpace(getStringValue(providerConfig, "model", "")) == "" {
+			return []string{"provider \"azure\" requires deployment_name (or model to use as deployment)"}
 		}
 	case "vertex":
 		var issues []string

@@ -2,7 +2,7 @@
 
 > 分支：`fix/incomplete-features`
 > 基线：`master` @ `bb5578c`（v2.5.1）
-> 状态：计划待确认（本提交只新增本文件，不改业务代码）
+> 状态：已确认，实施中（计划提交只新增本文件；后续按工作项独立提交）
 > 范围：仅修复代码审查中确认的、代码层可见的未完成/半成品问题。不包含 VSCode 扩展、Git hooks、JetBrains/Vim/Emacs、团队/SaaS、覆盖率门禁、ARM64 发布矩阵等路线图或工程化大项。
 
 ## 1. 背景
@@ -309,7 +309,7 @@
    - `max_tokens`、`retries` 必须是正整数；`top_p` 在 `[0,1]`；`temperature` 在 `[0,2]`；`frequency_penalty` 在 `[-2,2]`。
    - `file_ignore` 必须是字符串数组。
    - `prompt.brief_commit_message`、`prompt.rich_commit_message`、`prompt.translation`、`prompt.review` 如存在必须是非空字符串。
-   - provider 专属：Azure 检查 `deployment_name`，`api_version` 缺失时给 warning（构造函数有默认值）；Vertex 要求 `project_id` 和 `location`；Claude 检查 `anthropic_version`（缺失给 warning，不阻断）。
+   - provider 专属：Azure 检查 `deployment_name`（允许用 `model` 作为 deployment 回退）；`api_version` 缺失不报错（构造函数有默认值）；Vertex 要求 `project_id` 和 `location`；Claude 不强制 `anthropic_version`（构造函数有默认值）。
 3. `gmsg config validate`：
    - 读取当前配置，打印每个问题。
    - 有问题时返回错误（进程退出码非 0），无问题时打印通过信息。
@@ -335,7 +335,7 @@
 
 **验收**
 
-- `gmsg config validate` 对当前默认配置返回成功。
+- `gmsg config validate` 对配置了 API key（YAML 或环境变量）的配置返回成功；空配置明确报告缺少 API key。
 - 构造一个非法配置时，命令打印具体问题并以非 0 退出。
 - 不影响现有 `config set` / `config get` / `config keys` 行为。
 
@@ -392,8 +392,8 @@ go build -o /tmp/gmsg .
 # 2. 新配置目录，验证 keys
 HOME=$(mktemp -d) /tmp/gmsg config keys | grep -E 'markdown_theme|prompt.review'
 
-# 3. 验证 validate（默认配置应通过）
-HOME=$(mktemp -d) /tmp/gmsg config validate
+# 3. 验证 validate（默认配置缺 API key 时应报错；提供 key 后应通过）
+HOME=$(mktemp -d) OPENAI_API_KEY=test-key /tmp/gmsg config validate
 
 # 4. 构造非法配置，验证非 0 退出
 #    （非法 lang 或 markdown_theme）
@@ -408,7 +408,7 @@ go test ./internal/client -run TestTranslateMessage -v
 - [ ] `go test ./...` 全绿，新增回归测试覆盖每个修复。
 - [ ] `go vet ./...` 无新增问题。
 - [ ] `gofmt` 无变更。
-- [ ] `gmsg config validate` 可用，默认配置通过。
+- [ ] `gmsg config validate` 可用；提供 API key 后通过，空配置明确报错。
 - [ ] `gmsg config keys` 包含 `output.markdown_theme`、`prompt.review`。
 - [ ] 默认翻译 prompt 不再出现 `%!(EXTRA ...)`。
 - [ ] Azure/Vertex/Claude 的专属字段能从 YAML 进入 `ClientConfig`。
