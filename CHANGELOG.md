@@ -1,5 +1,36 @@
 
 ---
+## [2.6.0](https://github.com/belingud/gptcomet/compare/v2.5.1..v2.6.0) - 2026-10-26
+
+### ⛰️  Features
+
+- **(config)** add validate command - ([5d3ccfc](https://github.com/belingud/gptcomet/commit/5d3ccfc803c63bc6447de265f03bf90ba673a7c6)) - belingud
+- **(config)** support API keys from environment variables - ([98fb3a6](https://github.com/belingud/gptcomet/commit/98fb3a63b1c2a28b2a290201d4c22a1264fc783b)) - belingud
+
+### 🐛 Bug Fixes
+
+- **(claude)** update default API version and release docs link - ([f319cc1](https://github.com/belingud/gptcomet/commit/f319cc138a0dece810c3aa328fcfd6c2d786e83b)) - belingud
+- **(config)** refine validation and streaming error output - ([a89304e](https://github.com/belingud/gptcomet/commit/a89304ed9bb9968cd1a5ecd4967011dd78028f0c)) - belingud
+- **(config)** list markdown theme and review prompt keys - ([07473ca](https://github.com/belingud/gptcomet/commit/07473ca8fc74b36e2048c4786e13a19fde811ad8)) - belingud
+- **(config)** load provider-specific fields and retries - ([cfcdd5b](https://github.com/belingud/gptcomet/commit/cfcdd5b67f3410937bc5df521a50d1dcfe2509bf)) - belingud
+- **(git)** honor in-memory file_ignore defaults - ([af9b777](https://github.com/belingud/gptcomet/commit/af9b77770b3b5cdb93aeb607bd011880a97aedd2)) - belingud
+- **(llm)** use LongCat 2.5 Preview as default - ([f7ea43d](https://github.com/belingud/gptcomet/commit/f7ea43d6cc6e8c48fbb540fbebf7630aeec21c49)) - belingud
+- **(prompt)** render translation and rich template placeholders - ([bcedc84](https://github.com/belingud/gptcomet/commit/bcedc843efc98b960ed620b12a884a382ca1adcd)) - belingud
+- **(review)** clean up streaming output and retry before first chunk - ([385192e](https://github.com/belingud/gptcomet/commit/385192ec53c9e4a7be0d5a7e84bbea18c8586359)) - belingud
+- **(svn)** honor file_ignore when building diffs - ([ba527a9](https://github.com/belingud/gptcomet/commit/ba527a9678e3956063bd037beef959f4ba4b7b4b)) - belingud
+- address independent review findings - ([e6fe16e](https://github.com/belingud/gptcomet/commit/e6fe16ef24199d48a87dacfdbad2b3c50651dc11)) - belingud
+
+### 📚 Documentation
+
+- **(plan)** record final git fix commit - ([43811bc](https://github.com/belingud/gptcomet/commit/43811bcad8363b6ebee28c540fddcbe0e39fd7df)) - belingud
+- add plan for incomplete feature fixes - ([5c4874b](https://github.com/belingud/gptcomet/commit/5c4874b14d88171f60eafa1e33d88163cf49d399)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- **(llm)** refresh provider model defaults and examples - ([7c08fb2](https://github.com/belingud/gptcomet/commit/7c08fb2bd7bb005fd84122f17c79d5e1badad4ac)) - belingud
+
+
+---
 ## [2.5.0](https://github.com/belingud/gptcomet/compare/v2.4.1..v2.5.0) - 2026-04-23
 
 ### ⛰️  Features
