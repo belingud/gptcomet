@@ -18,7 +18,7 @@ its tests, this table, and the examples in the READMEs.
 | `groq`     | `openai/gpt-oss-120b`                      | Groq-hosted GPT-OSS 120B. |
 | `hunyuan`  | `hunyuan-a13b`                             | Kept on the existing Hunyuan endpoint; `hy3` requires migrating the API base to TokenHub. |
 | `kimi`     | `kimi-k3-1-pro`                            | Moonshot Kimi K3.1 Pro. |
-| `longcat`  | `LongCat-2.0`                              | Meituan LongCat 2.0. |
+| `longcat`  | `LongCat-2.5-Preview`                      | Current API pay-as-you-go model; `LongCat-2.0` remains available as a stable fallback. |
 | `minimax`  | `MiniMax-M3.1-Flash`                       | MiniMax M3.1 Flash. |
 | `mistral`  | `mistral-large-latest`                     | Rolling alias; stays current automatically. |
 | `modelscope` | `deepseek-ai/DeepSeek-V4.1-Flash`        | ModelScope-hosted DeepSeek V4.1 Flash. |
@@ -43,7 +43,7 @@ its tests, this table, and the examples in the READMEs.
 - Kimi: <https://platform.kimi.com/docs/guide/kimi-k3-1-pro-quickstart>
 - MiniMax: <https://platform.minimax.io/docs/api-reference/api-overview>
 - GLM: <https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3>
-- LongCat: <https://longcat.chat/platform/docs/zh/api/chat>
+- LongCat: <https://longcat.chat/platform/docs/zh/pricing/longcat-2.5>
 - Cohere: <https://docs.cohere.com/v1/docs/command-a-plus>
 - Groq: <https://console.groq.com/docs/model/openai/gpt-oss-120b>
 - SiliconFlow: <https://www.siliconflow.com/models/qwen3-8-2-4t-a95b>

@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultLongCatAPIBase = "https://api.longcat.chat/openai"
-	DefaultLongCatModel   = "LongCat-2.0"
+	DefaultLongCatModel   = "LongCat-2.5-Preview"
 )
 
 // LongCatLLM implements the LLM interface for LongCat
