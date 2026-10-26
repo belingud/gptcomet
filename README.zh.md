@@ -456,6 +456,7 @@ GPTComet 提供以下命令：
 | `prompt.brief_commit_message`  | 生成简短提交信息的 prompt 模板。                          | 参考 `defaults/defaults.go`       |
 | `prompt.rich_commit_message`   | 生成富文本提交信息的 prompt 模板。                        | 参考 `defaults/defaults.go`       |
 | `prompt.translation`           | 翻译提交信息的 prompt 模板。                              | 参考 `defaults/defaults.go`       |
+| `prompt.review`                | 代码审查使用的 prompt 模板。                              | 参考 `defaults/defaults.go`       |
 
 **注意：**`<provider>` 应替换为实际提供商名称，例如 `openai`、`gemini`、`claude`。
 

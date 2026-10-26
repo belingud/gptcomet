@@ -456,6 +456,7 @@ Here's a summary of the main configuration keys:
 | `prompt.brief_commit_message`  | The prompt template for generating brief commit messages.  | (See `defaults/defaults.go`)      |
 | `prompt.rich_commit_message`   | The prompt template for generating rich commit messages.   | (See `defaults/defaults.go`)      |
 | `prompt.translation`           | The prompt template for translating commit messages.       | (See `defaults/defaults.go`)      |
+| `prompt.review`                | The prompt template for reviewing code changes.            | (See `defaults/defaults.go`)      |
 
 **Note:** `<provider>` should be replaced with the actual provider name (e.g., `openai`, `gemini`, `claude`).
 

@@ -136,6 +136,7 @@ func (m *Manager) GetSupportedKeys() []string {
 		"rich_template",
 		"translate_title",
 		"review_lang",
+		"markdown_theme",
 	}
 	for _, key := range outputKeys {
 		keys["output."+key] = true
@@ -174,6 +175,7 @@ func (m *Manager) GetSupportedKeys() []string {
 		"brief_commit_message",
 		"rich_commit_message",
 		"translation",
+		"review",
 	}
 	for _, key := range promptKeys {
 		keys["prompt."+key] = true
