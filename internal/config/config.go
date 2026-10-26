@@ -264,6 +264,11 @@ func (m *Manager) Set(key string, value interface{}) error {
 		if _, ok := value.(bool); !ok {
 			return gptcometerrors.InvalidConfigValueError(key, fmt.Sprintf("%v", value), "translate_title must be a boolean value")
 		}
+	case "output.markdown_theme":
+		theme, ok := value.(string)
+		if !ok || !IsValidMarkdownTheme(theme) {
+			return gptcometerrors.InvalidConfigValueError(key, fmt.Sprintf("%v", value), "markdown theme must be one of: auto, ascii, dark, dracula, light, tokyo-night, notty, pink")
+		}
 	}
 
 	keys := strings.Split(key, ".")

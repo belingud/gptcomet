@@ -134,5 +134,30 @@ func TestNewConfigCmd(t *testing.T) {
 	cmd := NewConfigCmd()
 	assert.NotNil(t, cmd)
 	assert.Equal(t, "config", cmd.Use)
-	assert.Equal(t, 8, len(cmd.Commands()))
+	assert.Equal(t, 9, len(cmd.Commands()))
+}
+
+func TestValidateConfigCmd_Valid(t *testing.T) {
+	cmd := newValidateConfigCmd()
+	cmd.SetContext(context.Background())
+	mock := &testutils.MockConfigManager{}
+	mock.On("Validate").Return([]string{})
+	setConfigManager(cmd, mock)
+
+	err := cmd.Execute()
+	assert.NoError(t, err)
+	mock.AssertExpectations(t)
+}
+
+func TestValidateConfigCmd_Invalid(t *testing.T) {
+	cmd := newValidateConfigCmd()
+	cmd.SetContext(context.Background())
+	mock := &testutils.MockConfigManager{}
+	mock.On("Validate").Return([]string{"provider is not set", "output.lang is invalid"})
+	setConfigManager(cmd, mock)
+
+	err := cmd.Execute()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "2 configuration issue(s) found")
+	mock.AssertExpectations(t)
 }

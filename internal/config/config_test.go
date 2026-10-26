@@ -110,6 +110,21 @@ openai:
 			value:   "gpt-4",
 			wantErr: false,
 		},
+		{
+			name:       "Set valid markdown theme",
+			configData: "",
+			key:        "output.markdown_theme",
+			value:      "dark",
+			wantErr:    false,
+		},
+		{
+			name:        "Set invalid markdown theme",
+			configData:  "",
+			key:         "output.markdown_theme",
+			value:       "neon",
+			wantErr:     true,
+			errContains: "markdown theme",
+		},
 	}
 
 	for _, tt := range tests {

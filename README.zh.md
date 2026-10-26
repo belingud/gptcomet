@@ -389,6 +389,7 @@ GPTComet 提供以下命令：
     -   `remove <key> [value]`：删除配置键，或者从列表中删除某个值。仅用于列表值，例如 `fileignore`。
     -   `append <key> <value>`：向列表配置追加值。仅用于列表值，例如 `fileignore`。
     -   `keys`：列出所有支持的配置键。
+    -   `validate`：校验当前配置并报告问题。
 -   `gmsg commit`：根据变更或 diff 生成提交信息。
     -   `--svn`：为 SVN 生成提交信息。
     -   `--dry-run`：试运行，不真正生成提交信息。

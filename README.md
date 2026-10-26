@@ -390,6 +390,7 @@ The following are the available commands for GPTComet:
     -   `remove <key> [value]`: Remove a configuration key or a value from a list. (List value only, like `fileignore`)
     -   `append <key> <value>`: Append a value to a list configuration.(List value only, like `fileignore`)
     -   `keys`: List all supported configuration keys.
+    -   `validate`: Validate the current configuration and report issues.
 -   `gmsg commit`: Generate commit message by changes/diff.
     -   `--svn`: Generate commit message for svn.
     -   `--dry-run`: Dry run the command without actually generating the commit message.

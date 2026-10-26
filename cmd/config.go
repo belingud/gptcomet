@@ -21,6 +21,7 @@ type ConfigManager interface {
 	Remove(key string, value string) error
 	Append(key string, value interface{}) error
 	GetSupportedKeys() []string
+	Validate() []string
 }
 
 // configKey is used as the key type for context
@@ -340,6 +341,34 @@ func newAppendConfigCmd() *cobra.Command {
 	}
 }
 
+// newValidateConfigCmd creates and returns a new cobra.Command that validates
+// the current configuration and reports all detected issues.
+func newValidateConfigCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:          "validate",
+		Short:        "Validate configuration",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfgManager, err := getConfigManager(cmd)
+			if err != nil {
+				return err
+			}
+
+			issues := cfgManager.Validate()
+			if len(issues) == 0 {
+				fmt.Println("Configuration is valid")
+				return nil
+			}
+
+			fmt.Printf("Configuration validation failed with %d issue(s):\n", len(issues))
+			for _, issue := range issues {
+				fmt.Printf("  - %s\n", issue)
+			}
+			return fmt.Errorf("%d configuration issue(s) found", len(issues))
+		},
+	}
+}
+
 // newKeysConfigCmd creates and returns a new cobra.Command that lists all supported configuration keys.
 // The command:
 //   - Has the name "keys"
@@ -384,6 +413,7 @@ func newKeysConfigCmd() *cobra.Command {
 // - remove: Remove configuration entries
 // - append: Append values to configuration arrays
 // - keys: List available configuration keys
+// - validate: Validate the current configuration
 //
 // The configuration manager is initialized using the config path provided via the global --config flag.
 // If initialization fails, an error is returned and the command execution is stopped.
@@ -417,6 +447,7 @@ func NewConfigCmd() *cobra.Command {
 		newRemoveConfigCmd(),
 		newAppendConfigCmd(),
 		newKeysConfigCmd(),
+		newValidateConfigCmd(),
 	)
 	return cmd
 }
