@@ -193,6 +193,7 @@ provider: openai
 }
 
 func TestManager_GetClientConfig(t *testing.T) {
+	t.Setenv("OPENAI_API_KEY", "")
 	tests := []struct {
 		name         string
 		configData   string
@@ -619,4 +620,74 @@ openai:
 			}
 		})
 	}
+}
+
+func TestManager_GetClientConfig_APIKeyFromEnv(t *testing.T) {
+	t.Run("env fallback", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: openai
+openai:
+  api_base: https://api.openai.com/v1
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("OPENAI_API_KEY", "env-key")
+		clientConfig, err := cfg.GetClientConfig("")
+		require.NoError(t, err)
+		assert.Equal(t, "env-key", clientConfig.APIKey)
+	})
+
+	t.Run("config wins over env", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: openai
+openai:
+  api_key: config-key
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("OPENAI_API_KEY", "env-key")
+		clientConfig, err := cfg.GetClientConfig("")
+		require.NoError(t, err)
+		assert.Equal(t, "config-key", clientConfig.APIKey)
+	})
+
+	t.Run("generic provider env var", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: deepseek
+deepseek:
+  api_base: https://api.deepseek.com/v1
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("DEEPSEEK_API_KEY", "deepseek-env-key")
+		clientConfig, err := cfg.GetClientConfig("")
+		require.NoError(t, err)
+		assert.Equal(t, "deepseek-env-key", clientConfig.APIKey)
+	})
+
+	t.Run("missing key still errors", func(t *testing.T) {
+		configFile, cleanup := testutils.TestConfig(t, `
+provider: openai
+openai:
+  api_base: https://api.openai.com/v1
+`)
+		defer cleanup()
+
+		cfg, err := New(configFile)
+		require.NoError(t, err)
+
+		t.Setenv("OPENAI_API_KEY", "")
+		_, err = cfg.GetClientConfig("")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "API Key Not Configured")
+	})
 }

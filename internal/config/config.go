@@ -120,8 +120,13 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	if provider == "ollama" {
 		apiKey = ""
 	} else {
-		apiKeyValue, ok := providerConfig["api_key"].(string)
-		if !ok || apiKeyValue == "" {
+		apiKeyValue, _ := providerConfig["api_key"].(string)
+		if apiKeyValue == "" {
+			// Configuration file wins; environment variables are a fallback
+			// so the guidance in APIKeyNotSetError actually works.
+			apiKeyValue = os.Getenv(gptcometerrors.GetAPIKeyEnvVar(provider))
+		}
+		if apiKeyValue == "" {
 			return nil, gptcometerrors.APIKeyNotSetError(provider)
 		}
 		apiKey = apiKeyValue

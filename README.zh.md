@@ -160,6 +160,12 @@ Installed 2 executables: gmsg, gptcomet
 2. **交互式设置**
     - 使用 `gmsg newprovider` 命令完成引导式设置。
 
+3. **环境变量**
+    - 如果配置文件中没有设置 `api_key`，GPTComet 会回退到提供商对应的环境变量，
+      例如 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`GEMINI_API_KEY`、
+      `AZURE_API_KEY`，其他提供商使用 `<PROVIDER>_API_KEY`。
+    - 同时存在时，配置文件优先。
+
 ### 提供商设置指南
 
 ![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)

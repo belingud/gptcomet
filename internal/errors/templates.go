@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Common error templates and constructors
@@ -31,7 +32,7 @@ func ConfigFileNotFoundError(configPath string) *GPTCometError {
 
 // APIKeyNotSetError is returned when the API key is not configured
 func APIKeyNotSetError(provider string) *GPTCometError {
-	envVar := getAPIKeyEnvVar(provider)
+	envVar := GetAPIKeyEnvVar(provider)
 
 	return NewConfigError(
 		ErrTitleAPIKeyNotSet,
@@ -387,9 +388,10 @@ func ProxyURLParseError(cause error) *GPTCometError {
 	)
 }
 
-// getAPIKeyEnvVar returns the environment variable name for the provider's API key
-func getAPIKeyEnvVar(provider string) string {
-	switch provider {
+// GetAPIKeyEnvVar returns the conventional environment variable name for the
+// provider's API key.
+func GetAPIKeyEnvVar(provider string) string {
+	switch strings.ToLower(strings.TrimSpace(provider)) {
 	case "openai":
 		return "OPENAI_API_KEY"
 	case "azure":
@@ -401,6 +403,10 @@ func getAPIKeyEnvVar(provider string) string {
 	case "cohere":
 		return "COHERE_API_KEY"
 	default:
-		return fmt.Sprintf("%s_API_KEY", provider)
+		normalized := strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(provider), "-", "_"))
+		if normalized == "" {
+			return "API_KEY"
+		}
+		return normalized + "_API_KEY"
 	}
 }

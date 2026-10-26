@@ -160,6 +160,13 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
 2. **Interactive Setup**
     - Use the `gmsg newprovider` command for guided setup.
 
+3. **Environment Variables**
+    - If `api_key` is not set in the configuration file, GPTComet falls back to
+      the provider's conventional environment variable, such as
+      `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `AZURE_API_KEY`,
+      or `<PROVIDER>_API_KEY` for other providers.
+    - The configuration file takes precedence when both are set.
+
 ### Provider Setup Guide
 
 ![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)
