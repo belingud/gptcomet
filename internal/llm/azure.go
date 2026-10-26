@@ -13,12 +13,24 @@ type AzureLLM struct {
 	*OpenAILLM
 }
 
+const defaultAzureAPIVersion = "2024-02-15-preview"
+
 // NewAzureLLM creates a new AzureLLM
 func NewAzureLLM(config *types.ClientConfig) *AzureLLM {
 	if config.Model == "" {
 		config.Model = "gpt-4o"
 	}
-	completionPath := fmt.Sprintf("deployments/%s/chat/completions", config.DeploymentName)
+	if config.APIVersion == "" {
+		config.APIVersion = defaultAzureAPIVersion
+	}
+
+	deploymentName := config.DeploymentName
+	if deploymentName == "" {
+		deploymentName = config.Model
+	}
+	config.DeploymentName = deploymentName
+
+	completionPath := fmt.Sprintf("deployments/%s/chat/completions", deploymentName)
 	config.CompletionPath = &completionPath
 
 	return &AzureLLM{

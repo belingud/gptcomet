@@ -175,9 +175,12 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 		Temperature:      temperature,
 		FrequencyPenalty: frequencyPenalty,
 	}
-	if m, ok := providerConfig["retries"].(float64); ok {
-		clientConfig.Retries = int(m)
-	}
+	clientConfig.Retries = getIntValue(providerConfig, "retries", defaults.DefaultRetries)
+	clientConfig.APIVersion = getStringValue(providerConfig, "api_version", "")
+	clientConfig.DeploymentName = getStringValue(providerConfig, "deployment_name", "")
+	clientConfig.ProjectID = getStringValue(providerConfig, "project_id", "")
+	clientConfig.Location = getStringValue(providerConfig, "location", "")
+	clientConfig.AnthropicVersion = getStringValue(providerConfig, "anthropic_version", "")
 
 	if answerPath, ok := providerConfig["answer_path"].(string); ok {
 		clientConfig.AnswerPath = answerPath
