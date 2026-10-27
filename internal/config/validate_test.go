@@ -141,6 +141,15 @@ azure:
 `,
 			wantValid: true,
 		},
+		{
+			name: "lmstudio does not require api key",
+			configData: `
+provider: lmstudio
+lmstudio:
+  model: local-model
+`,
+			wantValid: true,
+		},
 	}
 
 	for _, tt := range tests {

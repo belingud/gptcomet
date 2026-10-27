@@ -293,6 +293,112 @@ ollama:
 			},
 		},
 		{
+			name: "LM Studio provider (no API key required)",
+			configData: `
+provider: lmstudio
+lmstudio:
+  model: local-model
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "lmstudio", cfg.Provider)
+				assert.Equal(t, "", cfg.APIKey)
+				assert.Equal(t, "http://localhost:1234/v1", cfg.APIBase)
+				assert.Equal(t, "local-model", cfg.Model)
+			},
+		},
+		{
+			name: "Bedrock provider fields",
+			configData: `
+provider: bedrock
+bedrock:
+  api_key: test-key
+  region: eu-west-1
+  model: openai.gpt-oss-120b-1:0
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "bedrock", cfg.Provider)
+				assert.Equal(t, "eu-west-1", cfg.Region)
+				assert.Equal(t, "https://bedrock-runtime.eu-west-1.amazonaws.com/openai/v1", cfg.APIBase)
+			},
+		},
+		{
+			name: "Cloudflare provider fields",
+			configData: `
+provider: cloudflare
+cloudflare:
+  api_key: test-token
+  account_id: account-123
+  model: "@cf/openai/gpt-oss-120b"
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "cloudflare", cfg.Provider)
+				assert.Equal(t, "account-123", cfg.AccountID)
+				assert.Equal(t, "https://api.cloudflare.com/client/v4/accounts/account-123/ai/v1", cfg.APIBase)
+			},
+		},
+		{
+			name: "Qianfan default api base",
+			configData: `
+provider: qianfan
+qianfan:
+  api_key: test-key
+  model: ernie-5.0
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "qianfan", cfg.Provider)
+				assert.Equal(t, "https://qianfan.baidubce.com/v2", cfg.APIBase)
+			},
+		},
+		{
+			name: "Doubao default api base",
+			configData: `
+provider: doubao
+doubao:
+  api_key: test-key
+  model: doubao-seed-2-1-pro-260915
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "doubao", cfg.Provider)
+				assert.Equal(t, "https://ark.cn-beijing.volces.com/api/v3", cfg.APIBase)
+			},
+		},
+		{
+			name: "Cloudflare account id required",
+			configData: `
+provider: cloudflare
+cloudflare:
+  api_key: test-token
+  model: "@cf/openai/gpt-oss-120b"
+`,
+			initProvider: "",
+			wantErr:      true,
+			errContains:  "account_id is not set",
+		},
+		{
+			name: "Stream answer path",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+  stream_answer_path: choices.0.delta.content
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, "choices.0.delta.content", cfg.StreamAnswerPath)
+			},
+		},
+		{
 			name: "Custom API base",
 			configData: `
 provider: openai

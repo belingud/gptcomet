@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-GPTComet generates Git commit messages and reviews code using LLMs. Supports 23+ providers (OpenAI, Claude, Gemini, etc.) and both Git/SVN.
+GPTComet generates Git commit messages and reviews code using LLMs. Supports 27+ providers (OpenAI, Claude, Gemini, etc.) and both Git/SVN.
 
 **Core Commands**:
 
@@ -22,7 +22,7 @@ internal/
 ├── config/    → YAML config manager (~/.config/gptcomet/gptcomet.yaml)
 ├── factory/   → Dependency injection (VCS, config, client creation)
 ├── git/       → VCS abstraction (git, svn)
-├── llm/       → Provider interface + 23 implementations
+├── llm/       → Provider interface + 27 implementations
 ├── ui/        → Terminal UI (progress, markdown rendering)
 ├── errors/    → Structured error handling (typed errors with suggestions)
 ├── debug/     → Debug logging
@@ -52,7 +52,7 @@ type LLM interface {
 
 **Adding a provider**: Register in [internal/llm/provider.go](internal/llm/provider.go) init()
 
-**Supported providers**: ai21, azure, chatglm, claude, cohere, deepseek, gemini, groq, hunyuan, kimi, longcat, minimax, mistral, modelscope, ollama, openai, openrouter, sambanova, silicon, tongyi, vertex, xai, yi
+**Supported providers**: ai21, azure, bedrock, chatglm, claude, cloudflare, cohere, deepseek, doubao, gemini, groq, hunyuan, kimi, lmstudio, longcat, minimax, mistral, modelscope, ollama, openai, openrouter, qianfan, sambanova, silicon, tongyi, vertex, xai
 
 ## Development
 

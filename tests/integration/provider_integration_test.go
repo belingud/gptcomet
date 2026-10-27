@@ -131,6 +131,62 @@ xai:
   model: grok-4.7
 `,
 		},
+		{
+			name:        "Bedrock",
+			configKey:   "bedrock",
+			requiresKey: true,
+			config: `
+provider: bedrock
+bedrock:
+  api_key: test-key
+  region: us-east-1
+  model: openai.gpt-oss-120b-1:0
+`,
+		},
+		{
+			name:        "Cloudflare",
+			configKey:   "cloudflare",
+			requiresKey: true,
+			config: `
+provider: cloudflare
+cloudflare:
+  api_key: test-token
+  account_id: account-123
+  model: "@cf/openai/gpt-oss-120b"
+`,
+		},
+		{
+			name:        "Qianfan",
+			configKey:   "qianfan",
+			requiresKey: true,
+			config: `
+provider: qianfan
+qianfan:
+  api_key: test-key
+  model: ernie-5.0
+`,
+		},
+		{
+			name:        "Doubao",
+			configKey:   "doubao",
+			requiresKey: true,
+			config: `
+provider: doubao
+doubao:
+  api_key: test-key
+  model: doubao-seed-2-1-pro-260915
+`,
+		},
+		{
+			name:        "LM Studio",
+			configKey:   "lmstudio",
+			requiresKey: false,
+			config: `
+provider: lmstudio
+lmstudio:
+  model: local-model
+`,
+		},
 	}
 
 	for _, tt := range providers {

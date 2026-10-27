@@ -14,6 +14,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	bedrockAPIBaseFormat    = "https://bedrock-runtime.%s.amazonaws.com/openai/v1"
+	cloudflareAPIBaseFormat = "https://api.cloudflare.com/client/v4/accounts/%s/ai/v1"
+)
+
+// providerAllowsEmptyAPIKey reports whether a provider can be used without an API key.
+func providerAllowsEmptyAPIKey(provider string) bool {
+	switch provider {
+	case "ollama", "lmstudio":
+		return true
+	default:
+		return false
+	}
+}
+
 type ManagerInterface interface {
 	Get(key string) (interface{}, bool)
 	GetWithDefault(key string, defaultValue interface{}) interface{}
@@ -99,6 +114,9 @@ func New(configPath string) (*Manager, error) {
 // - retries: the number of times to retry the request if it fails (defaults to 3)
 // - answer_path: the JSON path to the answer field in the response (defaults to an empty string)
 // - completion_path: the JSON path to the completion field in the response (defaults to an empty string)
+// - stream_answer_path: the JSON path to the streaming answer field (defaults to the OpenAI format)
+// - region: the AWS region for Bedrock (defaults to us-east-1)
+// - account_id: the Cloudflare account ID used to build the Workers AI endpoint
 //
 // If any of the required configuration options are not set, an error is returned.
 func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, error) {
@@ -117,7 +135,7 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 		return nil, gptcometerrors.NewConfigError("Configuration Error", fmt.Sprintf("Provider config not found: %s", provider), nil, []string{fmt.Sprintf("Configure the provider: gptcomet config set %s.api_key <key>", provider)})
 	}
 	var apiKey string
-	if provider == "ollama" {
+	if providerAllowsEmptyAPIKey(provider) {
 		apiKey = ""
 	} else {
 		apiKeyValue, _ := providerConfig["api_key"].(string)
@@ -138,6 +156,21 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	} else if provider == "ollama" {
 		// Ollama uses local default
 		apiBase = "http://localhost:11434/api"
+	} else if provider == "lmstudio" {
+		// LM Studio uses a local OpenAI-compatible server by default
+		apiBase = "http://localhost:1234/v1"
+	} else if provider == "bedrock" {
+		region := getStringValue(providerConfig, "region", "us-east-1")
+		apiBase = fmt.Sprintf(bedrockAPIBaseFormat, region)
+	} else if provider == "cloudflare" {
+		accountID := getStringValue(providerConfig, "account_id", "")
+		if accountID != "" {
+			apiBase = fmt.Sprintf(cloudflareAPIBaseFormat, accountID)
+		}
+	} else if provider == "qianfan" {
+		apiBase = "https://qianfan.baidubce.com/v2"
+	} else if provider == "doubao" {
+		apiBase = "https://ark.cn-beijing.volces.com/api/v3"
 	} else if provider == "gemini" {
 		// Gemini API endpoint
 		apiBase = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -186,9 +219,30 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	clientConfig.ProjectID = getStringValue(providerConfig, "project_id", "")
 	clientConfig.Location = getStringValue(providerConfig, "location", "")
 	clientConfig.AnthropicVersion = getStringValue(providerConfig, "anthropic_version", "")
+	clientConfig.Region = getStringValue(providerConfig, "region", "")
+	clientConfig.AccountID = getStringValue(providerConfig, "account_id", "")
+
+	if provider == "bedrock" && clientConfig.Region == "" {
+		clientConfig.Region = "us-east-1"
+	}
+	if provider == "cloudflare" && clientConfig.AccountID == "" {
+		customBase, _ := providerConfig["api_base"].(string)
+		if strings.TrimSpace(customBase) == "" {
+			return nil, gptcometerrors.NewConfigError(
+				"Configuration Error",
+				"Cloudflare account_id is not set",
+				nil,
+				[]string{"Set it using 'gptcomet config set cloudflare.account_id <account-id>'"},
+			)
+		}
+	}
 
 	if answerPath, ok := providerConfig["answer_path"].(string); ok {
 		clientConfig.AnswerPath = answerPath
+	}
+
+	if streamAnswerPath, ok := providerConfig["stream_answer_path"].(string); ok {
+		clientConfig.StreamAnswerPath = streamAnswerPath
 	}
 
 	if completionPath, ok := providerConfig["completion_path"].(string); ok {

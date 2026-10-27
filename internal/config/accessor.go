@@ -110,6 +110,9 @@ func (m *Manager) SetNestedValue(keys []string, value interface{}) {
 //   - <provider>.extra_headers
 //   - <provider>.completion_path
 //   - <provider>.answer_path
+//   - <provider>.stream_answer_path
+//   - <provider>.region
+//   - <provider>.account_id
 //   - prompt.brief_commit_message
 //   - prompt.rich_commit_message
 //   - prompt.translation
@@ -165,6 +168,9 @@ func (m *Manager) GetSupportedKeys() []string {
 		"extra_body",
 		"completion_path",
 		"answer_path",
+		"stream_answer_path",
+		"region",
+		"account_id",
 	}
 	for _, key := range providerKeys {
 		keys["<provider>."+key] = true

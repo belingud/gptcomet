@@ -78,7 +78,7 @@ GPTComet 使用大语言模型自动处理重复工作，并帮助改进开发�
 -   **多语言支持**：GPTComet 支持英语、中文等多种语言。
 -   **可配置**：GPTComet 允许用户自定义配置，例如 LLM 模型和 prompt。
 -   **富文本提交信息**：GPTComet 支持包含标题、摘要和详细说明的富文本提交信息。
--   **多提供商支持**：GPTComet 支持 OpenAI、Gemini、Claude/Anthropic、Vertex、Azure、Ollama 等提供商。
+-   **多提供商支持**：GPTComet 支持 OpenAI、Gemini、Claude/Anthropic、Vertex、Azure、AWS Bedrock、Ollama 等提供商。
 -   **支持 SVN 和 Git**：GPTComet 同时支持 SVN 和 Git 仓库。
 
 ## ⬇️ 安装
@@ -310,6 +310,11 @@ Provider ollama configured successfully!
 
 #### 其他支持的提供商
 
+-   AI21
+-   AWS Bedrock
+-   百度千帆（ERNIE）
+-   字节豆包（Doubao）
+-   Cloudflare Workers AI
 -   Groq
 -   Mistral
 -   Tongyi/Qwen
@@ -319,20 +324,20 @@ Provider ollama configured successfully!
 -   Deepseek
 -   ChatGLM
 -   KIMI
+-   LM Studio
 -   LongCat
 -   Cohere
 -   OpenRouter
 -   Hunyuan
 -   ModelScope
 -   MiniMax
--   Yi (lingyiwanwu)
 
 默认模型会定期更新，当前列表和最后核验日期见
 [docs/provider-models.md](https://github.com/belingud/gptcomet/blob/master/docs/provider-models.md)。
 
-暂不支持：
-
--   Baidu ERNIE
+> AWS Bedrock 走 OpenAI-compatible 的 Bedrock runtime endpoint，需要使用
+> Bedrock API key（设置 `bedrock.api_key` 或 `AWS_BEARER_TOKEN_BEDROCK`）。
+> 暂不支持 IAM access key / SigV4 认证。
 
 ### 手动设置提供商
 
@@ -353,9 +358,15 @@ Enter max tokens [1024]:
 [GPTComet] Provider test configured successfully.
 ```
 
-某些特殊提供商可能需要自定义配置，例如 `cloudflare`。
+对于 GPTComet 尚未内置预设的 OpenAI-compatible 服务，也可以走这个入口：
+手输一个 provider 名称，再设置对应的 `api_base`、`model`、`api_key`。高级用户还可以设置
+`completion_path`、`answer_path`、`stream_answer_path`、`extra_headers`、`extra_body`
+来适配非标准 API。
 
-> 注意：Cloudflare API 不会使用模型名称。
+Cloudflare Workers AI 现在是内置 provider。在 `gmsg newprovider` 里选择 `cloudflare`，
+填入 account ID、API token 和 Workers AI 模型（例如 `@cf/openai/gpt-oss-120b`），
+GPTComet 会自动拼出 OpenAI-compatible endpoint，不再需要旧的 `/ai/run` +
+`result.response` 手工配置。
 
 ```shell
 $ gmsg newprovider
@@ -363,20 +374,12 @@ $ gmsg newprovider
 Selected provider: cloudflare
 Configure provider:
 
-Previous inputs:
-  Enter API Base URL: https://api.cloudflare.com/client/v4/accounts/<account_id>/ai/run
-  Enter model name: llama-3.3-70b-instruct-fp8-fast
-  Enter API key: abc*************************************
-
-Enter Enter max tokens (default: 1024):
-> 1024
-
-Provider cloudflare already has a configuration. Do you want to overwrite it? (y/N): y
+Enter Cloudflare account ID: <account_id>
+Enter Cloudflare API token: *************************************
+Enter Workers AI model ID [@cf/openai/gpt-oss-120b]:
+Enter max tokens [1024]:
 
 Provider cloudflare configured successfully!
-
-$ gmsg config set cloudflare.completion_path @cf/meta/llama-3.3-70b-instruct-fp8-fast
-$ gmsg config set cloudflare.answer_path result.response
 ```
 
 ## ⌨️ 命令

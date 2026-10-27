@@ -1,7 +1,7 @@
 # Provider Model Defaults
 
 These are the default models used by `gmsg newprovider` and when a provider
-configuration omits `model`. The list was last refreshed on **2026-10-26**.
+configuration omits `model`. The list was last refreshed on **2026-10-27**.
 
 Model names change frequently. When updating one, update the provider constant,
 its tests, this table, and the examples in the READMEs.
@@ -10,14 +10,18 @@ its tests, this table, and the examples in the READMEs.
 | ---------- | ------------------------------------------ | ----- |
 | `ai21`     | `jamba-1.5-large`                          | Kept; no newer public model verified in this refresh. |
 | `azure`    | `gpt-6.1-sol`                              | Use your Azure deployment name; this is the default deployment example. |
+| `bedrock`  | `openai.gpt-oss-120b-1:0`                  | Bedrock model ID; replace with an enabled model or inference profile in your region. |
 | `chatglm`  | `glm-5.3-flash`                            | Zhipu GLM-5.3 Flash. |
 | `claude`   | `claude-sonnet-5-5`                        | Anthropic Claude Sonnet 5.5. |
+| `cloudflare` | `@cf/openai/gpt-oss-120b`                | Workers AI model ID; requires `account_id` in the provider config. |
 | `cohere`   | `command-a-plus`                           | Cohere Command A+. |
 | `deepseek` | `deepseek-v4.1-flash`                      | DeepSeek V4.1 Flash. |
+| `doubao`   | `doubao-seed-2-1-pro-260915`               | Volcano Ark model ID; an endpoint ID (`ep-...`) can be used instead. |
 | `gemini`   | `gemini-3.8-flash`                         | Google Gemini 3.8 Flash. |
 | `groq`     | `openai/gpt-oss-120b`                      | Groq-hosted GPT-OSS 120B. |
 | `hunyuan`  | `hunyuan-a13b`                             | Kept on the existing Hunyuan endpoint; `hy3` requires migrating the API base to TokenHub. |
 | `kimi`     | `kimi-k3-1-pro`                            | Moonshot Kimi K3.1 Pro. |
+| `lmstudio` | `local-model`                              | Placeholder; use the model loaded in your local LM Studio server. |
 | `longcat`  | `LongCat-2.5-Preview`                      | Current API pay-as-you-go model; `LongCat-2.0` remains available as a stable fallback. |
 | `minimax`  | `MiniMax-M3.1-Flash`                       | MiniMax M3.1 Flash. |
 | `mistral`  | `mistral-large-latest`                     | Rolling alias; stays current automatically. |
@@ -25,12 +29,12 @@ its tests, this table, and the examples in the READMEs.
 | `ollama`   | `qwen3.8:27b`                              | Local Ollama library tag. |
 | `openai`   | `gpt-6.1-sol`                              | OpenAI GPT-6.1 Sol. |
 | `openrouter` | `openai/gpt-6.1-sol`                     | OpenRouter namespaced model ID. |
+| `qianfan`  | `ernie-5.0`                                | Baidu Qianfan ERNIE 5.0 via the OpenAI-compatible v2 endpoint. |
 | `sambanova` | `Meta-Llama-4-Maverick-17B-128E-Instruct` | SambaNova-hosted Llama 4 Maverick. |
 | `silicon`  | `Qwen/Qwen3.8-2.4T-A95B`                   | SiliconFlow model ID. |
 | `tongyi`   | `qwen3.8-max`                              | Alibaba Cloud Qwen3.8 Max. |
 | `vertex`   | `gemini-3.8-flash`                         | Vertex AI Gemini 3.8 Flash. |
 | `xai`      | `grok-4.7`                                 | xAI Grok 4.7. |
-| `yi`       | `yi-lightning`                             | Kept; no newer public model verified in this refresh. |
 
 ## Sources
 
@@ -50,6 +54,11 @@ its tests, this table, and the examples in the READMEs.
 - Ollama: <https://registry.ollama.com/library/qwen3.8>
 - Tencent Hunyuan: <https://tokenhub.com/zh/providers/tencent-hunyuan>
 - OpenRouter: <https://openrouter.ai/openai/gpt-6.1-sol>
+- Amazon Bedrock: <https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html>
+- Baidu Qianfan: <https://cloud.baidu.com/doc/qianfan/s/rmh4stp0j>
+- Volcano Ark: <https://docs.volcengine.com/docs/ark/model-list>
+- Cloudflare Workers AI: <https://developers.cloudflare.com/workers-ai/models/>
+- LM Studio: <https://lmstudio.ai/docs/app/api/endpoints/openai>
 
 ## Refresh checklist
 

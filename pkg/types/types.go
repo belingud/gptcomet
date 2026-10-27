@@ -65,4 +65,6 @@ type ClientConfig struct {
 	Provider          string                 `json:"provider"`
 	ProjectID         string                 `json:"project_id,omitempty"` // Vertex AI project ID
 	Location          string                 `json:"location,omitempty"`   // Vertex AI location
+	Region            string                 `json:"region,omitempty"`     // AWS Bedrock region
+	AccountID         string                 `json:"account_id,omitempty"` // Cloudflare account ID
 }

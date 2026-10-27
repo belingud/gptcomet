@@ -78,7 +78,7 @@ This project leverages the power of large language models to automate repetitive
 -   **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
 -   **Customizable Configuration**: GPTComet allows users to customize the configuration to suit their needs, such llm model and prompt.
 -   **Support for Rich Commit Messages**: GPTComet supports rich commit messages, which include a title, summary, and detailed description.
--   **Support for Multiple Providers**: GPTComet supports multiple providers, including OpenAI, Gemini, Claude/Anthropic, Vertex, Azure, Ollama, and others.
+-   **Support for Multiple Providers**: GPTComet supports multiple providers, including OpenAI, Gemini, Claude/Anthropic, Vertex, Azure, AWS Bedrock, Ollama, and others.
 -   **Support SVN and Git**: GPTComet supports both SVN and Git repositories.
 
 ## ⬇️ Installation
@@ -311,6 +311,11 @@ Provider ollama configured successfully!
 
 #### Other Supported Providers
 
+-   AI21
+-   AWS Bedrock
+-   Baidu Qianfan (ERNIE)
+-   ByteDance Doubao
+-   Cloudflare Workers AI
 -   Groq
 -   Mistral
 -   Tongyi/Qwen
@@ -320,21 +325,21 @@ Provider ollama configured successfully!
 -   Deepseek
 -   ChatGLM
 -   KIMI
+-   LM Studio
 -   LongCat
 -   Cohere
 -   OpenRouter
 -   Hunyuan
 -   ModelScope
 -   MiniMax
--   Yi (lingyiwanwu)
 
 Default models are refreshed periodically; see
 [docs/provider-models.md](https://github.com/belingud/gptcomet/blob/master/docs/provider-models.md) for the current defaults and
 the last verification date.
 
-Not supported:
-
--   Baidu ERNIE
+> AWS Bedrock uses the OpenAI-compatible Bedrock runtime endpoint with a
+> Bedrock API key (set `bedrock.api_key` or `AWS_BEARER_TOKEN_BEDROCK`). IAM
+> access-key/SigV4 authentication is not supported yet.
 
 ### Manual Provider Setup
 
@@ -355,9 +360,17 @@ Enter max tokens [1024]:
 [GPTComet] Provider test configured successfully.
 ```
 
-Some special provider may need your custome config. Like `cloudflare`.
+This is also the escape hatch for any OpenAI-compatible service that GPTComet
+does not ship a preset for: enter a custom provider name, then set its
+`api_base`, `model`, and `api_key`. Advanced users can also set
+`completion_path`, `answer_path`, `stream_answer_path`, `extra_headers`, and
+`extra_body` for non-standard APIs.
 
-> Be aware that the model name is not used in cloudflare api.
+Cloudflare Workers AI is a built-in provider now. Select `cloudflare` in
+`gmsg newprovider` and enter your account ID, API token, and Workers AI model
+(for example `@cf/openai/gpt-oss-120b`); GPTComet builds the OpenAI-compatible
+endpoint for you. The old `/ai/run` + `result.response` manual workaround is no
+longer needed.
 
 ```shell
 $ gmsg newprovider
@@ -365,20 +378,12 @@ $ gmsg newprovider
 Selected provider: cloudflare
 Configure provider:
 
-Previous inputs:
-  Enter API Base URL: https://api.cloudflare.com/client/v4/accounts/<account_id>/ai/run
-  Enter model name: llama-3.3-70b-instruct-fp8-fast
-  Enter API key: abc*************************************
-
-Enter Enter max tokens (default: 1024):
-> 1024
-
-Provider cloudflare already has a configuration. Do you want to overwrite it? (y/N): y
+Enter Cloudflare account ID: <account_id>
+Enter Cloudflare API token: *************************************
+Enter Workers AI model ID [@cf/openai/gpt-oss-120b]:
+Enter max tokens [1024]:
 
 Provider cloudflare configured successfully!
-
-$ gmsg config set cloudflare.completion_path @cf/meta/llama-3.3-70b-instruct-fp8-fast
-$ gmsg config set cloudflare.answer_path result.response
 ```
 
 ## ⌨️ Commands

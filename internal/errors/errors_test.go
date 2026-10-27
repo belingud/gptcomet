@@ -286,6 +286,9 @@ func TestGetAPIKeyEnvVar(t *testing.T) {
 		{"claude", "ANTHROPIC_API_KEY"},
 		{"gemini", "GEMINI_API_KEY"},
 		{"cohere", "COHERE_API_KEY"},
+		{"bedrock", "AWS_BEARER_TOKEN_BEDROCK"},
+		{"cloudflare", "CLOUDFLARE_API_TOKEN"},
+		{"doubao", "ARK_API_KEY"},
 		{"unknown", "UNKNOWN_API_KEY"},
 	}
 

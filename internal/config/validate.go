@@ -65,7 +65,7 @@ func (m *Manager) Validate() []string {
 }
 
 func validateAPIKey(provider string, providerConfig map[string]interface{}) []string {
-	if provider == "ollama" {
+	if providerAllowsEmptyAPIKey(provider) {
 		return nil
 	}
 

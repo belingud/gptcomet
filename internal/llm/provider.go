@@ -65,23 +65,31 @@ func CreateProvider(config *types.ClientConfig) (LLM, error) {
 // It registers the following providers:
 // - AI21
 // - Azure
+// - Bedrock
 // - ChatGLM
 // - Claude
+// - Cloudflare
 // - Cohere
 // - Deepseek
+// - Doubao
 // - Gemini
+// - Groq
+// - Hunyuan
 // - Kimi
-// - Mistral
+// - LM Studio
+// - LongCat
 // - MiniMax
+// - Mistral
+// - ModelScope
 // - Ollama
 // - OpenAI
-// - Vertex
-// - XAI
+// - OpenRouter
+// - Qianfan
 // - Sambanova
 // - Silicon
 // - Tongyi
-// - Groq
-// - OpenRouter
+// - Vertex
+// - XAI
 //
 // Each provider is registered with a constructor function that creates a new instance
 // of the corresponding LLM implementation.
@@ -96,6 +104,11 @@ func init() {
 		return NewAzureLLM(config)
 	})
 
+	// Bedrock
+	RegisterProvider("bedrock", func(config *types.ClientConfig) LLM {
+		return NewBedrockLLM(config)
+	})
+
 	// ChatGLM
 	RegisterProvider("chatglm", func(config *types.ClientConfig) LLM {
 		return NewChatGLMLLM(config)
@@ -106,6 +119,11 @@ func init() {
 		return NewClaudeLLM(config)
 	})
 
+	// Cloudflare
+	RegisterProvider("cloudflare", func(config *types.ClientConfig) LLM {
+		return NewCloudflareLLM(config)
+	})
+
 	// Cohere
 	RegisterProvider("cohere", func(config *types.ClientConfig) LLM {
 		return NewCohereLLM(config)
@@ -114,6 +132,11 @@ func init() {
 	// Deepseek
 	RegisterProvider("deepseek", func(config *types.ClientConfig) LLM {
 		return NewDeepSeekLLM(config)
+	})
+
+	// Doubao
+	RegisterProvider("doubao", func(config *types.ClientConfig) LLM {
+		return NewDoubaoLLM(config)
 	})
 
 	// Gemini
@@ -134,6 +157,11 @@ func init() {
 	// Kimi
 	RegisterProvider("kimi", func(config *types.ClientConfig) LLM {
 		return NewKimiLLM(config)
+	})
+
+	// LM Studio
+	RegisterProvider("lmstudio", func(config *types.ClientConfig) LLM {
+		return NewLMStudioLLM(config)
 	})
 
 	// LongCat
@@ -171,6 +199,11 @@ func init() {
 		return NewOpenRouterLLM(config)
 	})
 
+	// Qianfan
+	RegisterProvider("qianfan", func(config *types.ClientConfig) LLM {
+		return NewQianfanLLM(config)
+	})
+
 	// Sambanova
 	RegisterProvider("sambanova", func(config *types.ClientConfig) LLM {
 		return NewSambanovaLLM(config)
@@ -194,10 +227,5 @@ func init() {
 	// XAI
 	RegisterProvider("xai", func(config *types.ClientConfig) LLM {
 		return NewXAILLM(config)
-	})
-
-	// Yi
-	RegisterProvider("yi", func(config *types.ClientConfig) LLM {
-		return NewYiLLM(config)
 	})
 }

@@ -402,6 +402,12 @@ func GetAPIKeyEnvVar(provider string) string {
 		return "GEMINI_API_KEY"
 	case "cohere":
 		return "COHERE_API_KEY"
+	case "bedrock":
+		return "AWS_BEARER_TOKEN_BEDROCK"
+	case "cloudflare":
+		return "CLOUDFLARE_API_TOKEN"
+	case "doubao":
+		return "ARK_API_KEY"
 	default:
 		normalized := strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(provider), "-", "_"))
 		if normalized == "" {
