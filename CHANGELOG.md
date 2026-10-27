@@ -1,5 +1,17 @@
 
 ---
+## [2.7.0](https://github.com/belingud/gptcomet/compare/v2.6.3..v2.7.0) - 2026-10-27
+
+### ⛰️  Features
+
+- **(providers)** add five providers and remove discontinued Yi - ([0b07649](https://github.com/belingud/gptcomet/commit/0b07649d5d8167cad3e71c8310a1923ae3c6d4a7)) - belingud
+
+### 🐛 Bug Fixes
+
+- **(ci)** repair staticcheck and pytest quality checks - ([6373458](https://github.com/belingud/gptcomet/commit/63734585039d585e199509fd1f23c6f5c920a03b)) - belingud
+
+
+---
 ## [2.6.3](https://github.com/belingud/gptcomet/compare/v2.6.2..v2.6.3) - 2026-10-26
 
 ### ⚙️ Miscellaneous Tasks
