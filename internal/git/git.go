@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/config"
@@ -110,33 +109,6 @@ func (g *GitVCS) GetStagedFiles(repoPath string) ([]string, error) {
 	}
 
 	return files, nil
-}
-
-// ShouldIgnoreFile checks if a file should be ignored based on patterns
-func ShouldIgnoreFile(file string, ignorePatterns []string) bool {
-	for _, pattern := range ignorePatterns {
-		matched, err := filepath.Match(pattern, file)
-		if err == nil && matched {
-			return true
-		}
-	}
-	return false
-}
-
-// FilterIgnoredFiles returns files that do not match any of the ignore
-// patterns. The input order is preserved.
-func FilterIgnoredFiles(files []string, ignorePatterns []string) []string {
-	if len(ignorePatterns) == 0 {
-		return files
-	}
-
-	filtered := make([]string, 0, len(files))
-	for _, file := range files {
-		if !ShouldIgnoreFile(file, ignorePatterns) {
-			filtered = append(filtered, file)
-		}
-	}
-	return filtered
 }
 
 // GetStagedDiffFiltered returns the git diff for staged changes, excluding files that match the patterns

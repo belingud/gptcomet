@@ -213,8 +213,11 @@ func TestGitVCS_GetStagedDiffFiltered_UsesStringSlicePatterns(t *testing.T) {
 	vcs, dir, cleanup := setupVCSTest(t, Git)
 	defer cleanup()
 
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "nested"), 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "keep.go"), []byte("package main\n"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "skip.lock"), []byte("lock\n"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "nested", "keep.go"), []byte("package nested\n"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "nested", "skip.lock"), []byte("lock\n"), 0644))
 	require.NoError(t, testutils.RunGitCommand(t, dir, "add", "."))
 
 	cfg := new(testutils.MockConfigManager)
@@ -224,5 +227,7 @@ func TestGitVCS_GetStagedDiffFiltered_UsesStringSlicePatterns(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, diff, "keep.go")
 	assert.NotContains(t, diff, "skip.lock")
+	assert.Contains(t, diff, "nested/keep.go")
+	assert.NotContains(t, diff, "nested/skip.lock")
 	cfg.AssertExpectations(t)
 }

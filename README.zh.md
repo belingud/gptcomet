@@ -510,7 +510,20 @@ GPTComet 的配置文件是 `gptcomet.yaml`。
 ```
 
 可以使用 `gmsg config append file_ignore <xxx>` 添加更多忽略项。
-`<xxx>` 使用与 `gitignore` 相同的语法，例如用 `*.so` 忽略所有 `.so` 后缀文件。
+`<xxx>` 使用 gitignore 风格的模式：
+
+- `*.lock` 会匹配 `a.lock` 和 `vendor/a.lock`（不含 `/` 的模式在任意层级匹配）。
+- `vendor/**` 匹配 `vendor/` 下的所有内容；`docs/*.md` 只匹配 `docs/` 的直接子文件。
+- `/go.sum` 只匹配仓库根目录的 `go.sum`；`go.sum` 则在任意层级匹配。
+- `build/` 匹配名为 `build` 的目录及其下所有内容。
+- `!important.lock` 可以重新包含之前已被忽略的文件。
+
+示例：
+
+```shell
+gmsg config append file_ignore "vendor/**"
+gmsg config append file_ignore "!vendor/keep.go"
+```
 
 ### provider
 

@@ -514,7 +514,20 @@ The file to ignore when generating a commit. The default value is
 ```
 
 You can add more file_ignore by using the `gmsg config append file_ignore <xxx>` command.
-`<xxx>` is same syntax as `gitignore`, like `*.so` to ignore all `.so` suffix files.
+`<xxx>` uses gitignore-style patterns:
+
+- `*.lock` matches `a.lock` and `vendor/a.lock` (a pattern without `/` matches at any depth).
+- `vendor/**` matches everything under `vendor/`, and `docs/*.md` matches only direct children of `docs/`.
+- `/go.sum` matches only the repository-root `go.sum`; `go.sum` matches it at any depth.
+- `build/` matches a directory named `build` and everything below it.
+- `!important.lock` re-includes a file matched by an earlier pattern.
+
+Example:
+
+```shell
+gmsg config append file_ignore "vendor/**"
+gmsg config append file_ignore "!vendor/keep.go"
+```
 
 ### provider
 
