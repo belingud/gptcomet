@@ -1,5 +1,14 @@
 
 ---
+## [2.7.1](https://github.com/belingud/gptcomet/compare/v2.7.0..v2.7.1) - 2026-10-28
+
+### 🐛 Bug Fixes
+
+- **(git)** support gitignore-style file_ignore patterns - ([fa3a24e](https://github.com/belingud/gptcomet/commit/fa3a24e7bf2519500972d0d12a96c5420efd35a1)) - belingud
+- **(timeout)** enforce request timeouts - ([e7ab294](https://github.com/belingud/gptcomet/commit/e7ab2946d1788c643a5dacd88f9042826f97ff69)) - belingud
+
+
+---
 ## [2.7.0](https://github.com/belingud/gptcomet/compare/v2.6.3..v2.7.0) - 2026-10-27
 
 ### ⛰️  Features
