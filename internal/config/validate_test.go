@@ -101,6 +101,16 @@ openai:
 			wantIssues: []string{"retries must be >= 1"},
 		},
 		{
+			name: "invalid timeout",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+  timeout: 0
+`,
+			wantIssues: []string{"timeout must be >= 1"},
+		},
+		{
 			name: "invalid top_p",
 			configData: `
 provider: openai

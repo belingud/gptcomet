@@ -172,6 +172,10 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("DefaultOllamaAPIBase = %v, want 'http://localhost:11434/api'", DefaultOllamaAPIBase)
 	}
 
+	if DefaultTimeoutSeconds != 60 {
+		t.Errorf("DefaultTimeoutSeconds = %v, want 60", DefaultTimeoutSeconds)
+	}
+
 	if DefaultTimeout != 60*time.Second {
 		t.Errorf("DefaultTimeout = %v, want 60s", DefaultTimeout)
 	}

@@ -174,8 +174,12 @@ const (
 	// DefaultOllamaAPIBase is the default Ollama API base URL
 	DefaultOllamaAPIBase = "http://localhost:11434/api"
 
-	// DefaultTimeout is the default HTTP request timeout
-	DefaultTimeout = 60 * time.Second
+	// DefaultTimeoutSeconds is the default request timeout in seconds, used
+	// by the configuration layer.
+	DefaultTimeoutSeconds = 60
+
+	// DefaultTimeout is the default HTTP request timeout.
+	DefaultTimeout = time.Duration(DefaultTimeoutSeconds) * time.Second
 )
 
 // Common Strings

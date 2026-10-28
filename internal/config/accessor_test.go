@@ -301,6 +301,7 @@ func TestManager_GetSupportedKeys(t *testing.T) {
 				"output.translate_title",
 				"<provider>.api_key",
 				"<provider>.model",
+				"<provider>.timeout",
 				"<provider>.region",
 				"<provider>.account_id",
 				"<provider>.stream_answer_path",

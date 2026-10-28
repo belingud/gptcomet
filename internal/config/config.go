@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/belingud/gptcomet/internal/constants"
 	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -112,6 +113,7 @@ func New(configPath string) (*Manager, error) {
 // - temperature: the temperature parameter (defaults to 1.0)
 // - frequency_penalty: the frequency penalty parameter (defaults to 0.5)
 // - retries: the number of times to retry the request if it fails (defaults to 3)
+// - timeout: request timeout in seconds (defaults to 60)
 // - answer_path: the JSON path to the answer field in the response (defaults to an empty string)
 // - completion_path: the JSON path to the completion field in the response (defaults to an empty string)
 // - stream_answer_path: the JSON path to the streaming answer field (defaults to the OpenAI format)
@@ -201,6 +203,11 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	frequencyPenalty := defaults.DefaultFrequencyPenalty
 	frequencyPenalty = getFloatValue(providerConfig, "frequency_penalty", frequencyPenalty)
 
+	timeout := getIntValue(providerConfig, "timeout", constants.DefaultTimeoutSeconds)
+	if timeout <= 0 {
+		timeout = constants.DefaultTimeoutSeconds
+	}
+
 	clientConfig := &types.ClientConfig{
 		APIBase:          apiBase,
 		APIKey:           apiKey,
@@ -212,6 +219,7 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 		TopP:             topP,
 		Temperature:      temperature,
 		FrequencyPenalty: frequencyPenalty,
+		Timeout:          int64(timeout),
 	}
 	clientConfig.Retries = getIntValue(providerConfig, "retries", defaults.DefaultRetries)
 	clientConfig.APIVersion = getStringValue(providerConfig, "api_version", "")

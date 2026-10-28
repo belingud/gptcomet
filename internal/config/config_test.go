@@ -3,6 +3,7 @@ package config
 import (
 	"testing"
 
+	"github.com/belingud/gptcomet/internal/constants"
 	"github.com/belingud/gptcomet/internal/testutils"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -258,7 +259,36 @@ openai:
 				assert.Equal(t, 0.3, cfg.Temperature)
 				assert.Equal(t, 0.0, cfg.FrequencyPenalty)
 				assert.Equal(t, 3, cfg.Retries)
+				assert.Equal(t, int64(constants.DefaultTimeoutSeconds), cfg.Timeout)
 				assert.Equal(t, "", cfg.Proxy)
+			},
+		},
+		{
+			name: "Timeout override",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+  timeout: 15
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, int64(15), cfg.Timeout)
+			},
+		},
+		{
+			name: "Non-positive timeout falls back to default",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+  timeout: 0
+`,
+			initProvider: "",
+			wantErr:      false,
+			validateFunc: func(t *testing.T, cfg *types.ClientConfig) {
+				assert.Equal(t, int64(constants.DefaultTimeoutSeconds), cfg.Timeout)
 			},
 		},
 		{

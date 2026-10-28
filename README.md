@@ -416,6 +416,7 @@ The following are the available commands for GPTComet:
     -   `--provider`: Override AI provider (openai/deepseek)
     -   `--proxy`: Override proxy URL
     -   `--retries`: Override retry count
+    -   `--timeout`: Override request timeout in seconds
     -   `--temperature`: Override temperature
     -   `--top-p`: Override top_p value
 -   `gmsg newprovider`: Add a new provider.
@@ -433,6 +434,7 @@ The following are the available commands for GPTComet:
     -   `--provider`: Override AI provider (openai/deepseek)
     -   `--proxy`: Override proxy URL
     -   `--retries`: Override retry count
+    -   `--timeout`: Override request timeout in seconds
     -   `--temperature`: Override temperature
     -   `--top-p`: Override top_p value
 
@@ -461,6 +463,7 @@ Here's a summary of the main configuration keys:
 | `<provider>.api_key`           | The API key for the provider.                              |                                   |
 | `<provider>.model`             | The model name to use.                                     | (Provider-specific)               |
 | `<provider>.retries`           | The number of retry attempts for API requests.             | `2`                               |
+| `<provider>.timeout`           | Request timeout in seconds. Non-streaming calls use it as a total deadline; streaming calls use it as an idle timeout that resets whenever content arrives. | `60`                              |
 | `<provider>.proxy`             | The proxy URL to use (if needed).                          |                                   |
 | `<provider>.max_tokens`        | The maximum number of tokens to generate.                  | `2048`                            |
 | `<provider>.top_p`             | The top-p value for nucleus sampling.                      | `0.7`                             |

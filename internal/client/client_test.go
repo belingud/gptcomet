@@ -8,7 +8,9 @@ import (
 	"net/http/httptest"
 	"sync/atomic"
 	"testing"
+	"time"
 
+	"github.com/belingud/gptcomet/internal/constants"
 	gptErrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/llm"
 	"github.com/belingud/gptcomet/pkg/config"
@@ -771,4 +773,107 @@ func TestStreamNoExtraNewlineWhenContentEndsWithNewline(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Equal(t, []string{"hello\n"}, chunks)
+}
+
+func TestClientRequestTimeout(t *testing.T) {
+	tests := []struct {
+		name    string
+		timeout int64
+		want    time.Duration
+	}{
+		{name: "default when unset", timeout: 0, want: constants.DefaultTimeout},
+		{name: "default when negative", timeout: -5, want: constants.DefaultTimeout},
+		{name: "configured value", timeout: 12, want: 12 * time.Second},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{config: &types.ClientConfig{Timeout: tt.timeout}}
+			assert.Equal(t, tt.want, c.requestTimeout())
+		})
+	}
+}
+
+func TestChatTimeout(t *testing.T) {
+	mockLLM := &MockLLM{
+		name: "mock",
+		makeRequestFunc: func(ctx context.Context, client *http.Client, message string, stream bool) (string, error) {
+			<-ctx.Done()
+			return "", ctx.Err()
+		},
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{
+			Retries: 1,
+			Timeout: 1,
+		},
+		llm: mockLLM,
+	}
+
+	start := time.Now()
+	_, err := client.Chat(context.Background(), "test message", nil)
+	require.Error(t, err)
+	assert.Less(t, time.Since(start), 3*time.Second)
+}
+
+func TestGetClientUsesResponseHeaderTimeout(t *testing.T) {
+	c := &Client{config: &types.ClientConfig{Timeout: 5}}
+
+	httpClient, err := c.getClient()
+	require.NoError(t, err)
+
+	// The total timeout is enforced per-call via context so streaming
+	// responses are not cut off.
+	assert.Zero(t, httpClient.Timeout)
+
+	transport, ok := httpClient.Transport.(*http.Transport)
+	require.True(t, ok)
+	assert.Equal(t, 5*time.Second, transport.ResponseHeaderTimeout)
+}
+
+func TestStreamIdleTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		if flusher, ok := w.(http.Flusher); ok {
+			flusher.Flush()
+		}
+		// Send no content and keep the connection open until the client
+		// cancels it.
+		<-r.Context().Done()
+	}))
+	defer server.Close()
+
+	mockLLM := &MockLLM{
+		name: "mock",
+		buildURLFunc: func() string {
+			return server.URL
+		},
+		formatMessagesFunc: func(message string) (interface{}, error) {
+			return map[string]interface{}{"model": "test"}, nil
+		},
+	}
+
+	client := &Client{
+		config: &types.ClientConfig{
+			Retries: 1,
+			Timeout: 1,
+		},
+		llm: mockLLM,
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		done <- client.Stream(context.Background(), "test message", func(resp *types.CompletionResponse) error {
+			return nil
+		})
+	}()
+
+	select {
+	case err := <-done:
+		require.Error(t, err)
+	case <-time.After(5 * time.Second):
+		t.Fatal("Stream did not return after the idle timeout")
+	}
 }

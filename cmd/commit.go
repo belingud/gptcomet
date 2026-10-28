@@ -95,6 +95,7 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 //   - --api-key: Override API key (string)
 //   - --max-tokens: Override maximum tokens (int)
 //   - --retries: Override retry count (int)
+//   - --timeout: Override request timeout in seconds (int)
 //   - --model: Override model name (string)
 //   - --answer-path: Override answer path (string)
 //   - --completion-path: Override completion path (string)

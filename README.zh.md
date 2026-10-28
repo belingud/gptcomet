@@ -412,6 +412,7 @@ GPTComet 提供以下命令：
     -   `--provider`：覆盖 AI 提供商，例如 `openai` 或 `deepseek`。
     -   `--proxy`：覆盖代理 URL。
     -   `--retries`：覆盖重试次数。
+    -   `--timeout`：覆盖请求超时时间（秒）。
     -   `--temperature`：覆盖 temperature。
     -   `--top-p`：覆盖 top_p。
 -   `gmsg newprovider`：添加一个新的提供商。
@@ -429,6 +430,7 @@ GPTComet 提供以下命令：
     -   `--provider`：覆盖 AI 提供商，例如 `openai` 或 `deepseek`。
     -   `--proxy`：覆盖代理 URL。
     -   `--retries`：覆盖重试次数。
+    -   `--timeout`：覆盖请求超时时间（秒）。
     -   `--temperature`：覆盖 temperature。
     -   `--top-p`：覆盖 top_p。
 
@@ -457,6 +459,7 @@ GPTComet 提供以下命令：
 | `<provider>.api_key`           | 提供商 API 密钥。                                         |                                   |
 | `<provider>.model`             | 要使用的模型名称。                                        | 由提供商决定                      |
 | `<provider>.retries`           | API 请求重试次数。                                        | `2`                               |
+| `<provider>.timeout`           | 请求超时时间（秒）。非流式请求作为总超时；流式请求作为空闲超时，收到内容后重置。 | `60`                              |
 | `<provider>.proxy`             | 需要时使用的代理 URL。                                    |                                   |
 | `<provider>.max_tokens`        | 生成内容的最大 token 数。                                 | `2048`                            |
 | `<provider>.top_p`             | 核采样的 top-p 值。                                       | `0.7`                             |

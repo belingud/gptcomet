@@ -16,6 +16,7 @@ type CommonOptions struct {
 	APIKey           string
 	MaxTokens        int
 	Retries          int
+	Timeout          int64
 	Model            string
 	AnswerPath       string
 	CompletionPath   string
@@ -33,6 +34,7 @@ func AddAdvancedAPIFlags(flags *pflag.FlagSet, opts *CommonOptions) {
 	flags.StringVar(&opts.APIKey, "api-key", "", "Override API key")
 	flags.IntVar(&opts.MaxTokens, "max-tokens", 0, "Override maximum tokens")
 	flags.IntVar(&opts.Retries, "retries", 0, "Override retry count")
+	flags.Int64Var(&opts.Timeout, "timeout", 0, "Override request timeout in seconds")
 	flags.StringVar(&opts.Model, "model", "", "Override model name")
 	flags.StringVar(&opts.AnswerPath, "answer-path", "", "Override answer path")
 	flags.StringVar(&opts.CompletionPath, "completion-path", "", "Override completion path")
@@ -70,6 +72,9 @@ func ApplyCommonOptions(opts *CommonOptions, clientConfig *types.ClientConfig) {
 	}
 	if opts.Retries > 0 {
 		clientConfig.Retries = opts.Retries
+	}
+	if opts.Timeout > 0 {
+		clientConfig.Timeout = opts.Timeout
 	}
 	if opts.Model != "" {
 		clientConfig.Model = opts.Model

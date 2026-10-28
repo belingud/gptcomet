@@ -88,6 +88,12 @@ func New(config *types.ClientConfig) (*Client, error) {
 
 // Chat sends a chat message to the LLM provider with retry logic
 func (c *Client) Chat(ctx context.Context, message string, history []types.Message) (*types.CompletionResponse, error) {
+	// Enforce the configured timeout for the whole non-streaming operation,
+	// including retries and backoff. Streaming uses its own context so long
+	// responses are not cut off by a total request deadline.
+	ctx, cancel := context.WithTimeout(ctx, c.requestTimeout())
+	defer cancel()
+
 	client, err := c.getClient()
 	if err != nil {
 		logger.Error("Get client failed: %v", err)
@@ -118,13 +124,17 @@ func (c *Client) Chat(ctx context.Context, message string, history []types.Messa
 		}
 
 		// Exponential backoff with jitter
-		if i < maxRetries {
+		if i < maxRetries-1 {
 			delay := time.Duration(float64(constants.BaseRetryDelay) * math.Pow(2, float64(i)))
 			jitter := time.Duration(rand.Int63n(int64(float64(delay) * constants.MaxJitterPercent)))
 			sleepDuration := delay + jitter
 
 			logger.Info("Retrying in %v...", sleepDuration)
-			time.Sleep(sleepDuration)
+			select {
+			case <-ctx.Done():
+				return nil, gptErrors.RequestRetryError(maxRetries, ctx.Err())
+			case <-time.After(sleepDuration):
+			}
 		}
 	}
 
@@ -213,6 +223,15 @@ func (c *Client) createProxyTransport() (*http.Transport, error) {
 	}
 }
 
+// requestTimeout returns the configured request timeout, falling back to the
+// package default when the configuration does not set one.
+func (c *Client) requestTimeout() time.Duration {
+	if c.config != nil && c.config.Timeout > 0 {
+		return time.Duration(c.config.Timeout) * time.Second
+	}
+	return constants.DefaultTimeout
+}
+
 // getClient returns an HTTP client configured with proxy settings if specified
 func (c *Client) getClient() (*http.Client, error) {
 	// Create a transport with proxy if configured
@@ -222,11 +241,11 @@ func (c *Client) getClient() (*http.Client, error) {
 		return nil, err
 	}
 
-	// Create a client with the configured transport and timeout
-	client := &http.Client{
-		Transport: transport,
-		Timeout:   time.Duration(c.config.Timeout) * time.Second,
-	}
+	// Bound the time spent waiting for response headers. The total budget for
+	// non-streaming calls is enforced by the context in Chat; a total
+	// http.Client timeout would cut off long streaming responses.
+	transport.ResponseHeaderTimeout = c.requestTimeout()
+	client := &http.Client{Transport: transport}
 
 	return client, nil
 }
@@ -305,6 +324,16 @@ func (c *Client) GenerateReviewCommentStream(diff string, prompt string, callbac
 // Returns an error if the client cannot be obtained, the request fails, or the callback function
 // returns an error.
 func (c *Client) Stream(ctx context.Context, message string, callback func(*types.CompletionResponse) error) error {
+	// A single total deadline would cut off legitimate long reviews, so use
+	// an idle timeout instead: it is reset every time content arrives.
+	streamCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	idleTimeout := c.requestTimeout()
+	idleTimer := time.AfterFunc(idleTimeout, cancel)
+	defer idleTimer.Stop()
+	resetIdleTimer := func() { idleTimer.Reset(idleTimeout) }
+
 	client, err := c.getClient()
 	if err != nil {
 		return err
@@ -353,7 +382,9 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		logger.Info("Sending streaming request to %s...", c.llm.Name())
 
-		emitted, err := c.streamOnce(ctx, client, url, reqBody, headers, func(content string, raw map[string]interface{}) error {
+		resetIdleTimer()
+		emitted, err := c.streamOnce(streamCtx, client, url, reqBody, headers, func(content string, raw map[string]interface{}) error {
+			resetIdleTimer()
 			return callback(&types.CompletionResponse{
 				Content: content,
 				Raw:     raw,
@@ -378,8 +409,8 @@ func (c *Client) Stream(ctx context.Context, message string, callback func(*type
 
 		logger.Info("Retrying streaming request in %v...", sleepDuration)
 		select {
-		case <-ctx.Done():
-			return ctx.Err()
+		case <-streamCtx.Done():
+			return streamCtx.Err()
 		case <-time.After(sleepDuration):
 		}
 	}

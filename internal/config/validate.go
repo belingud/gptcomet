@@ -92,6 +92,7 @@ func validateProviderNumbers(providerConfig map[string]interface{}) []string {
 	var issues []string
 	issues = append(issues, validateIntField(providerConfig, "max_tokens", 1)...)
 	issues = append(issues, validateIntField(providerConfig, "retries", 1)...)
+	issues = append(issues, validateIntField(providerConfig, "timeout", 1)...)
 	issues = append(issues, validateFloatField(providerConfig, "top_p", 0, 1)...)
 	issues = append(issues, validateFloatField(providerConfig, "temperature", 0, 2)...)
 	issues = append(issues, validateFloatField(providerConfig, "frequency_penalty", -2, 2)...)

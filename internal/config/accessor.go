@@ -102,6 +102,7 @@ func (m *Manager) SetNestedValue(keys []string, value interface{}) {
 //   - <provider>.api_key
 //   - <provider>.model
 //   - <provider>.retries
+//   - <provider>.timeout
 //   - <provider>.proxy
 //   - <provider>.max_tokens
 //   - <provider>.top_p
@@ -159,6 +160,7 @@ func (m *Manager) GetSupportedKeys() []string {
 		"api_key",
 		"model",
 		"retries",
+		"timeout",
 		"proxy",
 		"max_tokens",
 		"top_p",

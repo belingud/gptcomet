@@ -118,6 +118,7 @@ func TestApplyCommonOptions(t *testing.T) {
 				APIKey:           "custom-key",
 				MaxTokens:        2048,
 				Retries:          5,
+				Timeout:          30,
 				Model:            "custom-model",
 				AnswerPath:       "custom.answer",
 				CompletionPath:   "/custom/completion",
@@ -131,6 +132,7 @@ func TestApplyCommonOptions(t *testing.T) {
 				APIKey:           "default-key",
 				MaxTokens:        1024,
 				Retries:          3,
+				Timeout:          60,
 				Model:            "default-model",
 				AnswerPath:       "default.answer",
 				CompletionPath:   nil,
@@ -145,6 +147,7 @@ func TestApplyCommonOptions(t *testing.T) {
 				assert.Equal(t, "custom-key", cfg.APIKey, "APIKey should be updated")
 				assert.Equal(t, 2048, cfg.MaxTokens, "MaxTokens should be updated")
 				assert.Equal(t, 5, cfg.Retries, "Retries should be updated")
+				assert.Equal(t, int64(30), cfg.Timeout, "Timeout should be updated")
 				assert.Equal(t, "custom-model", cfg.Model, "Model should be updated")
 				assert.Equal(t, "custom.answer", cfg.AnswerPath, "AnswerPath should be updated")
 				assert.Equal(t, "/custom/completion", *cfg.CompletionPath, "CompletionPath should be updated")
@@ -259,6 +262,7 @@ func TestCommonOptions_DefaultValues(t *testing.T) {
 	assert.Equal(t, "", opts.APIKey, "APIKey should be empty by default")
 	assert.Equal(t, 0, opts.MaxTokens, "MaxTokens should be 0 by default")
 	assert.Equal(t, 0, opts.Retries, "Retries should be 0 by default")
+	assert.Equal(t, int64(0), opts.Timeout, "Timeout should be 0 by default")
 	assert.Equal(t, "", opts.Model, "Model should be empty by default")
 	assert.Equal(t, "", opts.AnswerPath, "AnswerPath should be empty by default")
 	assert.Equal(t, "", opts.CompletionPath, "CompletionPath should be empty by default")
