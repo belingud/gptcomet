@@ -1,5 +1,18 @@
 
 ---
+## [2.8.0](https://github.com/belingud/gptcomet/compare/v2.7.1..v2.8.0) - 2026-10-29
+
+### ⛰️  Features
+
+- **(hook)** add prepare-commit-msg integration - ([cc1fc6f](https://github.com/belingud/gptcomet/commit/cc1fc6f9d6f477d0f51bb91df7627017d65fa93e)) - belingud
+- add DeepSeek Harness (dsh) host support - ([23003e1](https://github.com/belingud/gptcomet/commit/23003e1210d97529d1ac572b9a50c2c4ea2af62f)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- **(trellis)** record git-hook task - ([e15345a](https://github.com/belingud/gptcomet/commit/e15345a85331e85149b9e198a8b99f7e2270a077)) - belingud
+
+
+---
 ## [2.7.1](https://github.com/belingud/gptcomet/compare/v2.7.0..v2.7.1) - 2026-10-28
 
 ### 🐛 Bug Fixes
