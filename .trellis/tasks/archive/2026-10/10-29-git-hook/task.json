@@ -1,0 +1,28 @@
+{
+  "id": "git-hook",
+  "name": "git-hook",
+  "title": "Add Git hook integration for automatic commit messages",
+  "description": "Install and manage a prepare-commit-msg hook that fills the commit message from the staged diff, plus a message-only generate command; fails open and never blocks git commit.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": "go",
+  "package": null,
+  "priority": "P2",
+  "creator": "belingud",
+  "assignee": "belingud",
+  "createdAt": "2026-10-29",
+  "completedAt": "2026-10-29",
+  "branch": "feat/git-hook",
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "priority": "P0"
+  }
+}
