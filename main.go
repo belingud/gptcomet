@@ -19,6 +19,8 @@ var version = "2.7.1"
 // - config: Manage application configuration
 // - update: Check and update to latest version
 // - review: Review git changes and commit messages
+// - generate: Generate a commit message and print it to stdout
+// - hook: Install, remove, or run the prepare-commit-msg hook
 //
 // The root command supports the following persistent flags:
 //
@@ -60,6 +62,8 @@ func main() {
 	rootCmd.AddCommand(cmd.NewConfigCmd())        // config
 	rootCmd.AddCommand(cmd.NewUpdateCmd(version)) // update
 	rootCmd.AddCommand(cmd.NewReviewCmd())        // review
+	rootCmd.AddCommand(cmd.NewGenerateCmd())      // generate
+	rootCmd.AddCommand(cmd.NewHookCmd())          // hook
 
 	if err := rootCmd.Execute(); err != nil {
 		// fmt.Fprintln(os.Stderr, err)

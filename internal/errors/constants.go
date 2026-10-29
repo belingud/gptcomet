@@ -26,6 +26,11 @@ const (
 	ErrTitleAPIStatusError     = "API Request Failed"
 	ErrTitleCallbackError      = "Callback Function Failed"
 	ErrTitleUnsupportedProxy   = "Unsupported Proxy Scheme"
+	ErrTitleHookAlreadyExists  = "Git Hook Already Exists"
+	ErrTitleHookBackupExists   = "Git Hook Backup Already Exists"
+	ErrTitleHookInstall        = "Git Hook Installation Failed"
+	ErrTitleHookUninstall      = "Git Hook Removal Failed"
+	ErrTitleHookStatus         = "Git Hook Status Failed"
 
 	// Common Messages
 	ErrMsgConfigNotFound     = "Cannot find configuration file at: %s"
@@ -52,6 +57,11 @@ const (
 	ErrMsgAPIStatusError     = "API request failed with status code %d."
 	ErrMsgCallbackError      = "Callback function returned an error."
 	ErrMsgUnsupportedProxy   = "Proxy scheme '%s' is not supported."
+	ErrMsgHookAlreadyExists  = "A prepare-commit-msg hook already exists at: %s"
+	ErrMsgHookBackupExists   = "A backup of the existing prepare-commit-msg hook already exists at: %s"
+	ErrMsgHookInstall        = "Failed to install the git hook at: %s"
+	ErrMsgHookUninstall      = "Failed to remove the git hook at: %s"
+	ErrMsgHookStatus         = "Failed to inspect the git hook at: %s"
 
 	// Common Suggestions
 	SuggInitConfig            = "Run 'gptcomet config init' to create a default configuration"
@@ -81,6 +91,10 @@ const (
 	SuggCheckGitInstalled     = "Check if git is installed: git --version"
 	SuggEnsureInGit           = "Ensure you're in a git repository"
 	SuggCheckGitOutput        = "Check the git command output for more details"
+	SuggInspectHook           = "Inspect the existing hook before merging or removing it"
+	SuggForceHook             = "Re-run with --force to back it up to %s and replace it"
+	SuggRemoveHookBackup      = "Move or remove the existing backup, then retry"
+	SuggCheckHookPermissions  = "Check that the hooks directory is writable"
 	SuggCheckAvailableModels  = "Check available models for %s"
 	SuggSetValidModel         = "Set a valid model: gptcomet config set %s.model <valid-model>"
 	SuggVisitDocs             = "Visit provider documentation for model list"

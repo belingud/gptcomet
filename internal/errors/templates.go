@@ -146,6 +146,72 @@ func GitCommandFailedError(command string, cause error) *GPTCometError {
 	)
 }
 
+// HookAlreadyExistsError is returned when install would overwrite a
+// prepare-commit-msg hook that gptcomet does not manage.
+func HookAlreadyExistsError(hookPath, backupPath string) *GPTCometError {
+	return NewGitError(
+		ErrTitleHookAlreadyExists,
+		fmt.Sprintf(ErrMsgHookAlreadyExists, hookPath),
+		nil,
+		[]string{
+			SuggInspectHook,
+			fmt.Sprintf(SuggForceHook, backupPath),
+		},
+	)
+}
+
+// HookBackupExistsError is returned when --force would overwrite an existing
+// backup of a foreign hook.
+func HookBackupExistsError(backupPath string) *GPTCometError {
+	return NewValidationError(
+		ErrTitleHookBackupExists,
+		fmt.Sprintf(ErrMsgHookBackupExists, backupPath),
+		nil,
+		[]string{
+			SuggRemoveHookBackup,
+		},
+	)
+}
+
+// HookInstallError is returned when writing the hook file fails.
+func HookInstallError(hookPath string, cause error) *GPTCometError {
+	return NewGitError(
+		ErrTitleHookInstall,
+		fmt.Sprintf(ErrMsgHookInstall, hookPath),
+		cause,
+		[]string{
+			SuggCheckHookPermissions,
+			SuggCheckGitOutput,
+		},
+	)
+}
+
+// HookUninstallError is returned when removing or restoring the hook fails.
+func HookUninstallError(hookPath string, cause error) *GPTCometError {
+	return NewGitError(
+		ErrTitleHookUninstall,
+		fmt.Sprintf(ErrMsgHookUninstall, hookPath),
+		cause,
+		[]string{
+			SuggCheckHookPermissions,
+			SuggCheckGitOutput,
+		},
+	)
+}
+
+// HookStatusError is returned when inspecting the hook file fails.
+func HookStatusError(hookPath string, cause error) *GPTCometError {
+	return NewGitError(
+		ErrTitleHookStatus,
+		fmt.Sprintf(ErrMsgHookStatus, hookPath),
+		cause,
+		[]string{
+			SuggCheckHookPermissions,
+			SuggCheckGitOutput,
+		},
+	)
+}
+
 // ModelNotFoundError is returned when the specified model is not found
 func ModelNotFoundError(provider, model string) *GPTCometError {
 	return NewConfigError(

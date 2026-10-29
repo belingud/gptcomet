@@ -36,6 +36,7 @@
       - [Other Supported Providers](#other-supported-providers)
     - [Manual Provider Setup](#manual-provider-setup)
   - [⌨️ Commands](#️-commands)
+  - [🪝 Git Hook](#-git-hook)
   - [⚙ Configuration](#-configuration)
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
@@ -73,6 +74,7 @@ GPTComet is an AI-powered developer tool that streamlines your Git workflow and 
 This project leverages the power of large language models to automate repetitive tasks and improve the overall development process. The core features include:
 
 -   **Automatic Commit Message Generation**: GPTComet can generate commit messages based on the changes made in the code.
+-   **Git Hook Integration**: Install a `prepare-commit-msg` hook once and let `git commit` fill the message automatically.
 -   **Intelligent Code Review**: Get AI-powered code reviews with actionable feedback and suggestions.
 -   **Progress Indicators**: Optional verbose mode shows real-time progress for long-running operations.
 -   **Support for Multiple Languages**: GPTComet supports multiple languages, including English, Chinese and so on.
@@ -419,6 +421,14 @@ The following are the available commands for GPTComet:
     -   `--timeout`: Override request timeout in seconds
     -   `--temperature`: Override temperature
     -   `--top-p`: Override top_p value
+-   `gmsg generate`: Generate a commit message from the staged diff and print only the message to stdout.
+    -   `--repo`: Path to the repository (default ".").
+    -   `--rich`: Generate a rich commit message with details.
+    -   API override flags: `--model`, `--api-base`, `--api-key`, `--timeout`, and the other advanced flags.
+-   `gmsg hook`: Manage the Git `prepare-commit-msg` hook.
+    -   `install [--repo] [--force]`: Install the hook; `--force` backs up an existing hook first.
+    -   `uninstall [--repo]`: Remove a gptcomet-managed hook and restore a backup.
+    -   `status [--repo]`: Show the hooks directory, state, and backup.
 -   `gmsg newprovider`: Add a new provider.
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
@@ -444,6 +454,52 @@ Global flags:
   -c, --config string   Config file path
   -d, --debug           Enable debug mode
 ```
+
+## 🪝 Git Hook
+
+Install the hook once per repository:
+
+```shell
+gmsg hook install
+gmsg hook status
+```
+
+The managed `prepare-commit-msg` hook generates a message from the staged diff before the editor
+opens. It **fails open**: if gptcomet is missing, the configuration is invalid, there is no staged
+diff, or the API call fails or times out, the commit message file is left unchanged and the commit
+continues.
+
+```shell
+gmsg hook uninstall          # remove the managed hook
+gmsg hook install --force    # back up and replace an existing hook
+```
+
+Behavior:
+
+- Skips `git commit -m` / `-F`, merges, squash commits, and `git commit --amend`.
+- Skips when the message file already has non-comment content. The all-comment template used by
+  the first commit is still filled; a custom template with real content is left untouched.
+- `GMSG_SKIP=1` skips the hook entirely.
+- `GMSG_FORCE=1` overrides the explicit-message and existing-content skips.
+- `GMSG_BIN=/path/to/gmsg` selects the binary; `GMSG_CONFIG=/path/to/config.yaml` selects the
+  configuration file. `gmsg hook install -c <config>` embeds that config path in the hook.
+- `gmsg hook install --force` backs up an existing hook to
+  `prepare-commit-msg.gptcomet-backup`; `gmsg hook uninstall` restores it.
+- The hooks directory is resolved with `git rev-parse`, so `core.hooksPath` and linked worktrees
+  are respected.
+- Generation is synchronous, so the editor opens after the model responds; the configured
+  `<provider>.timeout` bounds the wait.
+- `git commit --no-verify` does **not** skip `prepare-commit-msg`; use `GMSG_SKIP=1` instead.
+
+To preview the exact message without committing:
+
+```shell
+gmsg generate
+gmsg generate --rich
+```
+
+`generate` writes only the message to stdout; status and token-usage output goes to stderr, so it is
+safe to use in scripts.
 
 ## ⚙ Configuration
 

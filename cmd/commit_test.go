@@ -426,3 +426,87 @@ func TestCommitService_generateCommitMessage_RendersRichTemplate(t *testing.T) {
 	assert.Equal(t, "feat: test", message)
 	mockClient.AssertExpectations(t)
 }
+
+func TestCommitService_GenerateMessage(t *testing.T) {
+	configPath, cleanup := setupTempConfig(t)
+	defer cleanup()
+
+	cfg, err := config.New(configPath)
+	require.NoError(t, err)
+
+	mockVCS := new(MockVCS)
+	mockVCS.On("HasStagedChanges", mock.Anything).Return(true, nil)
+	mockVCS.On("GetStagedDiffFiltered", mock.Anything, cfg).Return("test diff", nil)
+
+	mockClient := new(MockClient)
+	mockClient.On("GenerateCommitMessage", "test diff", mock.Anything).Return("feat: generated", nil)
+
+	service := &CommitService{
+		vcs:        mockVCS,
+		client:     mockClient,
+		cfgManager: cfg,
+		options:    CommitOptions{},
+	}
+
+	message, err := service.GenerateMessage()
+	require.NoError(t, err)
+	assert.Equal(t, "feat: generated", message)
+
+	mockVCS.AssertExpectations(t)
+	mockClient.AssertExpectations(t)
+}
+
+func TestCommitService_GenerateMessage_NoStagedChanges(t *testing.T) {
+	configPath, cleanup := setupTempConfig(t)
+	defer cleanup()
+
+	cfg, err := config.New(configPath)
+	require.NoError(t, err)
+
+	mockVCS := new(MockVCS)
+	mockVCS.On("HasStagedChanges", mock.Anything).Return(false, nil)
+
+	service := &CommitService{
+		vcs:        mockVCS,
+		client:     new(MockClient),
+		cfgManager: cfg,
+		options:    CommitOptions{},
+	}
+
+	_, err = service.GenerateMessage()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "No Staged Changes")
+	mockVCS.AssertExpectations(t)
+}
+
+func TestCommitService_GenerateMessage_MissingOutputLanguageDefaultsEnglish(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(`
+provider: openai
+openai:
+  api_key: test-key
+`), 0o600))
+
+	cfg, err := config.New(configPath)
+	require.NoError(t, err)
+
+	mockVCS := new(MockVCS)
+	mockVCS.On("HasStagedChanges", mock.Anything).Return(true, nil)
+	mockVCS.On("GetStagedDiffFiltered", mock.Anything, cfg).Return("test diff", nil)
+
+	mockClient := new(MockClient)
+	mockClient.On("GenerateCommitMessage", "test diff", mock.Anything).Return("feat: generated", nil)
+
+	service := &CommitService{
+		vcs:        mockVCS,
+		client:     mockClient,
+		cfgManager: cfg,
+		options:    CommitOptions{},
+	}
+
+	message, err := service.GenerateMessage()
+	require.NoError(t, err)
+	assert.Equal(t, "feat: generated", message)
+	mockVCS.AssertExpectations(t)
+	mockClient.AssertExpectations(t)
+}

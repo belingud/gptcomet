@@ -39,14 +39,15 @@ func (s *CommitService) generateCommitMessage(diff string) (string, error) {
 		return "", err
 	}
 
-	// Translate commit message if output.lang is not en
-	langValue, ok := s.cfgManager.Get(LANGUAGE_KEY)
-	if !ok {
-		return "", fmt.Errorf("failed to get output.lang: configuration key not found")
-	}
+	// Translate commit message if output.lang is not en. A minimal custom
+	// config may omit the output section; treat it as English.
+	langValue := s.cfgManager.GetWithDefault(LANGUAGE_KEY, "en")
 	lang, ok := langValue.(string)
 	if !ok {
 		return "", fmt.Errorf("output.lang is not a string: %v", langValue)
+	}
+	if lang == "" {
+		lang = "en"
 	}
 
 	// If language is English, return the original message
@@ -122,6 +123,45 @@ func removeThinkTags(input string) (string, error) {
 	return strings.TrimSpace(cleaned), nil
 }
 
+// getStagedDiff returns the filtered staged diff, or NoStagedChangesError when
+// there is nothing to generate a commit message from.
+func (s *CommitService) getStagedDiff() (string, error) {
+	hasStagedChanges, err := s.vcs.HasStagedChanges(s.options.RepoPath)
+	if err != nil {
+		return "", err
+	}
+	if !hasStagedChanges {
+		return "", gptcometerrors.NoStagedChangesError()
+	}
+
+	diff, err := s.vcs.GetStagedDiffFiltered(s.options.RepoPath, s.cfgManager)
+	debug.Printf("Got diff length: %d\n", len(diff))
+	if err != nil {
+		return "", err
+	}
+	if diff == "" {
+		return "", gptcometerrors.NoStagedChangesError()
+	}
+
+	return diff, nil
+}
+
+// GenerateMessage generates a commit message from the current staged diff
+// without printing progress or creating a commit.
+func (s *CommitService) GenerateMessage() (string, error) {
+	diff, err := s.getStagedDiff()
+	if err != nil {
+		return "", err
+	}
+
+	commitMsg, err := s.generateCommitMessage(diff)
+	if err != nil {
+		return "", err
+	}
+
+	return removeThinkTags(commitMsg)
+}
+
 // Execute performs the commit operation with the following steps:
 // 1. Checks for staged changes in the repository
 // 2. Gets the filtered diff of staged changes
@@ -151,34 +191,12 @@ func (s *CommitService) Execute() error {
 	if progress != nil {
 		progress.Start("Fetching git diff")
 	}
-	hasStagedChanges, err := s.vcs.HasStagedChanges(s.options.RepoPath)
+	diff, err := s.getStagedDiff()
 	if err != nil {
 		if progress != nil {
 			progress.Error("Fetching git diff", err)
 		}
 		return err
-	}
-	if !hasStagedChanges {
-		if progress != nil {
-			progress.Error("Fetching git diff", gptcometerrors.NoStagedChangesError())
-		}
-		return gptcometerrors.NoStagedChangesError()
-	}
-
-	// get diff of staged changes after filtering with file_ignore patterns
-	diff, err := s.vcs.GetStagedDiffFiltered(s.options.RepoPath, s.cfgManager)
-	debug.Printf("Got diff length: %d\n", len(diff))
-	if err != nil {
-		if progress != nil {
-			progress.Error("Fetching git diff", err)
-		}
-		return err
-	}
-	if diff == "" {
-		if progress != nil {
-			progress.Error("Fetching git diff", gptcometerrors.NoStagedChangesError())
-		}
-		return gptcometerrors.NoStagedChangesError()
 	}
 
 	if progress != nil {
@@ -278,7 +296,7 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 			fmt.Println("Operation cancelled")
 			return nil
 		case "r", "retry":
-			diff, err := s.vcs.GetStagedDiffFiltered(s.options.RepoPath, s.cfgManager)
+			diff, err := s.getStagedDiff()
 			if err != nil {
 				return err
 			}

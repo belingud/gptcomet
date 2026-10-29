@@ -262,6 +262,61 @@ func TestGitCommandFailedError(t *testing.T) {
 	}
 }
 
+func TestHookErrors(t *testing.T) {
+	t.Run("already exists", func(t *testing.T) {
+		err := HookAlreadyExistsError("/repo/.git/hooks/prepare-commit-msg", "/repo/.git/hooks/prepare-commit-msg.gptcomet-backup")
+		if err.Type != ErrTypeGit {
+			t.Errorf("HookAlreadyExistsError() Type = %v, want %v", err.Type, ErrTypeGit)
+		}
+		if !strings.Contains(err.Message, "prepare-commit-msg") {
+			t.Errorf("HookAlreadyExistsError() should contain hook path, got: %s", err.Message)
+		}
+		if !strings.Contains(err.Error(), "--force") {
+			t.Errorf("HookAlreadyExistsError() should suggest --force, got: %s", err.Error())
+		}
+	})
+
+	t.Run("backup exists", func(t *testing.T) {
+		err := HookBackupExistsError("/repo/.git/hooks/prepare-commit-msg.gptcomet-backup")
+		if err.Type != ErrTypeValidation {
+			t.Errorf("HookBackupExistsError() Type = %v, want %v", err.Type, ErrTypeValidation)
+		}
+	})
+
+	t.Run("install wraps cause", func(t *testing.T) {
+		cause := errors.New("permission denied")
+		err := HookInstallError("/repo/.git/hooks/prepare-commit-msg", cause)
+		if err.Type != ErrTypeGit {
+			t.Errorf("HookInstallError() Type = %v, want %v", err.Type, ErrTypeGit)
+		}
+		if !errors.Is(err, cause) {
+			t.Errorf("HookInstallError() should wrap cause")
+		}
+	})
+
+	t.Run("uninstall wraps cause", func(t *testing.T) {
+		cause := errors.New("permission denied")
+		err := HookUninstallError("/repo/.git/hooks/prepare-commit-msg", cause)
+		if err.Type != ErrTypeGit {
+			t.Errorf("HookUninstallError() Type = %v, want %v", err.Type, ErrTypeGit)
+		}
+		if !errors.Is(err, cause) {
+			t.Errorf("HookUninstallError() should wrap cause")
+		}
+	})
+
+	t.Run("status wraps cause", func(t *testing.T) {
+		cause := errors.New("permission denied")
+		err := HookStatusError("/repo/.git/hooks/prepare-commit-msg", cause)
+		if err.Type != ErrTypeGit {
+			t.Errorf("HookStatusError() Type = %v, want %v", err.Type, ErrTypeGit)
+		}
+		if !errors.Is(err, cause) {
+			t.Errorf("HookStatusError() should wrap cause")
+		}
+	})
+}
+
 func TestModelNotFoundError(t *testing.T) {
 	provider := "openai"
 	model := "gpt-5"

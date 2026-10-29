@@ -36,6 +36,7 @@
       - [其他支持的提供商](#其他支持的提供商)
     - [手动设置提供商](#手动设置提供商)
   - [⌨️ 命令](#️-命令)
+  - [🪝 Git Hook](#-git-hook)
   - [⚙ 配置](#-配置)
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
@@ -73,6 +74,7 @@ GPTComet 是一个 AI 驱动的开发者工具，用自动生成提交信息和�
 GPTComet 使用大语言模型自动处理重复工作，并帮助改进开发流程。核心功能包括：
 
 -   **自动生成提交信息**：GPTComet 可以根据代码变更生成 Git 提交信息。
+-   **Git Hook 集成**：安装一次 `prepare-commit-msg` hook，之后 `git commit` 会自动填充提交信息。
 -   **智能代码审查**：获取 AI 生成的代码审查结果、反馈和修改建议。
 -   **进度提示**：可选的详细模式会显示长时间操作的实时进度。
 -   **多语言支持**：GPTComet 支持英语、中文等多种语言。
@@ -415,6 +417,14 @@ GPTComet 提供以下命令：
     -   `--timeout`：覆盖请求超时时间（秒）。
     -   `--temperature`：覆盖 temperature。
     -   `--top-p`：覆盖 top_p。
+-   `gmsg generate`：根据 staged diff 生成提交信息，只把消息输出到 stdout。
+    -   `--repo`：仓库路径，默认值为 `.`。
+    -   `--rich`：生成包含详情的富文本提交信息。
+    -   其他 API 覆盖参数：`--model`、`--api-base`、`--api-key`、`--timeout` 等。
+-   `gmsg hook`：管理 Git `prepare-commit-msg` hook。
+    -   `install [--repo] [--force]`：安装 hook；`--force` 会先备份已有 hook。
+    -   `uninstall [--repo]`：删除 gptcomet 管理的 hook，并恢复备份。
+    -   `status [--repo]`：显示 hooks 目录、状态和备份。
 -   `gmsg newprovider`：添加一个新的提供商。
 -   `gmsg review`：审查 staged diff，也可以通过管道输入给 `gmsg review`。
     -   `--svn`：从 SVN 获取 diff。
@@ -440,6 +450,48 @@ GPTComet 提供以下命令：
   -c, --config string   Config file path
   -d, --debug           Enable debug mode
 ```
+
+## 🪝 Git Hook
+
+每个仓库安装一次：
+
+```shell
+gmsg hook install
+gmsg hook status
+```
+
+安装后的 `prepare-commit-msg` hook 会在编辑器打开前，根据 staged diff 生成提交信息。它采用
+**fail-open** 策略：如果找不到 gptcomet、配置无效、没有 staged 变更，或者 API 调用失败/超时，
+消息文件保持不变，提交继续执行。
+
+```shell
+gmsg hook uninstall          # 删除 gptcomet 管理的 hook
+gmsg hook install --force    # 备份并替换已有 hook
+```
+
+行为说明：
+
+- 跳过 `git commit -m` / `-F`、merge、squash 和 `git commit --amend`。
+- 消息文件已有非注释内容时跳过。首次提交使用的全注释模板仍会被填充；包含真实内容的自定义
+  模板不会被覆盖。
+- `GMSG_SKIP=1` 完全跳过 hook。
+- `GMSG_FORCE=1` 覆盖显式消息和已有内容的跳过规则。
+- `GMSG_BIN=/path/to/gmsg` 指定二进制；`GMSG_CONFIG=/path/to/config.yaml` 指定配置文件。
+  `gmsg hook install -c <config>` 会把该配置路径写入 hook。
+- `gmsg hook install --force` 会把已有 hook 备份到
+  `prepare-commit-msg.gptcomet-backup`；`gmsg hook uninstall` 会恢复它。
+- hooks 目录通过 `git rev-parse` 解析，因此会尊重 `core.hooksPath` 和 linked worktree。
+- 生成是同步的，编辑器会在模型返回后打开；等待时间受 `<provider>.timeout` 限制。
+- `git commit --no-verify` **不会**跳过 `prepare-commit-msg`；请使用 `GMSG_SKIP=1`。
+
+只预览消息、不创建提交：
+
+```shell
+gmsg generate
+gmsg generate --rich
+```
+
+`generate` 只把消息写到 stdout；状态和 token usage 走 stderr，可以安全用于脚本。
 
 ## ⚙ 配置
 

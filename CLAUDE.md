@@ -8,6 +8,8 @@ GPTComet generates Git commit messages and reviews code using LLMs. Supports 27+
 
 - `gmsg commit` - Generate commit message from diff
 - `gmsg review` - AI code review (supports streaming with `--stream`)
+- `gmsg generate` - Print a generated commit message to stdout (no commit)
+- `gmsg hook` - Manage the Git `prepare-commit-msg` hook (install/uninstall/status)
 - `gmsg config` - Manage configuration (get/set/list/reset/path/keys/append/remove/validate)
 - `gmsg newprovider` - Interactive provider setup
 
@@ -16,12 +18,13 @@ GPTComet generates Git commit messages and reviews code using LLMs. Supports 27+
 ```
 Go Core                    Python Wrapper
 ────────                  ────────────────
-cmd/           → CLI commands (commit, review, config, provider)
+cmd/           → CLI commands (commit, review, generate, hook, config, provider)
 internal/
 ├── client/    → HTTP client with retry, proxy (HTTP/SOCKS5), streaming
 ├── config/    → YAML config manager (~/.config/gptcomet/gptcomet.yaml)
 ├── factory/   → Dependency injection (VCS, config, client creation)
 ├── git/       → VCS abstraction (git, svn)
+├── hook/      → prepare-commit-msg install/run logic
 ├── llm/       → Provider interface + 27 implementations
 ├── ui/        → Terminal UI (progress, markdown rendering)
 ├── errors/    → Structured error handling (typed errors with suggestions)
@@ -121,3 +124,25 @@ default: provider = llm.NewDefaultLLM(config)
 - Error messages use templates from `internal/errors/templates.go`
 - Streaming uses SSE (Server-Sent Events) parsing
 - Complex tasks or plans should be handled using sequential thinking if available.
+
+<!-- TRELLIS:START -->
+# Trellis Instructions
+
+These instructions are for AI assistants working in this project.
+
+This project is managed by Trellis. The working knowledge you need lives under `.trellis/`:
+
+- `.trellis/workflow.md` — development phases, when to create tasks, skill routing
+- `.trellis/spec/` — package- and layer-scoped coding guidelines (read before writing code in a given layer)
+- `.trellis/workspace/` — per-developer journals and session traces
+- `.trellis/tasks/` — active and archived tasks (PRDs, research, jsonl context)
+
+If a Trellis command is available on your platform (e.g. `/trellis:finish-work`, `/trellis:continue`), prefer it over manual steps. Not every platform exposes every command.
+
+If you're using Codex or another agent-capable tool, additional project-scoped helpers may live in:
+- `.agents/skills/` — reusable Trellis skills
+- `.codex/agents/` — optional custom subagents
+
+Managed by Trellis. Edits outside this block are preserved; edits inside may be overwritten by a future `trellis update`.
+
+<!-- TRELLIS:END -->
