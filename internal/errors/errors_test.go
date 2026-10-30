@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGPTCometError_Error(t *testing.T) {
@@ -383,6 +384,189 @@ func TestGetSuggestionIcon(t *testing.T) {
 		icon := getSuggestionIcon(i)
 		if icon == "" {
 			t.Errorf("getSuggestionIcon(%d) should return non-empty string", i)
+		}
+	}
+}
+
+func TestProviderNotFoundError(t *testing.T) {
+	err := ProviderNotFoundError("not-a-provider")
+
+	if err.Type != ErrTypeValidation {
+		t.Errorf("ProviderNotFoundError type = %q, want %q", err.Type, ErrTypeValidation)
+	}
+	if err.Title != ErrTitleUnknownProvider {
+		t.Errorf("ProviderNotFoundError title = %q, want %q", err.Title, ErrTitleUnknownProvider)
+	}
+
+	rendered := err.Error()
+	for _, want := range []string{
+		"not-a-provider",
+		"gmsg provider list",
+		"gmsg newprovider",
+		"config set not-a-provider.api_key",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Errorf("ProviderNotFoundError() missing %q in:\n%s", want, rendered)
+		}
+	}
+}
+
+func TestNoProviderSelectedError(t *testing.T) {
+	err := NoProviderSelectedError()
+
+	if err.Type != ErrTypeConfig {
+		t.Errorf("NoProviderSelectedError type = %q, want %q", err.Type, ErrTypeConfig)
+	}
+
+	rendered := err.Error()
+	for _, want := range []string{
+		"No Provider Selected",
+		"gmsg provider list",
+		"gmsg provider use <name>",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Errorf("NoProviderSelectedError() missing %q in:\n%s", want, rendered)
+		}
+	}
+}
+
+func TestProviderTestError(t *testing.T) {
+	tests := []struct {
+		name        string
+		cause       error
+		wantSubs    []string
+		notWantSubs []string
+	}{
+		{
+			name: "authentication failure",
+			cause: NewAPIError(
+				ErrTitleRequestRetry,
+				"Request failed after 1 attempts.",
+				errors.New("request failed with status 401: Incorrect API key provided"),
+				nil,
+			),
+			wantSubs: []string{
+				"did not respond successfully after 1.25s",
+				"status 401",
+				"Verify API key",
+				"Set new API key",
+			},
+		},
+		{
+			name:     "rate limit",
+			cause:    errors.New("request failed with status 429: rate limit exceeded"),
+			wantSubs: []string{"Wait a few minutes and retry", "Check your API quota"},
+		},
+		{
+			name:     "provider outage",
+			cause:    errors.New("request failed with status 503: service unavailable"),
+			wantSubs: []string{"provider's API service is operational"},
+		},
+		{
+			name:     "network with credential in url",
+			cause:    errors.New(`Get "https://generativelanguage.googleapis.com/v1beta/models?key=SECRETKEY123": dial tcp: no such host`),
+			wantSubs: []string{"Check internet connection", "key=***", "no such host"},
+			notWantSubs: []string{
+				"SECRETKEY123",
+			},
+		},
+		{
+			name:     "generic failure",
+			cause:    errors.New("something unexpected happened"),
+			wantSubs: []string{"Check if the provider's API service is operational", "gmsg provider test openai"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ProviderTestError("openai", 1250*time.Millisecond, tt.cause)
+			if err.Type != ErrTypeAPI {
+				t.Errorf("ProviderTestError type = %q, want %q", err.Type, ErrTypeAPI)
+			}
+
+			rendered := err.Error()
+			for _, want := range tt.wantSubs {
+				if !strings.Contains(rendered, want) {
+					t.Errorf("ProviderTestError() missing %q in:\n%s", want, rendered)
+				}
+			}
+			for _, notWant := range tt.notWantSubs {
+				if strings.Contains(rendered, notWant) {
+					t.Errorf("ProviderTestError() leaked %q in:\n%s", notWant, rendered)
+				}
+			}
+
+			var got *GPTCometError
+			if !errors.As(err, &got) {
+				t.Errorf("ProviderTestError() is not a *GPTCometError")
+			}
+		})
+	}
+}
+
+func TestSanitizeErrorDetail(t *testing.T) {
+	long := strings.Repeat("detail ", 100)
+
+	tests := []struct {
+		name     string
+		cause    error
+		want     string
+		wantCaps bool
+	}{
+		{
+			name:  "nil cause",
+			cause: nil,
+			want:  "",
+		},
+		{
+			name:  "query secret is redacted",
+			cause: errors.New("Get https://example.com/v1?key=abc123&model=x: boom"),
+			want:  "Get https://example.com/v1?key=***&model=x: boom",
+		},
+		{
+			name:  "newlines collapse",
+			cause: errors.New("line one\nline two"),
+			want:  "line one line two",
+		},
+		{
+			name:     "long detail is capped",
+			cause:    errors.New(long),
+			wantCaps: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := sanitizeErrorDetail(tt.cause)
+			if tt.wantCaps {
+				if len([]rune(got)) != providerTestDetailLimit+1 {
+					t.Errorf("sanitizeErrorDetail() rune length = %d, want %d", len([]rune(got)), providerTestDetailLimit+1)
+				}
+				return
+			}
+			if got != tt.want {
+				t.Errorf("sanitizeErrorDetail() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestProviderNotConfiguredError(t *testing.T) {
+	err := ProviderNotConfiguredError("deepseek")
+
+	if err.Type != ErrTypeConfig {
+		t.Errorf("ProviderNotConfiguredError type = %q, want %q", err.Type, ErrTypeConfig)
+	}
+
+	rendered := err.Error()
+	for _, want := range []string{
+		"deepseek",
+		"gmsg provider use deepseek",
+		"gmsg newprovider",
+		"gmsg config get deepseek.api_base",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Errorf("ProviderNotConfiguredError() missing %q in:\n%s", want, rendered)
 		}
 	}
 }

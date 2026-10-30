@@ -14,7 +14,8 @@ var version = "2.8.0"
 // main is the entry point of the GPTComet application. It initializes and configures the command-line interface
 // using cobra. The following commands are available:
 //
-// - provider: Manage AI providers configuration
+// - provider: List, switch, and test AI providers
+// - newprovider: Configure a new provider interactively
 // - commit: Generate commit messages using AI
 // - config: Manage application configuration
 // - update: Check and update to latest version
@@ -57,7 +58,8 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&debugEnabled, "debug", "d", false, "Enable debug mode")
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "Config file path")
 
-	rootCmd.AddCommand(cmd.NewProviderCmd())      // newprovider
+	rootCmd.AddCommand(cmd.NewProviderCmd())      // provider
+	rootCmd.AddCommand(cmd.NewProviderSetupCmd()) // newprovider
 	rootCmd.AddCommand(cmd.NewCommitCmd())        // commit
 	rootCmd.AddCommand(cmd.NewConfigCmd())        // config
 	rootCmd.AddCommand(cmd.NewUpdateCmd(version)) // update

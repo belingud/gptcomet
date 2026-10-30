@@ -31,6 +31,10 @@ const (
 	ErrTitleHookInstall        = "Git Hook Installation Failed"
 	ErrTitleHookUninstall      = "Git Hook Removal Failed"
 	ErrTitleHookStatus         = "Git Hook Status Failed"
+	ErrTitleUnknownProvider    = "Unknown Provider"
+	ErrTitleNoProviderSelected = "No Provider Selected"
+	ErrTitleProviderTest       = "Provider Test Failed"
+	ErrTitleProviderNotConfig  = "Provider Not Configured"
 
 	// Common Messages
 	ErrMsgConfigNotFound     = "Cannot find configuration file at: %s"
@@ -62,6 +66,10 @@ const (
 	ErrMsgHookInstall        = "Failed to install the git hook at: %s"
 	ErrMsgHookUninstall      = "Failed to remove the git hook at: %s"
 	ErrMsgHookStatus         = "Failed to inspect the git hook at: %s"
+	ErrMsgUnknownProvider    = "Provider '%s' is not built in and has no configuration in gptcomet.yaml."
+	ErrMsgNoProviderSelected = "No default provider is configured."
+	ErrMsgProviderTestFailed = "Provider '%s' did not respond successfully after %s."
+	ErrMsgProviderNotConfig  = "Provider '%s' has no configuration block in gptcomet.yaml."
 
 	// Common Suggestions
 	SuggInitConfig            = "Run 'gptcomet config init' to create a default configuration"
@@ -108,4 +116,10 @@ const (
 	SuggVerifyRequestPayload  = "Verify that the request payload is correctly formatted"
 	SuggCheckErrorDetails     = "Check the error details for more information"
 	SuggSupportedProxySchemes = "Supported proxy schemes: http, https, socks5"
+	SuggListProviders         = "List available providers: gmsg provider list"
+	SuggConfigureProvider     = "Configure a provider interactively: gmsg newprovider"
+	SuggSelectProvider        = "Select a provider: gmsg provider use <name>"
+	SuggTestProvider          = "Test the provider: gmsg provider test %s"
+	SuggCheckProviderBaseURL  = "Check the provider API base: gmsg config get %s.api_base"
+	SuggUseProvider           = "Switch to it and create defaults: gmsg provider use %s"
 )

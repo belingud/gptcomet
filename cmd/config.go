@@ -47,8 +47,12 @@ func setConfigManager(cmd *cobra.Command, manager ConfigManager) {
 func getConfigManager(cmd *cobra.Command) (ConfigManager, error) {
 	current := cmd
 	for current != nil {
-		if manager, ok := current.Context().Value(configKey{}).(ConfigManager); ok {
-			return manager, nil
+		// Only the command that had a context set explicitly carries one;
+		// parent commands may have a nil context.
+		if ctx := current.Context(); ctx != nil {
+			if manager, ok := ctx.Value(configKey{}).(ConfigManager); ok {
+				return manager, nil
+			}
 		}
 		current = current.Parent()
 	}

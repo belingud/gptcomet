@@ -1,10 +1,13 @@
 package errors
 
 import (
+	stderrors "errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"time"
 )
 
 // Common error templates and constructors
@@ -481,4 +484,154 @@ func GetAPIKeyEnvVar(provider string) string {
 		}
 		return normalized + "_API_KEY"
 	}
+}
+
+// providerTestDetailLimit caps how much of the underlying provider error is
+// echoed back to the user by ProviderTestError.
+const providerTestDetailLimit = 280
+
+// sensitiveQueryValuePattern matches URL query parameters that commonly carry
+// credentials. Gemini-style providers put the API key in the URL, so network
+// errors can otherwise leak it into the rendered message.
+var sensitiveQueryValuePattern = regexp.MustCompile(`(?i)([?&](?:key|api[_-]?key|token|access_token|secret)=)[^&\s"']+`)
+
+// ProviderNotFoundError is returned when a provider name is neither registered
+// in the LLM registry nor present in the configuration file.
+func ProviderNotFoundError(name string) *GPTCometError {
+	return NewValidationError(
+		ErrTitleUnknownProvider,
+		fmt.Sprintf(ErrMsgUnknownProvider, name),
+		nil,
+		[]string{
+			SuggListProviders,
+			SuggConfigureProvider,
+			fmt.Sprintf(SuggSetAPIKey, name),
+		},
+	)
+}
+
+// NoProviderSelectedError is returned when a command needs the active provider
+// but the configuration has no provider set.
+func NoProviderSelectedError() *GPTCometError {
+	return NewConfigError(
+		ErrTitleNoProviderSelected,
+		ErrMsgNoProviderSelected,
+		nil,
+		[]string{
+			SuggListProviders,
+			SuggSelectProvider,
+			SuggConfigureProvider,
+		},
+	)
+}
+
+// ProviderNotConfiguredError is returned when a command needs a provider's
+// saved configuration but the config file has no block for it.
+func ProviderNotConfiguredError(name string) *GPTCometError {
+	return NewConfigError(
+		ErrTitleProviderNotConfig,
+		fmt.Sprintf(ErrMsgProviderNotConfig, name),
+		nil,
+		[]string{
+			fmt.Sprintf(SuggUseProvider, name),
+			SuggConfigureProvider,
+			fmt.Sprintf(SuggCheckProviderBaseURL, name),
+		},
+	)
+}
+
+// ProviderTestError is returned when a provider connectivity/authentication
+// probe fails. It reports how long the failed request took and includes a
+// sanitized excerpt of the underlying provider error.
+func ProviderTestError(provider string, latency time.Duration, cause error) *GPTCometError {
+	message := fmt.Sprintf(ErrMsgProviderTestFailed, provider, latency.Round(time.Millisecond))
+
+	detail := sanitizeErrorDetail(cause)
+	if detail != "" {
+		message += fmt.Sprintf("\nDetails: %s", detail)
+	}
+
+	return NewAPIError(ErrTitleProviderTest, message, cause, providerTestSuggestions(provider, detail))
+}
+
+// providerTestSuggestions picks actionable next steps from the sanitized
+// provider error text.
+func providerTestSuggestions(provider string, detail string) []string {
+	lower := strings.ToLower(detail)
+
+	switch {
+	case containsAny(lower, "status 401", "status 403", "unauthorized", "authentication"):
+		return []string{
+			fmt.Sprintf(SuggVerifyAPIKey, provider),
+			fmt.Sprintf(SuggSetNewAPIKey, provider),
+			SuggCheckKeyValid,
+			SuggEnsurePermissions,
+		}
+	case containsAny(lower, "status 429", "rate limit", "too many requests", "quota"):
+		return []string{
+			SuggWaitRetry,
+			SuggCheckQuota,
+			SuggUpgradePlan,
+		}
+	case containsAny(lower, "status 500", "status 502", "status 503", "status 504", "service unavailable"):
+		return []string{
+			SuggCheckProviderStatus,
+			SuggWaitRetry,
+			SuggCheckErrorDetails,
+		}
+	case containsAny(lower, "no such host", "dial tcp", "connection refused", "network is unreachable",
+		"deadline exceeded", "timeout", "tls handshake", "x509"):
+		return []string{
+			SuggCheckInternet,
+			SuggCheckProxy,
+			SuggUseProxyFlag,
+		}
+	default:
+		return []string{
+			SuggCheckProviderStatus,
+			fmt.Sprintf(SuggCheckProviderBaseURL, provider),
+			fmt.Sprintf(SuggTestProvider, provider),
+			SuggCheckErrorDetails,
+		}
+	}
+}
+
+// sanitizeErrorDetail returns a single-line, length-capped excerpt of the
+// deepest underlying error, with credential-bearing query values redacted.
+func sanitizeErrorDetail(cause error) string {
+	if cause == nil {
+		return ""
+	}
+
+	detail := sensitiveQueryValuePattern.ReplaceAllString(errorDetailText(cause), "${1}***")
+	detail = strings.Join(strings.Fields(detail), " ")
+
+	runes := []rune(detail)
+	if len(runes) > providerTestDetailLimit {
+		return string(runes[:providerTestDetailLimit]) + "…"
+	}
+	return detail
+}
+
+// errorDetailText unwraps GPTCometError causes and returns the human-readable
+// message of the deepest error. For a GPTCometError without a cause it returns
+// the template message instead of the fully rendered error.
+func errorDetailText(err error) string {
+	var gptErr *GPTCometError
+	if stderrors.As(err, &gptErr) {
+		if gptErr.Cause == nil {
+			return gptErr.Message
+		}
+		return errorDetailText(gptErr.Cause)
+	}
+	return err.Error()
+}
+
+func containsAny(s string, substrings ...string) bool {
+	for _, sub := range substrings {
+		if strings.Contains(s, sub) {
+			return true
+		}
+	}
+	return false
 }
