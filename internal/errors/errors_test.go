@@ -402,7 +402,7 @@ func TestProviderNotFoundError(t *testing.T) {
 	for _, want := range []string{
 		"not-a-provider",
 		"gmsg provider list",
-		"gmsg newprovider",
+		"gmsg provider new",
 		"config set not-a-provider.api_key",
 	} {
 		if !strings.Contains(rendered, want) {
@@ -562,7 +562,7 @@ func TestProviderNotConfiguredError(t *testing.T) {
 	for _, want := range []string{
 		"deepseek",
 		"gmsg provider use deepseek",
-		"gmsg newprovider",
+		"gmsg provider new",
 		"gmsg config get deepseek.api_base",
 	} {
 		if !strings.Contains(rendered, want) {

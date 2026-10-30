@@ -11,8 +11,8 @@ GPTComet generates Git commit messages and reviews code using LLMs. Supports 27+
 - `gmsg generate` - Print a generated commit message to stdout (no commit)
 - `gmsg hook` - Manage the Git `prepare-commit-msg` hook (install/uninstall/status)
 - `gmsg config` - Manage configuration (get/set/list/reset/path/keys/append/remove/validate)
-- `gmsg provider` - Inspect/switch/test providers (`list`, `use <name>`, `test [name]`)
-- `gmsg newprovider` - Interactive provider setup
+- `gmsg provider` - Inspect/switch/test/add providers (`list`, `new`, `use <name>`, `test [name]`)
+- `gmsg newprovider` - Deprecated: use `gmsg provider new`; kept for now, will be removed in a future release
 
 ## Architecture
 

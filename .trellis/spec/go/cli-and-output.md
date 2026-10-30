@@ -44,6 +44,10 @@ Rules:
 - `SilenceUsage` is set once on the root command in `main.go`; only `config validate` opts in
   again explicitly (`cmd/config.go:350`).
 - `RunE` returns the error; Cobra prints `Error: ...`. `main.go` exits with code 1 on failure.
+- Deprecated commands stay runnable and visible: `gmsg newprovider` prints a yellow `⚠` notice
+  pointing at `gmsg provider new` from its own `RunE` (`cmd/newprovider.go`). Do not set Cobra's
+  `Deprecated` field while the command must remain discoverable — Cobra hides deprecated commands
+  from help.
 - Read output through `cmd.OutOrStdout()` in helpers that tests capture (see `cmd/newprovider.go`).
 - `generate` has a strict stdout contract: only the final message. `generateWithCleanStdout`
   temporarily redirects `os.Stdout` to stderr because some providers still print status/usage

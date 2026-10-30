@@ -17,7 +17,7 @@ func TestNewProviderSetupCmd(t *testing.T) {
 
 	// Test command basic properties
 	assert.Equal(t, "newprovider", cmd.Use)
-	assert.Equal(t, "Configure a new provider interactively", cmd.Short)
+	assert.Equal(t, "Configure a new provider interactively (deprecated)", cmd.Short)
 	assert.NotNil(t, cmd.RunE)
 
 	// Create a buffer to capture output
@@ -36,8 +36,10 @@ func TestNewProviderSetupCmd(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	// Check output
+	// Check output: deprecation hint + provider list
 	output := buf.String()
+	assert.Contains(t, output, "deprecated")
+	assert.Contains(t, output, "gmsg provider new")
 	assert.Contains(t, output, "Available providers:")
 	assert.Contains(t, output, "test-provider")
 }
@@ -59,8 +61,10 @@ func TestProviderSetupCmd_NonInteractive(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	// Check output
+	// Check output: deprecation hint + provider list
 	output := buf.String()
+	assert.Contains(t, output, "deprecated")
+	assert.Contains(t, output, "gmsg provider new")
 	assert.Contains(t, output, "Available providers:")
 	assert.Contains(t, output, "test-provider")
 }

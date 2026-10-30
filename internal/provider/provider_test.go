@@ -198,7 +198,7 @@ openai:
 	require.True(t, errors.As(err, &gptErr))
 	assert.Equal(t, gptcometerrors.ErrTitleUnknownProvider, gptErr.Title)
 	assert.Contains(t, err.Error(), "gmsg provider list")
-	assert.Contains(t, err.Error(), "gmsg newprovider")
+	assert.Contains(t, err.Error(), "gmsg provider new")
 	assert.Equal(t, "openai", svc.CurrentName(), "provider must not change on failure")
 }
 

@@ -117,7 +117,7 @@ const (
 	SuggCheckErrorDetails     = "Check the error details for more information"
 	SuggSupportedProxySchemes = "Supported proxy schemes: http, https, socks5"
 	SuggListProviders         = "List available providers: gmsg provider list"
-	SuggConfigureProvider     = "Configure a provider interactively: gmsg newprovider"
+	SuggConfigureProvider     = "Configure a provider interactively: gmsg provider new"
 	SuggSelectProvider        = "Select a provider: gmsg provider use <name>"
 	SuggTestProvider          = "Test the provider: gmsg provider test %s"
 	SuggCheckProviderBaseURL  = "Check the provider API base: gmsg config get %s.api_base"

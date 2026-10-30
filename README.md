@@ -161,7 +161,7 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
     - Configure directly in `~/.config/gptcomet/gptcomet.yaml`.
 
 2. **Interactive Setup**
-    - Use the `gmsg newprovider` command for guided setup.
+    - Use the `gmsg provider new` command for guided setup (`gmsg newprovider` is deprecated and will be removed in a future release).
 
 3. **Environment Variables**
     - If `api_key` is not set in the configuration file, GPTComet falls back to
@@ -198,14 +198,14 @@ provider's saved configuration, and reports the model, API base, key source, lat
 response. It exits non-zero when the request fails and prints an actionable error (invalid key,
 rate limit, provider outage, or network/proxy problem). It does not need a Git repository.
 
-To add or reconfigure a provider interactively, use `gmsg newprovider`.
+To add or reconfigure a provider interactively, use `gmsg provider new` (`gmsg newprovider` is deprecated and will be removed in a future release).
 
 ### Provider Setup Guide
 
 ![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)
 
 ```bash
-gmsg newprovider
+gmsg provider new
 
     Select Provider
 
@@ -236,7 +236,7 @@ gmsg newprovider
 OpenAI api key page: https://platform.openai.com/api-keys
 
 ```shell
-gmsg newprovider
+gmsg provider new
 
 Selected provider: openai
 Configure provider:
@@ -258,7 +258,7 @@ Provider openai configured successfully!
 Gemini api key page: https://aistudio.google.com/u/1/apikey
 
 ```shell
-gmsg newprovider
+gmsg provider new
 Selected provider: gemini
 Configure provider:
 
@@ -284,7 +284,7 @@ I don't have an anthropic account yet, please see [Anthropic console](https://co
 Vertex console page: https://console.cloud.google.com
 
 ```shell
-gmsg newprovider
+gmsg provider new
 Selected provider: vertex
 Configure provider:
 
@@ -305,7 +305,7 @@ Provider vertex configured successfully!
 #### Azure
 
 ```shell
-gmsg newprovider
+gmsg provider new
 
 Selected provider: azure
 Configure provider:
@@ -327,7 +327,7 @@ Provider azure configured successfully!
 #### Ollama
 
 ```shell
-gmsg newprovider
+gmsg provider new
 Selected provider: ollama
 Configure provider:
 
@@ -379,7 +379,7 @@ the last verification date.
 Or you can enter the provider name manually, and setup config manually.
 
 ```shell
-gmsg newprovider
+gmsg provider new
 You can either select one from the list or enter a custom provider name.
   ...
   vertex
@@ -400,13 +400,13 @@ does not ship a preset for: enter a custom provider name, then set its
 `extra_body` for non-standard APIs.
 
 Cloudflare Workers AI is a built-in provider now. Select `cloudflare` in
-`gmsg newprovider` and enter your account ID, API token, and Workers AI model
+`gmsg provider new` and enter your account ID, API token, and Workers AI model
 (for example `@cf/openai/gpt-oss-120b`); GPTComet builds the OpenAI-compatible
 endpoint for you. The old `/ai/run` + `result.response` manual workaround is no
 longer needed.
 
 ```shell
-$ gmsg newprovider
+$ gmsg provider new
 
 Selected provider: cloudflare
 Configure provider:
@@ -460,11 +460,12 @@ The following are the available commands for GPTComet:
     -   `install [--repo] [--force]`: Install the hook; `--force` backs up an existing hook first.
     -   `uninstall [--repo]`: Remove a gptcomet-managed hook and restore a backup.
     -   `status [--repo]`: Show the hooks directory, state, and backup.
--   `gmsg provider`: Inspect, switch, and test LLM providers.
+-   `gmsg provider`: Inspect, switch, test, and add LLM providers.
     -   `list`: Show the active provider plus every provider's model and API key source.
+    -   `new`: Configure a new provider interactively (replaces `gmsg newprovider`).
     -   `use <name>`: Switch the default provider; seeds defaults for a built-in provider without a config block.
     -   `test [provider]`: Send one minimal request and report connectivity, auth, latency, and a short response.
--   `gmsg newprovider`: Add a new provider interactively.
+-   `gmsg newprovider`: Deprecated; use `gmsg provider new`. Kept for now and will be removed in a future release.
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
     -   `--stream`: Stream output as it arrives from the LLM.

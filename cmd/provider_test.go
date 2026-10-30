@@ -75,6 +75,7 @@ func TestNewProviderCmd(t *testing.T) {
 
 	wantSubcommands := map[string]bool{
 		"list": false,
+		"new":  false,
 		"use":  false,
 		"test": false,
 	}
@@ -122,7 +123,7 @@ myproxy:
 		"* openai",
 		"myproxy",
 		"Switch providers with 'gmsg provider use <name>'.",
-		"gmsg newprovider",
+		"gmsg provider new",
 	} {
 		assert.Contains(t, output, want)
 	}
@@ -303,4 +304,18 @@ func TestFormatKeySource(t *testing.T) {
 			assert.Equal(t, tt.want, formatKeySource(tt.info))
 		})
 	}
+}
+
+func TestProviderNewCmd_NonInteractive(t *testing.T) {
+	t.Setenv("GPTCOMET_TEST", "1")
+
+	cmd := newProviderNewCmd()
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+
+	require.NoError(t, cmd.Execute())
+
+	output := buf.String()
+	assert.Contains(t, output, "Available providers:")
+	assert.NotContains(t, output, "deprecated", "provider new must not print the legacy deprecation hint")
 }

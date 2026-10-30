@@ -13,17 +13,19 @@ import (
 
 // NewProviderCmd creates the provider command group. It exposes the provider
 // inventory, switches the default provider, and probes a provider with one
-// minimal request. Interactive configuration stays in `gmsg newprovider`.
+// minimal request. Interactive configuration lives in `gmsg provider new`
+// (the legacy `gmsg newprovider` still works but is deprecated).
 func NewProviderCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "provider",
-		Short: "Inspect, switch, and test LLM providers",
-		Long: "Inspect the active LLM provider, switch the default provider, and test " +
-			"connectivity with a minimal request.",
+		Short: "Inspect, switch, test, and add LLM providers",
+		Long: "Inspect the active LLM provider, switch the default provider, test " +
+			"connectivity with a minimal request, and configure a new provider interactively.",
 	}
 
 	cmd.AddCommand(
 		newProviderListCmd(),
+		newProviderNewCmd(),
 		newProviderUseCmd(),
 		newProviderTestCmd(),
 	)
@@ -112,7 +114,7 @@ func newProviderUseCmd() *cobra.Command {
 			}
 			if len(result.MissingFields) > 0 {
 				fmt.Fprintln(out, formatRemindMessage(fmt.Sprintf(
-					"⚠ Provider '%s' still needs: %s. Configure it with 'gmsg newprovider' or 'gmsg config set %s.<field> <value>'.",
+					"⚠ Provider '%s' still needs: %s. Configure it with 'gmsg provider new' or 'gmsg config set %s.<field> <value>'.",
 					result.Provider, strings.Join(result.MissingFields, ", "), result.Provider)))
 			}
 
@@ -160,7 +162,7 @@ func renderProviderList(w io.Writer, svc *provider.Service) {
 
 	fmt.Fprintln(w, "Switch providers with 'gmsg provider use <name>'.")
 	fmt.Fprintln(w, "Set a missing API key with 'gmsg config set <provider>.api_key <key>' or the provider's environment variable (e.g. OPENAI_API_KEY).")
-	fmt.Fprintln(w, "Configure a provider interactively with 'gmsg newprovider'.")
+	fmt.Fprintln(w, "Configure a provider interactively with 'gmsg provider new'.")
 }
 
 // formatKeySource renders where a provider's API key comes from.

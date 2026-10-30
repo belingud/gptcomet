@@ -227,7 +227,7 @@ func (s *Service) hasSection(name string) bool {
 }
 
 // providerDefault returns the provider's built-in default for a required config
-// field, using the same GetRequiredConfig() source as `gmsg newprovider`.
+// field, using the same GetRequiredConfig() source as `gmsg provider new`.
 func providerDefault(name, key string) string {
 	requirements := requiredConfig(name)
 	if requirements == nil {

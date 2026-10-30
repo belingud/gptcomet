@@ -14,8 +14,8 @@ var version = "2.8.0"
 // main is the entry point of the GPTComet application. It initializes and configures the command-line interface
 // using cobra. The following commands are available:
 //
-// - provider: List, switch, and test AI providers
-// - newprovider: Configure a new provider interactively
+// - provider: List, switch, test, and add AI providers
+// - newprovider: Configure a new provider interactively (deprecated, use 'provider new')
 // - commit: Generate commit messages using AI
 // - config: Manage application configuration
 // - update: Check and update to latest version

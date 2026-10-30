@@ -161,7 +161,7 @@ Installed 2 executables: gmsg, gptcomet
     - 直接编辑 `~/.config/gptcomet/gptcomet.yaml`。
 
 2. **交互式设置**
-    - 使用 `gmsg newprovider` 命令完成引导式设置。
+    - 使用 `gmsg provider new` 命令完成引导式设置（`gmsg newprovider` 已弃用，将在未来版本移除）。
 
 3. **环境变量**
     - 如果配置文件中没有设置 `api_key`，GPTComet 会回退到提供商对应的环境变量，
@@ -194,14 +194,14 @@ gmsg provider test      # 测试当前提供商；也可执行 gmsg provider tes
 API base、key 来源、延迟和简短响应。请求失败时以非零状态退出，并给出可操作的错误
 （key 无效、限流、服务不可用或网络/代理问题）。该命令不需要 Git 仓库。
 
-要交互式添加或重新配置提供商，请使用 `gmsg newprovider`。
+要交互式添加或重新配置提供商，请使用 `gmsg provider new`（`gmsg newprovider` 已弃用，将在未来版本移除）。
 
 ### 提供商设置指南
 
 ![Made with VHS](https://vhs.charm.sh/vhs-6019QMIveifvh9vGKc2ZZ8.gif)
 
 ```bash
-gmsg newprovider
+gmsg provider new
 
     Select Provider
 
@@ -232,7 +232,7 @@ gmsg newprovider
 OpenAI API key 页面：https://platform.openai.com/api-keys
 
 ```shell
-gmsg newprovider
+gmsg provider new
 
 Selected provider: openai
 Configure provider:
@@ -254,7 +254,7 @@ Provider openai configured successfully!
 Gemini API key 页面：https://aistudio.google.com/u/1/apikey
 
 ```shell
-gmsg newprovider
+gmsg provider new
 Selected provider: gemini
 Configure provider:
 
@@ -280,7 +280,7 @@ Provider gemini configured successfully!
 Vertex 控制台页面：https://console.cloud.google.com
 
 ```shell
-gmsg newprovider
+gmsg provider new
 Selected provider: vertex
 Configure provider:
 
@@ -301,7 +301,7 @@ Provider vertex configured successfully!
 #### Azure
 
 ```shell
-gmsg newprovider
+gmsg provider new
 
 Selected provider: azure
 Configure provider:
@@ -323,7 +323,7 @@ Provider azure configured successfully!
 #### Ollama
 
 ```shell
-gmsg newprovider
+gmsg provider new
 Selected provider: ollama
 Configure provider:
 
@@ -374,7 +374,7 @@ Provider ollama configured successfully!
 也可以手动输入提供商名称并配置。
 
 ```shell
-gmsg newprovider
+gmsg provider new
 You can either select one from the list or enter a custom provider name.
   ...
   vertex
@@ -393,13 +393,13 @@ Enter max tokens [1024]:
 `completion_path`、`answer_path`、`stream_answer_path`、`extra_headers`、`extra_body`
 来适配非标准 API。
 
-Cloudflare Workers AI 现在是内置 provider。在 `gmsg newprovider` 里选择 `cloudflare`，
+Cloudflare Workers AI 现在是内置 provider。在 `gmsg provider new` 里选择 `cloudflare`，
 填入 account ID、API token 和 Workers AI 模型（例如 `@cf/openai/gpt-oss-120b`），
 GPTComet 会自动拼出 OpenAI-compatible endpoint，不再需要旧的 `/ai/run` +
 `result.response` 手工配置。
 
 ```shell
-$ gmsg newprovider
+$ gmsg provider new
 
 Selected provider: cloudflare
 Configure provider:
@@ -453,11 +453,12 @@ GPTComet 提供以下命令：
     -   `install [--repo] [--force]`：安装 hook；`--force` 会先备份已有 hook。
     -   `uninstall [--repo]`：删除 gptcomet 管理的 hook，并恢复备份。
     -   `status [--repo]`：显示 hooks 目录、状态和备份。
--   `gmsg provider`：查看、切换和测试 LLM 提供商。
+-   `gmsg provider`：查看、切换、测试和添加 LLM 提供商。
     -   `list`：显示当前提供商，以及所有提供商的模型和 API key 来源。
+    -   `new`：交互式配置一个新的提供商（替代 `gmsg newprovider`）。
     -   `use <name>`：切换默认提供商；内置提供商没有配置块时会按默认值创建。
     -   `test [provider]`：发送一次最小请求，报告连通性、鉴权、延迟和简短响应。
--   `gmsg newprovider`：交互式添加一个新的提供商。
+-   `gmsg newprovider`：已弃用，请使用 `gmsg provider new`；当前保留，将在未来版本移除。
 -   `gmsg review`：审查 staged diff，也可以通过管道输入给 `gmsg review`。
     -   `--svn`：从 SVN 获取 diff。
     -   `--stream`：以流式方式输出 LLM 返回内容。
