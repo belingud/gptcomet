@@ -26,6 +26,7 @@
   - [📕 Usage](#-usage)
   - [🔧 Setup](#-setup)
     - [Configuration Methods](#configuration-methods)
+    - [Managing Providers](#managing-providers)
     - [Provider Setup Guide](#provider-setup-guide)
       - [OpenAI](#openai)
       - [Gemini](#gemini)
@@ -168,6 +169,36 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
       `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `AZURE_API_KEY`,
       or `<PROVIDER>_API_KEY` for other providers.
     - The configuration file takes precedence when both are set.
+
+### Managing Providers
+
+Inspect the active provider and every known provider, switch the default, and verify a provider
+with one minimal request:
+
+```shell
+gmsg provider list     # active provider, model, API base, and API key source
+gmsg provider use claude
+gmsg provider test      # probe the active provider; or: gmsg provider test deepseek
+```
+
+`gmsg provider list` shows where each provider's API key comes from:
+
+-   `config (sk-ab***)` — set in `gptcomet.yaml` (masked in the output);
+-   `env OPENAI_API_KEY` — the config value is empty and the built-in environment variable is set;
+-   `not required` — local providers such as `ollama` and `lmstudio`;
+-   `missing` — no key found; commands that call the provider fail until one is set.
+
+`gmsg provider use <name>` switches the default provider and creates a default configuration block
+for a built-in provider that does not have one yet. It never overwrites an existing block, and it
+warns when the API key or a provider-specific field (for example `azure.deployment_name`) is still
+missing. Configured custom providers keep working through the OpenAI-compatible fallback.
+
+`gmsg provider test [provider]` sends exactly one small request without retries, using the
+provider's saved configuration, and reports the model, API base, key source, latency, and a short
+response. It exits non-zero when the request fails and prints an actionable error (invalid key,
+rate limit, provider outage, or network/proxy problem). It does not need a Git repository.
+
+To add or reconfigure a provider interactively, use `gmsg newprovider`.
 
 ### Provider Setup Guide
 
@@ -429,7 +460,11 @@ The following are the available commands for GPTComet:
     -   `install [--repo] [--force]`: Install the hook; `--force` backs up an existing hook first.
     -   `uninstall [--repo]`: Remove a gptcomet-managed hook and restore a backup.
     -   `status [--repo]`: Show the hooks directory, state, and backup.
--   `gmsg newprovider`: Add a new provider.
+-   `gmsg provider`: Inspect, switch, and test LLM providers.
+    -   `list`: Show the active provider plus every provider's model and API key source.
+    -   `use <name>`: Switch the default provider; seeds defaults for a built-in provider without a config block.
+    -   `test [provider]`: Send one minimal request and report connectivity, auth, latency, and a short response.
+-   `gmsg newprovider`: Add a new provider interactively.
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
     -   `--stream`: Stream output as it arrives from the LLM.
@@ -589,7 +624,8 @@ gmsg config append file_ignore "!vendor/keep.go"
 
 The provider configuration of the language model.
 
-The default provider is `openai`.
+The default provider is `openai`. You can inspect and switch it with `gmsg provider list` and
+`gmsg provider use <name>`, and verify the configuration with `gmsg provider test`.
 
 Provider config just like:
 

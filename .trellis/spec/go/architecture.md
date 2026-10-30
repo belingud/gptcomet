@@ -41,6 +41,7 @@ These are enforced by the current code — keep them that way:
 | --- | --- | --- |
 | New command / subcommand | `cmd/<name>.go` with `New<Name>Cmd() *cobra.Command` | register in `main.go` `rootCmd.AddCommand(...)` |
 | New Git hook lifecycle | `internal/hook/` | `cmd/hook.go`, `internal/git/hooks.go` (path resolution), README hook section |
+| Provider inventory/switch rules | `internal/provider/` | `cmd/provider.go`, README provider section, error templates |
 | New flag | `cmd/flags.go` helpers (`AddAdvancedAPIFlags`, `AddGeneralFlags`, `AddConfigFlag`) | command doc string + README flag table |
 | New LLM provider | `internal/llm/<provider>.go` | `internal/llm/provider.go` `init()`, `<provider>_test.go`, `docs/provider-models.md` |
 | New config key | `pkg/config/defaults/defaults.go` (default) | `internal/config/accessor.go` `GetSupportedKeys`, `internal/config/client_config` mapping, README config section |

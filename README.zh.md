@@ -26,6 +26,7 @@
   - [📕 使用](#-使用)
   - [🔧 设置](#-设置)
     - [配置方式](#配置方式)
+    - [管理提供商](#管理提供商)
     - [提供商设置指南](#提供商设置指南)
       - [OpenAI](#openai)
       - [Gemini](#gemini)
@@ -167,6 +168,33 @@ Installed 2 executables: gmsg, gptcomet
       例如 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`GEMINI_API_KEY`、
       `AZURE_API_KEY`，其他提供商使用 `<PROVIDER>_API_KEY`。
     - 同时存在时，配置文件优先。
+
+### 管理提供商
+
+查看当前提供商和所有已知提供商、切换默认提供商，并用一次最小请求验证连通性：
+
+```shell
+gmsg provider list     # 当前提供商、模型、API base 和 API key 来源
+gmsg provider use claude
+gmsg provider test      # 测试当前提供商；也可执行 gmsg provider test deepseek
+```
+
+`gmsg provider list` 会显示每个提供商的 API key 来源：
+
+-   `config (sk-ab***)`：在 `gptcomet.yaml` 中设置（输出时会打码）；
+-   `env OPENAI_API_KEY`：配置文件中为空，但内置环境变量已设置；
+-   `not required`：`ollama`、`lmstudio` 等本地提供商不需要 key；
+-   `missing`：未找到 key；调用该提供商的命令会失败，直到设置 key 为止。
+
+`gmsg provider use <name>` 会切换默认提供商；如果该内置提供商还没有配置块，会按默认值创建一个。
+它不会覆盖已有配置块，并会在 API key 或提供商专属字段（例如 `azure.deployment_name`）
+仍然缺失时给出警告。自定义提供商仍可通过 OpenAI 兼容回退继续使用。
+
+`gmsg provider test [provider]` 使用已保存的配置发送一次小请求（不重试），并显示模型、
+API base、key 来源、延迟和简短响应。请求失败时以非零状态退出，并给出可操作的错误
+（key 无效、限流、服务不可用或网络/代理问题）。该命令不需要 Git 仓库。
+
+要交互式添加或重新配置提供商，请使用 `gmsg newprovider`。
 
 ### 提供商设置指南
 
@@ -425,7 +453,11 @@ GPTComet 提供以下命令：
     -   `install [--repo] [--force]`：安装 hook；`--force` 会先备份已有 hook。
     -   `uninstall [--repo]`：删除 gptcomet 管理的 hook，并恢复备份。
     -   `status [--repo]`：显示 hooks 目录、状态和备份。
--   `gmsg newprovider`：添加一个新的提供商。
+-   `gmsg provider`：查看、切换和测试 LLM 提供商。
+    -   `list`：显示当前提供商，以及所有提供商的模型和 API key 来源。
+    -   `use <name>`：切换默认提供商；内置提供商没有配置块时会按默认值创建。
+    -   `test [provider]`：发送一次最小请求，报告连通性、鉴权、延迟和简短响应。
+-   `gmsg newprovider`：交互式添加一个新的提供商。
 -   `gmsg review`：审查 staged diff，也可以通过管道输入给 `gmsg review`。
     -   `--svn`：从 SVN 获取 diff。
     -   `--stream`：以流式方式输出 LLM 返回内容。
@@ -581,7 +613,8 @@ gmsg config append file_ignore "!vendor/keep.go"
 
 语言模型的提供商配置。
 
-默认提供商是 `openai`。
+默认提供商是 `openai`。可以使用 `gmsg provider list` 查看、`gmsg provider use <name>`
+切换，并用 `gmsg provider test` 验证配置。
 
 提供商配置示例：
 

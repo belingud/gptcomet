@@ -52,10 +52,11 @@ Do not report a Go change as done while `just check` or `just test` fails.
 | `internal/config/` | YAML manager, dot-key accessors, `GetClientConfig`, `GetSupportedKeys` | `ManagerInterface` is mocked in tests |
 | `internal/git/` | `VCS` interface, Git + SVN implementations, gitignore-style `file_ignore` matching | No `os/exec` outside this package |
 | `internal/hook/` | `prepare-commit-msg` install/status/uninstall/run logic | Generator is injected by `cmd`; no client/config imports |
+| `internal/provider/` | Provider inventory, effective model/API-base display data, switch + default-block seeding | Imports `config.ManagerInterface`/`llm`/`errors`; no network I/O |
 | `internal/ui/` | Progress stages, provider selector (bubbletea) | Also markdown rendering via glamour in `cmd/review.go` |
 | `internal/errors/` | `GPTCometError` type + one template function per user-facing scenario | Every user-visible failure has a template here |
 | `internal/logger/`, `internal/debug/` | Leveled logger; opt-in debug printer to stderr | Leaf packages, no internal deps |
 | `internal/prompt/` | `{{ var }}` template rendering | Used by `client` for prompts |
 | `internal/constants/` | Timeouts, retry/backoff, endpoints, config keys | Changing a value here changes runtime behavior globally |
-| `pkg/types/` | `ClientConfig`, `Message`, `CompletionResponse` | Shared, importable outside `internal/` |
+| `pkg/types/` | `ClientConfig`, `Message`, `CompletionResponse`, `APIKeySource` | Shared, importable outside `internal/` |
 | `pkg/config/` | `ConfigRequirement` type + `defaults` package (default config, prompt defaults) | Defaults are the single source of truth |

@@ -44,7 +44,7 @@ Rules:
 - `SilenceUsage` is set once on the root command in `main.go`; only `config validate` opts in
   again explicitly (`cmd/config.go:350`).
 - `RunE` returns the error; Cobra prints `Error: ...`. `main.go` exits with code 1 on failure.
-- Read output through `cmd.OutOrStdout()` in helpers that tests capture (see `cmd/provider.go`).
+- Read output through `cmd.OutOrStdout()` in helpers that tests capture (see `cmd/newprovider.go`).
 - `generate` has a strict stdout contract: only the final message. `generateWithCleanStdout`
   temporarily redirects `os.Stdout` to stderr because some providers still print status/usage
   lines there (known debt). `hook` commands delegate to `internal/hook`; only `internal/git`
@@ -54,7 +54,11 @@ Rules:
 
 - `setConfigManager(cmd, mgr)` / `getConfigManager(cmd)` (`cmd/config.go:33`) store the manager in
   the Cobra context. Tests inject `testutils.MockConfigManager` with this pair instead of building
-  a real config file (`cmd/config_test.go` `setupTest`).
+  a real config file (`cmd/config_test.go` `setupTest`). `getConfigManager` skips commands with a
+  nil context; `providerConfigManager` (`cmd/provider.go`) falls back to `config.New` from the
+  root `--config` flag when no manager is in the context.
+- The `provider test` command uses the `newProviderProber` package variable as its client seam so
+  tests inject a fake prober and never hit the network (`cmd/provider_probe.go`).
 - Services (`ReviewService`, commit action) take interfaces (`git.VCS`, `client.ClientInterface`,
   `config.ManagerInterface`, `MarkdownRenderer`), never concrete types, so tests can mock them.
 
@@ -82,7 +86,7 @@ Styling primitives live in `cmd/common.go`:
   (`cmd/review.go:34`), with the style from config `output.markdown_theme`.
 - Interactive prompts (provider picker, commit-message editor) use `bubbletea` models from
   `internal/ui` and `cmd/common.go` (`textEditor`). Interactive paths must honour the
-  `GPTCOMET_TEST=1` escape hatch (`cmd/provider.go:26`) so tests never block on a TTY.
+  `GPTCOMET_TEST=1` escape hatch (`cmd/newprovider.go:26`) so tests never block on a TTY.
 
 ## What the User Sees (commit flow)
 

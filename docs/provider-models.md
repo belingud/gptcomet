@@ -2,6 +2,8 @@
 
 These are the default models used by `gmsg newprovider` and when a provider
 configuration omits `model`. The list was last refreshed on **2026-10-27**.
+Run `gmsg provider list` to see the effective model and API-key source for every
+configured provider.
 
 Model names change frequently. When updating one, update the provider constant,
 its tests, this table, and the examples in the READMEs.
