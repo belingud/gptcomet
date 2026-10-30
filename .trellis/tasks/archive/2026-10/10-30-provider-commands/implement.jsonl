@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/go/architecture.md", "reason": "Go implementation guideline required before code changes"}
+{"file": ".trellis/spec/go/cli-and-output.md", "reason": "Go implementation guideline required before code changes"}
+{"file": ".trellis/spec/go/config-and-defaults.md", "reason": "Go implementation guideline required before code changes"}
+{"file": ".trellis/spec/go/error-handling.md", "reason": "Go implementation guideline required before code changes"}
+{"file": ".trellis/spec/go/quality-guidelines.md", "reason": "Go implementation guideline required before code changes"}

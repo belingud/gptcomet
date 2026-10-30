@@ -1,0 +1,28 @@
+{
+  "id": "provider-commands",
+  "name": "provider-commands",
+  "title": "Add provider management commands",
+  "description": "Add a gmsg provider command group with list, use, and test subcommands: show the active provider/model/API-key source, switch the default provider, and verify connectivity/auth/latency with a minimal request. Keep gmsg newprovider working as an alias/entry point.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": "go",
+  "package": null,
+  "priority": "P0",
+  "creator": "belingud",
+  "assignee": "belingud",
+  "createdAt": "2026-10-30",
+  "completedAt": "2026-10-30",
+  "branch": "master",
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": "30c1e6f,0aac04b,bdd701b",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "priority": "P0"
+  }
+}

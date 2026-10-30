@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/go/architecture.md", "reason": "Quality/compliance check reference for the provider commands"}
+{"file": ".trellis/spec/go/cli-and-output.md", "reason": "Quality/compliance check reference for the provider commands"}
+{"file": ".trellis/spec/go/config-and-defaults.md", "reason": "Quality/compliance check reference for the provider commands"}
+{"file": ".trellis/spec/go/error-handling.md", "reason": "Quality/compliance check reference for the provider commands"}
+{"file": ".trellis/spec/go/quality-guidelines.md", "reason": "Quality/compliance check reference for the provider commands"}
