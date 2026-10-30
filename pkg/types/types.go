@@ -35,6 +35,22 @@ type Usage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
+// APIKeySource identifies where a provider's API key was resolved from.
+// It lives in pkg/types so config implementations, mocks and commands can share
+// it without importing internal packages.
+type APIKeySource string
+
+const (
+	// APIKeySourceConfig means the key comes from <provider>.api_key in the config file.
+	APIKeySourceConfig APIKeySource = "config"
+	// APIKeySourceEnv means the config value is empty and the provider's env var is set.
+	APIKeySourceEnv APIKeySource = "env"
+	// APIKeySourceNotRequired means the provider runs without an API key.
+	APIKeySourceNotRequired APIKeySource = "not-required"
+	// APIKeySourceMissing means no key is available from config or environment.
+	APIKeySourceMissing APIKeySource = "missing"
+)
+
 // ClientConfig represents the configuration for an LLM client
 type ClientConfig struct {
 	APIBase           string                 `json:"api_base"`

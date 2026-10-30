@@ -121,3 +121,8 @@ func (m *MockConfigManager) Validate() []string {
 	args := m.Called()
 	return args.Get(0).([]string)
 }
+
+func (m *MockConfigManager) ResolveAPIKey(provider string) (string, types.APIKeySource) {
+	args := m.Called(provider)
+	return args.String(0), args.Get(1).(types.APIKeySource)
+}

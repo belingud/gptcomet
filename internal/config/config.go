@@ -20,6 +20,21 @@ const (
 	cloudflareAPIBaseFormat = "https://api.cloudflare.com/client/v4/accounts/%s/ai/v1"
 )
 
+// APIKeySource identifies where a provider's API key was resolved from. It is
+// an alias of types.APIKeySource so callers do not need a pkg/types import.
+type APIKeySource = types.APIKeySource
+
+const (
+	// APIKeySourceConfig means the key comes from <provider>.api_key in the config file.
+	APIKeySourceConfig = types.APIKeySourceConfig
+	// APIKeySourceEnv means the config value is empty and the provider's env var is set.
+	APIKeySourceEnv = types.APIKeySourceEnv
+	// APIKeySourceNotRequired means the provider runs without an API key.
+	APIKeySourceNotRequired = types.APIKeySourceNotRequired
+	// APIKeySourceMissing means no key is available from config or environment.
+	APIKeySourceMissing = types.APIKeySourceMissing
+)
+
 // providerAllowsEmptyAPIKey reports whether a provider can be used without an API key.
 func providerAllowsEmptyAPIKey(provider string) bool {
 	switch provider {
@@ -28,6 +43,31 @@ func providerAllowsEmptyAPIKey(provider string) bool {
 	default:
 		return false
 	}
+}
+
+// ResolveAPIKey returns the API key that GetClientConfig would use for provider
+// and where it came from: the config file, the provider's environment variable,
+// not required at all, or missing.
+//
+// It is the single source of truth for the config -> environment fallback used
+// at runtime and by `gmsg provider list`, so the two can never disagree.
+func (m *Manager) ResolveAPIKey(provider string) (string, APIKeySource) {
+	if providerAllowsEmptyAPIKey(provider) {
+		return "", APIKeySourceNotRequired
+	}
+
+	providerConfig, _ := m.config[provider].(map[string]interface{})
+	if key, _ := providerConfig["api_key"].(string); key != "" {
+		return key, APIKeySourceConfig
+	}
+
+	// Configuration file wins; environment variables are a fallback
+	// so the guidance in APIKeyNotSetError actually works.
+	if key := os.Getenv(gptcometerrors.GetAPIKeyEnvVar(provider)); key != "" {
+		return key, APIKeySourceEnv
+	}
+
+	return "", APIKeySourceMissing
 }
 
 type ManagerInterface interface {
@@ -51,6 +91,7 @@ type ManagerInterface interface {
 	GetTranslationPrompt() string
 	GetOutputTranslateTitle() bool
 	GetFileIgnore() []string
+	ResolveAPIKey(provider string) (string, APIKeySource)
 }
 
 // Manager handles configuration management
@@ -136,20 +177,9 @@ func (m *Manager) GetClientConfig(initProvider string) (*types.ClientConfig, err
 	if !ok {
 		return nil, gptcometerrors.NewConfigError("Configuration Error", fmt.Sprintf("Provider config not found: %s", provider), nil, []string{fmt.Sprintf("Configure the provider: gptcomet config set %s.api_key <key>", provider)})
 	}
-	var apiKey string
-	if providerAllowsEmptyAPIKey(provider) {
-		apiKey = ""
-	} else {
-		apiKeyValue, _ := providerConfig["api_key"].(string)
-		if apiKeyValue == "" {
-			// Configuration file wins; environment variables are a fallback
-			// so the guidance in APIKeyNotSetError actually works.
-			apiKeyValue = os.Getenv(gptcometerrors.GetAPIKeyEnvVar(provider))
-		}
-		if apiKeyValue == "" {
-			return nil, gptcometerrors.APIKeyNotSetError(provider)
-		}
-		apiKey = apiKeyValue
+	apiKey, keySource := m.ResolveAPIKey(provider)
+	if keySource == APIKeySourceMissing {
+		return nil, gptcometerrors.APIKeyNotSetError(provider)
 	}
 
 	apiBase := defaults.DefaultAPIBase
