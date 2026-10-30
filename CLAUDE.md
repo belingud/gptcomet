@@ -12,7 +12,7 @@ GPTComet generates Git commit messages and reviews code using LLMs. Supports 27+
 - `gmsg hook` - Manage the Git `prepare-commit-msg` hook (install/uninstall/status)
 - `gmsg config` - Manage configuration (get/set/list/reset/path/keys/append/remove/validate)
 - `gmsg provider` - Inspect/switch/test/add providers (`list`, `new`, `use <name>`, `test [name]`)
-- `gmsg newprovider` - Deprecated: use `gmsg provider new`; kept for now, will be removed in a future release
+- `gmsg newprovider` - Deprecated: use `gmsg provider new`; kept for now, removal scheduled for v2.11.0
 
 ## Architecture
 
@@ -117,6 +117,7 @@ default: provider = llm.NewDefaultLLM(config)
 
 - [README.md](README.md) - User guide, installation, configuration
 - [docs/provider-models.md](docs/provider-models.md) - Default models per provider and refresh checklist
+- [docs/deprecations.md](docs/deprecations.md) - Deprecation policy and removal schedule
 - [pyproject.toml](pyproject.toml) - Python project config, tool settings
 
 ## Notes

@@ -15,10 +15,18 @@ import (
 	"golang.org/x/term"
 )
 
-// providerSetupDeprecationNotice is printed by the legacy newprovider command
-// on every invocation. The command keeps working until it is removed in a
-// future release in favor of `gmsg provider new`.
-const providerSetupDeprecationNotice = "⚠ 'gmsg newprovider' is deprecated and will be removed in a future release. Use 'gmsg provider new' instead."
+const (
+	// providerSetupRemovalVersion is the release in which the legacy
+	// `newprovider` command is scheduled to be removed. Deprecated in 2.8.0;
+	// removal three minor releases later, tracked in docs/deprecations.md.
+	providerSetupRemovalVersion = "2.11.0"
+
+	// providerSetupDeprecationNotice is printed by the legacy newprovider
+	// command on every invocation. The command keeps working until the
+	// scheduled removal.
+	providerSetupDeprecationNotice = "⚠ 'gmsg newprovider' is deprecated and will be removed in v" +
+		providerSetupRemovalVersion + ". Use 'gmsg provider new' instead."
+)
 
 // NewProviderSetupCmd returns the legacy `newprovider` command. It stays
 // visible and functional for now, but prints a deprecation hint pointing at

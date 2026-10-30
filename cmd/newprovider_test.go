@@ -39,6 +39,7 @@ func TestNewProviderSetupCmd(t *testing.T) {
 	// Check output: deprecation hint + provider list
 	output := buf.String()
 	assert.Contains(t, output, "deprecated")
+	assert.Contains(t, output, "v"+providerSetupRemovalVersion)
 	assert.Contains(t, output, "gmsg provider new")
 	assert.Contains(t, output, "Available providers:")
 	assert.Contains(t, output, "test-provider")
@@ -64,6 +65,7 @@ func TestProviderSetupCmd_NonInteractive(t *testing.T) {
 	// Check output: deprecation hint + provider list
 	output := buf.String()
 	assert.Contains(t, output, "deprecated")
+	assert.Contains(t, output, "v"+providerSetupRemovalVersion)
 	assert.Contains(t, output, "gmsg provider new")
 	assert.Contains(t, output, "Available providers:")
 	assert.Contains(t, output, "test-provider")
