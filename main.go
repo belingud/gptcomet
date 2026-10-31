@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "2.8.0"
+var version = "2.9.0"
 
 // main is the entry point of the GPTComet application. It initializes and configures the command-line interface
 // using cobra. The following commands are available:
