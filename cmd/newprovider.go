@@ -17,9 +17,9 @@ import (
 
 const (
 	// providerSetupRemovalVersion is the release in which the legacy
-	// `newprovider` command is scheduled to be removed. Deprecated in 2.8.0;
-	// removal three minor releases later, tracked in docs/deprecations.md.
-	providerSetupRemovalVersion = "2.11.0"
+	// `newprovider` command is scheduled to be removed. Deprecated in 2.9.0;
+	// removal five minor releases later, tracked in docs/deprecations.md.
+	providerSetupRemovalVersion = "2.14.0"
 
 	// providerSetupDeprecationNotice is printed by the legacy newprovider
 	// command on every invocation. The command keeps working until the

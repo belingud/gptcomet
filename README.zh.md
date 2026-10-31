@@ -161,7 +161,7 @@ Installed 2 executables: gmsg, gptcomet
     - 直接编辑 `~/.config/gptcomet/gptcomet.yaml`。
 
 2. **交互式设置**
-    - 使用 `gmsg provider new` 命令完成引导式设置（`gmsg newprovider` 已弃用，将在 v2.11.0 移除，
+    - 使用 `gmsg provider new` 命令完成引导式设置（`gmsg newprovider` 已弃用，将在 v2.14.0 移除，
       见[弃用计划](docs/deprecations.md)）。
 
 3. **环境变量**
@@ -196,7 +196,7 @@ API base、key 来源、延迟和简短响应。请求失败时以非零状态�
 （key 无效、限流、服务不可用或网络/代理问题）。该命令不需要 Git 仓库。
 
 要交互式添加或重新配置提供商，请使用 `gmsg provider new`（`gmsg newprovider` 已弃用，将在
-v2.11.0 移除，见[弃用计划](docs/deprecations.md)）。
+v2.14.0 移除，见[弃用计划](docs/deprecations.md)）。
 
 ### 提供商设置指南
 
@@ -460,7 +460,7 @@ GPTComet 提供以下命令：
     -   `new`：交互式配置一个新的提供商（替代 `gmsg newprovider`）。
     -   `use <name>`：切换默认提供商；内置提供商没有配置块时会按默认值创建。
     -   `test [provider]`：发送一次最小请求，报告连通性、鉴权、延迟和简短响应。
--   `gmsg newprovider`：已弃用，请使用 `gmsg provider new`；当前保留，计划在 v2.11.0 移除
+-   `gmsg newprovider`：已弃用，请使用 `gmsg provider new`；当前保留，计划在 v2.14.0 移除
     （[弃用计划](docs/deprecations.md)）。
 -   `gmsg review`：审查 staged diff，也可以通过管道输入给 `gmsg review`。
     -   `--svn`：从 SVN 获取 diff。

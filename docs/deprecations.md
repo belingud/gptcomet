@@ -2,7 +2,7 @@
 
 This page tracks deprecated user-facing behavior and when it is scheduled to be
 removed. The policy is deliberately conservative: a deprecated command keeps
-working for **three minor releases after the release that deprecates it**, so
+working for **five minor releases after the release that deprecates it**, so
 scripts, docs, and muscle memory have time to migrate.
 
 ## Policy
@@ -20,13 +20,13 @@ scripts, docs, and muscle memory have time to migrate.
 
 | Deprecated | Deprecated in | Removal target | Replacement | Status |
 | --- | --- | --- | --- | --- |
-| `gmsg newprovider` | `2.8.0` | `2.11.0` | `gmsg provider new` | Deprecated — prints a warning, stays visible in `--help` |
+| `gmsg newprovider` | `2.9.0` | `2.14.0` | `gmsg provider new` | Deprecated — prints a warning, stays visible in `--help` |
 
 ### `gmsg newprovider`
 
-- **Deprecated in**: `2.8.0`
-- **Removal target**: `2.11.0` (three minor releases after the deprecation:
-  `2.9.0`, `2.10.0`, `2.11.0`)
+- **Deprecated in**: `2.9.0` (the first release whose CLI prints the warning)
+- **Removal target**: `2.14.0` (five minor releases after the deprecation:
+  `2.10.0`, `2.11.0`, `2.12.0`, `2.13.0`, `2.14.0`)
 - **Replacement**: `gmsg provider new` — same interactive flow, same prompts,
   same result; it just lives under the `provider` command group.
 - **Why**: provider management is grouped under `gmsg provider`. The legacy
@@ -37,12 +37,18 @@ scripts, docs, and muscle memory have time to migrate.
   `gmsg provider test` are unchanged.
 - **Current UX**: the command stays runnable and visible in `gmsg --help`,
   prints
-  `⚠ 'gmsg newprovider' is deprecated and will be removed in v2.11.0. Use 'gmsg provider new' instead.`
+  `⚠ 'gmsg newprovider' is deprecated and will be removed in v2.14.0. Use 'gmsg provider new' instead.`
   and adds `(deprecated)` to its short description. It deliberately does **not**
   use Cobra's `Deprecated` field, because Cobra would hide it from help before
   the announced target.
 
-#### Removal checklist (`2.11.0`)
+#### History
+
+- `2.9.0` release notes mention a `2.11.0` removal target. The target was
+  extended to `2.14.0` after the release; the policy allows moving a removal
+  later, never earlier.
+
+#### Removal checklist (`2.14.0`)
 
 - [ ] Delete `NewProviderSetupCmd` and `providerSetupDeprecationNotice` from
       `cmd/newprovider.go`; keep `runProviderSetup` and `newProviderNewCmd`

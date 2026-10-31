@@ -162,7 +162,7 @@ If you are using `openai` provider, and finished set `api_key`, you can run `gms
 
 2. **Interactive Setup**
     - Use the `gmsg provider new` command for guided setup (`gmsg newprovider` is deprecated and
-      will be removed in v2.11.0; see [Deprecations](docs/deprecations.md)).
+      will be removed in v2.14.0; see [Deprecations](docs/deprecations.md)).
 
 3. **Environment Variables**
     - If `api_key` is not set in the configuration file, GPTComet falls back to
@@ -200,7 +200,7 @@ response. It exits non-zero when the request fails and prints an actionable erro
 rate limit, provider outage, or network/proxy problem). It does not need a Git repository.
 
 To add or reconfigure a provider interactively, use `gmsg provider new` (`gmsg newprovider` is
-deprecated and will be removed in v2.11.0; see [Deprecations](docs/deprecations.md)).
+deprecated and will be removed in v2.14.0; see [Deprecations](docs/deprecations.md)).
 
 ### Provider Setup Guide
 
@@ -467,7 +467,7 @@ The following are the available commands for GPTComet:
     -   `new`: Configure a new provider interactively (replaces `gmsg newprovider`).
     -   `use <name>`: Switch the default provider; seeds defaults for a built-in provider without a config block.
     -   `test [provider]`: Send one minimal request and report connectivity, auth, latency, and a short response.
--   `gmsg newprovider`: Deprecated; use `gmsg provider new`. Kept for now; scheduled for removal in v2.11.0
+-   `gmsg newprovider`: Deprecated; use `gmsg provider new`. Kept for now; scheduled for removal in v2.14.0
     ([deprecation schedule](docs/deprecations.md)).
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
