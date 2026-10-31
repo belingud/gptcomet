@@ -1,5 +1,25 @@
 
 ---
+## [2.9.0](https://github.com/belingud/gptcomet/compare/v2.8.0..v2.9.0) - 2026-10-31
+
+### ⛰️  Features
+
+- **(config)** expose API key source resolution - ([30c1e6f](https://github.com/belingud/gptcomet/commit/30c1e6f244072a14c73983d1b774d803f8a23565)) - belingud
+- **(provider)** add provider new and deprecate newprovider - ([1ecb806](https://github.com/belingud/gptcomet/commit/1ecb8061924c617d74d7a4af58d6c042ff7e293a)) - belingud
+- **(provider)** add provider list/use/test commands - ([0aac04b](https://github.com/belingud/gptcomet/commit/0aac04b957bc62aaa854a9fb2d58040b65e7741b)) - belingud
+
+### 📚 Documentation
+
+- **(deprecations)** schedule newprovider removal for v2.11.0 - ([023ea0f](https://github.com/belingud/gptcomet/commit/023ea0f0d403acddf76750308596acdaabc53102)) - belingud
+- **(provider)** document provider management commands - ([bdd701b](https://github.com/belingud/gptcomet/commit/bdd701b0130b2d7fded79047924cbec939fa465e)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- **(trellis)** archive provider-commands task - ([cd6c70b](https://github.com/belingud/gptcomet/commit/cd6c70bbae42688dd70819511fd8e18daab9dc4f)) - belingud
+- record journal - ([b930b66](https://github.com/belingud/gptcomet/commit/b930b66a09c89338da87680b6b19222d56b87f5a)) - belingud
+
+
+---
 ## [2.8.0](https://github.com/belingud/gptcomet/compare/v2.7.1..v2.8.0) - 2026-10-29
 
 ### ⛰️  Features
