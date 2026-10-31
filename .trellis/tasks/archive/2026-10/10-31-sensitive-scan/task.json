@@ -1,0 +1,28 @@
+{
+  "id": "sensitive-scan",
+  "name": "sensitive-scan",
+  "title": "Add sensitive data pre-send scanning with gitleaks rules",
+  "description": "Scan diff added lines before sending to the LLM for secrets/credentials. Reuse gitleaks v8.30.1 rule data (MIT, 222 rules, 95KB TOML) via a lightweight in-repo matcher; no gitleaks library/CLI dependency. Modes: warn (default), redact, block. Config: sensitive.mode + sensitive.allow; CLI --secrets override on commit/generate/review. Integrates into CommitService.getStagedDiff (covers commit/generate/hook) and ReviewService.getDiff (staged + stdin pipe). Structured SensitiveContentError; docs + FUTURE_FEATURES item 8 marked complete. Non-goals: base64/hex decoding, archive/history scanning, baseline files, changing file_ignore defaults.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "belingud",
+  "assignee": "belingud",
+  "createdAt": "2026-10-31",
+  "completedAt": "2026-10-31",
+  "branch": "master",
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "commit": "c3c478f,64283f1,fa30a3d"
+  }
+}

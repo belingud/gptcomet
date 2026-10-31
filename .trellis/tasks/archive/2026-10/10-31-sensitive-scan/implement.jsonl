@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/go/architecture.md", "reason": "package boundaries: new leaf package internal/secretscan"}
+{"file": ".trellis/spec/go/config-and-defaults.md", "reason": "sensitive.mode/sensitive.allow config keys and defaults"}
+{"file": ".trellis/spec/go/error-handling.md", "reason": "structured SensitiveContentError templates"}
+{"file": ".trellis/spec/go/cli-and-output.md", "reason": "stderr warnings and generate stdout contract"}
+{"file": ".trellis/spec/go/quality-guidelines.md", "reason": "table-driven tests and quality gate"}
