@@ -1,5 +1,23 @@
 
 ---
+## [2.10.0](https://github.com/belingud/gptcomet/compare/v2.9.0..v2.10.0) - 2026-10-31
+
+### ⛰️  Features
+
+- **(secretscan)** scan diffs for credentials before sending to the LLM - ([c3c478f](https://github.com/belingud/gptcomet/commit/c3c478fd66679c24c8ed948266ffc2a589cf27c6)) - belingud
+
+### 📚 Documentation
+
+- **(deprecations)** extend newprovider removal target to v2.14.0 - ([ab1210e](https://github.com/belingud/gptcomet/commit/ab1210e5b41c0c4992bf257e2624f7e803098b73)) - belingud
+- **(spec)** add secretscan to the Go package map - ([fa30a3d](https://github.com/belingud/gptcomet/commit/fa30a3d5eb756725a7cd7461b584fca21d455d69)) - belingud
+- document sensitive data scanning and --secrets - ([64283f1](https://github.com/belingud/gptcomet/commit/64283f138b4861445ce5aabec7413b7d3c29e417)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- **(trellis)** archive sensitive-scan task - ([c8083a1](https://github.com/belingud/gptcomet/commit/c8083a18129ae220b873156a9993ca126936c4de)) - belingud
+
+
+---
 ## [2.9.0](https://github.com/belingud/gptcomet/compare/v2.8.0..v2.9.0) - 2026-10-31
 
 ### ⛰️  Features
