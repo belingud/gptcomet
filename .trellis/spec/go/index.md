@@ -53,6 +53,7 @@ Do not report a Go change as done while `just check` or `just test` fails.
 | `internal/git/` | `VCS` interface, Git + SVN implementations, gitignore-style `file_ignore` matching | No `os/exec` outside this package |
 | `internal/hook/` | `prepare-commit-msg` install/status/uninstall/run logic | Generator is injected by `cmd`; no client/config imports |
 | `internal/provider/` | Provider inventory, effective model/API-base display data, switch + default-block seeding | Imports `config.ManagerInterface`/`llm`/`errors`; no network I/O |
+| `internal/secretscan/` | Pre-send secret scanning: diff added-line parser, vendored gitleaks rule data (`rules/`), rule matcher, warn/redact/block modes | Leaf package; imports only `internal/errors`; update rules with `just sync-secret-rules` |
 | `internal/ui/` | Progress stages, provider selector (bubbletea) | Also markdown rendering via glamour in `cmd/review.go` |
 | `internal/errors/` | `GPTCometError` type + one template function per user-facing scenario | Every user-visible failure has a template here |
 | `internal/logger/`, `internal/debug/` | Leveled logger; opt-in debug printer to stderr | Leaf packages, no internal deps |
