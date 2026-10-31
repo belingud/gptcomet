@@ -45,6 +45,7 @@
     - [Markdown 主题](#markdown-主题)
     - [支持的语言](#支持的语言)
     - [console](#console)
+    - [敏感信息预检](#敏感信息预检)
   - [🔦 支持的键](#-支持的键)
   - [📃 示例](#-示例)
     - [基础用法](#基础用法)
@@ -433,6 +434,7 @@ GPTComet 提供以下命令：
     -   `--dry-run`：试运行，不真正生成提交信息。
     -   `-y/--yes`：跳过确认提示。
     -   `--no-verify`：跳过 Git hooks 校验，效果类似 `git commit --no-verify`。
+    -   `--secrets`：本次运行的敏感信息扫描模式，可选 `off`、`warn`、`redact`、`block`（默认取配置）。
     -   `--repo`：仓库路径，默认值为 `.`。
     -   `--answer-path`：覆盖 answer path。
     -   `--api-base`：覆盖 API base URL。
@@ -450,6 +452,7 @@ GPTComet 提供以下命令：
 -   `gmsg generate`：根据 staged diff 生成提交信息，只把消息输出到 stdout。
     -   `--repo`：仓库路径，默认值为 `.`。
     -   `--rich`：生成包含详情的富文本提交信息。
+    -   `--secrets`：本次运行的敏感信息扫描模式，可选 `off`、`warn`、`redact`、`block`。
     -   其他 API 覆盖参数：`--model`、`--api-base`、`--api-key`、`--timeout` 等。
 -   `gmsg hook`：管理 Git `prepare-commit-msg` hook。
     -   `install [--repo] [--force]`：安装 hook；`--force` 会先备份已有 hook。
@@ -465,6 +468,7 @@ GPTComet 提供以下命令：
 -   `gmsg review`：审查 staged diff，也可以通过管道输入给 `gmsg review`。
     -   `--svn`：从 SVN 获取 diff。
     -   `--stream`：以流式方式输出 LLM 返回内容。
+    -   `--secrets`：本次运行的敏感信息扫描模式，可选 `off`、`warn`、`redact`、`block`。
     -   `--repo`：仓库路径，默认值为 `.`。
     -   `--answer-path`：覆盖 answer path。
     -   `--api-base`：覆盖 API base URL。
@@ -537,6 +541,8 @@ gmsg generate --rich
 | :----------------------------- | :--------------------------------------------------------- | :-------------------------------- |
 | `provider`                     | 要使用的 LLM 提供商名称。                                 | `openai`                          |
 | `file_ignore`                  | 在 diff 中忽略的文件模式列表。                            | 参考 [file_ignore](#file_ignore) |
+| `sensitive.mode`               | 发送前的敏感信息扫描模式：`off`、`warn`、`redact`、`block`。 | `warn`                            |
+| `sensitive.allow`              | 正则白名单，匹配命中的密钥或整行时忽略该条结果。          | `[]`                              |
 | `output.lang`                  | 生成提交信息时使用的语言。                                | `en`                              |
 | `output.rich_template`         | 富文本提交信息使用的模板。                                | `<title>:<summary>\n\n<detail>`   |
 | `output.translate_title`       | 是否翻译提交信息标题。                                    | `false`                           |
@@ -612,6 +618,42 @@ GPTComet 的配置文件是 `gptcomet.yaml`。
 gmsg config append file_ignore "vendor/**"
 gmsg config append file_ignore "!vendor/keep.go"
 ```
+
+### 敏感信息预检
+
+在把 diff 发送给模型之前，GPTComet 会扫描**新增行**中的凭据。规则数据来自 MIT 许可的
+[gitleaks](https://github.com/gitleaks/gitleaks)（222 条规则，位于 `internal/secretscan/rules/`），
+但使用仓库内的轻量匹配器，不依赖 gitleaks 二进制或 Go 库。真实 diff 不会被修改，只有发送给模型
+的文本可能被改写。
+
+```yaml
+sensitive:
+  mode: warn      # off | warn | redact | block
+  allow: []       # 正则，匹配命中密钥或整行时忽略
+```
+
+| 模式 | 行为 |
+| --- | --- |
+| `off` | 不扫描。 |
+| `warn`（默认） | diff 原样发送，在 stderr 打印打码后的告警。 |
+| `redact` | 发送前把命中片段替换为 `[REDACTED:<rule>]`。 |
+| `block` | 不发送，返回结构化错误。 |
+
+即使在密钥正则未命中时，敏感文件名（`.env*`、私钥文件、`credentials.json`、`.npmrc`、
+`.pypirc`、`.netrc`）也会被标记。误报可以加入 `sensitive.allow`，或在单行加上
+`gitleaks:allow` 注释。Git hook 保持 fail-open：`block` 模式只打印告警，不会阻止
+`git commit`。
+
+按命令临时覆盖模式（所有会发送 diff 的命令）：
+
+```shell
+gmsg commit --secrets redact
+gmsg generate --secrets off
+gmsg review --secrets block
+```
+
+不检测：base64/hex 编码后的密钥、Git 历史、归档文件内容——这是发送前的防护，不能替代 CI 里的
+`gitleaks` 或 GitHub secret scanning。
 
 ### provider
 

@@ -52,7 +52,7 @@ fallback**. Flags are applied after `Manager.GetClientConfig`, never before.
 
 | Family | Keys |
 | --- | --- |
-| Root | `provider`, `file_ignore` |
+| Root | `provider`, `file_ignore`, `sensitive.mode`, `sensitive.allow` |
 | Output | `output.lang`, `output.rich_template`, `output.translate_title`, `output.review_lang`, `output.markdown_theme` |
 | Console | `console.verbose` |
 | Provider | `<provider>.api_base`, `.api_key`, `.model`, `.retries`, `.timeout`, `.proxy`, `.max_tokens`, `.top_p`, `.temperature`, `.frequency_penalty`, `.extra_headers`, `.extra_body`, `.completion_path`, `.answer_path`, `.stream_answer_path`, `.region`, `.account_id` |
@@ -71,6 +71,9 @@ When adding a key that `GetClientConfig` reads, add it to both places.
   `uv.lock`, `*.py[cod]`, …), `output`, `console`, and per-provider blocks seeded with the same
   keys as the provider table. Per-provider blocks keep their own `retries` / `max_tokens` /
   `top_p` / `temperature` values — they are intentionally not identical across providers.
+- `DefaultSensitiveMode = "warn"`; `DefaultConfig["sensitive"] = {"mode": "warn", "allow": []}`.
+  Valid modes are `off`/`warn`/`redact`/`block`; the scanner itself lives in
+  `internal/secretscan` and `sensitive.allow` entries must be valid Go regular expressions.
 - `PromptDefaults`: `brief_commit_message`, `rich_commit_message`, `translation`, `review`.
   Prompt strings may embed `{{ output.lang }}`, `{{ output.rich_template }}` placeholders that are
   filled by `internal/prompt.Render` (`internal/prompt/render.go`).
@@ -89,6 +92,8 @@ When adding a key that `GetClientConfig` reads, add it to both places.
 5. Extend tests: `pkg/config/defaults/defaults_test.go` for the default,
    `internal/config/config_test.go` for set/get/list behaviour, and a flag test in
    `cmd/flags_test.go` if it gets a CLI override.
+6. If the key affects sent content (for example `sensitive.mode`), wire it in the command that
+   sends the diff and cover warn/redact/block paths in `cmd/*_test.go`.
 
 ## Rules
 

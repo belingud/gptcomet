@@ -37,6 +37,9 @@ Rules:
   existing command — do not invent a third flag shape.
 - `CommonOptions` (`cmd/flags.go:15`) is the shared API-override struct; add new overrides there
   and to `AddAdvancedAPIFlags`, not per-command.
+- Commands that send a diff (`commit`, `generate`, `review`) register a local `--secrets
+  off|warn|redact|block` flag through `cmd/sensitive.go`'s `resolveSensitiveOptions`. Warnings go
+  to stderr (`printSensitiveFindings`), never stdout, so the `generate` contract is preserved.
 - Flags are applied **after** `GetClientConfig`: services call
   `ApplyCommonOptions(&options.CommonOptions, clientConfig)` (`cmd/flags.go:63`), which only
   overwrites when the flag is non-empty. Booleans like `--stream/-s` (`cmd/review.go:368`) are the

@@ -45,6 +45,7 @@
     - [Markdown theme](#markdown-theme)
     - [Supported languages](#supported-languages)
     - [console](#console)
+    - [Sensitive data scanning](#sensitive-data-scanning)
   - [🔦 Supported Keys](#-supported-keys)
   - [📃 Example](#-example)
     - [Basic Usage](#basic-usage)
@@ -440,6 +441,7 @@ The following are the available commands for GPTComet:
     -   `--dry-run`: Dry run the command without actually generating the commit message.
     -   `-y/--yes`: Skip the confirmation prompt.
     -   `--no-verify`: Skip git hooks verification, akin to using `git commit --no-verify`
+    -   `--secrets`: Sensitive data scan mode for this run: `off`, `warn`, `redact`, or `block` (default from config).
     -   `--repo`: Path to the repository (default ".").
     -   `--answer-path`: Override answer path
     -   `--api-base`: Override API base URL
@@ -457,6 +459,7 @@ The following are the available commands for GPTComet:
 -   `gmsg generate`: Generate a commit message from the staged diff and print only the message to stdout.
     -   `--repo`: Path to the repository (default ".").
     -   `--rich`: Generate a rich commit message with details.
+    -   `--secrets`: Sensitive data scan mode for this run: `off`, `warn`, `redact`, or `block`.
     -   API override flags: `--model`, `--api-base`, `--api-key`, `--timeout`, and the other advanced flags.
 -   `gmsg hook`: Manage the Git `prepare-commit-msg` hook.
     -   `install [--repo] [--force]`: Install the hook; `--force` backs up an existing hook first.
@@ -472,6 +475,7 @@ The following are the available commands for GPTComet:
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
     -   `--stream`: Stream output as it arrives from the LLM.
+    -   `--secrets`: Sensitive data scan mode for this run: `off`, `warn`, `redact`, or `block`.
     -   `--repo`: Path to the repository (default ".").
     -   `--answer-path`: Override answer path
     -   `--api-base`: Override API base URL
@@ -548,6 +552,8 @@ Here's a summary of the main configuration keys:
 | :----------------------------- | :--------------------------------------------------------- | :-------------------------------- |
 | `provider`                     | The name of the LLM provider to use.                       | `openai`                          |
 | `file_ignore`                  | A list of file patterns to ignore in the diff.             | (See [file_ignore](#file_ignore)) |
+| `sensitive.mode`               | Pre-send secret scanning mode: `off`, `warn`, `redact`, or `block`. | `warn`                            |
+| `sensitive.allow`              | Regex allowlist matched against a finding's secret or line; matches are ignored. | `[]`                              |
 | `output.lang`                  | The language for commit message generation.                | `en`                              |
 | `output.rich_template`         | The template to use for rich commit messages.              | `<title>:<summary>\n\n<detail>`   |
 | `output.translate_title`       | Translate the title of the commit message.                 | `false`                           |
@@ -623,6 +629,42 @@ Example:
 gmsg config append file_ignore "vendor/**"
 gmsg config append file_ignore "!vendor/keep.go"
 ```
+
+### sensitive data scanning
+
+Before any diff is sent to a provider, GPTComet scans the **added lines** for credentials with a
+lightweight engine loaded from the MIT-licensed [gitleaks](https://github.com/gitleaks/gitleaks)
+rule data (222 rules, vendored under `internal/secretscan/rules/`). It never changes your staged
+diff; only the text sent to the model can be rewritten.
+
+```yaml
+sensitive:
+  mode: warn      # off | warn | redact | block
+  allow: []       # regexes matched against the secret or the full line
+```
+
+| Mode | Behavior |
+| --- | --- |
+| `off` | No scanning. |
+| `warn` (default) | Send the diff unchanged and print masked findings to stderr. |
+| `redact` | Replace secret spans with `[REDACTED:<rule>]` before sending. |
+| `block` | Send nothing and exit with a structured error. |
+
+Sensitive file names (`.env*`, private key material, `credentials.json`, `.npmrc`, `.pypirc`,
+`.netrc`) are flagged even when no per-line regex matches. Silence known false positives with
+`sensitive.allow`, or a single line with a `gitleaks:allow` comment. The Git hook stays fail-open:
+in `block` mode it prints the warning but does not block `git commit`.
+
+Override the mode for one command (all commands that send a diff):
+
+```shell
+gmsg commit --secrets redact
+gmsg generate --secrets off
+gmsg review --secrets block
+```
+
+Not detected: secrets hidden inside base64/hex blobs, git history, or archive contents — this is a
+pre-send guard, not a replacement for `gitleaks`/GitHub secret scanning in CI.
 
 ### provider
 

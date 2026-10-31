@@ -28,6 +28,7 @@ internal/
 ├── hook/      → prepare-commit-msg install/run logic
 ├── llm/       → Provider interface + 27 implementations
 ├── provider/  → Provider inventory, switch/seeding rules, probe metadata
+├── secretscan/→ Pre-send secret scanning (gitleaks rule data + lightweight matcher)
 ├── ui/        → Terminal UI (progress, markdown rendering)
 ├── errors/    → Structured error handling (typed errors with suggestions)
 ├── debug/     → Debug logging
@@ -75,6 +76,7 @@ type LLM interface {
 - `just test` / `just test-py` - Run tests
 - `just build` / `just build-py` - Build
 - `just ci-check` - Run all checks
+- `just sync-secret-rules` - Regenerate `internal/secretscan/rules_gen.go` from the vendored gitleaks TOML
 
 ### Configuration
 
@@ -86,6 +88,7 @@ type LLM interface {
 - Default model: `gpt-6.1-sol`
 - Default API base: `https://api.openai.com/v1`
 - Prompts: `brief_commit_message`, `rich_commit_message`, `translation`, `review`
+- Sensitive scanning: `sensitive.mode: warn` (`off|warn|redact|block`) and `sensitive.allow: []`
 
 **Supported keys**: Run `gmsg config keys`
 
@@ -107,6 +110,11 @@ default: provider = llm.NewDefaultLLM(config)
 **Retry logic**: Exponential backoff with jitter (base 500ms, `config.Retries` attempts)
 
 **Proxy support**: HTTP, HTTPS, SOCKS5 (with auth)
+
+**Secret scanning**: `internal/secretscan` parses added diff lines, matches the vendored
+gitleaks v8.30.1 rule data (MIT, see `internal/secretscan/rules/UPSTREAM.md`), and enforces the
+`sensitive.mode` (warn/redact/block). `cmd/sensitive.go` resolves config plus the `--secrets`
+override. Update the rule data with `just sync-secret-rules`.
 
 ## Testing
 
