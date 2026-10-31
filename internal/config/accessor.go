@@ -94,6 +94,8 @@ func (m *Manager) SetNestedValue(keys []string, value interface{}) {
 // The returned list will include the following keys:
 //   - provider
 //   - file_ignore
+//   - sensitive.mode
+//   - sensitive.allow
 //   - output.lang
 //   - output.rich_template
 //   - output.translate_title
@@ -133,6 +135,10 @@ func (m *Manager) GetSupportedKeys() []string {
 	// Root level keys
 	keys["provider"] = true
 	keys["file_ignore"] = true
+
+	// Sensitive data scanning keys
+	keys["sensitive.mode"] = true
+	keys["sensitive.allow"] = true
 
 	// Output keys
 	outputKeys := []string{

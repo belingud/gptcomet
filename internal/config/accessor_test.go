@@ -296,6 +296,8 @@ func TestManager_GetSupportedKeys(t *testing.T) {
 			checkKeys: []string{
 				"provider",
 				"file_ignore",
+				"sensitive.mode",
+				"sensitive.allow",
 				"output.lang",
 				"output.markdown_theme",
 				"output.translate_title",

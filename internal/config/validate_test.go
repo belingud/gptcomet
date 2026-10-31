@@ -210,3 +210,100 @@ func TestIsValidMarkdownTheme(t *testing.T) {
 	assert.False(t, IsValidMarkdownTheme("neon"))
 	assert.False(t, IsValidMarkdownTheme(""))
 }
+
+func TestManager_Validate_SensitiveSection(t *testing.T) {
+	t.Setenv("OPENAI_API_KEY", "env-key")
+
+	tests := []struct {
+		name       string
+		configData string
+		wantIssues []string
+		wantValid  bool
+	}{
+		{
+			name: "valid modes",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+sensitive:
+  mode: redact
+  allow:
+    - "^dummy-"
+    - "EXAMPLE$"
+`,
+			wantValid: true,
+		},
+		{
+			name: "invalid mode",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+sensitive:
+  mode: loud
+`,
+			wantIssues: []string{`sensitive.mode "loud"`},
+		},
+		{
+			name: "mode not a string",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+sensitive:
+  mode: 3
+`,
+			wantIssues: []string{"sensitive.mode must be a string"},
+		},
+		{
+			name: "allow not a list",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+sensitive:
+  allow: "dummy"
+`,
+			wantIssues: []string{"sensitive.allow must be a list of strings"},
+		},
+		{
+			name: "invalid allow regex",
+			configData: `
+provider: openai
+openai:
+  api_key: test-key
+sensitive:
+  allow:
+    - "("
+`,
+			wantIssues: []string{"invalid regular expression"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			configFile, cleanup := testutils.TestConfig(t, tt.configData)
+			defer cleanup()
+
+			cfg, err := New(configFile)
+			require.NoError(t, err)
+
+			issues := cfg.Validate()
+			if tt.wantValid {
+				assert.Empty(t, issues)
+				return
+			}
+			for _, wantIssue := range tt.wantIssues {
+				found := false
+				for _, issue := range issues {
+					if strings.Contains(issue, wantIssue) {
+						found = true
+						break
+					}
+				}
+				assert.True(t, found, "issue %q not found in %v", wantIssue, issues)
+			}
+		})
+	}
+}

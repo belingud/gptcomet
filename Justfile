@@ -120,6 +120,12 @@ release:
 # Utility Commands
 # ==============
 
+# Regenerate gitleaks rule data used by the sensitive-data scanner
+sync-secret-rules:
+    @echo "🔑 Regenerating gitleaks rule data"
+    python3 scripts/gen_secret_rules.py
+    gofmt -w internal/secretscan/rules_gen.go
+
 # Update changelog
 changelog:
     uv lock

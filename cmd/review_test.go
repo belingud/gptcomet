@@ -14,6 +14,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func expectSensitiveScanDefaults(cfg *testutils.MockConfigManager) {
+	cfg.On("GetWithDefault", sensitiveModeKey, mock.Anything).Return("off").Maybe()
+	cfg.On("GetWithDefault", sensitiveAllowKey, mock.Anything).Return([]string{}).Maybe()
+}
+
 func TestNewReviewService(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -94,6 +99,7 @@ func TestReviewService_Execute(t *testing.T) {
 				cfg.On("Get", REVIEW_LANG_KEY).Return("en", true)
 				cfg.On("GetWithDefault", "output.markdown_theme", mock.Anything).Return("auto")
 				cfg.On("GetNestedValue", []string{"console", "verbose"}).Return(false, true)
+				expectSensitiveScanDefaults(cfg)
 				client.On("GenerateReviewComment", "test-diff", "test-prompt").Return("test-comment", nil)
 				vcs.On("GetStagedDiffFiltered", mock.Anything, mock.Anything).Return("staged-diff", nil)
 			},
@@ -105,6 +111,7 @@ func TestReviewService_Execute(t *testing.T) {
 			setupMocks: func(vcs *MockVCS, cfg *testutils.MockConfigManager, client *MockClient) {
 				vcs.On("HasStagedChanges", mock.Anything).Return(false, nil)
 				cfg.On("GetNestedValue", []string{"console", "verbose"}).Return(false, true)
+				expectSensitiveScanDefaults(cfg)
 			},
 			wantErr:     true,
 			errContains: "no staged changes found",

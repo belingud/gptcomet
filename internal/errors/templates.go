@@ -635,3 +635,84 @@ func containsAny(s string, substrings ...string) bool {
 	}
 	return false
 }
+
+// SensitiveFinding is the masked description of one sensitive-data finding used
+// by SensitiveContentError. Preview must never contain a full secret value.
+type SensitiveFinding struct {
+	Path    string
+	Line    int
+	RuleID  string
+	Preview string
+}
+
+// sensitiveContentFindingLimit caps how many findings are rendered in one error.
+const sensitiveContentFindingLimit = 10
+
+// SensitiveContentError is returned when sensitive.mode is "block" and the diff
+// contains potential credentials. It lists masked findings and how to proceed.
+func SensitiveContentError(findings []SensitiveFinding) *GPTCometError {
+	message := fmt.Sprintf(ErrMsgSensitiveDataBlocked, len(findings))
+	if len(findings) > 0 {
+		message += "\nFindings:"
+		limit := len(findings)
+		if limit > sensitiveContentFindingLimit {
+			limit = sensitiveContentFindingLimit
+		}
+		for _, finding := range findings[:limit] {
+			location := finding.Path
+			if finding.Line > 0 {
+				location = fmt.Sprintf("%s:%d", finding.Path, finding.Line)
+			}
+			message += fmt.Sprintf("\n  • %s  [%s]  %s", location, finding.RuleID, finding.Preview)
+		}
+		if len(findings) > limit {
+			message += fmt.Sprintf("\n  … and %d more", len(findings)-limit)
+		}
+	}
+
+	err := NewValidationError(
+		ErrTitleSensitiveData,
+		message,
+		nil,
+		[]string{
+			SuggUnstageSensitiveFile,
+			SuggRedactSensitive,
+			SuggAllowSensitive,
+			SuggBypassSensitive,
+		},
+	)
+	err.DocsURL = SensitiveScanDocsURL
+	return err
+}
+
+// InvalidSensitiveModeError is returned when sensitive.mode (or --secrets) has
+// an unknown value.
+func InvalidSensitiveModeError(value string) *GPTCometError {
+	err := NewValidationError(
+		ErrTitleInvalidSensitiveMode,
+		fmt.Sprintf(ErrMsgInvalidSensitiveMode, value),
+		nil,
+		[]string{
+			fmt.Sprintf(SuggSetValidValue, "sensitive.mode"),
+			"Valid modes: off, warn, redact, block",
+		},
+	)
+	err.DocsURL = SensitiveScanDocsURL
+	return err
+}
+
+// InvalidSensitiveAllowError is returned when a sensitive.allow entry is not a
+// valid regular expression.
+func InvalidSensitiveAllowError(pattern string, cause error) *GPTCometError {
+	err := NewValidationError(
+		ErrTitleInvalidSensitiveAllow,
+		fmt.Sprintf(ErrMsgInvalidSensitiveAllow, pattern),
+		cause,
+		[]string{
+			fmt.Sprintf(SuggCheckCurrentValue, "sensitive.allow"),
+			fmt.Sprintf(SuggSetValidValue, "sensitive.allow"),
+		},
+	)
+	err.DocsURL = SensitiveScanDocsURL
+	return err
+}

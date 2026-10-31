@@ -10,6 +10,7 @@ import (
 	"github.com/belingud/gptcomet/internal/debug"
 	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	promptpkg "github.com/belingud/gptcomet/internal/prompt"
+	"github.com/belingud/gptcomet/internal/secretscan"
 	"github.com/belingud/gptcomet/internal/ui"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 )
@@ -143,7 +144,27 @@ func (s *CommitService) getStagedDiff() (string, error) {
 		return "", gptcometerrors.NoStagedChangesError()
 	}
 
-	return diff, nil
+	return s.scanDiffForSensitiveData(diff)
+}
+
+// scanDiffForSensitiveData runs the pre-send secret scan and enforces the
+// configured mode. The warning/error messages are printed to stderr so they
+// never pollute the "generate" stdout contract.
+func (s *CommitService) scanDiffForSensitiveData(diff string) (string, error) {
+	options, err := resolveSensitiveOptions(s.cfgManager, s.options.SecretsMode)
+	if err != nil {
+		return "", err
+	}
+	if options.Mode == secretscan.ModeOff {
+		return diff, nil
+	}
+
+	result, err := secretscan.Apply(diff, options)
+	printSensitiveFindings(orStderr(s.stderr), result.Findings, options.Mode)
+	if err != nil {
+		return "", err
+	}
+	return result.Diff, nil
 }
 
 // GenerateMessage generates a commit message from the current staged diff

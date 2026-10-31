@@ -3,10 +3,12 @@ package config
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
 	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
+	"github.com/belingud/gptcomet/internal/secretscan"
 )
 
 var validMarkdownThemes = map[string]struct{}{
@@ -52,6 +54,7 @@ func (m *Manager) Validate() []string {
 	}
 
 	issues = append(issues, validateOutputSection(m.config["output"])...)
+	issues = append(issues, validateSensitiveSection(m.config["sensitive"])...)
 
 	if raw, exists := m.config["file_ignore"]; exists {
 		if _, ok := toStringSlice(raw); !ok {
@@ -190,6 +193,42 @@ func validateOutputSection(raw interface{}) []string {
 	if value, exists := output["translate_title"]; exists {
 		if _, ok := value.(bool); !ok {
 			issues = append(issues, "output.translate_title must be a boolean")
+		}
+	}
+
+	return issues
+}
+
+func validateSensitiveSection(raw interface{}) []string {
+	if raw == nil {
+		return nil
+	}
+
+	section, ok := raw.(map[string]interface{})
+	if !ok {
+		return []string{"sensitive must be a mapping"}
+	}
+
+	var issues []string
+	if value, exists := section["mode"]; exists {
+		mode, ok := value.(string)
+		if !ok {
+			issues = append(issues, "sensitive.mode must be a string")
+		} else if _, err := secretscan.ParseMode(mode); err != nil {
+			issues = append(issues, fmt.Sprintf("sensitive.mode %q is not a valid mode (expected off, warn, redact or block)", mode))
+		}
+	}
+
+	if value, exists := section["allow"]; exists {
+		patterns, ok := toStringSlice(value)
+		if !ok {
+			issues = append(issues, "sensitive.allow must be a list of strings")
+		} else {
+			for _, pattern := range patterns {
+				if _, err := regexp.Compile(pattern); err != nil {
+					issues = append(issues, fmt.Sprintf("sensitive.allow contains an invalid regular expression: %q", pattern))
+				}
+			}
 		}
 	}
 

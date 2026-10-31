@@ -13,6 +13,9 @@ const (
 	DefaultTopP             = 1.0
 	DefaultFrequencyPenalty = 0.0
 	DefaultRichTemplate     = "<title>:<summary>\n\n<detail>"
+	// DefaultSensitiveMode is the default value of the sensitive.mode key.
+	// It is a member of the secretscan modes: off, warn, redact, block.
+	DefaultSensitiveMode = "warn"
 )
 
 // defaultConfig returns a default configuration map for gptcomet.
@@ -34,6 +37,9 @@ const (
 //   - markdown_theme: the default markdown theme for the output
 //   - console:
 //   - verbose: true
+//   - sensitive:
+//   - mode: "warn" (off | warn | redact | block)
+//   - allow: an empty list of allowlist regular expressions
 //   - openai:
 //   - api_base: the default API base for the OpenAI provider
 //   - api_key: an empty string (must be set by the user)
@@ -88,6 +94,10 @@ func defaultConfig() map[string]interface{} {
 		},
 		"console": map[string]interface{}{
 			"verbose": true,
+		},
+		"sensitive": map[string]interface{}{
+			"mode":  DefaultSensitiveMode,
+			"allow": []string{},
 		},
 		"openai": map[string]interface{}{
 			"api_base":          DefaultAPIBase,

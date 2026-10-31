@@ -11,6 +11,7 @@ import (
 	"github.com/belingud/gptcomet/internal/factory"
 	"github.com/belingud/gptcomet/internal/git"
 	"github.com/belingud/gptcomet/internal/logger"
+	"github.com/belingud/gptcomet/internal/secretscan"
 	"github.com/belingud/gptcomet/internal/ui"
 	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
@@ -24,10 +25,11 @@ import (
 // ReviewOptions contains the configuration settings for the review operation.
 type ReviewOptions struct {
 	CommonOptions
-	RepoPath   string
-	UseSVN     bool
-	ConfigPath string
-	Stream     bool
+	RepoPath    string
+	UseSVN      bool
+	ConfigPath  string
+	Stream      bool
+	SecretsMode string
 }
 
 // MarkdownRenderer interface for mocking in tests
@@ -52,6 +54,8 @@ type ReviewService struct {
 	editor           TextEditor
 	markdownRenderer MarkdownRenderer
 	clientConfig     *types.ClientConfig
+	// stderr receives sensitive-data warnings; nil falls back to os.Stderr.
+	stderr io.Writer
 }
 
 const defaultReviewLanguage = "en"
@@ -88,6 +92,7 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 		editor:           &TerminalEditor{},
 		markdownRenderer: &GlamourRenderer{}, // Inject the renderer
 		clientConfig:     clientConfig,
+		stderr:           os.Stderr,
 	}, nil
 }
 
@@ -213,12 +218,41 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 	return nil
 }
 
-// getDiff retrieves the diff either from piped input or staged changes
+// getDiff retrieves the diff either from piped input or staged changes, then
+// runs the pre-send secret scan on it.
 func (s *ReviewService) getDiff() (string, error) {
+	var (
+		diff string
+		err  error
+	)
 	if s.isInputFromPipe() {
-		return readPipedInput()
+		diff, err = readPipedInput()
+	} else {
+		diff, err = s.getStagedDiff()
 	}
-	return s.getStagedDiff()
+	if err != nil {
+		return "", err
+	}
+	return s.scanDiffForSensitiveData(diff)
+}
+
+// scanDiffForSensitiveData runs the pre-send secret scan and enforces the
+// configured mode.
+func (s *ReviewService) scanDiffForSensitiveData(diff string) (string, error) {
+	options, err := resolveSensitiveOptions(s.cfgManager, s.options.SecretsMode)
+	if err != nil {
+		return "", err
+	}
+	if options.Mode == secretscan.ModeOff {
+		return diff, nil
+	}
+
+	result, err := secretscan.Apply(diff, options)
+	printSensitiveFindings(orStderr(s.stderr), result.Findings, options.Mode)
+	if err != nil {
+		return "", err
+	}
+	return result.Diff, nil
 }
 
 // getStagedDiff retrieves and returns filtered diff of staged changes
@@ -366,6 +400,7 @@ func NewReviewCmd() *cobra.Command {
 	// General Flags
 	AddGeneralFlags(generalFlags, &options.RepoPath, &options.UseSVN)
 	generalFlags.BoolVarP(&options.Stream, "stream", "s", false, "Stream output as it arrives from the LLM")
+	generalFlags.StringVar(&options.SecretsMode, "secrets", "", "Sensitive data scan mode: off, warn, redact, block (default from config)")
 
 	// Advanced API Flags (shared with other commands)
 	AddAdvancedAPIFlags(advancedFlags, &options.CommonOptions)

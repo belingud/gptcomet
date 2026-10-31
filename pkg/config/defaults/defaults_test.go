@@ -65,3 +65,20 @@ func TestPromptDefaults(t *testing.T) {
 		})
 	}
 }
+
+func TestSensitiveDefaults(t *testing.T) {
+	if DefaultSensitiveMode != "warn" {
+		t.Errorf("DefaultSensitiveMode = %q, want \"warn\"", DefaultSensitiveMode)
+	}
+
+	section, ok := DefaultConfig["sensitive"].(map[string]interface{})
+	if !ok {
+		t.Fatal("default config is missing the sensitive section")
+	}
+	if mode, _ := section["mode"].(string); mode != DefaultSensitiveMode {
+		t.Errorf("sensitive.mode = %q, want %q", mode, DefaultSensitiveMode)
+	}
+	if allow, ok := section["allow"].([]string); !ok || len(allow) != 0 {
+		t.Errorf("sensitive.allow = %#v, want an empty string slice", section["allow"])
+	}
+}

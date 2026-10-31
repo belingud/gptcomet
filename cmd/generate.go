@@ -11,9 +11,10 @@ import (
 // GenerateOptions contains the settings for the generate command.
 type GenerateOptions struct {
 	CommonOptions
-	RepoPath   string
-	Rich       bool
-	ConfigPath string
+	RepoPath    string
+	Rich        bool
+	ConfigPath  string
+	SecretsMode string
 }
 
 // NewGenerateCmd creates a command that prints a generated commit message to
@@ -38,6 +39,7 @@ func NewGenerateCmd() *cobra.Command {
 				RepoPath:      options.RepoPath,
 				Rich:          options.Rich,
 				ConfigPath:    options.ConfigPath,
+				SecretsMode:   options.SecretsMode,
 			})
 			if err != nil {
 				return err
@@ -56,6 +58,7 @@ func NewGenerateCmd() *cobra.Command {
 	generalFlags := pflag.NewFlagSet("General Flag", pflag.ExitOnError)
 	generalFlags.StringVar(&options.RepoPath, "repo", ".", "Repository path")
 	generalFlags.BoolVarP(&options.Rich, "rich", "r", false, "Generate rich commit message with details")
+	generalFlags.StringVar(&options.SecretsMode, "secrets", "", "Sensitive data scan mode: off, warn, redact, block (default from config)")
 
 	advancedFlags := pflag.NewFlagSet("Overwrite Flag", pflag.ExitOnError)
 	AddAdvancedAPIFlags(advancedFlags, &options.CommonOptions)

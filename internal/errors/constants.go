@@ -123,3 +123,21 @@ const (
 	SuggCheckProviderBaseURL  = "Check the provider API base: gmsg config get %s.api_base"
 	SuggUseProvider           = "Switch to it and create defaults: gmsg provider use %s"
 )
+
+// Sensitive data scanning titles, messages and suggestions.
+const (
+	ErrTitleSensitiveData         = "Sensitive Data Detected"
+	ErrTitleInvalidSensitiveMode  = "Invalid Sensitive Scan Mode"
+	ErrTitleInvalidSensitiveAllow = "Invalid Sensitive Allow Pattern"
+
+	ErrMsgSensitiveDataBlocked  = "The diff contains %d potential secret(s) and sensitive.mode is \"block\"; nothing was sent to the provider."
+	ErrMsgInvalidSensitiveMode  = "Configuration key 'sensitive.mode' has an invalid value: %s (expected off, warn, redact or block)."
+	ErrMsgInvalidSensitiveAllow = "Configuration key 'sensitive.allow' contains an invalid regular expression: %s"
+
+	SuggUnstageSensitiveFile = "Remove the sensitive file from this commit: git restore --staged <path>"
+	SuggRedactSensitive      = "Redact findings before sending: gmsg config set sensitive.mode redact"
+	SuggAllowSensitive       = "Allow a known placeholder: gmsg config append sensitive.allow '<regex>'"
+	SuggBypassSensitive      = "Bypass the scan once for this command: --secrets off"
+
+	SensitiveScanDocsURL = "https://github.com/belingud/gptcomet#sensitive-data-scanning"
+)

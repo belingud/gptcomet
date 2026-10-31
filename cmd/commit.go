@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/belingud/gptcomet/internal/client"
@@ -23,6 +24,8 @@ type CommitOptions struct {
 	AutoYes    bool
 	ConfigPath string
 	NoVerify   bool
+	// SecretsMode overrides the sensitive.mode config for this invocation.
+	SecretsMode string
 }
 
 // CommitService handles the logic for committing changes to version control
@@ -36,6 +39,8 @@ type CommitService struct {
 	options      CommitOptions
 	editor       TextEditor
 	clientConfig *types.ClientConfig
+	// stderr receives sensitive-data warnings; nil falls back to os.Stderr.
+	stderr io.Writer
 }
 
 // NewCommitService creates a new CommitService instance with the provided options.
@@ -78,6 +83,7 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 		options:      options,
 		editor:       &TerminalEditor{},
 		clientConfig: clientConfig,
+		stderr:       os.Stderr,
 	}, nil
 }
 
@@ -151,6 +157,7 @@ func NewCommitCmd() *cobra.Command {
 	generalFlags.BoolVar(&options.NoVerify, "no-verify", false, "Skip git hooks verification, akin to using 'git commit --no-verify'")
 	generalFlags.BoolVar(&options.DryRun, "dry-run", false, "Print the generated commit message and exit without committing")
 	generalFlags.BoolVar(&options.UseSVN, "svn", false, "Use SVN instead of Git")
+	generalFlags.StringVar(&options.SecretsMode, "secrets", "", "Sensitive data scan mode: off, warn, redact, block (default from config)")
 
 	// Advanced API Flags (shared with other commands)
 	AddAdvancedAPIFlags(advancedFlags, &options.CommonOptions)
