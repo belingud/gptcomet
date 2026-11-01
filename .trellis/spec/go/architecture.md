@@ -47,6 +47,8 @@ These are enforced by the current code — keep them that way:
 | New LLM provider | `internal/llm/<provider>.go` | `internal/llm/provider.go` `init()`, `<provider>_test.go`, `docs/provider-models.md` |
 | New config key | `pkg/config/defaults/defaults.go` (default) | `internal/config/accessor.go` `GetSupportedKeys`, `internal/config/client_config` mapping, README config section |
 | New user-facing error | `internal/errors/templates.go` (scenario) / `errors.go` (type helper) | tests asserting the message |
+| New exit-code classification | `internal/errors/exit.go` (`ExitCode`, `UsageError`) | `main.go` `os.Exit`, README exit-code table, `cli-and-output.md` |
+| New status/progress output | `logger.Statusf` (leaf packages) or `ui.Progress` (staged operations) | keep it on stderr; never `os.Stdout` |
 | New HTTP behaviour (retry, timeout, proxy, streaming) | `internal/client/client.go` | `internal/constants/constants.go` for tunables |
 | New VCS | `internal/git/<vcs>.go` implementing `VCS` | `internal/git/vcs.go` `NewVCS` switch, `cmd/flags.go` |
 | New interactive UI | `internal/ui/` (bubbletea model) | keep `cmd/` thin |

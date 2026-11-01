@@ -46,17 +46,21 @@ Rules:
   exception — `false` is meaningful, so they are not part of `CommonOptions`.
 - `SilenceUsage` is set once on the root command in `main.go`; only `config validate` opts in
   again explicitly (`cmd/config.go:350`).
-- `RunE` returns the error; Cobra prints `Error: ...`. `main.go` exits with code 1 on failure.
+- `RunE` returns the error; Cobra prints `Error: ...` once to stderr. `main.go` exits with
+  `errors.ExitCode(err)` (see [Output Contract](#output-contract)); a flag-parsing error becomes a
+  `*errors.UsageError` via `rootCmd.SetFlagErrorFunc` and exits with code 2.
 - Deprecated commands stay runnable and visible: `gmsg newprovider` prints a yellow `⚠` notice
   with its removal version and replacement from its own `RunE` (`cmd/newprovider.go`). Do not set
   Cobra's `Deprecated` field while the command must remain discoverable — Cobra hides deprecated
   commands from help. The removal target lives in `docs/deprecations.md` and in
   `providerSetupRemovalVersion`.
 - Read output through `cmd.OutOrStdout()` in helpers that tests capture (see `cmd/newprovider.go`).
-- `generate` has a strict stdout contract: only the final message. `generateWithCleanStdout`
-  temporarily redirects `os.Stdout` to stderr because some providers still print status/usage
-  lines there (known debt). `hook` commands delegate to `internal/hook`; only `internal/git`
-  resolves repository/hooks paths.
+- `generate` has a strict stdout contract: only the final message. There is no `os.Stdout` swap
+  anymore: leaf packages report status through `logger.Statusf` and `ui.Progress`, both of which
+  write to stderr. `hook` commands delegate to `internal/hook`; only `internal/git` resolves
+  repository/hooks paths.
+- Service tests inject `stdout`/`stderr` fields (`orStdout`/`orStderr` in `cmd/writers.go`); the
+  command wires them from `cmd.OutOrStdout()` / `cmd.ErrOrStderr()` in `RunE`.
 
 ## Dependency Seams
 
@@ -69,6 +73,39 @@ Rules:
   tests inject a fake prober and never hit the network (`cmd/provider_probe.go`).
 - Services (`ReviewService`, commit action) take interfaces (`git.VCS`, `client.ClientInterface`,
   `config.ManagerInterface`, `MarkdownRenderer`), never concrete types, so tests can mock them.
+
+## Output Contract
+
+stdout is a machine interface; stderr is for humans and diagnostics. This is a hard rule for every
+new command and feature.
+
+| Command / mode | stdout | stderr |
+| --- | --- | --- |
+| `generate` | commit message only | status, request/usage lines, warnings, errors |
+| `review` | rendered review (glamour + border) | provider banner, reminders, progress, warnings, errors |
+| `review --raw` | model Markdown verbatim (no rendering, no border) | same as `review` |
+| `review --stream` | streamed chunks + trailing newline | reminders, warnings, errors (`--raw` is a no-op; stream is already raw) |
+| `commit` (interactive / `--yes`) | empty | banner, progress, previews, prompts, commit summary, errors |
+| `commit --dry-run` | boxed "Generated commit message" preview | banner, progress, warnings, errors |
+
+Exit codes (`internal/errors/exit.go`):
+
+| Code | Constant | Meaning |
+| --- | --- | --- |
+| `0` | `ExitSuccess` | success |
+| `1` | `ExitUnknown` | unexpected or unclassified failure |
+| `2` | `ExitUsage` | command-line usage error (unknown flag / invalid flag value) |
+| `3` | `ExitConfig` | configuration error |
+| `4` | `ExitNetwork` | network/proxy/connection error |
+| `5` | `ExitGit` | Git/VCS error, including "no staged changes" |
+| `6` | `ExitAPI` | API/LLM error (rejection, parsing, retries exhausted) |
+| `7` | `ExitValidation` | invalid input/content, including `sensitive.mode=block` |
+
+`errors.ExitCode` classifies wrapped `*GPTCometError` values by `Type` (`errors.As`); plain errors
+fall back to `ExitUnknown`. A validation wrapper that carries a classified cause (e.g.
+`DependencyCreationError` around a config error) follows the cause's class, so scripts see the
+root failure. Wrap with `%w` so the classification survives. Reuse the existing `internal/errors`
+template functions instead of ad-hoc `fmt.Errorf` when a failure is user-facing.
 
 ## Terminal Output
 
@@ -86,12 +123,15 @@ Styling primitives live in `cmd/common.go`:
   📝 writing a file, ⚠️ warning. Keep them at line start.
 - Diagnostics go through `internal/logger` (`logger.Debug/Info/Warn/Error`); `--debug` switches
   the level in `main.go`'s `PersistentPreRun`. Do not print debug output with `fmt.Println`.
+- User-facing status lines that must never reach stdout (request/usage lines, config warnings) go
+  through `logger.Statusf`; it writes raw to stderr without level prefix, icon, or timestamp.
 - Long, staged operations use `ui.Progress` (`internal/ui/progress.go`):
   `ui.NewProgress(verbose)`, `AddStages(...)`, `Start(name)`, `Complete(name)`, `Error(name, err)`.
-  `progress.render()` prints the current stage; `StartWithNewLine` / `CompleteInNewLine` exist for
-  output that must stay on its own line.
+  `progress.render()` prints the current stage to stderr; `StartWithNewLine` / `CompleteInNewLine`
+  exist for output that must stay on its own line.
 - Markdown review output is rendered with `glamour` behind the `MarkdownRenderer` interface
-  (`cmd/review.go:34`), with the style from config `output.markdown_theme`.
+  (`cmd/review.go:34`), with the style from config `output.markdown_theme`. `review --raw` short
+  circuits this path and keeps the model Markdown untouched for editor plugins/CI.
 - Interactive prompts (provider picker, commit-message editor) use `bubbletea` models from
   `internal/ui` and `cmd/common.go` (`textEditor`). Interactive paths must honour the
   `GPTCOMET_TEST=1` escape hatch (`cmd/newprovider.go:26`) so tests never block on a TTY.
@@ -108,8 +148,9 @@ Styling primitives live in `cmd/common.go`:
 Any new command should follow the same order: gather → render → call → display → confirm →
 mutate the repo last.
 
-## Known Debt
+## Output Rules
 
-`internal/llm/llm.go` and `internal/client/client.go` still print progress lines directly
-(`📤 Sending request to %s...`, token usage). Do not extend this pattern — put new output in
-`cmd/`, `internal/ui`, or `internal/logger`.
+- No `fmt.Print*` / `os.Stdout` writes in `internal/` (non-test) code: put result output in `cmd/`
+  services through their `stdout` writer and status output through `logger.Statusf` or
+  `internal/ui.Progress` (stderr). This is enforced by review; `grep -rn "fmt.Print\|os.Stdout"
+  --include='*.go' internal/` should only match `internal/logger` and tests.
