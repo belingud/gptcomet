@@ -1,5 +1,17 @@
 
 ---
+## [2.11.1](https://github.com/belingud/gptcomet/compare/v2.11.0..v2.11.1) - 2026-11-01
+
+### 🐛 Bug Fixes
+
+- **(git)** report non-repository failures and surface git stderr - ([8aec7e6](https://github.com/belingud/gptcomet/commit/8aec7e6c1271898f631a3bdf2bd02b79bf220cdf)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- **(trellis)** archive git-not-a-repo-error task - ([bf9a23f](https://github.com/belingud/gptcomet/commit/bf9a23f21f2b8c09378a0b8f17a8ff262c960f2a)) - belingud
+
+
+---
 ## [2.11.0](https://github.com/belingud/gptcomet/compare/v2.10.0..v2.11.0) - 2026-11-01
 
 ### ⛰️  Features
