@@ -38,6 +38,7 @@
     - [Manual Provider Setup](#manual-provider-setup)
   - [⌨️ Commands](#️-commands)
   - [🪝 Git Hook](#-git-hook)
+  - [🧩 Scripting and exit codes](#-scripting-and-exit-codes)
   - [⚙ Configuration](#-configuration)
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
@@ -475,6 +476,7 @@ The following are the available commands for GPTComet:
 -   `gmsg review`: Review staged diff or pipe to `gmsg review`.
     -   `--svn`: Get diff from svn.
     -   `--stream`: Stream output as it arrives from the LLM.
+    -   `--raw`: Print the raw Markdown returned by the model (no rendering or border).
     -   `--secrets`: Sensitive data scan mode for this run: `off`, `warn`, `redact`, or `block`.
     -   `--repo`: Path to the repository (default ".").
     -   `--answer-path`: Override answer path
@@ -542,7 +544,46 @@ gmsg generate --rich
 ```
 
 `generate` writes only the message to stdout; status and token-usage output goes to stderr, so it is
-safe to use in scripts.
+safe to use in scripts. See [Scripting and exit codes](#-scripting-and-exit-codes) for the full
+contract.
+
+## 🧩 Scripting and exit codes
+
+GPTComet separates results from status so it can be used inside scripts, editor plugins, and CI:
+
+-   **stdout carries only the result**: the commit message from `gmsg generate`, the review from
+    `gmsg review` (rendered, or verbatim Markdown with `--raw`), and the previewed message from
+    `gmsg commit --dry-run`.
+-   **stderr carries status**: provider/model banner, progress, reminders, token usage, warnings,
+    prompts, and errors. Secret-scan findings are always on stderr and are masked.
+
+```shell
+gmsg generate > commit-msg.txt          # only the message ends up in the file
+gmsg review --raw > review.md           # raw model Markdown, no rendering or border
+gmsg review --stream | pbcopy           # stream the review; status stays out of the pipe
+git commit -F commit-msg.txt            # use the generated message directly
+```
+
+`gmsg commit` is interactive: its prompts, message previews, and commit summary stay on stderr, and
+nothing is written to stdout. `--raw` only affects the non-stream review path; streamed chunks are
+already unformatted.
+
+Exit codes classify failures so scripts can distinguish them:
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Success |
+| `1` | Unexpected or unclassified error |
+| `2` | Command-line usage error (unknown flag or invalid flag value) |
+| `3` | Configuration error (missing provider/API key, invalid config) |
+| `4` | Network, proxy, or connection error |
+| `5` | Git/VCS error, including "no staged changes" |
+| `6` | API/LLM error (request rejected, response parsing, retries exhausted) |
+| `7` | Validation/content error, including a diff blocked by `sensitive.mode=block` |
+
+Scripts that only check "non-zero means failure" keep working; the fine-grained codes are for
+choosing remediation or gating CI. Hook management commands (`gmsg hook install/uninstall/status`)
+are human-facing and keep their current stdout output.
 
 ## ⚙ Configuration
 

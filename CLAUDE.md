@@ -7,7 +7,7 @@ GPTComet generates Git commit messages and reviews code using LLMs. Supports 27+
 **Core Commands**:
 
 - `gmsg commit` - Generate commit message from diff
-- `gmsg review` - AI code review (supports streaming with `--stream`)
+- `gmsg review` - AI code review (supports streaming with `--stream` and raw Markdown with `--raw`)
 - `gmsg generate` - Print a generated commit message to stdout (no commit)
 - `gmsg hook` - Manage the Git `prepare-commit-msg` hook (install/uninstall/status)
 - `gmsg config` - Manage configuration (get/set/list/reset/path/keys/append/remove/validate)
@@ -106,6 +106,14 @@ default: provider = llm.NewDefaultLLM(config)
 ```
 
 **Error handling**: Structured `GPTCometError` with type, title, message, cause, suggestions. Six types: config, network, git, api, validation, unknown. Template functions in [internal/errors/templates.go](internal/errors/templates.go)
+
+**Output contract and exit codes**: stdout carries only the result (`generate` message, `review`
+comment, `commit --dry-run` preview); status, progress, prompts, warnings, and errors go to stderr.
+`internal/errors.ExitCode` maps `GPTCometError.Type` to the process exit code (1 unknown, 2 usage,
+3 config, 4 network, 5 git, 6 API, 7 validation/content) and `main.go` exits with it. The review
+`--raw` flag bypasses glamour and the border. Keep new output out of stdout and do not print
+directly to `os.Stdout` in `internal/`; use `logger.Statusf` or `internal/ui.Progress` (both write
+to stderr).
 
 **Retry logic**: Exponential backoff with jitter (base 500ms, `config.Retries` attempts)
 

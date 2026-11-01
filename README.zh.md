@@ -38,6 +38,7 @@
     - [手动设置提供商](#手动设置提供商)
   - [⌨️ 命令](#️-命令)
   - [🪝 Git Hook](#-git-hook)
+  - [🧩 脚本与退出码](#-脚本与退出码)
   - [⚙ 配置](#-配置)
     - [file\_ignore](#file_ignore)
     - [provider](#provider)
@@ -468,6 +469,7 @@ GPTComet 提供以下命令：
 -   `gmsg review`：审查 staged diff，也可以通过管道输入给 `gmsg review`。
     -   `--svn`：从 SVN 获取 diff。
     -   `--stream`：以流式方式输出 LLM 返回内容。
+    -   `--raw`：输出模型返回的原始 Markdown（不做渲染、不加边框）。
     -   `--secrets`：本次运行的敏感信息扫描模式，可选 `off`、`warn`、`redact`、`block`。
     -   `--repo`：仓库路径，默认值为 `.`。
     -   `--answer-path`：覆盖 answer path。
@@ -531,7 +533,43 @@ gmsg generate
 gmsg generate --rich
 ```
 
-`generate` 只把消息写到 stdout；状态和 token usage 走 stderr，可以安全用于脚本。
+`generate` 只把消息写到 stdout；状态和 token usage 走 stderr，可以安全用于脚本。完整的输出契约见
+[脚本与退出码](#-脚本与退出码)。
+
+## 🧩 脚本与退出码
+
+GPTComet 把“结果”和“状态”分开，方便在脚本、编辑器插件和 CI 中使用：
+
+-   **stdout 只放结果**：`gmsg generate` 的提交信息、`gmsg review` 的审查结果（渲染后的内容，
+    或加 `--raw` 后的原始 Markdown）、`gmsg commit --dry-run` 预览的提交信息。
+-   **stderr 放状态**：provider/model 提示、进度、提醒、token usage、告警、交互提示和错误。
+    敏感信息扫描结果始终在 stderr 且已打码。
+
+```shell
+gmsg generate > commit-msg.txt          # 文件里只有提交信息
+gmsg review --raw > review.md           # 原始 Markdown，无渲染、无边框
+gmsg review --stream | pbcopy           # 流式审查，状态不会混进管道
+git commit -F commit-msg.txt            # 直接把生成的消息用于提交
+```
+
+`gmsg commit` 是交互命令：提示、消息预览和提交摘要都走 stderr，stdout 不输出内容。`--raw` 只影响
+非流式 review；流式输出本身就是原始内容。
+
+退出码用于区分失败类别，方便脚本决定后续动作：
+
+| 退出码 | 含义 |
+| --- | --- |
+| `0` | 成功 |
+| `1` | 未分类/意外错误 |
+| `2` | 命令行用法错误（未知 flag 或非法 flag 值） |
+| `3` | 配置错误（缺少 provider/API key、配置非法） |
+| `4` | 网络、代理或连接错误 |
+| `5` | Git/VCS 错误，包括“没有 staged 变更” |
+| `6` | API/LLM 错误（请求被拒绝、响应解析失败、重试耗尽） |
+| `7` | 校验/内容错误，包括被 `sensitive.mode=block` 拦截的 diff |
+
+只判断“非 0 即失败”的脚本不受影响；细分退出码用于选择修复方式或在 CI 中做门禁。`gmsg hook
+install/uninstall/status` 是面向人的命令，保持现有 stdout 输出。
 
 ## ⚙ 配置
 
