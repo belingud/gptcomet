@@ -151,3 +151,41 @@ Implemented FUTURE_FEATURES item 5: every command now keeps stdout for results o
 ### Next Steps
 
 - Release v2.11.0 pending user approval (bump2version, changelog, tag, push)
+
+
+## Session 5: Git error reporting outside a repository
+<!-- trellis-session: v=2 fp=f2911cb52d50761e -->
+
+**Date**: 2026-11-01
+**Task**: Git error reporting outside a repository
+**Branch**: `master`
+
+### Summary
+
+Fixed the misleading git error UX: running gmsg outside a git repository now reports Not a Git Repository with the checked path and git init hints (exit 5), git command failures render a sanitized Details excerpt of git's stderr/exit status, a missing git binary reports Git Not Installed, and command labels/exit-code formatting are correct. Added unit tests for every GitVCS command outside a repo plus E2E coverage.
+
+### Main Changes
+
+- internal/git: single gitCommandError classifier (rev-parse --is-inside-work-tree probe on failure only, no localized stderr matching), joined command labels, absolute display path
+- internal/errors: GPTCometError.Details rendering, GitRepositoryNotFoundError(path), GitExecutableNotFoundError, suggestions no longer blame a missing git after it ran
+- tests: non-repo classification for all GitVCS commands, in-repo failure Details, missing git binary, Details rendering, repoDisplayPath
+- docs: README/README.zh exit code 5, tracked Go spec cli-and-output.md, local error-handling.md scenario
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8aec7e6` | fix(git): report non-repository failures and surface git stderr |
+
+### Testing
+
+- [OK] go test ./... and go test -race ./..., go vet, staticcheck, gofmt/goimports, ruff check/format clean
+- [OK] E2E 37/37 new failure modes and 38/38 v2.11.0 output-contract regression
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Release v2.11.1 (changelog, bump, tag, push)

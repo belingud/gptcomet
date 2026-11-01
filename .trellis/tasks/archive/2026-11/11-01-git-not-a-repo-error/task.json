@@ -1,0 +1,28 @@
+{
+  "id": "git-not-a-repo-error",
+  "name": "git-not-a-repo-error",
+  "title": "Fix git error reporting outside a repository",
+  "description": "Classify failures from a non-git directory as 'Not a Git Repository', surface the underlying git stderr, and fix command wording; add unit/E2E coverage.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "belingud",
+  "assignee": "belingud",
+  "createdAt": "2026-11-01",
+  "completedAt": "2026-11-01",
+  "branch": "master",
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "commit": "8aec7e6"
+  }
+}

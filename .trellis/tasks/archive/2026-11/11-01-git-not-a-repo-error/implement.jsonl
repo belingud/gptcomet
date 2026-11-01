@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/go/error-handling.md", "reason": "Structured error types, exit-code mapping, and suggestion conventions; this task changes git failure classification and rendering."}
+{"file": ".trellis/spec/go/cli-and-output.md", "reason": "stdout/stderr contract and exit codes must stay unchanged."}
+{"file": ".trellis/spec/go/quality-guidelines.md", "reason": "Test and lint requirements for the fix."}
+{"file": ".trellis/spec/repo/build-and-release.md", "reason": "Release v2.11.1 after the fix."}
