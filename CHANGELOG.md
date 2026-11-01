@@ -1,5 +1,22 @@
 
 ---
+## [2.11.0](https://github.com/belingud/gptcomet/compare/v2.10.0..v2.11.0) - 2026-11-01
+
+### ⛰️  Features
+
+- **(output)** unify stdout/stderr contract and classify exit codes - ([3af06e3](https://github.com/belingud/gptcomet/commit/3af06e3647e4f1edafd9d3a2f36622df94937cfe)) - belingud
+
+### 📚 Documentation
+
+- **(spec)** record output contract and exit codes in the Go spec - ([634a0d9](https://github.com/belingud/gptcomet/commit/634a0d94d23a94c06c9e26dd0966460a78806c35)) - belingud
+- document scripting contract, exit codes and review --raw - ([15bbf74](https://github.com/belingud/gptcomet/commit/15bbf74e61db7287867c40f33d5d2c5c42e25cb2)) - belingud
+
+### ⚙️ Miscellaneous Tasks
+
+- **(trellis)** archive programmable-output task - ([9d062ca](https://github.com/belingud/gptcomet/commit/9d062ca0ddda3481b63e5a2b17bb6cc0abd9bda4)) - belingud
+
+
+---
 ## [2.10.0](https://github.com/belingud/gptcomet/compare/v2.9.0..v2.10.0) - 2026-10-31
 
 ### ⛰️  Features
