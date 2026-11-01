@@ -577,7 +577,7 @@ Exit codes classify failures so scripts can distinguish them:
 | `2` | Command-line usage error (unknown flag or invalid flag value) |
 | `3` | Configuration error (missing provider/API key, invalid config) |
 | `4` | Network, proxy, or connection error |
-| `5` | Git/VCS error, including "no staged changes" |
+| `5` | Git/VCS error, including "no staged changes" and "not a git repository" |
 | `6` | API/LLM error (request rejected, response parsing, retries exhausted) |
 | `7` | Validation/content error, including a diff blocked by `sensitive.mode=block` |
 

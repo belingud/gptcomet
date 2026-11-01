@@ -564,7 +564,7 @@ git commit -F commit-msg.txt            # 直接把生成的消息用于提交
 | `2` | 命令行用法错误（未知 flag 或非法 flag 值） |
 | `3` | 配置错误（缺少 provider/API key、配置非法） |
 | `4` | 网络、代理或连接错误 |
-| `5` | Git/VCS 错误，包括“没有 staged 变更” |
+| `5` | Git/VCS 错误，包括“没有 staged 变更”和“不是 git 仓库” |
 | `6` | API/LLM 错误（请求被拒绝、响应解析失败、重试耗尽） |
 | `7` | 校验/内容错误，包括被 `sensitive.mode=block` 拦截的 diff |
 

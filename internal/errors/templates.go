@@ -122,11 +122,12 @@ func InvalidConfigValueError(key, value, reason string) *GPTCometError {
 	)
 }
 
-// GitRepositoryNotFoundError is returned when not in a git repository
-func GitRepositoryNotFoundError() *GPTCometError {
+// GitRepositoryNotFoundError is returned when a path is not inside a git
+// working tree.
+func GitRepositoryNotFoundError(repoPath string) *GPTCometError {
 	return NewGitError(
 		ErrTitleNotGitRepo,
-		ErrMsgNotGitRepo,
+		fmt.Sprintf(ErrMsgNotGitRepo, repoPath),
 		nil,
 		[]string{
 			SuggInitGit,
@@ -135,18 +136,38 @@ func GitRepositoryNotFoundError() *GPTCometError {
 	)
 }
 
-// GitCommandFailedError is returned when a git command fails
+// GitExecutableNotFoundError is returned when the git binary itself cannot be
+// executed (missing from PATH or not installed). It must not be used when git
+// ran and returned a non-zero exit status.
+func GitExecutableNotFoundError(command string, cause error) *GPTCometError {
+	err := NewGitError(
+		ErrTitleGitNotInstalled,
+		fmt.Sprintf(ErrMsgGitNotInstalled, command),
+		cause,
+		[]string{
+			SuggCheckGitInstalled,
+			SuggGitOnPath,
+		},
+	)
+	err.Details = sanitizeErrorDetail(cause)
+	return err
+}
+
+// GitCommandFailedError is returned when a git command fails. The sanitized
+// excerpt of the cause (exit status and stderr) is rendered as Details so the
+// user can see git's actual diagnostic.
 func GitCommandFailedError(command string, cause error) *GPTCometError {
-	return NewGitError(
+	err := NewGitError(
 		ErrTitleGitCommand,
 		fmt.Sprintf(ErrMsgGitCommand, command),
 		cause,
 		[]string{
-			SuggCheckGitInstalled,
 			SuggEnsureInGit,
-			SuggCheckGitOutput,
+			SuggReviewGitOutput,
 		},
 	)
+	err.Details = sanitizeErrorDetail(cause)
+	return err
 }
 
 // HookAlreadyExistsError is returned when install would overwrite a

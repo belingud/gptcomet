@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -230,4 +231,98 @@ func TestGitVCS_GetStagedDiffFiltered_UsesStringSlicePatterns(t *testing.T) {
 	assert.Contains(t, diff, "nested/keep.go")
 	assert.NotContains(t, diff, "nested/skip.lock")
 	cfg.AssertExpectations(t)
+}
+
+func TestRepoDisplayPath(t *testing.T) {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+	dir := t.TempDir()
+
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"empty defaults to cwd", "", wd},
+		{"dot resolves to cwd", ".", wd},
+		{"absolute path unchanged", dir, dir},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, repoDisplayPath(tt.input))
+		})
+	}
+}
+
+// TestGitVCSOutsideRepository verifies that every git command failure outside a
+// working tree is classified as "Not a Git Repository" rather than a generic
+// command failure: git diff falls back to --no-index mode there and only reports
+// an unknown option, which used to leak into a misleading error.
+func TestGitVCSOutsideRepository(t *testing.T) {
+	dir := t.TempDir()
+	vcs := &GitVCS{}
+
+	tests := []struct {
+		name string
+		call func() error
+	}{
+		{"GetDiff", func() error { _, err := vcs.GetDiff(dir); return err }},
+		{"HasStagedChanges", func() error { _, err := vcs.HasStagedChanges(dir); return err }},
+		{"GetStagedFiles", func() error { _, err := vcs.GetStagedFiles(dir); return err }},
+		{"GetCurrentBranch", func() error { _, err := vcs.GetCurrentBranch(dir); return err }},
+		{"GetLastCommitHash", func() error { _, err := vcs.GetLastCommitHash(dir); return err }},
+		{"GetCommitInfo", func() error { _, err := vcs.GetCommitInfo(dir, "abc123"); return err }},
+		{"CreateCommit", func() error { return vcs.CreateCommit(dir, "message", false) }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.call()
+			require.Error(t, err)
+
+			var gptErr *gptcometerrors.GPTCometError
+			require.ErrorAs(t, err, &gptErr)
+			assert.Equal(t, gptcometerrors.ErrTypeGit, gptErr.Type)
+			assert.Equal(t, gptcometerrors.ErrTitleNotGitRepo, gptErr.Title)
+			assert.Contains(t, gptErr.Message, dir)
+			assert.Contains(t, gptErr.Suggestions, gptcometerrors.SuggInitGit)
+		})
+	}
+}
+
+// TestGitCommandFailureIncludesDetails verifies that a genuine in-repository
+// failure keeps the "Git Command Failed" classification but exposes git's
+// stderr/exit status in Details, with the command label rendered as plain args.
+func TestGitCommandFailureIncludesDetails(t *testing.T) {
+	vcs, dir, cleanup := setupVCSTest(t, Git)
+	defer cleanup()
+
+	_, err := vcs.GetCommitInfo(dir, "no-such-revision")
+	require.Error(t, err)
+
+	var gptErr *gptcometerrors.GPTCometError
+	require.ErrorAs(t, err, &gptErr)
+	assert.Equal(t, gptcometerrors.ErrTypeGit, gptErr.Type)
+	assert.Equal(t, gptcometerrors.ErrTitleGitCommand, gptErr.Title)
+	assert.Contains(t, gptErr.Message, "git log -1 --stat")
+	assert.NotContains(t, gptErr.Message, "[")
+	assert.Contains(t, gptErr.Details, "exit status 128")
+}
+
+// TestGitCommandNotInstalled verifies that a missing git executable is reported
+// as "Git Not Installed" instead of "Not a Git Repository".
+func TestGitCommandNotInstalled(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+
+	vcs := &GitVCS{}
+	_, err := vcs.GetDiff(t.TempDir())
+	require.Error(t, err)
+
+	var gptErr *gptcometerrors.GPTCometError
+	require.ErrorAs(t, err, &gptErr)
+	assert.Equal(t, gptcometerrors.ErrTypeGit, gptErr.Type)
+	assert.Equal(t, gptcometerrors.ErrTitleGitNotInstalled, gptErr.Title)
+	assert.Contains(t, gptErr.Details, "executable file not found")
+	assert.Contains(t, gptErr.Suggestions, gptcometerrors.SuggCheckGitInstalled)
 }

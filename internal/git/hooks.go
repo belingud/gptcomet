@@ -20,7 +20,7 @@ func GetRepoRoot(repoPath string) (string, error) {
 
 	root := strings.TrimSpace(out)
 	if root == "" {
-		return "", gptcometerrors.GitRepositoryNotFoundError()
+		return "", gptcometerrors.GitRepositoryNotFoundError(repoDisplayPath(repoPath))
 	}
 
 	return filepath.Clean(root), nil
@@ -41,7 +41,7 @@ func GetHooksDir(repoPath string) (string, error) {
 
 	hooksDir := strings.TrimSpace(out)
 	if hooksDir == "" {
-		return "", gptcometerrors.GitRepositoryNotFoundError()
+		return "", gptcometerrors.GitRepositoryNotFoundError(repoDisplayPath(repoPath))
 	}
 	if !filepath.IsAbs(hooksDir) {
 		root, rootErr := GetRepoRoot(repoPath)

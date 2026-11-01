@@ -2,8 +2,10 @@ package git
 
 import (
 	"bytes"
+	stderrors "errors"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/config"
@@ -19,6 +21,62 @@ const (
 	colorRed   = "\033[31m"
 	colorGreen = "\033[32m"
 )
+
+// commandLabel formats a git invocation for user-facing errors, e.g.
+// "git diff --staged -U2".
+func commandLabel(cmd *exec.Cmd) string {
+	return strings.Join(cmd.Args, " ")
+}
+
+// repoDisplayPath returns an absolute path for user-facing messages so commands
+// that default --repo to "." still show where the check actually happened.
+func repoDisplayPath(repoPath string) string {
+	if repoPath == "" {
+		repoPath = "."
+	}
+	if abs, err := filepath.Abs(repoPath); err == nil {
+		return abs
+	}
+	return repoPath
+}
+
+// isGitWorkingTree reports whether repoPath is inside a git working tree. Git
+// localizes its diagnostics, so this must probe with --is-inside-work-tree and
+// use the machine-readable output instead of parsing stderr.
+func isGitWorkingTree(repoPath string) bool {
+	if repoPath == "" {
+		repoPath = "."
+	}
+	probe := exec.Command("git", "rev-parse", "--is-inside-work-tree")
+	probe.Dir = repoPath
+	out, err := probe.Output()
+	return err == nil && strings.TrimSpace(string(out)) == "true"
+}
+
+// gitCommandError turns a failed git invocation into the error type that best
+// describes the real cause. Outside a working tree, git diff can fall back to
+// --no-index mode and report an unknown option (exit 129 on Git 2.55+) instead
+// of "not a git repository", so exit failures are classified by probing the
+// repository path instead of matching localized stderr.
+func gitCommandError(cmd *exec.Cmd, err error, stderr string) error {
+	repoPath := cmd.Dir
+	if repoPath == "" {
+		repoPath = "."
+	}
+	cause := fmt.Errorf("%w\nOutput: %s", err, strings.TrimSpace(stderr))
+
+	var execErr *exec.Error
+	if stderrors.As(err, &execErr) {
+		return gptcometerrors.GitExecutableNotFoundError(commandLabel(cmd), cause)
+	}
+
+	var exitErr *exec.ExitError
+	if stderrors.As(err, &exitErr) && !isGitWorkingTree(repoPath) {
+		return gptcometerrors.GitRepositoryNotFoundError(repoDisplayPath(repoPath))
+	}
+
+	return gptcometerrors.GitCommandFailedError(commandLabel(cmd), cause)
+}
 
 // GetDiff retrieves the staged git diff for the specified repository path.
 // It runs the "git diff --staged -U2" command and filters out lines that start with "index", "---", and "+++".
@@ -60,13 +118,7 @@ func (g *GitVCS) HasStagedChanges(repoPath string) (bool, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		// Check if it's an exit error (command ran but returned non-zero exit code)
-		if exitError, ok := err.(*exec.ExitError); ok {
-			cmdStr := fmt.Sprintf("git diff --staged --name-only (exit code %d)", exitError.ExitCode())
-			return false, gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
-		}
-		// Other errors (command couldn't be executed)
-		return false, gptcometerrors.GitCommandFailedError("git diff --staged --name-only", fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
+		return false, gitCommandError(cmd, err, stderr.String())
 	}
 
 	// If the command succeeded, check if there's any output
@@ -96,11 +148,7 @@ func (g *GitVCS) GetStagedFiles(repoPath string) ([]string, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			cmdStr := fmt.Sprintf("git diff --staged --name-only (exit code %d)", exitError.ExitCode())
-			return nil, gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
-		}
-		return nil, gptcometerrors.GitCommandFailedError("git diff --staged --name-only", fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
+		return nil, gitCommandError(cmd, err, stderr.String())
 	}
 
 	files := strings.Split(strings.TrimSpace(string(output)), "\n")
@@ -297,8 +345,7 @@ func (g *GitVCS) runCommand(cmd *exec.Cmd, repoPath string) (string, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		cmdStr := fmt.Sprintf("git %v", cmd.Args[1:])
-		return "", gptcometerrors.GitCommandFailedError(cmdStr, fmt.Errorf("%w\nOutput: %s", err, stderr.String()))
+		return "", gitCommandError(cmd, err, stderr.String())
 	}
 
 	return stdout.String(), nil

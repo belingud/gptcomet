@@ -97,7 +97,7 @@ Exit codes (`internal/errors/exit.go`):
 | `2` | `ExitUsage` | command-line usage error (unknown flag / invalid flag value) |
 | `3` | `ExitConfig` | configuration error |
 | `4` | `ExitNetwork` | network/proxy/connection error |
-| `5` | `ExitGit` | Git/VCS error, including "no staged changes" |
+| `5` | `ExitGit` | Git/VCS error, including "no staged changes" and "not a git repository" |
 | `6` | `ExitAPI` | API/LLM error (rejection, parsing, retries exhausted) |
 | `7` | `ExitValidation` | invalid input/content, including `sensitive.mode=block` |
 
@@ -106,6 +106,11 @@ fall back to `ExitUnknown`. A validation wrapper that carries a classified cause
 `DependencyCreationError` around a config error) follows the cause's class, so scripts see the
 root failure. Wrap with `%w` so the classification survives. Reuse the existing `internal/errors`
 template functions instead of ad-hoc `fmt.Errorf` when a failure is user-facing.
+
+Git failures are classified in `internal/git.gitCommandError`, never by matching localized stderr:
+not-inside-a-work-tree → `Not a Git Repository`, missing git binary → `Git Not Installed`, any
+other failure → `Git Command Failed` with a `Details:` excerpt of git's exit status and stderr.
+The rendered error still goes to stderr through Cobra; stdout stays clean.
 
 ## Terminal Output
 

@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -42,6 +43,16 @@ func TestGPTCometError_Error(t *testing.T) {
 				[]string{"Check git installation"},
 			),
 			wantSub: []string{"📦", "Test Git Error", "Git command failed", "Check git installation"},
+		},
+		{
+			name: "Git error with details",
+			err: &GPTCometError{
+				Type:    ErrTypeGit,
+				Title:   "Git Command Failed",
+				Message: "Git command 'git status' failed.",
+				Details: "exit status 128 Output: fatal: not a git repository",
+			},
+			wantSub: []string{"📦", "Details:", "exit status 128", "fatal: not a git repository"},
 		},
 		{
 			name: "API error",
@@ -234,10 +245,14 @@ func TestInvalidConfigValueError(t *testing.T) {
 }
 
 func TestGitRepositoryNotFoundError(t *testing.T) {
-	err := GitRepositoryNotFoundError()
+	err := GitRepositoryNotFoundError("/tmp/notgit")
 
 	if err.Type != ErrTypeGit {
 		t.Errorf("GitRepositoryNotFoundError() Type = %v, want %v", err.Type, ErrTypeGit)
+	}
+
+	if !strings.Contains(err.Message, "/tmp/notgit") {
+		t.Errorf("GitRepositoryNotFoundError() should contain the path, got: %s", err.Message)
 	}
 
 	if len(err.Suggestions) == 0 {
@@ -258,8 +273,38 @@ func TestGitCommandFailedError(t *testing.T) {
 		t.Errorf("GitCommandFailedError() should contain command, got: %s", err.Message)
 	}
 
+	if !strings.Contains(err.Details, "not a git repository") {
+		t.Errorf("GitCommandFailedError() should expose the cause in Details, got: %q", err.Details)
+	}
+
 	if err.Cause != cause {
 		t.Errorf("GitCommandFailedError() Cause = %v, want %v", err.Cause, cause)
+	}
+}
+
+func TestGitExecutableNotFoundError(t *testing.T) {
+	command := "git diff --staged"
+	cause := &exec.Error{Name: "git", Err: exec.ErrNotFound}
+	err := GitExecutableNotFoundError(command, cause)
+
+	if err.Type != ErrTypeGit {
+		t.Errorf("GitExecutableNotFoundError() Type = %v, want %v", err.Type, ErrTypeGit)
+	}
+
+	if err.Title != ErrTitleGitNotInstalled {
+		t.Errorf("GitExecutableNotFoundError() Title = %q, want %q", err.Title, ErrTitleGitNotInstalled)
+	}
+
+	if !strings.Contains(err.Message, command) {
+		t.Errorf("GitExecutableNotFoundError() should contain command, got: %s", err.Message)
+	}
+
+	if !strings.Contains(err.Details, "executable file not found") {
+		t.Errorf("GitExecutableNotFoundError() should expose the exec error in Details, got: %q", err.Details)
+	}
+
+	if !strings.Contains(strings.Join(err.Suggestions, "\n"), SuggCheckGitInstalled) {
+		t.Errorf("GitExecutableNotFoundError() should keep the installation suggestion, got: %v", err.Suggestions)
 	}
 }
 

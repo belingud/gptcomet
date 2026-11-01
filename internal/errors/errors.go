@@ -18,12 +18,15 @@ const (
 )
 
 // GPTCometError is a structured error type that provides detailed error information
-// including the error type, message, underlying cause, suggestions for fixing it,
-// and optional documentation URL.
+// including the error type, message, a rendered excerpt of the underlying cause
+// (Details), suggestions for fixing it, and optional documentation URL.
 type GPTCometError struct {
-	Type        ErrorType
-	Title       string
-	Message     string
+	Type    ErrorType
+	Title   string
+	Message string
+	// Details is an optional, already-sanitized excerpt of the underlying cause
+	// (for example git's stderr) that is safe to render to the user.
+	Details     string
 	Cause       error
 	Suggestions []string
 	DocsURL     string
@@ -38,6 +41,12 @@ func (e *GPTCometError) Error() string {
 
 	// Message
 	sb.WriteString(fmt.Sprintf("%s\n\n", e.Message))
+
+	// Details: a capped excerpt of the underlying cause. Without it, suggestions
+	// such as "check the git output" point at output the user cannot see.
+	if e.Details != "" {
+		sb.WriteString(fmt.Sprintf("Details: %s\n\n", e.Details))
+	}
 
 	// Suggestions
 	if len(e.Suggestions) > 0 {
