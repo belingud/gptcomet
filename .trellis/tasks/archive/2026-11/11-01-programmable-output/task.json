@@ -1,0 +1,28 @@
+{
+  "id": "programmable-output",
+  "name": "programmable-output",
+  "title": "输出可编程化：统一 stdout/stderr 契约与退出码",
+  "description": "让 commit/review/generate 的 stdout 只输出结果，状态走 stderr，并按错误类型细分退出码",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "belingud",
+  "assignee": "belingud",
+  "createdAt": "2026-11-01",
+  "completedAt": "2026-11-01",
+  "branch": "master",
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "commit": "3af06e3,15bbf74,634a0d9"
+  }
+}

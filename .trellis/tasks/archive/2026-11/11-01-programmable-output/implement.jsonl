@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/go/cli-and-output.md", "reason": "CLI command shape, terminal output rules, generate stdout contract, and Known Debt section this task resolves"}
+{"file": ".trellis/spec/go/error-handling.md", "reason": "Structured GPTCometError conventions used by the new exit-code mapping"}

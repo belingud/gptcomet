@@ -115,3 +115,39 @@ Added internal/secretscan, a lightweight pre-send credential scanner built on ve
 
 - Push master and release v2.10.0
 - Later: optional external gitleaks fallback or base64/hex decode coverage; FUTURE_FEATURES item 8 marked done in the untracked draft
+
+
+## Session 4: Programmable output: stdout/stderr contract and exit codes
+<!-- trellis-session: v=2 fp=dc19fd06e9936faf -->
+
+**Date**: 2026-11-01
+**Task**: Programmable output: stdout/stderr contract and exit codes
+**Branch**: `master`
+
+### Summary
+
+Implemented FUTURE_FEATURES item 5: every command now keeps stdout for results only (generate message, review result/raw Markdown, commit --dry-run preview) while status, progress, prompts, warnings and errors go to stderr. Removed the generate os.Stdout hijack by routing LLM request/usage lines and config warnings through logger.Statusf and progress through stderr. Added review --raw for verbatim model Markdown. Added internal/errors.ExitCode/UsageError and classified process exit codes (1 unknown, 2 usage, 3 config, 4 network, 5 git, 6 API, 7 validation, with validation wrappers following a classified cause). Docs and Go spec record the contract; quality gate green.
+
+### Main Changes
+
+- main.go,cmd/,internal/errors/exit.go,internal/llm/,internal/config/parser.go,internal/logger/,internal/ui/progress.go,README.md,README.zh.md,CLAUDE.md,.trellis/spec/go/
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `3af06e3` | feat(output): unify stdout/stderr contract and classify exit codes |
+| `15bbf74` | docs: document scripting contract, exit codes and review --raw |
+| `634a0d9` | docs(spec): record output contract and exit codes in the Go spec |
+
+### Testing
+
+- [OK] go test ./..., go test -race ./..., go vet ./..., staticcheck ./..., ruff check py/, gofmt/goimports clean; mock OpenAI-compatible server smoke verified stdout purity and exit codes 0/2/3/5/6/7
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Release v2.11.0 pending user approval (bump2version, changelog, tag, push)

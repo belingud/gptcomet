@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/go/cli-and-output.md", "reason": "Verify output-contract and command-shape compliance"}
+{"file": ".trellis/spec/go/quality-guidelines.md", "reason": "Quality gate: format, vet, staticcheck, tests"}
