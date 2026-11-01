@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -15,6 +14,18 @@ type GenerateOptions struct {
 	Rich        bool
 	ConfigPath  string
 	SecretsMode string
+}
+
+// commitMessageGenerator is the slice of CommitService that `generate` needs.
+// It exists so tests can inject a fake without a provider or a Git repo.
+type commitMessageGenerator interface {
+	GenerateMessage() (string, error)
+}
+
+// newGenerateService builds the generator used by the generate command. It is a
+// package-level variable so tests can replace it.
+var newGenerateService = func(options CommitOptions) (commitMessageGenerator, error) {
+	return NewCommitService(options)
 }
 
 // NewGenerateCmd creates a command that prints a generated commit message to
@@ -34,7 +45,7 @@ func NewGenerateCmd() *cobra.Command {
 			}
 			options.ConfigPath = configPath
 
-			service, err := NewCommitService(CommitOptions{
+			service, err := newGenerateService(CommitOptions{
 				CommonOptions: options.CommonOptions,
 				RepoPath:      options.RepoPath,
 				Rich:          options.Rich,
@@ -45,11 +56,13 @@ func NewGenerateCmd() *cobra.Command {
 				return err
 			}
 
-			message, err := generateWithCleanStdout(service.GenerateMessage)
+			message, err := service.GenerateMessage()
 			if err != nil {
 				return err
 			}
 
+			// stdout carries only the message; status/usage output is written
+			// to stderr by the lower layers.
 			fmt.Fprintln(cmd.OutOrStdout(), message)
 			return nil
 		},
@@ -69,15 +82,4 @@ func NewGenerateCmd() *cobra.Command {
 	SetAdvancedHelpFunc(cmd, generalFlags, advancedFlags)
 
 	return cmd
-}
-
-// generateWithCleanStdout redirects package-level stdout writes to stderr while
-// generation runs. Several providers still print request/usage lines directly
-// to stdout; the generate contract must expose only the final message.
-func generateWithCleanStdout(generate func() (string, error)) (string, error) {
-	original := os.Stdout
-	os.Stdout = os.Stderr
-	defer func() { os.Stdout = original }()
-
-	return generate()
 }

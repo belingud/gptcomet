@@ -1,9 +1,10 @@
 package config
 
 import (
-	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/belingud/gptcomet/internal/logger"
 )
 
 // getIntValue converts a configuration value to an integer.
@@ -18,14 +19,14 @@ func getIntValue(config map[string]interface{}, key string, defaultValue int) in
 			if v == float64(int(v)) {
 				return int(v)
 			}
-			fmt.Printf("Warning: %s value '%v' is not an integer, using default: %d\n", key, v, defaultValue)
+			logger.Statusf("Warning: %s value '%v' is not an integer, using default: %d\n", key, v, defaultValue)
 		case string:
 			if intVal, err := strconv.Atoi(v); err == nil {
 				return intVal
 			}
-			fmt.Printf("Warning: %s value '%s' is not a valid integer, using default: %d\n", key, v, defaultValue)
+			logger.Statusf("Warning: %s value '%s' is not a valid integer, using default: %d\n", key, v, defaultValue)
 		default:
-			fmt.Printf("Warning: %s has unexpected type %T, using default: %d\n", key, v, defaultValue)
+			logger.Statusf("Warning: %s has unexpected type %T, using default: %d\n", key, v, defaultValue)
 		}
 	}
 	return defaultValue
@@ -44,9 +45,9 @@ func getFloatValue(config map[string]interface{}, key string, defaultValue float
 			if floatVal, err := strconv.ParseFloat(v, 64); err == nil {
 				return floatVal
 			}
-			fmt.Printf("Warning: %s value '%s' is not a valid float, using default: %f\n", key, v, defaultValue)
+			logger.Statusf("Warning: %s value '%s' is not a valid float, using default: %f\n", key, v, defaultValue)
 		default:
-			fmt.Printf("Warning: %s has unexpected type %T, using default: %f\n", key, v, defaultValue)
+			logger.Statusf("Warning: %s has unexpected type %T, using default: %f\n", key, v, defaultValue)
 		}
 	}
 	return defaultValue

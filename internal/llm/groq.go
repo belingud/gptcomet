@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/logger"
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/tidwall/gjson"
@@ -174,7 +175,7 @@ func (g *GroqLLM) MakeRequest(ctx context.Context, client *http.Client, message 
 		return "", fmt.Errorf("failed to get usage: %w", err)
 	}
 	if usage != "" {
-		fmt.Printf("%s\n", usage)
+		logger.Statusf("%s\n", usage)
 	}
 
 	return g.ParseResponse(respBody)

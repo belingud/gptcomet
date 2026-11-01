@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os"
@@ -8,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/belingud/gptcomet/internal/config"
+	"github.com/belingud/gptcomet/internal/testutils"
+	"github.com/belingud/gptcomet/pkg/config/defaults"
 	"github.com/belingud/gptcomet/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -509,4 +512,59 @@ openai:
 	assert.Equal(t, "feat: generated", message)
 	mockVCS.AssertExpectations(t)
 	mockClient.AssertExpectations(t)
+}
+
+// newCommitOutputContractService builds a CommitService with buffered
+// stdout/stderr and the mock expectations shared by the contract tests.
+func newCommitOutputContractService(t *testing.T, options CommitOptions) (*CommitService, *MockVCS, *bytes.Buffer, *bytes.Buffer) {
+	t.Helper()
+
+	mockVCS := new(MockVCS)
+	mockCfg := new(testutils.MockConfigManager)
+	mockClient := new(MockClient)
+
+	mockCfg.On("GetNestedValue", []string{"console", "verbose"}).Return(false, true)
+	expectSensitiveScanDefaults(mockCfg)
+	mockCfg.On("GetPrompt", false).Return("test prompt")
+	mockCfg.On("GetWithDefault", "output.rich_template", mock.Anything).Return(defaults.DefaultRichTemplate)
+	mockCfg.On("GetWithDefault", LANGUAGE_KEY, "en").Return("en")
+
+	mockVCS.On("HasStagedChanges", "test-repo").Return(true, nil)
+	mockVCS.On("GetStagedDiffFiltered", "test-repo", mockCfg).Return("diff", nil)
+	mockClient.On("GenerateCommitMessage", "diff", "test prompt").Return("feat: contract", nil)
+
+	var stdout, stderr bytes.Buffer
+	service := &CommitService{
+		vcs:          mockVCS,
+		client:       mockClient,
+		cfgManager:   mockCfg,
+		options:      options,
+		clientConfig: &types.ClientConfig{Provider: "test-provider", Model: "test-model"},
+		stdout:       &stdout,
+		stderr:       &stderr,
+	}
+	return service, mockVCS, &stdout, &stderr
+}
+
+func TestCommitService_Execute_DryRun_OutputContract(t *testing.T) {
+	service, _, stdout, stderr := newCommitOutputContractService(t, CommitOptions{RepoPath: "test-repo", DryRun: true})
+
+	require.NoError(t, service.Execute())
+
+	assert.Contains(t, stdout.String(), "Generated commit message:")
+	assert.Contains(t, stdout.String(), "feat: contract")
+	assert.NotContains(t, stdout.String(), "Discovered provider")
+	assert.Contains(t, stderr.String(), "Discovered provider: test-provider, model: test-model")
+}
+
+func TestCommitService_Execute_InteractiveWritesNoStdout(t *testing.T) {
+	service, mockVCS, stdout, stderr := newCommitOutputContractService(t, CommitOptions{RepoPath: "test-repo", AutoYes: true})
+	mockVCS.On("CreateCommit", "test-repo", "feat: contract", false).Return(nil)
+	mockVCS.On("GetLastCommitHash", "test-repo").Return("abc1234", nil)
+	mockVCS.On("GetCommitInfo", "test-repo", "abc1234").Return("commit abc1234", nil)
+
+	require.NoError(t, service.Execute())
+
+	assert.Empty(t, stdout.String(), "interactive commit status must not leak to stdout")
+	assert.Contains(t, stderr.String(), "Successfully created commit")
 }

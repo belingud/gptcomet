@@ -78,16 +78,16 @@ func TestProgress_Start(t *testing.T) {
 			p := NewProgress(tt.verbose)
 			p.AddStages("Stage 1", "Stage 2")
 
-			// Capture stdout
-			old := os.Stdout
+			// Capture stderr
+			old := os.Stderr
 			r, w, _ := os.Pipe()
-			os.Stdout = w
+			os.Stderr = w
 
 			p.Start("Stage 1")
 
-			// Restore stdout
+			// Restore stderr
 			w.Close()
-			os.Stdout = old
+			os.Stderr = old
 
 			// Read output
 			var buf bytes.Buffer
@@ -128,16 +128,16 @@ func TestProgress_StartWithNewLine(t *testing.T) {
 	p := NewProgress(true)
 	p.AddStages("Stage 1", "Stage 2")
 
-	// Capture stdout
-	old := os.Stdout
+	// Capture stderr
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	p.StartWithNewLine("Stage 1")
 
-	// Restore stdout
+	// Restore stderr
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	// Read output
 	var buf bytes.Buffer
@@ -158,16 +158,16 @@ func TestProgress_Complete(t *testing.T) {
 	// Simulate some work
 	time.Sleep(10 * time.Millisecond)
 
-	// Capture stdout
-	old := os.Stdout
+	// Capture stderr
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	p.Complete("Stage 1")
 
-	// Restore stdout
+	// Restore stderr
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	// Read output
 	var buf bytes.Buffer
@@ -210,16 +210,16 @@ func TestProgress_CompleteInNewLine(t *testing.T) {
 	// Simulate some work
 	time.Sleep(10 * time.Millisecond)
 
-	// Capture stdout
-	old := os.Stdout
+	// Capture stderr
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	p.CompleteInNewLine("Stage 1")
 
-	// Restore stdout
+	// Restore stderr
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	// Read output
 	var buf bytes.Buffer
@@ -251,16 +251,16 @@ func TestProgress_Error(t *testing.T) {
 
 	err := errors.New("test error")
 
-	// Capture stdout
-	old := os.Stdout
+	// Capture stderr
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	p.Error("Stage 1", err)
 
-	// Restore stdout
+	// Restore stderr
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	// Read output
 	var buf bytes.Buffer
@@ -349,17 +349,17 @@ func TestProgress_SilentMode(t *testing.T) {
 	p := NewProgress(false)
 	p.AddStages("Stage 1", "Stage 2")
 
-	// Capture stdout
-	old := os.Stdout
+	// Capture stderr
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	p.Start("Stage 1")
 	p.Complete("Stage 1")
 
-	// Restore stdout
+	// Restore stderr
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	// Read output
 	var buf bytes.Buffer
@@ -404,16 +404,16 @@ func TestProgress_Render(t *testing.T) {
 	p.AddStages("Stage 1", "Stage 2")
 	p.Start("Stage 1")
 
-	// Capture stdout
-	old := os.Stdout
+	// Capture stderr
+	old := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	p.render()
 
-	// Restore stdout
+	// Restore stderr
 	w.Close()
-	os.Stdout = old
+	os.Stderr = old
 
 	// Read output
 	var buf bytes.Buffer

@@ -135,6 +135,19 @@ func (l *Logger) log(level Level, format string, args ...interface{}) {
 	l.logger.Output(3, message)
 }
 
+// Statusf writes a user-facing status/progress line to the logger output
+// (stderr by default) without a level prefix, icon, or timestamp.
+//
+// Use it for status lines that must never pollute stdout, such as the
+// "Sending request" and token-usage lines printed while a diff is sent to a
+// provider. It is not a logging level: the line is always written.
+func (l *Logger) Statusf(format string, args ...interface{}) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	_, _ = fmt.Fprintf(l.output, format, args...)
+}
+
 // Debug logs a debug message
 func (l *Logger) Debug(format string, args ...interface{}) {
 	l.log(DebugLevel, format, args...)
@@ -186,6 +199,12 @@ func Error(format string, args ...interface{}) {
 // Fatal logs an error message and exits using the default logger
 func Fatal(format string, args ...interface{}) {
 	std.Fatal(format, args...)
+}
+
+// Statusf writes a status line to the default logger's output without a level
+// prefix, icon, or timestamp. Use it for progress lines that belong on stderr.
+func Statusf(format string, args ...interface{}) {
+	std.Statusf(format, args...)
 }
 
 // Compatibility functions for migrating from debug package

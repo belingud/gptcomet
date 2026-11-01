@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/belingud/gptcomet/internal/config"
@@ -98,15 +97,6 @@ func printSensitiveFindings(w io.Writer, findings []secretscan.Finding, mode sec
 		fmt.Fprintln(w, "  Sending with redaction disabled; set sensitive.mode=redact or block to protect the request.")
 	}
 	fmt.Fprintln(w)
-}
-
-// orStderr returns w when set, otherwise os.Stderr. Services built directly in
-// tests leave the writer nil.
-func orStderr(w io.Writer) io.Writer {
-	if w != nil {
-		return w
-	}
-	return os.Stderr
 }
 
 func configStringSlice(raw interface{}) []string {

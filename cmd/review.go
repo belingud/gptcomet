@@ -29,6 +29,7 @@ type ReviewOptions struct {
 	UseSVN      bool
 	ConfigPath  string
 	Stream      bool
+	Raw         bool
 	SecretsMode string
 }
 
@@ -54,7 +55,10 @@ type ReviewService struct {
 	editor           TextEditor
 	markdownRenderer MarkdownRenderer
 	clientConfig     *types.ClientConfig
-	// stderr receives sensitive-data warnings; nil falls back to os.Stderr.
+	// stdout receives the review result; nil falls back to os.Stdout.
+	stdout io.Writer
+	// stderr receives status, warnings, and sensitive-data findings; nil falls
+	// back to os.Stderr.
 	stderr io.Writer
 }
 
@@ -92,6 +96,7 @@ func NewReviewService(options ReviewOptions) (*ReviewService, error) {
 		editor:           &TerminalEditor{},
 		markdownRenderer: &GlamourRenderer{}, // Inject the renderer
 		clientConfig:     clientConfig,
+		stdout:           os.Stdout,
 		stderr:           os.Stderr,
 	}, nil
 }
@@ -126,7 +131,7 @@ func (s *ReviewService) Execute() error {
 	}
 
 	// Get provider and model from configuration
-	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
+	fmt.Fprintf(orStderr(s.stderr), "Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
 
 	// Use streaming mode if the option is enabled
 	if s.options.Stream {
@@ -155,7 +160,7 @@ func (s *ReviewService) Execute() error {
 		return err
 	}
 
-	fmt.Println(formattedComment)
+	fmt.Fprintln(orStdout(s.stdout), formattedComment)
 	return nil
 }
 
@@ -188,16 +193,17 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
 	logger.Debug("Generating streaming review comment for diff length: %d", len(diff))
 
-	fmt.Println(formatRemindMessage("Reviewing, streaming results as they arrive..."))
+	fmt.Fprintln(orStderr(s.stderr), formatRemindMessage("Reviewing, streaming results as they arrive..."))
 
 	// Streaming mode is intentionally printed as-is. Track whether the last
 	// chunk already ended with a newline so the final output is not glued to
 	// the shell prompt (and no extra blank line is added).
+	stdout := orStdout(s.stdout)
 	lastChunkEndedWithNewline := true
 
 	// Define the callback function that will be called with each chunk of the response
 	err = s.client.GenerateReviewCommentStream(diff, prompt, func(chunk string) error {
-		fmt.Print(chunk)
+		fmt.Fprint(stdout, chunk)
 		if chunk != "" {
 			lastChunkEndedWithNewline = strings.HasSuffix(chunk, "\n")
 		}
@@ -206,13 +212,13 @@ func (s *ReviewService) ExecuteStream(diff string) error {
 
 	if err != nil {
 		if !lastChunkEndedWithNewline {
-			fmt.Println()
+			fmt.Fprintln(stdout)
 		}
 		return fmt.Errorf("failed to generate streaming review comment: %w", err)
 	}
 
 	if !lastChunkEndedWithNewline {
-		fmt.Println()
+		fmt.Fprintln(stdout)
 	}
 
 	return nil
@@ -297,7 +303,7 @@ func (s *ReviewService) generateReviewComment(diff string) (string, error) {
 	prompt = strings.ReplaceAll(prompt, "{{ output.review_lang }}", reviewLang)
 	logger.Debug("Generating review comment for diff length: %d", len(diff))
 
-	fmt.Println(formatRemindMessage("Reviwing, may take a few seconds, you can set --stream/-s to stream the results..."))
+	fmt.Fprintln(orStderr(s.stderr), formatRemindMessage("Reviwing, may take a few seconds, you can set --stream/-s to stream the results..."))
 	comment, err := s.client.GenerateReviewComment(diff, prompt)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate review comment: %w", err)
@@ -306,8 +312,15 @@ func (s *ReviewService) generateReviewComment(diff string) (string, error) {
 	return comment, nil
 }
 
-// formatReviewComment formats the review comment using the configured markdown theme.
+// formatReviewComment formats the review comment using the configured markdown
+// theme. In raw mode the model output is returned verbatim: no glamour
+// rendering, no ANSI styling, and no border, so editor plugins and CI can store
+// the Markdown as-is.
 func (s *ReviewService) formatReviewComment(comment string) (string, error) {
+	if s.options.Raw {
+		return comment, nil
+	}
+
 	markdownTheme := s.getConfiguredMarkdownTheme()
 	out, err := s.markdownRenderer.Render(comment, markdownTheme)
 	if err != nil {
@@ -389,6 +402,9 @@ func NewReviewCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			// Results go to stdout; status and warnings go to stderr.
+			service.stdout = cmd.OutOrStdout()
+			service.stderr = cmd.ErrOrStderr()
 
 			return service.Execute()
 		},
@@ -400,6 +416,7 @@ func NewReviewCmd() *cobra.Command {
 	// General Flags
 	AddGeneralFlags(generalFlags, &options.RepoPath, &options.UseSVN)
 	generalFlags.BoolVarP(&options.Stream, "stream", "s", false, "Stream output as it arrives from the LLM")
+	generalFlags.BoolVar(&options.Raw, "raw", false, "Print the raw Markdown returned by the model (no rendering or border; stream output is already raw)")
 	generalFlags.StringVar(&options.SecretsMode, "secrets", "", "Sensitive data scan mode: off, warn, redact, block (default from config)")
 
 	// Advanced API Flags (shared with other commands)

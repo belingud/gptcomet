@@ -334,3 +334,16 @@ func TestEnableIcons(t *testing.T) {
 		t.Error("expected icon in output")
 	}
 }
+
+func TestStatusf(t *testing.T) {
+	var buf bytes.Buffer
+	log := New(&buf, ErrorLevel, true)
+
+	log.Statusf("📤 Sending request to %s...\n", "openai")
+	log.Statusf("Token usage> prompt: 10\n")
+
+	want := "📤 Sending request to openai...\nToken usage> prompt: 10\n"
+	if got := buf.String(); got != want {
+		t.Errorf("Statusf output = %q, want %q", got, want)
+	}
+}

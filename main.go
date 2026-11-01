@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/belingud/gptcomet/cmd"
+	gptcometerrors "github.com/belingud/gptcomet/internal/errors"
 	"github.com/belingud/gptcomet/internal/logger"
 
 	"github.com/spf13/cobra"
@@ -28,7 +29,9 @@ var version = "2.10.0"
 //	--debug, -d: Enable debug mode for verbose logging
 //	--config, -c: Specify a custom config file path
 //
-// If command execution fails, the program exits with status code 1.
+// If command execution fails, the program exits with the code returned by
+// gptcometerrors.ExitCode: 1 unknown, 2 usage, 3 config, 4 network, 5 git,
+// 6 API, 7 validation/content. See README.md ("Scripting and exit codes").
 func main() {
 	var (
 		debugEnabled bool
@@ -58,6 +61,12 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&debugEnabled, "debug", "d", false, "Enable debug mode")
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "Config file path")
 
+	// Flag parsing failures are command-line usage errors (exit code 2).
+	// Cobra inherits this handler on subcommands.
+	rootCmd.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
+		return gptcometerrors.NewUsageError(err)
+	})
+
 	rootCmd.AddCommand(cmd.NewProviderCmd())      // provider
 	rootCmd.AddCommand(cmd.NewProviderSetupCmd()) // newprovider
 	rootCmd.AddCommand(cmd.NewCommitCmd())        // commit
@@ -68,7 +77,6 @@ func main() {
 	rootCmd.AddCommand(cmd.NewHookCmd())          // hook
 
 	if err := rootCmd.Execute(); err != nil {
-		// fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		os.Exit(gptcometerrors.ExitCode(err))
 	}
 }

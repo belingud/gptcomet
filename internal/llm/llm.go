@@ -245,7 +245,7 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 		req.Header.Set(k, v)
 	}
 
-	fmt.Printf("📤 Sending request to %s...\n", provider.Name())
+	logger.Statusf("📤 Sending request to %s...\n", provider.Name())
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -269,7 +269,7 @@ func (b *BaseLLM) MakeRequest(ctx context.Context, client *http.Client, provider
 			return "", fmt.Errorf("failed to get usage: %w", err)
 		}
 		if usage != "" {
-			fmt.Printf("%s\n", usage)
+			logger.Statusf("%s\n", usage)
 		}
 
 		content, err := provider.ParseResponse(respBody)

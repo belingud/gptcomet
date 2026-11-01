@@ -39,7 +39,11 @@ type CommitService struct {
 	options      CommitOptions
 	editor       TextEditor
 	clientConfig *types.ClientConfig
-	// stderr receives sensitive-data warnings; nil falls back to os.Stderr.
+	// stdout receives results (only --dry-run emits one); nil falls back to
+	// os.Stdout.
+	stdout io.Writer
+	// stderr receives status, prompts, warnings, and sensitive-data findings;
+	// nil falls back to os.Stderr.
 	stderr io.Writer
 }
 
@@ -83,6 +87,7 @@ func NewCommitService(options CommitOptions) (*CommitService, error) {
 		options:      options,
 		editor:       &TerminalEditor{},
 		clientConfig: clientConfig,
+		stdout:       os.Stdout,
 		stderr:       os.Stderr,
 	}, nil
 }
@@ -142,6 +147,9 @@ func NewCommitCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			// Results go to stdout; status, prompts, and warnings go to stderr.
+			service.stdout = cmd.OutOrStdout()
+			service.stderr = cmd.ErrOrStderr()
 
 			return service.Execute()
 		},

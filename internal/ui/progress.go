@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -24,7 +25,10 @@ type ProgressStage struct {
 	Duration  time.Duration
 }
 
-// Progress manages the display of progress information
+// Progress manages the display of progress information.
+//
+// Progress is status output: it always writes to stderr so stdout stays
+// reserved for command results (see README "Scripting and exit codes").
 type Progress struct {
 	stages  []*ProgressStage
 	current int
@@ -76,7 +80,7 @@ func (p *Progress) Start(name string) {
 			p.current = i
 			if p.verbose {
 				// Display start message
-				fmt.Printf("[%d/%d] %s...", i+1, len(p.stages), stage.Name)
+				fmt.Fprintf(os.Stderr, "[%d/%d] %s...", i+1, len(p.stages), stage.Name)
 			}
 			return
 		}
@@ -93,7 +97,7 @@ func (p *Progress) Start(name string) {
 // Return: None.
 func (p *Progress) StartWithNewLine(name string) {
 	p.Start(name)
-	fmt.Println() // Add newline after start
+	fmt.Fprintln(os.Stderr) // Add newline after start
 }
 
 // Complete marks a stage as complete
@@ -115,7 +119,7 @@ func (p *Progress) Complete(name string) {
 			stage.Duration = stage.EndTime.Sub(stage.StartTime)
 			if p.verbose {
 				// Display completion info immediately
-				fmt.Printf("\r[%d/%d] %s... ✓ (%.2fs)\n",
+				fmt.Fprintf(os.Stderr, "\r[%d/%d] %s... ✓ (%.2fs)\n",
 					stageNumber(p, stage.Name)+1,
 					len(p.stages),
 					stage.Name,
@@ -143,7 +147,7 @@ func (p *Progress) CompleteInNewLine(name string) {
 			stage.Duration = stage.EndTime.Sub(stage.StartTime)
 			if p.verbose {
 				// Display simple completion format
-				fmt.Printf("✓ %s (%.2fs)\n",
+				fmt.Fprintf(os.Stderr, "✓ %s (%.2fs)\n",
 					stage.Name,
 					float64(stage.Duration.Milliseconds())/1000)
 			}
@@ -205,7 +209,7 @@ func (p *Progress) render() {
 	// Only render the current running stage
 	for i, stage := range p.stages {
 		if stage.Status == StageStatusRunning {
-			fmt.Printf("[%d/%d] %s...\n", i+1, len(p.stages), stage.Name)
+			fmt.Fprintf(os.Stderr, "[%d/%d] %s...\n", i+1, len(p.stages), stage.Name)
 			break
 		}
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/belingud/gptcomet/internal/debug"
+	"github.com/belingud/gptcomet/internal/logger"
 	"github.com/belingud/gptcomet/pkg/config"
 	"github.com/belingud/gptcomet/pkg/types"
 )
@@ -192,7 +193,7 @@ func (g *GeminiLLM) MakeRequest(ctx context.Context, client *http.Client, messag
 		return "", fmt.Errorf("failed to get usage: %w", err)
 	}
 	if usage != "" {
-		fmt.Printf("%s\n", usage)
+		logger.Statusf("%s\n", usage)
 	}
 
 	return g.ParseResponse(respBody)

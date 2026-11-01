@@ -224,7 +224,7 @@ func (s *CommitService) Execute() error {
 		progress.Complete("Fetching git diff")
 	}
 
-	fmt.Printf("Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
+	fmt.Fprintf(orStderr(s.stderr), "Discovered provider: %s, model: %s\n", s.clientConfig.Provider, s.clientConfig.Model)
 
 	if progress != nil {
 		progress.StartWithNewLine("Generating message")
@@ -244,7 +244,7 @@ func (s *CommitService) Execute() error {
 		if progress != nil {
 			progress.Error("Generating message", err)
 		} else {
-			fmt.Printf("Error in generating: %v\n", err)
+			fmt.Fprintf(orStderr(s.stderr), "Error in generating: %v\n", err)
 		}
 		return err
 	}
@@ -254,7 +254,9 @@ func (s *CommitService) Execute() error {
 	}
 
 	if s.options.DryRun {
-		fmt.Printf("\nGenerated commit message:\n%s\n", formatBoxedMessage(commitMsg))
+		// dry-run is the one commit mode that writes a result to stdout; the
+		// interactive flow below writes status and prompts to stderr only.
+		fmt.Fprintf(orStdout(s.stdout), "\nGenerated commit message:\n%s\n", formatBoxedMessage(commitMsg))
 		return nil
 	}
 
@@ -292,14 +294,14 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 
 	for {
 		if commitMsg != "" {
-			fmt.Printf("\nCurrent commit message:\n%s\n", formatBoxedMessage(commitMsg))
+			fmt.Fprintf(orStderr(s.stderr), "\nCurrent commit message:\n%s\n", formatBoxedMessage(commitMsg))
 		}
 
 		if s.options.AutoYes {
 			return s.createCommit(commitMsg)
 		}
 
-		fmt.Print("\nWould you like to create this commit? ([Y]es/[n]o/[r]etry/[e]dit): ")
+		fmt.Fprint(orStderr(s.stderr), "\nWould you like to create this commit? ([Y]es/[n]o/[r]etry/[e]dit): ")
 		answer, err := reader.ReadString('\n')
 		if err != nil {
 			return fmt.Errorf("failed to read answer: %w", err)
@@ -314,7 +316,7 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 		case "y", "yes":
 			return s.createCommit(commitMsg)
 		case "n", "no":
-			fmt.Println("Operation cancelled")
+			fmt.Fprintln(orStderr(s.stderr), "Operation cancelled")
 			return nil
 		case "r", "retry":
 			diff, err := s.getStagedDiff()
@@ -327,18 +329,18 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 			}
 			commitMsg, err = removeThinkTags(commitMsg)
 			if err != nil {
-				fmt.Printf("Error in generating: %v\n", err)
+				fmt.Fprintf(orStderr(s.stderr), "Error in generating: %v\n", err)
 				return err
 			}
 		case "e", "edit":
 			edited, err := s.editor.Edit(commitMsg)
 			if err != nil {
-				fmt.Printf("Error editing message: %v\n", err)
+				fmt.Fprintf(orStderr(s.stderr), "Error editing message: %v\n", err)
 				continue
 			}
 			commitMsg = edited
 		default:
-			fmt.Println("Invalid option, please try again")
+			fmt.Fprintln(orStderr(s.stderr), "Invalid option, please try again")
 		}
 	}
 }
@@ -348,7 +350,7 @@ func (s *CommitService) handleCommitInteraction(initialMsg string) error {
 // 1. Creates a commit with the provided message
 // 2. Retrieves the hash of the newly created commit
 // 3. Gets detailed commit information
-// 4. Prints the commit details to stdout
+// 4. Prints the commit details to stderr (status output, never stdout)
 //
 // Parameters:
 //   - msg: string containing the commit message
@@ -372,6 +374,6 @@ func (s *CommitService) createCommit(msg string) error {
 		return fmt.Errorf("failed to get commit info: %w", err)
 	}
 
-	fmt.Printf("\nSuccessfully created commit:\n%s\n", commitInfo)
+	fmt.Fprintf(orStderr(s.stderr), "\nSuccessfully created commit:\n%s\n", commitInfo)
 	return nil
 }

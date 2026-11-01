@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -412,4 +413,106 @@ func TestReviewService_ExecuteStream_AddsTrailingNewline(t *testing.T) {
 	assert.False(t, strings.HasSuffix(string(out), "hello\n\n"), "output = %q", string(out))
 	mockClient.AssertExpectations(t)
 	mockCfg.AssertExpectations(t)
+}
+
+// fakeMarkdownRenderer records whether the renderer was used.
+type fakeMarkdownRenderer struct {
+	rendered string
+	err      error
+	calls    int
+}
+
+func (f *fakeMarkdownRenderer) Render(text string, style string) (string, error) {
+	f.calls++
+	return f.rendered, f.err
+}
+
+// newOutputContractService builds a ReviewService with buffered stdout/stderr
+// and the shared mock expectations for the non-stream path.
+func newOutputContractService(t *testing.T, raw bool) (*ReviewService, *MockVCS, *testutils.MockConfigManager, *MockClient, *bytes.Buffer, *bytes.Buffer) {
+	t.Helper()
+
+	mockVCS := new(MockVCS)
+	mockCfg := new(testutils.MockConfigManager)
+	mockClient := new(MockClient)
+
+	mockVCS.On("HasStagedChanges", "test-repo").Return(true, nil)
+	mockVCS.On("GetStagedDiffFiltered", "test-repo", mock.Anything).Return("diff", nil)
+	mockCfg.On("GetReviewPrompt").Return("review prompt")
+	mockCfg.On("Get", REVIEW_LANG_KEY).Return("en", true)
+	mockCfg.On("GetNestedValue", []string{"console", "verbose"}).Return(false, true)
+	mockCfg.On("GetWithDefault", "output.markdown_theme", mock.Anything).Return("auto")
+	expectSensitiveScanDefaults(mockCfg)
+	mockClient.On("GenerateReviewComment", "diff", "review prompt").Return("model review", nil)
+
+	var stdout, stderr bytes.Buffer
+	service := &ReviewService{
+		vcs:              mockVCS,
+		client:           mockClient,
+		cfgManager:       mockCfg,
+		options:          ReviewOptions{RepoPath: "test-repo", Raw: raw},
+		markdownRenderer: &fakeMarkdownRenderer{rendered: "rendered-review"},
+		clientConfig:     &types.ClientConfig{Provider: "test-provider", Model: "test-model"},
+		stdout:           &stdout,
+		stderr:           &stderr,
+	}
+	return service, mockVCS, mockCfg, mockClient, &stdout, &stderr
+}
+
+func TestReviewService_Execute_OutputContract(t *testing.T) {
+	service, _, _, _, stdout, stderr := newOutputContractService(t, false)
+
+	require.NoError(t, service.Execute())
+
+	assert.Contains(t, stdout.String(), "rendered-review")
+	assert.NotContains(t, stdout.String(), "Discovered provider")
+	assert.NotContains(t, stdout.String(), "may take a few seconds")
+
+	assert.Contains(t, stderr.String(), "Discovered provider: test-provider, model: test-model")
+	assert.Contains(t, stderr.String(), "may take a few seconds")
+}
+
+func TestReviewService_Execute_Raw(t *testing.T) {
+	service, _, _, _, stdout, stderr := newOutputContractService(t, true)
+
+	require.NoError(t, service.Execute())
+
+	renderer := service.markdownRenderer.(*fakeMarkdownRenderer)
+	assert.Zero(t, renderer.calls, "raw mode must not call the markdown renderer")
+	assert.Equal(t, "model review\n", stdout.String(), "raw mode must emit the model Markdown verbatim")
+	assert.Contains(t, stderr.String(), "Discovered provider", "status still goes to stderr in raw mode")
+}
+
+func TestReviewService_ExecuteStream_OutputContract(t *testing.T) {
+	mockCfg := new(testutils.MockConfigManager)
+	mockCfg.On("GetReviewPrompt").Return("review prompt")
+	mockCfg.On("Get", REVIEW_LANG_KEY).Return("en", true)
+
+	mockClient := new(MockClient)
+	mockClient.On("GenerateReviewCommentStream", "diff", "review prompt", mock.Anything).
+		Run(func(args mock.Arguments) {
+			callback := args.Get(2).(func(string) error)
+			assert.NoError(t, callback("hello"))
+		}).
+		Return(nil)
+
+	var stdout, stderr bytes.Buffer
+	service := &ReviewService{
+		client:     mockClient,
+		cfgManager: mockCfg,
+		stdout:     &stdout,
+		stderr:     &stderr,
+	}
+
+	require.NoError(t, service.ExecuteStream("diff"))
+	assert.Equal(t, "hello\n", stdout.String())
+	assert.Contains(t, stderr.String(), "streaming results as they arrive")
+	assert.NotContains(t, stdout.String(), "streaming results")
+}
+
+func TestReviewCmdRegistersRawFlag(t *testing.T) {
+	cmd := NewReviewCmd()
+	flag := cmd.Flags().Lookup("raw")
+	require.NotNil(t, flag, "review must register --raw")
+	assert.Equal(t, "bool", flag.Value.Type())
 }
